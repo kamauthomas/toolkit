@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth-card wide">
+  <div class="auth-header">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+    <h1>Create employee account</h1>
+  </div>
+  <p class="muted" style="margin-bottom:20px;">Use your real details. These appear on submitted reports.</p>
+  <form method="post" class="form grid">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label>Full name
+      <input type="text" name="full_name" required autocomplete="name" placeholder="John Doe">
+    </label>
+    <label>Email
+      <input type="email" name="email" required autocomplete="email" placeholder="john@example.com">
+    </label>
+    <label>Phone
+      <input type="tel" name="phone" autocomplete="tel" placeholder="+254 XXX XXX XXX">
+    </label>
+    <label>Department
+      <select name="department" required>
+        {% for department in departments %}<option>{{ department }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Position
+      <input type="text" name="position" required placeholder="e.g. Marketing Officer">
+    </label>
+    <label>Branch / work location
+      <select name="branch" required>
+        {% for branch in branches %}<option>{{ branch }}</option>{% endfor %}
+      </select>
+    </label>
+    <label style="grid-column:1/-1;">Password
+      <input type="password" name="password" required minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters">
+    </label>
+    <button class="primary" type="submit" style="grid-column:1/-1;justify-content:center;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      Create account
+    </button>
+  </form>
+</section>
+{% endblock %}

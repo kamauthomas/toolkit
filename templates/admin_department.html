@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">{{ g.user.role|capitalize }} &middot; {{ g.user.department }}</p>
+    <h1>My Department</h1>
+    <p class="muted">Manage users in {{ g.user.department }}.</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Add new {{ g.user.department }} user</h2>
+  <form method="post" class="form grid">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label>Full name
+      <input type="text" name="full_name" required placeholder="e.g. Jane Doe">
+    </label>
+    <label>Email
+      <input type="email" name="email" required placeholder="jane@toolkit.local">
+    </label>
+    <label>Password
+      <input type="password" name="password" required placeholder="Min 8 characters" minlength="8">
+    </label>
+    <label>Phone
+      <input type="text" name="phone" placeholder="Optional">
+    </label>
+    <label>Position
+      <input type="text" name="position" required placeholder="e.g. Marketing Officer">
+    </label>
+    <label>Branch
+      <select name="branch">
+        {% for b in branches %}
+          <option value="{{ b }}" {% if b == g.user.branch %}selected{% endif %}>{{ b }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div class="form full" style="display:flex;justify-content:flex-end;">
+      <button class="primary" type="submit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Add user
+      </button>
+    </div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ g.user.department }} users</h2>
+  {% if dept_users %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Position</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in dept_users %}
+            <tr>
+              <td>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                {{ u.full_name }}
+              </td>
+              <td>{{ u.email }}</td>
+              <td>{{ u.position }}</td>
+              <td>{{ u.role }}</td>
+              <td>
+                {% if u.is_active %}
+                  <span class="status-badge approved">Active</span>
+                {% else %}
+                  <span class="status-badge submitted">Pending</span>
+                {% endif %}
+              </td>
+              <td class="right">
+                {% if u.role == 'employee' %}
+                  <form method="post" class="inline-form">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="toggle_id" value="{{ u.id }}">
+                    <button class="secondary small-button" type="submit">
+                      {% if u.is_active %}
+                        Deactivate
+                      {% else %}
+                        Activate
+                      {% endif %}
+                    </button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">No users in this department.</p>
+  {% endif %}
+</section>
+{% endblock %}
