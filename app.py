@@ -304,6 +304,25 @@ def init_db():
             """
         )
 
+    # migrate: add report_comments table if missing
+    try:
+        db.execute("SELECT 1 FROM report_comments LIMIT 1")
+    except sqlite3.OperationalError:
+        db.execute(
+            """
+            CREATE TABLE report_comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                report_id INTEGER NOT NULL,
+                admin_id INTEGER NOT NULL,
+                admin_name TEXT NOT NULL,
+                comment TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(report_id) REFERENCES reports(id),
+                FOREIGN KEY(admin_id) REFERENCES users(id)
+            )
+            """
+        )
+
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@toolkit.local").strip().lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "ChangeMe123!")
     exists = db.execute("SELECT id FROM users WHERE role = 'superadmin' LIMIT 1").fetchone()
@@ -1072,6 +1091,10 @@ def view_report(report_id):
         "SELECT * FROM report_edits WHERE report_id = ? ORDER BY edited_at ASC",
         (report_id,),
     ).fetchall()
+    comments = get_db().execute(
+        "SELECT * FROM report_comments WHERE report_id = ? ORDER BY created_at ASC",
+        (report_id,),
+    ).fetchall()
     return render_template(
         "report_detail.html",
         report=report,
@@ -1081,6 +1104,7 @@ def view_report(report_id):
         metrics=json.loads(report["metrics_json"]),
         metrics_config=METRICS_CONFIG,
         edits=edits,
+        comments=comments,
     )
 
 
@@ -1108,6 +1132,13 @@ def edit_report(report_id):
         abort(403)
 
     if request.method == "POST":
+        edit_count = db.execute(
+            "SELECT COUNT(*) AS cnt FROM report_edits WHERE report_id = ?", (report_id,)
+        ).fetchone()["cnt"]
+        if edit_count >= 3:
+            flash("This report has reached the maximum of 3 edits and can no longer be edited.", "danger")
+            return redirect(url_for("view_report", report_id=report_id))
+
         csrf_protect()
         form = {key: clean_text(value) for key, value in request.form.items()}
         tasks = parse_items("task", form)
@@ -1425,6 +1456,30 @@ def archive_report(report_id):
     get_db().execute("UPDATE reports SET archived = ? WHERE id = ?", (archived, report_id))
     get_db().commit()
     flash("Report archived." if archived else "Report unarchived.", "success")
+    return redirect(url_for("view_report", report_id=report_id))
+
+
+@app.route("/reports/<int:report_id>/comment", methods=["POST"])
+@login_required
+def add_comment(report_id):
+    if g.user["role"] not in ("admin", "superadmin"):
+        abort(403)
+    csrf_protect()
+    report = get_db().execute("SELECT * FROM reports WHERE id = ?", (report_id,)).fetchone()
+    if not report:
+        abort(404)
+    if not can_view_report(g.user, report):
+        abort(403)
+    comment = clean_text(request.form.get("comment"), 2000)
+    if not comment:
+        flash("Comment cannot be empty.", "danger")
+        return redirect(url_for("view_report", report_id=report_id))
+    get_db().execute(
+        "INSERT INTO report_comments (report_id, admin_id, admin_name, comment, created_at) VALUES (?, ?, ?, ?, ?)",
+        (report_id, g.user["id"], g.user["full_name"], comment, now()),
+    )
+    get_db().commit()
+    flash("Comment added.", "success")
     return redirect(url_for("view_report", report_id=report_id))
 
 
