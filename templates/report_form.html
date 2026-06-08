@@ -2,13 +2,13 @@
 {% block content %}
 <section class="section-head">
   <div>
-    <p class="eyebrow">Daily submission</p>
-    <h1>Submit employee report</h1>
+    <p class="eyebrow">{% if report %}Edit report{% else %}Daily submission{% endif %}</p>
+    <h1>{% if report %}Edit employee report{% else %}Submit employee report{% endif %}</h1>
     <p class="muted">Fill what applies to your work. Marketing metrics can be left as zero by non-marketing staff.</p>
   </div>
 </section>
 
-<form method="post" class="report-form">
+<form method="post" class="report-form" action="{% if report %}{{ url_for('edit_report', report_id=report.id) }}{% else %}{{ url_for('new_report') }}{% endif %}">
   <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
   <section class="card">
     <h2>
@@ -17,27 +17,33 @@
     </h2>
     <div class="form grid">
       <label>Report date
-        <input type="date" name="report_date" value="{{ today }}" required>
+        <input type="date" name="report_date" value="{{ today }}" required onchange="updateDateFields()">
+      </label>
+      <label>Day of the week
+        <input type="text" id="day_of_week" value="{{ day_of_week }}" readonly>
+      </label>
+      <label>Reporting period
+        <input type="text" name="reporting_period" id="reporting_period" value="{{ reporting_period }}" required>
       </label>
       <label>Branch / work location
         <select name="branch" required>
           {% for branch in branches %}
-            <option {% if branch == g.user.branch %}selected{% endif %}>{{ branch }}</option>
+            <option {% if report %}{% if branch == report.branch %}selected{% endif %}{% elif branch == g.user.branch %}selected{% endif %}>{{ branch }}</option>
           {% endfor %}
         </select>
       </label>
       <label>Department
         <select name="department" required onchange="updateMetrics()">
           {% for dept in departments %}
-            <option value="{{ dept }}" {% if dept == g.user.department %}selected{% endif %}>{{ dept }}</option>
+            <option value="{{ dept }}" {% if report %}{% if dept == report.department %}selected{% endif %}{% elif dept == g.user.department %}selected{% endif %}>{{ dept }}</option>
           {% endfor %}
         </select>
       </label>
       <label>Position
-        <input type="text" name="position" value="{{ g.user.position }}" required>
+        <input type="text" name="position" value="{% if report %}{{ report.position }}{% else %}{{ g.user.position }}{% endif %}" required>
       </label>
       <label class="full">Brief summary of your day
-        <textarea name="day_summary" required placeholder="Example: Followed up admissions enquiries, updated the lead tracker, prepared course content, and resolved two student support issues."></textarea>
+        <textarea name="day_summary" required placeholder="Example: Followed up admissions enquiries, updated the lead tracker, prepared course content, and resolved two student support issues.">{% if report %}{{ report.day_summary }}{% endif %}</textarea>
       </label>
     </div>
   </section>
@@ -54,7 +60,37 @@
       </button>
     </div>
     <p class="hint">Add every major activity. At least one task is required.</p>
-    <div id="tasks"></div>
+    <div id="tasks">
+      {% if report and tasks %}
+        {% for item in tasks %}
+          {% set idx = loop.index %}
+          <div class="repeat-item">
+            <button type="button" class="remove" onclick="this.closest('.repeat-item').remove()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Remove
+            </button>
+            <div class="form grid">
+              <label class="full">Activity
+                <input type="text" name="task_activity_{{ idx }}" required placeholder="Example: Called new admissions enquiries" value="{{ item.activity or '' }}">
+              </label>
+              <label class="full">Description
+                <textarea name="task_description_{{ idx }}" placeholder="What happened, who was involved, and what was achieved?">{{ item.description or '' }}</textarea>
+              </label>
+              <label>Time spent
+                <input type="text" name="task_time_{{ idx }}" placeholder="Example: 2 hours" value="{{ item.time or '' }}">
+              </label>
+              <label>Status
+                <select name="task_status_{{ idx }}">
+                  <option {% if item.status == 'Completed' %}selected{% endif %}>Completed</option>
+                  <option {% if item.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                  <option {% if item.status == 'Pending' %}selected{% endif %}>Pending</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
   </section>
 
   <section class="card">
@@ -69,7 +105,33 @@
       </button>
     </div>
     <p class="hint">Optional, but useful for management support.</p>
-    <div id="challenges"></div>
+    <div id="challenges">
+      {% if report and challenges %}
+        {% for item in challenges %}
+          {% set idx = loop.index %}
+          <div class="repeat-item">
+            <button type="button" class="remove" onclick="this.closest('.repeat-item').remove()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Remove
+            </button>
+            <div class="form grid">
+              <label class="full">Challenge
+                <textarea name="challenge_challenge_{{ idx }}" placeholder="Describe the challenge.">{{ item.challenge or '' }}</textarea>
+              </label>
+              <label>Impact
+                <input type="text" name="challenge_impact_{{ idx }}" placeholder="Example: delayed follow-up" value="{{ item.impact or '' }}">
+              </label>
+              <label>Action taken
+                <input type="text" name="challenge_action_{{ idx }}" placeholder="What did you do?" value="{{ item.action or '' }}">
+              </label>
+              <label class="full">Support needed
+                <input type="text" name="challenge_support_{{ idx }}" placeholder="What help is needed, if any?" value="{{ item.support or '' }}">
+              </label>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
   </section>
 
   <section class="card">
@@ -79,10 +141,10 @@
     </h2>
     <div class="form">
       <label>Key decisions made
-        <textarea name="decisions" placeholder="Any approvals, decisions, changes, or important agreements made today."></textarea>
+        <textarea name="decisions" placeholder="Any approvals, decisions, changes, or important agreements made today.">{% if report %}{{ report.decisions }}{% endif %}</textarea>
       </label>
       <label>Comments / recommendations
-        <textarea name="comments" placeholder="Anything management or your supervisor should know."></textarea>
+        <textarea name="comments" placeholder="Anything management or your supervisor should know.">{% if report %}{{ report.comments }}{% endif %}</textarea>
       </label>
     </div>
   </section>
@@ -98,7 +160,39 @@
         Add plan
       </button>
     </div>
-    <div id="tomorrow"></div>
+    <div id="tomorrow">
+      {% if report and tomorrow %}
+        {% for item in tomorrow %}
+          {% set idx = loop.index %}
+          <div class="repeat-item">
+            <button type="button" class="remove" onclick="this.closest('.repeat-item').remove()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Remove
+            </button>
+            <div class="form grid">
+              <label class="full">Task
+                <input type="text" name="tomorrow_task_{{ idx }}" placeholder="What needs to be done?" value="{{ item.task or '' }}">
+              </label>
+              <label class="full">Planned activities
+                <textarea name="tomorrow_activities_{{ idx }}" placeholder="How will you do it?">{{ item.activities or '' }}</textarea>
+              </label>
+              <label class="full">Goal
+                <input type="text" name="tomorrow_objective_{{ idx }}" placeholder="What should be achieved?" value="{{ item.objective or '' }}">
+              </label>
+              <label>Responsible
+                <input type="text" name="tomorrow_responsible_{{ idx }}" placeholder="Who will own this task?" value="{{ item.responsible or '' }}">
+              </label>
+              <label>Resources / budget
+                <input type="text" name="tomorrow_resources_budget_{{ idx }}" placeholder="Tools, budget, approvals, or support needed" value="{{ item.resources_budget or '' }}">
+              </label>
+              <label class="full">Expected outcome
+                <input type="text" name="tomorrow_expected_outcome_{{ idx }}" placeholder="What result should be visible by tomorrow?" value="{{ item.expected_outcome or '' }}">
+              </label>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
   </section>
 
   <section class="card">
@@ -112,12 +206,23 @@
   </section>
 
   <div class="sticky-submit">
-    <button class="primary" type="submit">
+    <button class="primary" type="submit" id="submitBtn">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-      Submit report and generate PDF
+      {% if report %}Update report{% else %}Submit report and generate PDF{% endif %}
     </button>
   </div>
 </form>
+
+<div id="submitConfirm" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <h2>Are you done with your report?</h2>
+    <p>Take a moment to review your entries before submitting.</p>
+    <div class="modal-actions">
+      <button class="secondary" type="button" onclick="closeConfirm()">No, keep editing</button>
+      <button class="primary" type="button" onclick="submitReport()">Yes, I'm done — Submit</button>
+    </div>
+  </div>
+</div>
 
 <template id="task-template">
   <div class="repeat-item">
@@ -185,16 +290,65 @@
       <label class="full">Goal
         <input type="text" data-name="tomorrow_objective" placeholder="What should be achieved?">
       </label>
+      <label>Responsible
+        <input type="text" data-name="tomorrow_responsible" placeholder="Who will own this task?">
+      </label>
+      <label>Resources / budget
+        <input type="text" data-name="tomorrow_resources_budget" placeholder="Tools, budget, approvals, or support needed">
+      </label>
+      <label class="full">Expected outcome
+        <input type="text" data-name="tomorrow_expected_outcome" placeholder="What result should be visible by tomorrow?">
+      </label>
     </div>
   </div>
 </template>
 
+<style>
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: 32px;
+  width: min(420px, calc(100% - 32px));
+  text-align: center;
+}
+.modal h2 {
+  margin: 0 0 8px;
+  border: 0;
+  padding: 0;
+  color: var(--ink);
+}
+.modal p {
+  color: var(--muted);
+  margin: 0 0 24px;
+  font-size: 0.95rem;
+}
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.modal-actions button {
+  min-width: 120px;
+}
+</style>
+
 <script>
-let taskCount = 0;
-let challengeCount = 0;
-let tomorrowCount = 0;
+let taskCount = {{ tasks|length if report and tasks else 0 }};
+let challengeCount = {{ challenges|length if report and challenges else 0 }};
+let tomorrowCount = {{ tomorrow|length if report and tomorrow else 0 }};
 
 var METRICS_CONFIG = {{ metrics_config | tojson | safe }};
+var EXISTING_METRICS = {% if report and metrics %}{{ metrics | tojson | safe }}{% else %}null{% endif %};
 
 function renderMetrics(department) {
   var fields = METRICS_CONFIG[department] || METRICS_CONFIG["Other"];
@@ -210,7 +364,11 @@ function renderMetrics(department) {
       field.options.forEach(function(opt) {
         var option = document.createElement("option");
         option.textContent = opt;
-        if (opt === "No") option.selected = true;
+        if (EXISTING_METRICS && EXISTING_METRICS[field.key] === opt) {
+          option.selected = true;
+        } else if (opt === "No" && !(EXISTING_METRICS && EXISTING_METRICS[field.key])) {
+          option.selected = true;
+        }
         input.appendChild(option);
       });
     } else {
@@ -218,7 +376,11 @@ function renderMetrics(department) {
       input.type = "number";
       input.name = field.key;
       input.min = "0";
-      input.value = "0";
+      if (EXISTING_METRICS && EXISTING_METRICS[field.key] !== undefined) {
+        input.value = EXISTING_METRICS[field.key];
+      } else {
+        input.value = "0";
+      }
     }
     label.appendChild(input);
     container.appendChild(label);
@@ -228,6 +390,25 @@ function renderMetrics(department) {
 function updateMetrics() {
   var dept = document.querySelector("select[name=department]").value;
   renderMetrics(dept);
+}
+
+function formatDate(date) {
+  return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function updateDateFields() {
+  var input = document.querySelector("input[name=report_date]");
+  var dayInput = document.getElementById("day_of_week");
+  var periodInput = document.getElementById("reporting_period");
+  if (!input.value) return;
+  var date = new Date(input.value + "T00:00:00");
+  dayInput.value = date.toLocaleDateString('en-US', { weekday: 'long' });
+  var start = new Date(date);
+  var day = start.getDay() || 7;
+  start.setDate(start.getDate() - day + 1);
+  var end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  periodInput.value = formatDate(start) + " - " + formatDate(end);
 }
 
 function addFromTemplate(templateId, targetId, count) {
@@ -243,9 +424,36 @@ function addTask() { taskCount += 1; addFromTemplate('task-template', 'tasks', t
 function addChallenge() { challengeCount += 1; addFromTemplate('challenge-template', 'challenges', challengeCount); }
 function addTomorrow() { tomorrowCount += 1; addFromTemplate('tomorrow-template', 'tomorrow', tomorrowCount); }
 
+var form = document.querySelector('form.report-form');
+var confirmModal = document.getElementById('submitConfirm');
+var submitConfirmed = false;
+
+function showConfirm(e) {
+  if (submitConfirmed) return;
+  if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    confirmModal.style.display = 'flex';
+  }
+}
+
+function closeConfirm() {
+  confirmModal.style.display = 'none';
+}
+
+function submitReport() {
+  submitConfirmed = true;
+  confirmModal.style.display = 'none';
+  form.submit();
+}
+
+form.addEventListener('keydown', showConfirm);
+
+{% if not report %}
 addTask();
 addChallenge();
 addTomorrow();
+{% endif %}
 updateMetrics();
+updateDateFields();
 </script>
 {% endblock %}

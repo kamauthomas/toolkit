@@ -7,7 +7,7 @@ import secrets
 import sqlite3
 import textwrap
 import zlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
 
@@ -48,11 +48,27 @@ app.config["SESSION_COOKIE_SECURE"] = os.environ.get("ENV") == "production"
 
 RATE_LIMIT_SECONDS = 30
 
+PDF_COLORS = {
+    "forest": (0.105, 0.302, 0.180),  # #1B4D2E
+    "green": (0.180, 0.490, 0.275),  # #2E7D46
+    "gold": (0.961, 0.769, 0.000),  # #F5C400
+    "pale_green": (0.925, 0.965, 0.929),
+    "line": (0.650, 0.760, 0.680),
+    "ink": (0.080, 0.120, 0.095),
+    "muted": (0.330, 0.410, 0.360),
+    "white": (1, 1, 1),
+}
+
 
 def generate_csrf_token():
     if "_csrf_token" not in session:
         session["_csrf_token"] = secrets.token_hex(32)
     return session["_csrf_token"]
+
+
+def validate_production_config():
+    if os.environ.get("ENV") == "production" and app.config["SECRET_KEY"] == "local-dev-change-me":
+        raise RuntimeError("SECRET_KEY must be set before running in production.")
 
 
 def csrf_protect():
@@ -219,6 +235,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             report_date TEXT NOT NULL,
+            reporting_period TEXT DEFAULT '',
             branch TEXT NOT NULL,
             department TEXT NOT NULL,
             position TEXT NOT NULL,
@@ -242,6 +259,16 @@ def init_db():
             FOREIGN KEY(admin_id) REFERENCES users(id),
             FOREIGN KEY(employee_id) REFERENCES users(id)
         );
+
+        CREATE TABLE IF NOT EXISTS password_resets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            token TEXT NOT NULL UNIQUE,
+            expires_at TEXT NOT NULL,
+            used INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
         """
     )
     db.commit()
@@ -255,6 +282,27 @@ def init_db():
         db.execute("ALTER TABLE reports ADD COLUMN archived INTEGER NOT NULL DEFAULT 0")
     except sqlite3.OperationalError:
         pass
+    try:
+        db.execute("ALTER TABLE reports ADD COLUMN reporting_period TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
+
+    # migrate: add report_edits table if missing
+    try:
+        db.execute("SELECT 1 FROM report_edits LIMIT 1")
+    except sqlite3.OperationalError:
+        db.execute(
+            """
+            CREATE TABLE report_edits (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                report_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                edited_at TEXT NOT NULL,
+                FOREIGN KEY(report_id) REFERENCES reports(id),
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            )
+            """
+        )
 
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@toolkit.local").strip().lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "ChangeMe123!")
@@ -287,6 +335,27 @@ def init_db():
 
 def now():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def parse_report_date(value):
+    try:
+        return datetime.strptime(value, "%Y-%m-%d")
+    except (TypeError, ValueError):
+        return None
+
+
+def day_name(value):
+    parsed = parse_report_date(value)
+    return parsed.strftime("%A") if parsed else ""
+
+
+def default_reporting_period(value):
+    parsed = parse_report_date(value)
+    if not parsed:
+        return ""
+    start = parsed - timedelta(days=parsed.weekday())
+    end = start + timedelta(days=6)
+    return f"{start.strftime('%d %b %Y')} - {end.strftime('%d %b %Y')}"
 
 
 def current_user():
@@ -409,139 +478,272 @@ def make_report_pdf(report_id):
     tomorrow = json.loads(report["tomorrow_json"])
     metrics = json.loads(report["metrics_json"])
 
-    lines = [
-        ("TOOLKIT AFRICA", "title"),
-        ("EMPLOYEE DAILY REPORT", "subtitle"),
-        ("", "normal"),
-        (f"Employee: {report['full_name']}", "normal"),
-        (f"Email: {report['email']}", "normal"),
-        (f"Phone: {report['phone'] or 'Not provided'}", "normal"),
-        (f"Position: {report['position']}", "normal"),
-        (f"Department: {report['department']}", "normal"),
-        (f"Branch / Work Location: {report['branch']}", "normal"),
-        (f"Report Date: {report['report_date']}", "normal"),
-        (f"Submitted At: {report['created_at']}", "normal"),
-        ("", "normal"),
-        ("Daily Summary", "heading"),
-        (report["day_summary"], "normal"),
-        ("", "normal"),
-        ("Key Tasks / Activities Performed", "heading"),
-    ]
-
-    if tasks:
-        for idx, task in enumerate(tasks, 1):
-            lines.extend(
-                [
-                    (f"{idx}. {task.get('activity', '')}", "bold"),
-                    (f"Description: {task.get('description', '') or 'Not provided'}", "normal"),
-                    (f"Time Spent: {task.get('time', '') or 'Not provided'}", "normal"),
-                    (f"Status: {task.get('status', '') or 'Not provided'}", "normal"),
-                    ("", "normal"),
-                ]
-            )
-    else:
-        lines.append(("No tasks recorded.", "normal"))
-
-    lines.extend([("Challenges / Blockers", "heading")])
-    if challenges:
-        for idx, challenge in enumerate(challenges, 1):
-            lines.extend(
-                [
-                    (f"{idx}. {challenge.get('challenge', '')}", "bold"),
-                    (f"Impact: {challenge.get('impact', '') or 'Not provided'}", "normal"),
-                    (f"Action Taken: {challenge.get('action', '') or 'Not provided'}", "normal"),
-                    (f"Support Needed: {challenge.get('support', '') or 'Not provided'}", "normal"),
-                    ("", "normal"),
-                ]
-            )
-    else:
-        lines.append(("No challenges recorded.", "normal"))
-
-    lines.extend(
-        [
-            ("Key Decisions", "heading"),
-            (report["decisions"] or "No key decisions recorded.", "normal"),
-            ("Tomorrow's Plan", "heading"),
-        ]
-    )
-    if tomorrow:
-        for idx, item in enumerate(tomorrow, 1):
-            lines.extend(
-                [
-                    (f"{idx}. {item.get('task', '')}", "bold"),
-                    (f"Planned Activities: {item.get('activities', '') or 'Not provided'}", "normal"),
-                    (f"Goal: {item.get('objective', '') or 'Not provided'}", "normal"),
-                    ("", "normal"),
-                ]
-            )
-    else:
-        lines.append(("No plan recorded.", "normal"))
-
-    metric_lines = [("Operational Metrics", "heading")]
-    for key, value in metrics.items():
-        label = get_metric_label(key)
-        metric_lines.append((f"{label}: {value}", "normal"))
-    metric_lines.append(("", "normal"))
-    metric_lines.append(("Comments / Recommendations", "heading"))
-    metric_lines.append((report["comments"] or "No comments recorded.", "normal"))
-    lines.extend(metric_lines)
-
     filename = f"Toolkit_Report_{report['full_name'].replace(' ', '_')}_{report['report_date']}_{report['id']}.pdf"
     filename = secure_filename(filename)
     path = REPORT_DIR / filename
-    write_pdf(path, lines, LOGO_PATH if LOGO_PATH.exists() else None)
+    write_report_pdf(path, report, tasks, challenges, tomorrow, metrics, LOGO_PATH if LOGO_PATH.exists() else None)
     db.execute("UPDATE reports SET pdf_filename = ? WHERE id = ?", (filename, report_id))
     db.commit()
     return path
 
 
 def pdf_escape(text):
-    return str(text).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+    text = str(text or "")
+    text = text.replace("\u2014", "-").replace("\u2013", "-").replace("\u2018", "'").replace("\u2019", "'")
+    text = text.replace("\u201c", '"').replace("\u201d", '"')
+    text = text.encode("latin-1", "replace").decode("latin-1")
+    return text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
 
 
-def write_pdf(path, lines, logo_path=None):
+class PdfCanvas:
+    def __init__(self, logo_path=None):
+        self.page_width = 595
+        self.page_height = 842
+        self.margin = 42
+        self.bottom = 72
+        self.content_width = self.page_width - (self.margin * 2)
+        self.pages = []
+        self.current = []
+        self.y = 0
+        self.logo_meta = self._read_logo(logo_path)
+        self.new_page()
+
+    def _read_logo(self, logo_path):
+        if not logo_path or not Path(logo_path).exists():
+            return None
+        try:
+            img = Image.open(logo_path).convert("RGBA")
+            background = Image.new("RGBA", img.size, (255, 255, 255, 255))
+            background.alpha_composite(img)
+            img = background.convert("RGB")
+            img.thumbnail((96, 96))
+            return img.width, img.height, zlib.compress(img.tobytes())
+        except Exception:
+            return None
+
+    def new_page(self):
+        if self.current:
+            self._footer()
+            self.pages.append(self.current)
+        self.current = []
+        self.y = 742
+        self._header()
+
+    def _cmd(self, value):
+        self.current.append(value)
+
+    def _color(self, name):
+        return PDF_COLORS[name]
+
+    def _header(self):
+        self.rect(0, 790, self.page_width, 52, fill="forest", stroke=None)
+        self.rect(0, 786, self.page_width, 4, fill="gold", stroke=None)
+        if self.logo_meta:
+            self._cmd("q 42 0 0 42 42 795 cm /Logo Do Q")
+            text_x = 96
+        else:
+            text_x = 42
+        self.text("TOOLKIT FOR SKILLS AND INNOVATION", text_x, 818, 13, "F2", "white")
+        self.text("DAILY WORK REPORT", text_x, 801, 10, "F2", "white")
+
+    def _footer(self):
+        self.line(self.margin, 42, self.page_width - self.margin, 42, "green", 0.8)
+        self.text("Toolkit for Skills and Innovation  |  Confidential", self.margin, 28, 8, "F1", "muted")
+
+    def finish(self):
+        self._footer()
+        self.pages.append(self.current)
+        self.current = []
+
+    def ensure_space(self, height):
+        if self.y - height < self.bottom:
+            self.new_page()
+
+    def rect(self, x, y, w, h, fill=None, stroke="line", width=0.5):
+        commands = ["q"]
+        if fill:
+            r, g, b = self._color(fill)
+            commands.append(f"{r:.3f} {g:.3f} {b:.3f} rg")
+        if stroke:
+            r, g, b = self._color(stroke)
+            commands.append(f"{r:.3f} {g:.3f} {b:.3f} RG {width:.2f} w")
+        commands.append(f"{x:.2f} {y:.2f} {w:.2f} {h:.2f} re")
+        commands.append("B" if fill and stroke else "f" if fill else "S")
+        commands.append("Q")
+        self._cmd(" ".join(commands))
+
+    def line(self, x1, y1, x2, y2, color="line", width=0.5):
+        r, g, b = self._color(color)
+        self._cmd(f"q {r:.3f} {g:.3f} {b:.3f} RG {width:.2f} w {x1:.2f} {y1:.2f} m {x2:.2f} {y2:.2f} l S Q")
+
+    def text(self, value, x, y, size=9, font="F1", color="ink"):
+        r, g, b = self._color(color)
+        self._cmd(f"BT {r:.3f} {g:.3f} {b:.3f} rg /{font} {size} Tf {x:.2f} {y:.2f} Td ({pdf_escape(value)}) Tj ET")
+
+    def wrap(self, value, width, size=8.5):
+        chars = max(8, int(width / (size * 0.48)))
+        lines = []
+        for part in str(value or "").split("\n"):
+            lines.extend(textwrap.wrap(part, width=chars) or [""])
+        return lines
+
+    def paragraph(self, value, size=9, color="ink", font="F1", leading=12):
+        lines = self.wrap(value or "Not provided.", self.content_width, size)
+        self.ensure_space((len(lines) * leading) + 8)
+        for line in lines:
+            self.text(line, self.margin, self.y, size, font, color)
+            self.y -= leading
+        self.y -= 6
+
+    def section(self, title):
+        self.ensure_space(34)
+        self.rect(self.margin, self.y - 18, self.content_width, 22, fill="forest", stroke=None)
+        self.rect(self.margin, self.y - 21, self.content_width, 3, fill="gold", stroke=None)
+        self.text(title.upper(), self.margin + 8, self.y - 12, 9.5, "F2", "white")
+        self.y -= 34
+
+    def table(self, headers, rows, widths):
+        header_h = 24
+        body_size = 7.8 if len(headers) > 4 else 8.3
+
+        def row_height(row):
+            max_lines = 1
+            for value, width in zip(row, widths):
+                max_lines = max(max_lines, len(self.wrap(value, width - 10, body_size)))
+            return max(28, 12 + (max_lines * 10))
+
+        def draw_header():
+            if not headers:
+                return
+            self.ensure_space(header_h + 8)
+            x = self.margin
+            self.rect(x, self.y - header_h, sum(widths), header_h, fill="green", stroke="green")
+            for header, width in zip(headers, widths):
+                self.text(header, x + 5, self.y - 15, 7.3, "F2", "white")
+                x += width
+            self.y -= header_h
+
+        draw_header()
+        if not rows:
+            rows = [["No records provided."] + [""] * (len(widths) - 1)]
+        for idx, row in enumerate(rows):
+            height = row_height(row)
+            if self.y - height < self.bottom:
+                self.new_page()
+                draw_header()
+            x = self.margin
+            fill = "pale_green" if idx % 2 else None
+            if fill:
+                self.rect(x, self.y - height, sum(widths), height, fill=fill, stroke=None)
+            for cell, width in zip(row, widths):
+                self.rect(x, self.y - height, width, height, fill=None, stroke="line")
+                ty = self.y - 11
+                for line in self.wrap(cell, width - 10, body_size):
+                    self.text(line, x + 5, ty, body_size, "F1", "ink")
+                    ty -= 10
+                x += width
+            self.y -= height
+        self.y -= 14
+
+
+def write_report_pdf(path, report, tasks, challenges, tomorrow, metrics, logo_path=None):
+    canvas = PdfCanvas(logo_path)
+
+    info_rows = [
+        [
+            "Name:",
+            report["full_name"],
+            "Branch / Campus:",
+            report["branch"],
+        ],
+        [
+            "Position:",
+            report["position"],
+            "Date:",
+            report["report_date"],
+        ],
+        [
+            "Day of the Week:",
+            day_name(report["report_date"]) or "Not provided",
+            "Reporting Period:",
+            report["reporting_period"] or default_reporting_period(report["report_date"]) or "Not provided",
+        ],
+    ]
+    canvas.table([], info_rows, [92, 165, 112, 142])
+
+    canvas.section("1. Summary of key tasks / activities performed today")
+    canvas.paragraph(report["day_summary"], 8.8)
+    canvas.table(
+        ["Activity / Task", "Description of Work Done", "Time Spent", "Status"],
+        [
+            [
+                item.get("activity", ""),
+                item.get("description", ""),
+                item.get("time", ""),
+                item.get("status", ""),
+            ]
+            for item in tasks
+        ],
+        [128, 242, 70, 71],
+    )
+
+    canvas.section("2. Challenges experienced today")
+    canvas.table(
+        ["Challenge", "Impact", "Action Taken", "Support Needed"],
+        [
+            [
+                item.get("challenge", ""),
+                item.get("impact", ""),
+                item.get("action", ""),
+                item.get("support", ""),
+            ]
+            for item in challenges
+        ],
+        [138, 110, 130, 133],
+    )
+
+    canvas.section("3. Key decisions made")
+    canvas.paragraph(report["decisions"] or "No key decisions recorded.", 8.8)
+
+    canvas.section("4. Workplan for tomorrow - to-do list")
+    canvas.table(
+        ["Task", "Activities", "Objective", "Responsible", "Resources / Budget", "Expected Outcome"],
+        [
+            [
+                item.get("task", ""),
+                item.get("activities", ""),
+                item.get("objective", ""),
+                item.get("responsible", report["full_name"]),
+                item.get("resources_budget", ""),
+                item.get("expected_outcome", ""),
+            ]
+            for item in tomorrow
+        ],
+        [78, 110, 88, 78, 78, 79],
+    )
+
+    canvas.section("5. Comments / recommendations")
+    canvas.paragraph(report["comments"] or "No comments recorded.", 8.8)
+
+    canvas.section("Sign-off")
+    signature_rows = [
+        [
+            f"Prepared By\nName: {report['full_name']}\nDate: {report['report_date']}",
+            "Reviewed By\nName: ____________________\nDate: ____________________",
+            "Approved By\nName: ____________________\nDate: ____________________",
+        ]
+    ]
+    canvas.table(["Prepared By", "Reviewed By", "Approved By"], signature_rows, [170, 170, 171])
+    canvas.finish()
+    write_pdf_document(path, canvas.pages, canvas.logo_meta)
+
+
+def write_pdf_document(path, pages, logo_meta=None):
     page_width = 595
     page_height = 842
-    margin = 54
-    y_start = 760
-    y = y_start
-    pages = []
-    current = []
-
-    def add_line(text, style="normal"):
-        nonlocal y, current
-        size = {"title": 18, "subtitle": 13, "heading": 12, "bold": 10, "normal": 10}[style]
-        leading = 18 if style in ("title", "subtitle", "heading") else 14
-        if y < 70:
-            pages.append(current)
-            current = []
-            y = y_start
-        current.append((text, style, size, y))
-        y -= leading
-
-    for text, style in lines:
-        width = 52 if style in ("normal", "bold") else 44
-        for part in str(text).split("\n"):
-            wrapped = textwrap.wrap(part, width=width) or [""]
-            for chunk in wrapped:
-                add_line(chunk, style)
-        if style == "heading":
-            y -= 4
-    pages.append(current)
 
     objects = []
     logo_obj_id = None
-    logo_meta = None
-
-    if logo_path and Path(logo_path).exists():
-        try:
-            img = Image.open(logo_path).convert("RGB")
-            img.thumbnail((150, 60))
-            raw = img.tobytes()
-            compressed = zlib.compress(raw)
-            logo_meta = (img.width, img.height, compressed)
-        except Exception:
-            logo_meta = None
 
     def add_object(content):
         objects.append(content)
@@ -565,19 +767,8 @@ def write_pdf(path, lines, logo_path=None):
         )
 
     page_ids = []
-    content_ids = []
     for page in pages:
-        commands = ["q"]
-        if logo_obj_id:
-            commands.append("150 0 0 37 54 785 cm /Logo Do")
-        commands.append("Q")
-        for text, style, size, ypos in page:
-            font = "F2" if style in ("title", "subtitle", "heading", "bold") else "F1"
-            x = margin
-            if style in ("title", "subtitle"):
-                x = 180 if style == "title" else 190
-            commands.append(f"BT /{font} {size} Tf {x} {ypos} Td ({pdf_escape(text)}) Tj ET")
-        stream = "\n".join(commands).encode("utf-8")
+        stream = "\n".join(page).encode("latin-1", "replace")
         resources = f"<< /Font << /F1 {font_regular} 0 R /F2 {font_bold} 0 R >>"
         if logo_obj_id:
             resources += f" /XObject << /Logo {logo_obj_id} 0 R >>"
@@ -585,7 +776,6 @@ def write_pdf(path, lines, logo_path=None):
         content_id = add_object(
             b"<< /Length " + str(len(stream)).encode() + b" >>\nstream\n" + stream + b"\nendstream"
         )
-        content_ids.append(content_id)
         page_id = add_object(
             f"<< /Type /Page /Parent {{PAGES}} 0 R /MediaBox [0 0 {page_width} {page_height}] /Resources {resources} /Contents {content_id} 0 R >>".encode()
         )
@@ -692,6 +882,61 @@ def login():
     return render_template("login.html")
 
 
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        csrf_protect()
+        email = clean_text(request.form.get("email"), 160).lower()
+        user = get_db().execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+        if user:
+            token = secrets.token_urlsafe(48)
+            expires_at = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+            get_db().execute(
+                "INSERT INTO password_resets (user_id, token, expires_at, used, created_at) VALUES (?, ?, ?, 0, ?)",
+                (user["id"], token, expires_at, now()),
+            )
+            get_db().commit()
+            reset_url = url_for("reset_password", token=token, _external=True)
+            flash(f"Password reset link (valid 1 hour): {reset_url}", "info")
+            return redirect(url_for("forgot_password"))
+        else:
+            flash("If that email is registered, a reset link has been generated.", "info")
+            return redirect(url_for("forgot_password"))
+    return render_template("forgot_password.html")
+
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    reset = get_db().execute(
+        "SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > ?",
+        (token, now()),
+    ).fetchone()
+    if not reset:
+        flash("That reset link is invalid or has expired.", "danger")
+        return redirect(url_for("forgot_password"))
+
+    if request.method == "POST":
+        csrf_protect()
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm_password", "")
+        if len(password) < 8:
+            flash("Use a password with at least 8 characters.", "danger")
+            return render_template("reset_password.html")
+        if password != confirm:
+            flash("Passwords do not match.", "danger")
+            return render_template("reset_password.html")
+        get_db().execute(
+            "UPDATE users SET password_hash = ? WHERE id = ?",
+            (generate_password_hash(password), reset["user_id"]),
+        )
+        get_db().execute("UPDATE password_resets SET used = 1 WHERE id = ?", (reset["id"],))
+        get_db().commit()
+        flash("Password reset successfully. Sign in with your new password.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("reset_password.html")
+
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -767,14 +1012,15 @@ def new_report():
         cursor = get_db().execute(
             """
             INSERT INTO reports (
-                user_id, report_date, branch, department, position, day_summary,
+                user_id, report_date, reporting_period, branch, department, position, day_summary,
                 tasks_json, challenges_json, decisions, tomorrow_json, comments,
                 metrics_json, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 g.user["id"],
                 request.form.get("report_date"),
+                clean_text(request.form.get("reporting_period")) or default_reporting_period(request.form.get("report_date")),
                 clean_text(request.form.get("branch")) or g.user["branch"],
                 department,
                 clean_text(request.form.get("position")) or g.user["position"],
@@ -794,7 +1040,16 @@ def new_report():
         flash("Report submitted and PDF generated.", "success")
         return redirect(url_for("view_report", report_id=cursor.lastrowid))
 
-    return render_template("report_form.html", departments=DEPARTMENTS, branches=BRANCHES, today=datetime.now().strftime("%Y-%m-%d"), metrics_config=METRICS_CONFIG)
+    today = datetime.now().strftime("%Y-%m-%d")
+    return render_template(
+        "report_form.html",
+        departments=DEPARTMENTS,
+        branches=BRANCHES,
+        today=today,
+        day_of_week=day_name(today),
+        reporting_period=default_reporting_period(today),
+        metrics_config=METRICS_CONFIG,
+    )
 
 
 @app.route("/reports/<int:report_id>")
@@ -813,6 +1068,10 @@ def view_report(report_id):
         abort(404)
     if not can_view_report(g.user, report):
         abort(403)
+    edits = get_db().execute(
+        "SELECT * FROM report_edits WHERE report_id = ? ORDER BY edited_at ASC",
+        (report_id,),
+    ).fetchall()
     return render_template(
         "report_detail.html",
         report=report,
@@ -820,6 +1079,98 @@ def view_report(report_id):
         challenges=json.loads(report["challenges_json"]),
         tomorrow=json.loads(report["tomorrow_json"]),
         metrics=json.loads(report["metrics_json"]),
+        metrics_config=METRICS_CONFIG,
+        edits=edits,
+    )
+
+
+@app.route("/reports/<int:report_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_report(report_id):
+    db = get_db()
+    report = db.execute(
+        """
+        SELECT reports.*, users.full_name, users.email, users.phone
+        FROM reports
+        JOIN users ON users.id = reports.user_id
+        WHERE reports.id = ?
+        """,
+        (report_id,),
+    ).fetchone()
+    if not report:
+        abort(404)
+    if not can_view_report(g.user, report):
+        abort(403)
+    if report["status"] == "approved":
+        flash("This report has been approved and can no longer be edited.", "danger")
+        return redirect(url_for("view_report", report_id=report_id))
+    if report["user_id"] != g.user["id"]:
+        abort(403)
+
+    if request.method == "POST":
+        csrf_protect()
+        form = {key: clean_text(value) for key, value in request.form.items()}
+        tasks = parse_items("task", form)
+        tomorrow = parse_items("tomorrow", form)
+        challenges = parse_items("challenge", form)
+        if not tasks:
+            flash("Add at least one task or activity completed today.", "danger")
+            return redirect(url_for("edit_report", report_id=report_id))
+
+        department = clean_text(request.form.get("department")) or report["department"]
+        dept_metrics = get_metrics_for_department(department)
+        metrics = {}
+        for field in dept_metrics:
+            if field["type"] == "number":
+                metrics[field["key"]] = int_field(field["key"])
+            else:
+                metrics[field["key"]] = request.form.get(field["key"], field.get("options", ["No"])[0])
+
+        db.execute(
+            """
+            UPDATE reports SET
+                report_date = ?, reporting_period = ?, branch = ?, department = ?, position = ?,
+                day_summary = ?, tasks_json = ?, challenges_json = ?, decisions = ?,
+                tomorrow_json = ?, comments = ?, metrics_json = ?
+            WHERE id = ?
+            """,
+            (
+                request.form.get("report_date"),
+                clean_text(request.form.get("reporting_period")) or default_reporting_period(request.form.get("report_date")),
+                clean_text(request.form.get("branch")) or report["branch"],
+                department,
+                clean_text(request.form.get("position")) or report["position"],
+                clean_text(request.form.get("day_summary")),
+                json.dumps(tasks),
+                json.dumps(challenges),
+                clean_text(request.form.get("decisions")),
+                json.dumps(tomorrow),
+                clean_text(request.form.get("comments")),
+                json.dumps(metrics),
+                report_id,
+            ),
+        )
+        db.execute(
+            "INSERT INTO report_edits (report_id, user_id, edited_at) VALUES (?, ?, ?)",
+            (report_id, g.user["id"], now()),
+        )
+        db.commit()
+        make_report_pdf(report_id)
+        flash("Report updated successfully.", "success")
+        return redirect(url_for("view_report", report_id=report_id))
+
+    return render_template(
+        "report_form.html",
+        report=report,
+        tasks=json.loads(report["tasks_json"]),
+        challenges=json.loads(report["challenges_json"]),
+        tomorrow=json.loads(report["tomorrow_json"]),
+        metrics=json.loads(report["metrics_json"]),
+        departments=DEPARTMENTS,
+        branches=BRANCHES,
+        today=report["report_date"],
+        day_of_week=day_name(report["report_date"]),
+        reporting_period=report["reporting_period"] or default_reporting_period(report["report_date"]),
         metrics_config=METRICS_CONFIG,
     )
 
@@ -856,6 +1207,30 @@ def admin_users():
 
     users = db.execute("SELECT * FROM users ORDER BY role DESC, full_name ASC").fetchall()
     return render_template("admin_users.html", users=users)
+
+
+@app.route("/admin/users/<int:user_id>/reset-password", methods=["GET", "POST"])
+@superadmin_required
+def admin_reset_password(user_id):
+    db = get_db()
+    target = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    if not target:
+        abort(404)
+    if request.method == "POST":
+        csrf_protect()
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm_password", "")
+        if len(password) < 8:
+            flash("Use a password with at least 8 characters.", "danger")
+            return render_template("admin_reset_password.html", target=target, back_url=url_for("admin_users"))
+        if password != confirm:
+            flash("Passwords do not match.", "danger")
+            return render_template("admin_reset_password.html", target=target, back_url=url_for("admin_users"))
+        db.execute("UPDATE users SET password_hash = ? WHERE id = ?", (generate_password_hash(password), user_id))
+        db.commit()
+        flash(f"Password for {target['full_name']} has been reset.", "success")
+        return redirect(url_for("admin_users"))
+    return render_template("admin_reset_password.html", target=target, back_url=url_for("admin_users"))
 
 
 @app.route("/admin/access/<int:admin_id>", methods=["GET", "POST"])
@@ -954,6 +1329,33 @@ def admin_department():
     return render_template("admin_department.html", dept_users=users, departments=DEPARTMENTS, branches=BRANCHES)
 
 
+@app.route("/admin/department/<int:user_id>/reset-password", methods=["GET", "POST"])
+@admin_required
+def admin_department_reset_password(user_id):
+    db = get_db()
+    target = db.execute(
+        "SELECT * FROM users WHERE id = ? AND department = ?",
+        (user_id, g.user["department"]),
+    ).fetchone()
+    if not target:
+        abort(404)
+    if request.method == "POST":
+        csrf_protect()
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm_password", "")
+        if len(password) < 8:
+            flash("Use a password with at least 8 characters.", "danger")
+            return render_template("admin_reset_password.html", target=target, back_url=url_for("admin_department"))
+        if password != confirm:
+            flash("Passwords do not match.", "danger")
+            return render_template("admin_reset_password.html", target=target, back_url=url_for("admin_department"))
+        db.execute("UPDATE users SET password_hash = ? WHERE id = ?", (generate_password_hash(password), user_id))
+        db.commit()
+        flash(f"Password for {target['full_name']} has been reset.", "success")
+        return redirect(url_for("admin_department"))
+    return render_template("admin_reset_password.html", target=target, back_url=url_for("admin_department"))
+
+
 @app.route("/reports/<int:report_id>/status", methods=["POST"])
 @login_required
 def update_status(report_id):
@@ -1048,9 +1450,10 @@ def server_error(_error):
 
 if __name__ == "__main__":
     init_db()
+    validate_production_config()
     if app.config["SECRET_KEY"] == "local-dev-change-me":
         import warnings
         warnings.warn("Using insecure default SECRET_KEY. Set the SECRET_KEY environment variable for production.")
     port = int(os.environ.get("PORT", "5055"))
     debug = os.environ.get("DEBUG", "").lower() in ("1", "true", "yes")
-    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=port, debug=debug)
+    app.run(host=os.environ.get("HOST", "0.0.0.0"), port=port, debug=debug)
