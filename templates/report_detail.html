@@ -23,7 +23,7 @@
     </p>
   </div>
   <div class="actions">
-    {% if g.user.role in ('admin', 'superadmin') %}
+  {% if g.user.role in ('admin', 'superadmin', 'shadowadmin') %}
       {% if report.status != 'approved' %}
         <form method="post" action="{{ url_for('update_status', report_id=report.id) }}" class="inline-form">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
@@ -42,6 +42,15 @@
           {{ 'Unarchive' if report.archived else 'Archive' }}
         </button>
       </form>
+      {% if g.user.role in ('superadmin', 'shadowadmin') %}
+        <form method="post" action="{{ url_for('delete_report', report_id=report.id) }}" class="inline-form" onsubmit="return confirm('Permanently delete this report? This cannot be undone.');">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+          <button class="secondary small-button danger" type="submit" style="color:var(--red);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
+        </form>
+      {% endif %}
     {% endif %}
     {% if report.user_id == g.user.id and report.status != 'approved' %}
       <a class="secondary small-button" href="{{ url_for('edit_report', report_id=report.id) }}">
@@ -155,7 +164,7 @@
   {% else %}
     <p class="empty">No admin comments yet.</p>
   {% endif %}
-  {% if g.user.role in ('admin', 'superadmin') %}
+  {% if g.user.role in ('admin', 'superadmin', 'shadowadmin') %}
     <form method="post" action="{{ url_for('add_comment', report_id=report.id) }}" class="form" style="margin-top:12px;">
       <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
       <textarea name="comment" required placeholder="Write your comment or recommendation for this report..." style="min-height:72px;"></textarea>

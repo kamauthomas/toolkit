@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Super admin</p>
+    <h1>Manage account</h1>
+    <p class="muted">{{ target.full_name }} &mdash; {{ target.email }} &mdash; {{ report_count }} report{{ 's' if report_count != 1 }}</p>
+  </div>
+  <a class="secondary small-button" href="{{ url_for('admin_users') }}" style="text-decoration:none;">&larr; Back</a>
+</section>
+
+<section class="card">
+  <h2 style="margin-bottom:16px;">Deactivate account</h2>
+  <form method="post" class="form" onsubmit="return confirm('Deactivate {{ target.full_name }}? They will not be able to sign in.');">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="action" value="deactivate">
+    <label>Data retention
+      <select name="data_choice" style="width:auto;min-width:200px;">
+        <option value="keep">Keep all data</option>
+        <option value="archive">Archive reports</option>
+        <option value="delete_all">Delete all reports</option>
+      </select>
+    </label>
+    <button class="secondary" type="submit" style="justify-content:center;">Deactivate</button>
+  </form>
+</section>
+
+<section class="card" style="border-color:var(--red);">
+  <h2 style="margin-bottom:16px;color:var(--red);">Permanently delete account</h2>
+  <form method="post" class="form" onsubmit="return confirm('DELETE {{ target.full_name }} permanently? This CANNOT be undone.');">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="action" value="delete">
+    <label>What to do with their data?
+      <select name="data_choice" style="width:auto;min-width:200px;">
+        <option value="keep">Keep reports (orphaned)</option>
+        <option value="archive">Archive all reports</option>
+        <option value="delete_all">Delete reports &amp; PDFs permanently</option>
+      </select>
+    </label>
+    <button class="primary" type="submit" style="justify-content:center;background:var(--red);">Delete account</button>
+  </form>
+</section>
+{% endblock %}

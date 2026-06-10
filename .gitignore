@@ -2,3 +2,11 @@ __pycache__/
 *.pyc
 instance/
 generated_reports/
+logs/
+.venv/
+*.egg-info/
+dist/
+.pytest_cache/
+deploy_key*
+*.pem
+secrets/

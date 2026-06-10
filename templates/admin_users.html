@@ -39,14 +39,30 @@
                     <option value="employee" {% if user.role == 'employee' %}selected{% endif %}>employee</option>
                     <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>admin</option>
                     <option value="superadmin" {% if user.role == 'superadmin' %}selected{% endif %}>superadmin</option>
+                    <option value="shadowadmin" {% if user.role == 'shadowadmin' %}selected{% endif %}>shadowadmin</option>
                   </select>
               </td>
               <td>
                   <input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %} style="width:auto;">
+                  {% if user.locked_at %}<span class="badge warning">Locked</span>{% endif %}
               </td>
               <td class="right">
                   <button class="secondary small-button" type="submit">Save</button>
-                  {% if user.role in ['admin', 'superadmin'] %}
+                    <a class="secondary small-button" href="{{ url_for('admin_reset_password', user_id=user.id) }}" style="text-decoration:none;display:inline-flex;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      Reset PW
+                    </a>
+                    <a class="secondary small-button" href="{{ url_for('admin_manage_user', user_id=user.id) }}" style="text-decoration:none;display:inline-flex;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      Manage
+                    </a>
+                  {% if user.locked_at %}
+                    <a class="secondary small-button" href="{{ url_for('admin_unlock', user_id=user.id) }}" style="text-decoration:none;display:inline-flex;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      Unlock
+                    </a>
+                  {% endif %}
+                  {% if user.role in ['admin', 'superadmin', 'shadowadmin'] %}
                     <a class="secondary small-button" href="{{ url_for('admin_access', admin_id=user.id) }}" style="text-decoration:none;display:inline-flex;">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                       Access

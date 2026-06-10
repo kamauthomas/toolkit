@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Account</p>
+    <h1>My profile</h1>
+  </div>
+</section>
+
+<section class="card">
+  <form method="post" class="form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label>Full name
+      <input type="text" name="full_name" value="{{ g.user.full_name }}" required maxlength="120">
+    </label>
+    <label>Email
+      <input type="email" value="{{ g.user.email }}" disabled style="opacity:0.6;">
+    </label>
+    <label>Phone
+      <input type="text" name="phone" value="{{ g.user.phone }}" maxlength="40">
+    </label>
+    <label>Department
+      <select disabled style="opacity:0.6;">
+        <option>{{ g.user.department }}</option>
+      </select>
+    </label>
+    <label>Branch
+      <select disabled style="opacity:0.6;">
+        <option>{{ g.user.branch }}</option>
+      </select>
+    </label>
+    <label>Position
+      <input type="text" name="position" value="{{ g.user.position }}" maxlength="100">
+    </label>
+    <label>Role
+      <input type="text" value="{{ g.user.role }}" disabled style="opacity:0.6;">
+    </label>
+    <button class="primary" type="submit" style="justify-content:center;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Save changes
+    </button>
+  </form>
+</section>
+{% endblock %}

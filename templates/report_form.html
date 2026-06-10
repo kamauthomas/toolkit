@@ -443,10 +443,20 @@ function closeConfirm() {
 function submitReport() {
   submitConfirmed = true;
   confirmModal.style.display = 'none';
-  form.submit();
+  if (form.requestSubmit) {
+    form.requestSubmit();
+  } else {
+    form.submit();
+  }
 }
 
 form.addEventListener('keydown', showConfirm);
+form.addEventListener('submit', function(e) {
+  if (submitConfirmed) return;
+  if (!form.checkValidity()) return;
+  e.preventDefault();
+  confirmModal.style.display = 'flex';
+});
 
 {% if not report %}
 addTask();
@@ -455,5 +465,130 @@ addTomorrow();
 {% endif %}
 updateMetrics();
 updateDateFields();
+
+(function() {
+  var form = document.querySelector('form.report-form');
+  if (!form) return;
+
+  var currentDraftId = null;
+  var lastData = '';
+  var draftTitle = '';
+
+  var indicator = document.createElement('div');
+  indicator.id = 'draftIndicator';
+  indicator.style.cssText = 'display:none;align-items:center;gap:8px;padding:10px 16px;background:var(--success-bg, #e6f7e6);border-radius:var(--radius);margin-bottom:16px;font-size:0.9rem;';
+  form.parentNode.insertBefore(indicator, form);
+
+  function updateIndicator(saved, title) {
+    if (!saved) {
+      indicator.style.display = 'none';
+      return;
+    }
+    indicator.style.display = 'flex';
+    indicator.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+      + '<span style="flex:1;">Draft saved: <strong>' + (title || 'Untitled') + '</strong></span>'
+      + '<a href="{{ url_for("my_drafts") }}" style="font-size:0.85rem;">My drafts</a>';
+  }
+
+  function collectDraftData() {
+    var data = {};
+    var fields = form.querySelectorAll('input, textarea, select');
+    for (var i = 0; i < fields.length; i++) {
+      var f = fields[i];
+      if (!f.name || f.name === '_csrf_token' || f.type === 'submit' || f.name === 'draft_id') continue;
+      if (f.type === 'checkbox') data[f.name] = f.checked ? 'on' : 'off';
+      else data[f.name] = f.value;
+    }
+    data.report_date = data.report_date || '{{ today }}';
+    if (currentDraftId) data.draft_id = currentDraftId;
+    return data;
+  }
+
+  function saveDraft(manual) {
+    var data = collectDraftData();
+    if (!manual) {
+      var str = JSON.stringify(data);
+      if (str === lastData) return;
+    }
+    if (!data.report_date) data.report_date = '{{ today }}';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '{{ url_for("draft_report") }}', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('X-CSRF-Token', '{{ csrf_token }}');
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        var resp = JSON.parse(xhr.responseText);
+        if (resp.ok) {
+          currentDraftId = resp.draft_id;
+          draftTitle = resp.title || 'Draft';
+          lastData = JSON.stringify(data);
+          updateIndicator(true, draftTitle);
+        }
+      }
+    };
+    xhr.send(JSON.stringify(data));
+  }
+
+  function restoreForm(data) {
+    if (!data || data._empty) return;
+    var maxTask = 0, maxChallenge = 0, maxTomorrow = 0;
+    for (var key in data) {
+      var m;
+      if ((m = key.match(/^task_activity_(\d+)$/)) && parseInt(m[1]) > maxTask) maxTask = parseInt(m[1]);
+      if ((m = key.match(/^challenge_challenge_(\d+)$/)) && parseInt(m[1]) > maxChallenge) maxChallenge = parseInt(m[1]);
+      if ((m = key.match(/^tomorrow_task_(\d+)$/)) && parseInt(m[1]) > maxTomorrow) maxTomorrow = parseInt(m[1]);
+    }
+    while (taskCount < maxTask) addTask();
+    while (challengeCount < maxChallenge) addChallenge();
+    while (tomorrowCount < maxTomorrow) addTomorrow();
+    if (currentDraftId) {
+      var h = document.createElement('input');
+      h.type = 'hidden';
+      h.name = 'draft_id';
+      h.value = currentDraftId;
+      form.appendChild(h);
+    }
+    var fields = form.querySelectorAll('input, textarea, select');
+    for (var i = 0; i < fields.length; i++) {
+      var f = fields[i];
+      if (f.name && data[f.name] !== undefined && f.type !== 'submit' && f.name !== 'draft_id') {
+        if (f.type === 'checkbox') f.checked = data[f.name] === 'on';
+        else f.value = data[f.name];
+      }
+    }
+  }
+
+  function loadDraftFromServer(draftId) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '{{ url_for("draft_report") }}?id=' + encodeURIComponent(draftId), true);
+    xhr.onload = function() {
+      if (xhr.status !== 200) return;
+      try {
+        var data = JSON.parse(xhr.responseText);
+        if (data._empty) return;
+        currentDraftId = draftId;
+        restoreForm(data);
+        updateIndicator(true, data.title || 'Draft');
+      } catch(e) {}
+    };
+    xhr.send();
+  }
+
+  var loadId = '{{ load_draft_id }}';
+  if (loadId) {
+    loadDraftFromServer(loadId);
+  }
+
+  var saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'secondary small-button';
+  saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
+  saveBtn.appendChild(document.createTextNode(' Save draft'));
+  saveBtn.onclick = function() { saveDraft(true); };
+  var submitArea = document.querySelector('.sticky-submit');
+  if (submitArea) submitArea.insertBefore(saveBtn, submitArea.firstChild);
+
+  setInterval(function() { saveDraft(false); }, 10000);
+})();
 </script>
 {% endblock %}

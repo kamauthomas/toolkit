@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Reports</p>
+    <h1>My drafts</h1>
+    <p class="muted">{{ drafts|length }} of {{ max_drafts }} draft{{ 's' if drafts|length != 1 }} used</p>
+  </div>
+  <a class="primary small-button" href="{{ url_for('new_report') }}" style="text-decoration:none;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    New report
+  </a>
+</section>
+
+{% if drafts %}
+  <section class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Department</th>
+            <th>Last saved</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for draft in drafts %}
+            <tr>
+              <td>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                {{ draft.title }}
+              </td>
+              <td>{{ draft.report_date }}</td>
+              <td>{{ draft.department }}</td>
+              <td>{{ draft.updated_at }}</td>
+              <td class="right">
+                <a class="secondary small-button" href="{{ url_for('new_report', draft=draft.id) }}" style="text-decoration:none;display:inline-flex;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                  Continue
+                </a>
+                <form method="post" action="{{ url_for('draft_report') }}" class="inline-form" onsubmit="return confirm('Delete this draft?');">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                  <input type="hidden" name="id" value="{{ draft.id }}">
+                  <input type="hidden" name="_method" value="DELETE">
+                  <button class="secondary small-button" type="submit" style="color:var(--red);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Delete
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% else %}
+  <section class="card">
+    <p class="empty">No drafts yet. Start a report and save it as a draft to pick up later.</p>
+  </section>
+{% endif %}
+{% endblock %}

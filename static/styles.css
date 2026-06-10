@@ -1,26 +1,28 @@
 :root {
-  --ink: #17221d;
-  --ink-secondary: #3d5248;
-  --muted: #6b7d73;
-  --line: #dde5df;
-  --line-light: #e9efe9;
+  --ink: #112017;
+  --ink-secondary: #2f4a39;
+  --muted: #617668;
+  --line: #cfe0d4;
+  --line-light: #e5f0e8;
   --paper: #ffffff;
-  --soft: #f3f7f4;
-  --surface: #f6faf7;
-  --brand: #FF4C00;
-  --brand-dark: #CC3D00;
-  --brand-light: #FFF0E6;
-  --brand-ring: rgba(255, 76, 0, 0.15);
-  --accent: #969E2A;
-  --accent-light: #F4F5E6;
+  --soft: #f0f7f2;
+  --surface: #f6fbf7;
+  --brand: #1B4D2E;
+  --brand-dark: #10361F;
+  --brand-mid: #2E7D46;
+  --brand-light: #EAF4ED;
+  --brand-ring: rgba(46, 125, 70, 0.18);
+  --accent: #F5C400;
+  --accent-dark: #9A7800;
+  --accent-light: #FFF8D9;
   --danger: #b3261e;
   --danger-light: #fce9e8;
-  --success: #006A68;
-  --success-light: #E0F0EF;
+  --success: #2E7D46;
+  --success-light: #E4F3E8;
   --warning: #b76e00;
   --warning-light: #fff3e0;
-  --info: #006A68;
-  --info-light: #E0F0EF;
+  --info: #1B4D2E;
+  --info-light: #EAF4ED;
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -99,8 +101,8 @@ a:focus-visible {
 }
 
 .brand img {
-  width: 120px;
-  max-height: 36px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
 }
 
@@ -194,7 +196,7 @@ a:focus-visible {
 }
 
 .hero-panel {
-  background: linear-gradient(135deg, var(--brand-dark) 0%, #7A2600 100%);
+  background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
   color: #fff;
   padding: 40px 32px;
   display: flex;
@@ -420,7 +422,7 @@ textarea {
 input:hover,
 select:hover,
 textarea:hover {
-  border-color: #e0c8b8;
+  border-color: var(--brand-mid);
 }
 
 input:focus,
@@ -433,15 +435,20 @@ textarea:focus {
 
 input::placeholder,
 textarea::placeholder {
-  color: #b0a89e;
+  color: #8a9a8f;
 }
 
 /* ========== Flash Messages ========== */
 
 .messages {
+  position: fixed;
+  top: 84px;
+  left: 20px;
+  z-index: 80;
   display: grid;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: 10px;
+  width: min(420px, calc(100vw - 32px));
+  pointer-events: none;
 }
 
 .message {
@@ -453,9 +460,14 @@ textarea::placeholder {
   background: var(--soft);
   border: 1px solid var(--line);
   border-left: 4px solid var(--muted);
+  box-shadow: var(--shadow-lg);
   color: var(--ink-secondary);
   font-size: 0.9rem;
   line-height: 1.5;
+  pointer-events: auto;
+  transform: translateX(-18px);
+  opacity: 0;
+  animation: toast-in 220ms ease-out forwards;
 }
 
 .message svg {
@@ -471,7 +483,7 @@ textarea::placeholder {
 .message.success {
   border-left-color: var(--success);
   background: var(--success-light);
-  color: #00403F;
+  color: var(--brand-dark);
 }
 
 .message.warning {
@@ -483,7 +495,14 @@ textarea::placeholder {
 .message.info {
   border-left-color: var(--info);
   background: var(--info-light);
-  color: #00403F;
+  color: var(--brand-dark);
+}
+
+@keyframes toast-in {
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .status-badge {
@@ -503,12 +522,12 @@ textarea::placeholder {
 
 .status-badge.reviewed {
   background: var(--accent-light);
-  color: var(--accent);
+  color: var(--accent-dark);
 }
 
 .status-badge.approved {
   background: var(--success-light);
-  color: #00403F;
+  color: var(--brand-dark);
 }
 
 /* ========== Cards ========== */
@@ -532,7 +551,9 @@ textarea::placeholder {
   font-size: 1.15rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--ink);
+  color: var(--brand);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 8px;
 }
 
 .card h3 {
@@ -689,12 +710,12 @@ thead {
 }
 
 th {
-  background: var(--soft);
-  border-bottom: 2px solid var(--line);
+  background: var(--brand);
+  border-bottom: 3px solid var(--accent);
   padding: 12px 14px;
   text-align: left;
   vertical-align: middle;
-  color: var(--muted);
+  color: #fff;
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -716,11 +737,11 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: var(--brand-light);
+  background: #e2f0e6;
 }
 
 tbody tr:nth-child(even) {
-  background: #fcfaf8;
+  background: #f4faf5;
 }
 
 tbody tr:nth-child(even):hover {
@@ -739,7 +760,7 @@ tbody tr:nth-child(even):hover {
   display: flex;
   justify-content: flex-end;
   padding: 14px 20px;
-  background: rgba(250, 246, 243, 0.9);
+  background: rgba(246, 251, 247, 0.92);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   -webkit-backdrop-filter: blur(8px);

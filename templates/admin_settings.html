@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Administration</p>
+    <h1>System settings</h1>
+  </div>
+</section>
+
+<section class="card">
+  <form method="post" class="form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label class="checkbox-label">
+      <input type="checkbox" name="registration_open" {% if registration_open %}checked{% endif %} style="width:auto;">
+      Allow new user registrations
+    </label>
+    <button class="primary" type="submit" style="justify-content:center;">Save settings</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth-card">
+  <div class="auth-header">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <h1>Unlock account</h1>
+  </div>
+  <p class="muted" style="margin-bottom:20px;">Unlocking <strong>{{ target.full_name }}</strong> ({{ target.email }})</p>
+  <form method="post" class="form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label>Reason for unlocking <span class="required">*</span>
+      <textarea name="reason" required minlength="10" placeholder="Explain why this account is being unlocked..." style="min-height:100px;"></textarea>
+    </label>
+    <button class="primary" type="submit" style="justify-content:center;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Unlock account
+    </button>
+  </form>
+</section>
+{% endblock %}
