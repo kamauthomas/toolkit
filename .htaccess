@@ -4,11 +4,13 @@ PassengerPython "/home/bfyigiln/virtualenv/reports.toolkitafrica.ac.ke/3.11/bin/
 PassengerAppType wsgi
 PassengerStartupFile passenger_wsgi.py
 
-<FilesMatch "\.(py|pyc|db|sqlite3|log|ini|env|pem|key)$">
+<FilesMatch "^(requirements\.txt|Dockerfile|docker-compose\.yml)$|(\.(py|pyc|db|sqlite3|log|ini|env|pem|key)$)">
   Require all denied
 </FilesMatch>
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
+  RewriteRule ^\.git(/|$) - [F,L]
+  RewriteRule ^\.(?!well-known/) - [F,L]
   RewriteRule ^(instance|logs|generated_reports)/ - [F,L]
 </IfModule>
