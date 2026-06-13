@@ -1,53 +1,172 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="section-head">
+<section class="dashboard-hero">
   <div>
-    <p class="eyebrow">{{ g.user.role|capitalize }}</p>
-    <h1>Dashboard</h1>
-    <p class="muted">Welcome, {{ g.user.full_name }}.</p>
+    <p class="eyebrow">{{ g.user.role|capitalize }} workspace</p>
+    <h1>Institution operations dashboard</h1>
+    <p class="lead">Reports, admissions signals, marketing output, staff activity, and follow-up work in one executive view.</p>
   </div>
-  <a class="primary" href="{{ url_for('new_report') }}">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-    Submit report
-  </a>
+  <div class="hero-actions">
+    <a class="secondary" href="{{ url_for('modules') }}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4Z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/></svg>
+      View modules
+    </a>
+    <a class="primary" href="{{ url_for('new_report') }}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+      Submit report
+    </a>
+  </div>
 </section>
 
-<div class="kpi-grid">
-  <div class="kpi-card">
-    <div class="kpi-label">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-      Total Reports
-    </div>
-    <div class="kpi-value">{{ reports|length }}</div>
-    <div class="kpi-desc">
-      {% if g.user.role == 'employee' %}Your submitted reports{% else %}Visible reports{% endif %}
-    </div>
+<div class="kpi-grid executive-grid">
+  <div class="kpi-card accent-card">
+    <div class="kpi-label">Total Reports</div>
+    <div class="kpi-value">{{ insights.total_reports }}</div>
+    <div class="kpi-desc">{% if g.user.role == 'employee' %}Your active report set{% else %}Visible institutional reports{% endif %}</div>
   </div>
-  {% if reports %}
-    <div class="kpi-card">
-      <div class="kpi-label">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Latest Report
-      </div>
-      <div class="kpi-value" style="font-size:1rem;">{{ reports[0].report_date }}</div>
-      <div class="kpi-desc">Most recent activity</div>
-    </div>
-  {% endif %}
   <div class="kpi-card">
-    <div class="kpi-label">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Period
-    </div>
-    <div class="kpi-value" style="font-size:1rem;">{{ reports[0].report_date if reports else '--' }}</div>
-    <div class="kpi-desc">Ongoing reporting cycle</div>
+    <div class="kpi-label">Pending Review</div>
+    <div class="kpi-value">{{ insights.pending_review }}</div>
+    <div class="kpi-desc">Submitted reports awaiting oversight</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Verified / Approved</div>
+    <div class="kpi-value">{{ insights.approved }}</div>
+    <div class="kpi-desc">{{ insights.approval_rate }}% approval rate</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Admissions Signals</div>
+    <div class="kpi-value">{{ insights.admissions_activity }}</div>
+    <div class="kpi-desc">Applications processed and interviews scheduled</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Marketing Activity</div>
+    <div class="kpi-value">{{ insights.marketing_activity }}</div>
+    <div class="kpi-desc">Leads, outreach, and social activity</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Active Staff</div>
+    <div class="kpi-value">{{ insights.staff_count }}</div>
+    <div class="kpi-desc">Visible active users under this role</div>
   </div>
 </div>
 
-<section class="card">
+<section class="dashboard-grid">
+  <div class="glass-panel panel-wide">
+    <div class="inline-head">
+      <div>
+        <p class="eyebrow">Performance</p>
+        <h2>Review completion</h2>
+      </div>
+      <span class="status-pill">{{ insights.review_progress }}%</span>
+    </div>
+    <div class="progress-track large">
+      <span style="width: {{ insights.review_progress }}%"></span>
+    </div>
+    <div class="status-row">
+      <span><strong>{{ insights.pending_review }}</strong> submitted</span>
+      <span><strong>{{ insights.reviewed }}</strong> reviewed</span>
+      <span><strong>{{ insights.approved }}</strong> approved</span>
+    </div>
+  </div>
+
+  <div class="glass-panel">
+    <div class="inline-head">
+      <div>
+        <p class="eyebrow">Trends</p>
+        <h2>Monthly reports</h2>
+      </div>
+    </div>
+    <div class="chart-list">
+      {% for month, count in insights.month_series %}
+        <div class="chart-row">
+          <span>{{ month }}</span>
+          <div class="bar"><i style="width: {{ (count / insights.max_month * 100)|round(0, 'floor') }}%"></i></div>
+          <strong>{{ count }}</strong>
+        </div>
+      {% else %}
+        <p class="empty">No monthly activity yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="glass-panel">
+    <div class="inline-head">
+      <div>
+        <p class="eyebrow">Departments</p>
+        <h2>Activity spread</h2>
+      </div>
+    </div>
+    <div class="rank-list">
+      {% for department, count in insights.top_departments %}
+        <div>
+          <span>{{ department }}</span>
+          <strong>{{ count }}</strong>
+        </div>
+      {% else %}
+        <p class="empty">Department activity appears after reports are submitted.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="glass-panel panel-wide">
+    <div class="inline-head">
+      <div>
+        <p class="eyebrow">Staff</p>
+        <h2>Performance overview</h2>
+      </div>
+    </div>
+    <div class="staff-strip">
+      {% for staff in insights.top_staff %}
+        <article>
+          <strong>{{ staff.name }}</strong>
+          <span>{{ staff.department }}</span>
+          <div class="mini-stats">
+            <small>{{ staff.reports }} reports</small>
+            <small>{{ staff.approved }} approved</small>
+            <small>{{ staff.latest }}</small>
+          </div>
+        </article>
+      {% else %}
+        <p class="empty">Staff performance appears once reports are submitted.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="module-band">
+  <div class="section-head compact">
+    <div>
+      <p class="eyebrow">Expansion modules</p>
+      <h2>Operational platform preview</h2>
+    </div>
+    <a class="secondary small-button" href="{{ url_for('modules') }}">Open module map</a>
+  </div>
+  <div class="module-grid">
+    {% for module in modules %}
+      <article class="module-card">
+        <div>
+          <span class="module-status">{{ module.status }}</span>
+          <h3>{{ module.title }}</h3>
+          <p>{{ module.summary }}</p>
+        </div>
+        <div class="module-metric">
+          <strong>{{ module.metric }}</strong>
+          <span>{{ module.label }}</span>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card table-card">
   <div class="inline-head">
-    <h2>{% if g.user.role == 'employee' %}My reports{% else %}Visible reports{% endif %}</h2>
+    <div>
+      <p class="eyebrow">Reports repository</p>
+      <h2>{% if g.user.role == 'employee' %}My reports{% else %}Visible reports{% endif %}</h2>
+    </div>
     <a class="secondary small-button" href="{{ url_for('export_csv') }}">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
       Export CSV
     </a>
   </div>
@@ -57,7 +176,7 @@
         <thead>
           <tr>
             <th>Date</th>
-          {% if g.user.role != 'employee' %}<th>Employee</th>{% endif %}
+            {% if g.user.role != 'employee' %}<th>Employee</th>{% endif %}
             <th>Department</th>
             <th>Summary</th>
             <th>Status</th>
@@ -81,10 +200,7 @@
                 {% endif %}
               </td>
               <td class="right">
-                <a class="secondary small-button" href="{{ url_for('view_report', report_id=report.id) }}">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  View
-                </a>
+                <a class="secondary small-button" href="{{ url_for('view_report', report_id=report.id) }}">View</a>
               </td>
             </tr>
           {% endfor %}

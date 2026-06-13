@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dashboard-hero module-hero">
+  <div>
+    <p class="eyebrow">System expansion</p>
+    <h1>Operations module map</h1>
+    <p class="lead">A practical view of the admissions, intake, marketing, incentives, minutes, notifications, and analytics modules planned for the reporting platform.</p>
+  </div>
+  <div class="hero-metric-stack">
+    <span><strong>{{ insights.total_reports }}</strong> reports</span>
+    <span><strong>{{ insights.pending_review }}</strong> pending reviews</span>
+    <span><strong>{{ insights.staff_count }}</strong> active staff</span>
+  </div>
+</section>
+
+<section class="module-board">
+  {% for module in modules %}
+    <article class="module-card large">
+      <div>
+        <span class="module-status">{{ module.status }}</span>
+        <h2>{{ module.title }}</h2>
+        <p>{{ module.summary }}</p>
+      </div>
+      <div class="module-metric">
+        <strong>{{ module.metric }}</strong>
+        <span>{{ module.label }}</span>
+      </div>
+    </article>
+  {% endfor %}
+</section>
+
+<section class="dashboard-grid">
+  <div class="glass-panel">
+    <p class="eyebrow">Admissions</p>
+    <h2>Verification workflow</h2>
+    <div class="workflow-list">
+      <span>Record capture</span>
+      <span>Officer assignment</span>
+      <span>Admin verification</span>
+      <span>Status history</span>
+    </div>
+  </div>
+  <div class="glass-panel">
+    <p class="eyebrow">Intake</p>
+    <h2>Target monitoring</h2>
+    <div class="progress-track large"><span style="width: {{ insights.review_progress }}%"></span></div>
+    <p class="small">Current review completion is used as a live proxy until intake targets are normalized.</p>
+  </div>
+  <div class="glass-panel">
+    <p class="eyebrow">Analytics</p>
+    <h2>Report signals</h2>
+    <div class="rank-list">
+      <div><span>Leads generated</span><strong>{{ insights.leads_generated }}</strong></div>
+      <div><span>Applications processed</span><strong>{{ insights.applications_processed }}</strong></div>
+      <div><span>Interviews scheduled</span><strong>{{ insights.interviews_scheduled }}</strong></div>
+      <div><span>Calls made</span><strong>{{ insights.calls_made }}</strong></div>
+    </div>
+  </div>
+  <div class="glass-panel">
+    <p class="eyebrow">Follow-up</p>
+    <h2>Reminder priorities</h2>
+    <div class="workflow-list">
+      <span>Pending reports</span>
+      <span>Unverified admissions</span>
+      <span>Outstanding action items</span>
+      <span>Monthly target reviews</span>
+    </div>
+  </div>
+</section>
+{% endblock %}

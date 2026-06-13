@@ -440,6 +440,180 @@ def get_metric_label(key):
     return key.replace("_", " ").title()
 
 
+def row_get(row, key, default=None):
+    if not row:
+        return default
+    try:
+        if key in row.keys():
+            return row[key]
+    except AttributeError:
+        return row.get(key, default)
+    return default
+
+
+def metric_int(value):
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def safe_metrics(report):
+    try:
+        return json.loads(row_get(report, "metrics_json", "{}") or "{}")
+    except (TypeError, ValueError):
+        return {}
+
+
+def build_dashboard_insights(reports, staff_count=0):
+    status_counts = {"submitted": 0, "reviewed": 0, "approved": 0}
+    department_counts = {}
+    month_counts = {}
+    employee_stats = {}
+    metric_totals = defaultdict(int)
+
+    for report in reports:
+        status = row_get(report, "status", "submitted") or "submitted"
+        status_counts[status] = status_counts.get(status, 0) + 1
+
+        department = row_get(report, "department", "Other") or "Other"
+        department_counts[department] = department_counts.get(department, 0) + 1
+
+        report_date = row_get(report, "report_date", "")
+        parsed = parse_report_date(report_date)
+        month_label = parsed.strftime("%b %Y") if parsed else "Unscheduled"
+        month_counts[month_label] = month_counts.get(month_label, 0) + 1
+
+        employee_name = row_get(report, "full_name", None) or row_get(g.user, "full_name", "My activity")
+        if employee_name not in employee_stats:
+            employee_stats[employee_name] = {
+                "name": employee_name,
+                "department": department,
+                "reports": 0,
+                "approved": 0,
+                "latest": report_date or "--",
+            }
+        employee_stats[employee_name]["reports"] += 1
+        if status == "approved":
+            employee_stats[employee_name]["approved"] += 1
+        if report_date and report_date > employee_stats[employee_name]["latest"]:
+            employee_stats[employee_name]["latest"] = report_date
+
+        metrics = safe_metrics(report)
+        for key, value in metrics.items():
+            metric_totals[key] += metric_int(value)
+
+    total_reports = len(reports)
+    approved = status_counts.get("approved", 0)
+    reviewed = status_counts.get("reviewed", 0)
+    pending = status_counts.get("submitted", 0)
+    review_progress = int(((approved + reviewed) / total_reports) * 100) if total_reports else 0
+    approval_rate = int((approved / total_reports) * 100) if total_reports else 0
+    admissions_activity = metric_totals["applications_processed"] + metric_totals["interviews_scheduled"]
+    marketing_activity = (
+        metric_totals["leads_generated"]
+        + metric_totals["outreach_updates"]
+        + metric_totals["facebook_posts"]
+        + metric_totals["instagram_posts"]
+        + metric_totals["tiktok_videos"]
+    )
+
+    top_departments = sorted(department_counts.items(), key=lambda item: item[1], reverse=True)[:5]
+    top_staff = sorted(employee_stats.values(), key=lambda item: item["reports"], reverse=True)[:5]
+    month_series = list(month_counts.items())[-6:]
+    max_month = max([count for _, count in month_series] or [1])
+
+    return {
+        "total_reports": total_reports,
+        "pending_review": pending,
+        "reviewed": reviewed,
+        "approved": approved,
+        "approval_rate": approval_rate,
+        "review_progress": review_progress,
+        "department_count": len(department_counts),
+        "staff_count": staff_count,
+        "admissions_activity": admissions_activity,
+        "marketing_activity": marketing_activity,
+        "calls_made": metric_totals["calls_made"],
+        "leads_generated": metric_totals["leads_generated"],
+        "applications_processed": metric_totals["applications_processed"],
+        "interviews_scheduled": metric_totals["interviews_scheduled"],
+        "meetings_logged": metric_totals["meetings_held"] + metric_totals["meetings_attended"] + metric_totals["meetings_coordinated"],
+        "reports_reviewed_metric": metric_totals["reports_reviewed"],
+        "status_counts": status_counts,
+        "top_departments": top_departments,
+        "top_staff": top_staff,
+        "month_series": month_series,
+        "max_month": max_month,
+    }
+
+
+def get_visible_staff_count(db):
+    if g.user["role"] in SUPER_ROLES:
+        row = db.execute("SELECT COUNT(*) AS c FROM users WHERE deleted_at IS NULL AND is_active = 1").fetchone()
+        return row["c"] if row else 0
+    if g.user["role"] == "admin":
+        row = db.execute(
+            """
+            SELECT COUNT(DISTINCT users.id) AS c
+            FROM users
+            JOIN report_access ON report_access.employee_id = users.id
+            WHERE report_access.admin_id = ? AND users.deleted_at IS NULL AND users.is_active = 1
+            """,
+            (g.user["id"],),
+        ).fetchone()
+        return row["c"] if row else 0
+    return 1
+
+
+def expansion_modules(insights=None):
+    insights = insights or {}
+    return [
+        {
+            "title": "Admissions",
+            "summary": "Verification queue, officer ownership, intake status, and admissions trend visibility.",
+            "metric": insights.get("applications_processed", 0),
+            "label": "Applications processed",
+            "status": "Dashboard preview",
+        },
+        {
+            "title": "Monthly Intake",
+            "summary": "Target attainment, monthly progress, completion percentages, and ranked officer output.",
+            "metric": insights.get("admissions_activity", 0),
+            "label": "Admissions activity",
+            "status": "Target model pending",
+        },
+        {
+            "title": "Marketing Reports",
+            "summary": "Campaign activity, social content, leads generated, outreach work, and conversion indicators.",
+            "metric": insights.get("marketing_activity", 0),
+            "label": "Marketing activity",
+            "status": "Live metrics proxy",
+        },
+        {
+            "title": "Incentives",
+            "summary": "Performance-linked rewards, approval flow, monthly history, and payment record tracking.",
+            "metric": insights.get("approved", 0),
+            "label": "Approved reports",
+            "status": "Workflow pending",
+        },
+        {
+            "title": "Minutes",
+            "summary": "Meeting records, action items, owners, deadlines, completion status, and follow-up views.",
+            "metric": insights.get("meetings_logged", 0),
+            "label": "Meeting signals",
+            "status": "Repository pending",
+        },
+        {
+            "title": "Notifications",
+            "summary": "Reminder rules for pending reports, verification work, target reviews, and action items.",
+            "metric": insights.get("pending_review", 0),
+            "label": "Pending reviews",
+            "status": "Scheduling pending",
+        },
+    ]
+
+
 def get_db():
     if "db" not in g:
         if _is_pg():
@@ -1462,7 +1636,53 @@ def dashboard(archived=0):
             """,
             (show_archived,),
         ).fetchall()
-    return render_template("dashboard.html", reports=reports, show_archived=bool(show_archived))
+    insights = build_dashboard_insights(reports, get_visible_staff_count(db))
+    modules = expansion_modules(insights)
+    return render_template(
+        "dashboard.html",
+        reports=reports,
+        show_archived=bool(show_archived),
+        insights=insights,
+        modules=modules,
+    )
+
+
+@app.route("/modules")
+@login_required
+def modules():
+    db = get_db()
+    archived_expr = archived_filter("reports.archived")
+    if g.user["role"] == "employee":
+        reports = db.execute(
+            f"SELECT * FROM reports WHERE user_id = ? AND {archived_filter()} = 0 ORDER BY report_date DESC, id DESC LIMIT 100",
+            (g.user["id"],),
+        ).fetchall()
+    elif g.user["role"] == "admin":
+        reports = db.execute(
+            f"""
+            SELECT reports.*, users.full_name
+            FROM reports
+            JOIN users ON users.id = reports.user_id
+            JOIN report_access ON report_access.employee_id = reports.user_id
+            WHERE report_access.admin_id = ? AND {archived_expr} = 0
+            ORDER BY reports.report_date DESC, reports.id DESC
+            LIMIT 150
+            """,
+            (g.user["id"],),
+        ).fetchall()
+    else:
+        reports = db.execute(
+            f"""
+            SELECT reports.*, users.full_name
+            FROM reports
+            JOIN users ON users.id = reports.user_id
+            WHERE {archived_expr} = 0
+            ORDER BY reports.report_date DESC, reports.id DESC
+            LIMIT 200
+            """
+        ).fetchall()
+    insights = build_dashboard_insights(reports, get_visible_staff_count(db))
+    return render_template("modules.html", modules=expansion_modules(insights), insights=insights)
 
 
 @app.route("/reports/new", methods=["GET", "POST"])
