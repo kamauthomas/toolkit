@@ -9,7 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body class="{% if g.user %}app-body{% else %}public-body{% endif %}">
+<body>
+  <div class="bg-scene" aria-hidden="true"></div>
   {% if g.user %}
     <button class="mobile-menu" id="burgerBtn" aria-label="Toggle navigation">
       <span></span>
@@ -17,65 +18,97 @@
       <span></span>
     </button>
     <div class="nav-scrim" id="navScrim"></div>
-    <aside class="sidebar" id="mainNav">
-      <a class="brand sidebar-brand" href="{{ url_for('dashboard') }}">
-        <img src="{{ url_for('static', filename='toolkit-logo.png') }}" alt="Toolkit Africa">
-        <span>Report System</span>
-      </a>
-      <div class="side-profile">
-        <strong>{{ g.user.full_name }}</strong>
-        <span>{{ g.user.position }} · {{ g.user.role|capitalize }}</span>
-      </div>
-      <nav class="side-nav">
-        <p class="nav-group">Workspace</p>
-        <a class="{% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Dashboard
+    <div class="page-wrapper">
+      <aside class="sidebar glass-heavy" id="mainNav">
+        <a class="sidebar-brand" href="{{ url_for('dashboard') }}">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4Z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/></svg>
+          <span class="brand-name">Report System</span>
         </a>
-        <a class="{% if request.endpoint == 'modules' %}active{% endif %}" href="{{ url_for('modules') }}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4Z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/></svg>
-          Operations
-        </a>
-        <a class="{% if request.endpoint == 'new_report' %}active{% endif %}" href="{{ url_for('new_report') }}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
-          New Report
-        </a>
-        <a class="{% if request.endpoint == 'my_drafts' %}active{% endif %}" href="{{ url_for('my_drafts') }}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-          Drafts
-        </a>
-        {% if g.user.role in ('admin', 'superadmin', 'shadowadmin') %}
-          <p class="nav-group">Oversight</p>
-          <a class="{% if request.endpoint == 'admin_department' %}active{% endif %}" href="{{ url_for('admin_department') }}">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
-            My Department
+        <div class="user-card">
+          <div class="user-avatar">{{ g.user.full_name[:2]|upper }}</div>
+          <div>
+            <div class="user-name">{{ g.user.full_name }}</div>
+            <div class="user-meta">{{ g.user.position }} · {{ g.user.role|capitalize }}</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <span class="nav-section-label">Workspace</span>
+          <a class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+            <span>Dashboard</span>
           </a>
+          <a class="nav-item {% if request.endpoint == 'modules' %}active{% endif %}" href="{{ url_for('modules') }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4Z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/></svg>
+            <span>Operations</span>
+          </a>
+          <a class="nav-item {% if request.endpoint == 'notifications' %}active{% endif %}" href="{{ url_for('notifications') }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span>Notifications</span>
+            {% if unread_notifications %}<span class="nav-badge">{{ unread_notifications }}</span>{% endif %}
+          </a>
+          <a class="nav-item {% if request.endpoint == 'new_report' %}active{% endif %}" href="{{ url_for('new_report') }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+            <span>New Report</span>
+          </a>
+          <a class="nav-item {% if request.endpoint == 'my_drafts' %}active{% endif %}" href="{{ url_for('my_drafts') }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            <span>Drafts</span>
+          </a>
+          {% if g.user.role in ('principal', 'superadmin', 'shadowadmin') %}
+            <span class="nav-section-label">Executive</span>
+            <a class="nav-item {% if request.endpoint == 'principal_overview' %}active{% endif %}" href="{{ url_for('principal_overview') }}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+              <span>Principal Overview</span>
+            </a>
+          {% endif %}
+          {% if g.user.role in ('admin', 'principal', 'superadmin', 'shadowadmin') %}
+            <span class="nav-section-label">Oversight</span>
+            <a class="nav-item {% if request.endpoint == 'admin_department' %}active{% endif %}" href="{{ url_for('admin_department') }}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/></svg>
+              <span>My Department</span>
+            </a>
+          {% endif %}
+          {% if g.user.role in ('superadmin', 'shadowadmin') %}
+            <a class="nav-item {% if request.endpoint == 'admin_users' %}active{% endif %}" href="{{ url_for('admin_users') }}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>All Users</span>
+            </a>
+            <a class="nav-item {% if request.endpoint == 'admin_settings' %}active{% endif %}" href="{{ url_for('admin_settings') }}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.72l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Settings</span>
+            </a>
+          {% endif %}
+          <span class="nav-section-label">Account</span>
+          <a class="nav-item {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Profile</span>
+          </a>
+          <a class="nav-item {% if request.endpoint == 'change_password' %}active{% endif %}" href="{{ url_for('change_password') }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Password</span>
+          </a>
+        </nav>
+        {% if unread_notifications %}
+        <div class="side-notifications" id="sideNotifs">
+          <div class="inline-head">
+            <span>Notifications</span>
+            <a href="{{ url_for('notifications') }}">View all</a>
+          </div>
+          <div class="side-notifications-list">
+            <div class="side-notification-item">
+              <div class="side-notification-text">
+                <span style="color:var(--muted);font-size:0.85rem;">{{ unread_notifications }} unread</span>
+              </div>
+            </div>
+          </div>
+        </div>
         {% endif %}
-        {% if g.user.role in ('superadmin', 'shadowadmin') %}
-          <a class="{% if request.endpoint == 'admin_users' %}active{% endif %}" href="{{ url_for('admin_users') }}">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
-            All Users
-          </a>
-          <a class="{% if request.endpoint == 'admin_settings' %}active{% endif %}" href="{{ url_for('admin_settings') }}">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 4.3l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06A2 2 0 1 1 19.7 7.04l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.44.56.75 1.03.75H21a2 2 0 1 1 0 4h-.09A1.65 1.65 0 0 0 19.4 15z"/></svg>
-            Settings
-          </a>
-        {% endif %}
-        <p class="nav-group">Account</p>
-        <a class="{% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Profile
+        <a class="sign-out" href="{{ url_for('logout') }}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+          Sign out
         </a>
-        <a class="{% if request.endpoint == 'change_password' %}active{% endif %}" href="{{ url_for('change_password') }}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Password
-        </a>
-      </nav>
-      <a class="side-logout" href="{{ url_for('logout') }}">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-        Sign out
-      </a>
-    </aside>
+      </aside>
+      <main class="main-area">
   {% else %}
     <header class="topbar public-topbar">
       <a class="brand" href="{{ url_for('index') }}">
@@ -85,13 +118,13 @@
       <nav>
         <a href="{{ url_for('login') }}">Sign in</a>
         {% if registration_open %}
-          <a class="button-link" href="{{ url_for('register') }}">Create account</a>
+          <a class="btn-accent" href="{{ url_for('register') }}">Create account</a>
         {% endif %}
       </nav>
     </header>
+    <main class="main-area" style="padding:80px 16px 16px">
   {% endif %}
 
-  <main class="page">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="messages" id="flashMessages">
@@ -114,6 +147,9 @@
     {% endwith %}
     {% block content %}{% endblock %}
   </main>
+  {% if g.user %}
+    </div>
+  {% endif %}
 
   <script>
     (function() {

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dashboard-hero compact">
+  <div>
+    <p class="eyebrow">Activity</p>
+    <h1>Notifications</h1>
+  </div>
+  {% if notifications %}
+    <form method="post" action="{{ url_for('mark_notifications_read') }}" class="inline-form">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+      <button class="secondary small-button" type="submit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Mark all as read
+      </button>
+    </form>
+  {% endif %}
+</section>
+
+<section class="card">
+  {% if notifications %}
+    <div class="notif-list">
+      {% for n in notifications %}
+        <article class="notif-item {% if not n.is_read %}unread{% endif %}">
+          <div class="notif-icon">
+            {% if n.kind == 'status' %}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            {% elif n.kind == 'comment' %}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            {% else %}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            {% endif %}
+          </div>
+          <div class="notif-body">
+            <strong>{{ n.title }}</strong>
+            <p>{{ n.body }}</p>
+            <span class="notif-time">{{ n.created_at }}</span>
+          </div>
+          {% if n.link %}
+            <a class="secondary small-button" href="{{ n.link }}" style="flex-shrink:0;">View</a>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="empty">No notifications yet. They'll appear when an admin reviews or comments on your reports.</p>
+  {% endif %}
+</section>
+{% endblock %}

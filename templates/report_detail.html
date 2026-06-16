@@ -23,7 +23,7 @@
     </p>
   </div>
   <div class="actions">
-  {% if g.user.role in ('admin', 'superadmin', 'shadowadmin') %}
+  {% if g.user.role in ('admin', 'principal', 'superadmin', 'shadowadmin') %}
       {% if report.status != 'approved' %}
         <form method="post" action="{{ url_for('update_status', report_id=report.id) }}" class="inline-form">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
@@ -164,7 +164,7 @@
   {% else %}
     <p class="empty">No admin comments yet.</p>
   {% endif %}
-  {% if g.user.role in ('admin', 'superadmin', 'shadowadmin') %}
+  {% if g.user.role in ('admin', 'principal', 'superadmin', 'shadowadmin') %}
     <form method="post" action="{{ url_for('add_comment', report_id=report.id) }}" class="form" style="margin-top:12px;">
       <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
       <textarea name="comment" required placeholder="Write your comment or recommendation for this report..." style="min-height:72px;"></textarea>

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="topbar glass-heavy">
+  <div class="topbar-left">
+    <p class="page-eyebrow">Principal workspace</p>
+    <h1 class="page-title">Institution executive overview</h1>
+    <p class="page-subtitle">A clear operating picture across departments, staff activity, review completion, admissions signals, and marketing follow-up.</p>
+  </div>
+  <div class="topbar-actions">
+    <a class="btn-glass" href="{{ url_for('dashboard') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="btn-accent" href="{{ url_for('export_csv') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+      Export CSV
+    </a>
+  </div>
+</header>
+
+<section class="stat-cards principal-stats">
+  <div class="stat-card glass primary-card">
+    <div class="stat-card-header">
+      <span class="label-card">Total Reports</span>
+    </div>
+    <span class="text-stat accent">{{ insights.total_reports }}</span>
+    <span class="stat-note">Active institutional reports in the executive window</span>
+  </div>
+  <div class="stat-card glass">
+    <div class="stat-card-header">
+      <span class="label-card">Outstanding Reviews</span>
+    </div>
+    <span class="text-stat pending">{{ overview.outstanding_reviews }}</span>
+    <span class="stat-note">Submitted or reviewed reports not yet approved</span>
+  </div>
+  <div class="stat-card glass">
+    <div class="stat-card-header">
+      <span class="label-card">Active Staff</span>
+    </div>
+    <span class="text-stat accent">{{ overview.active_staff }}</span>
+    <span class="stat-note">{{ overview.department_total }} departments represented</span>
+  </div>
+  <div class="stat-card glass">
+    <div class="stat-card-header">
+      <span class="label-card">Admissions Pipeline</span>
+    </div>
+    <span class="text-stat">{{ overview.admissions_pipeline }}</span>
+    <span class="stat-note">Applications processed plus interviews scheduled</span>
+  </div>
+  <div class="stat-card glass">
+    <div class="stat-card-header">
+      <span class="label-card">Marketing Reach</span>
+    </div>
+    <span class="text-stat">{{ overview.marketing_reach }}</span>
+    <span class="stat-note">Leads, calls, WhatsApp, and outreach signals</span>
+  </div>
+  <div class="stat-card glass">
+    <div class="stat-card-header">
+      <span class="label-card">Approval Rate</span>
+    </div>
+    <span class="text-stat approved">{{ insights.approval_rate }}%</span>
+    <span class="stat-note">Approved reports against visible total</span>
+  </div>
+</section>
+
+<section class="principal-grid">
+  <article class="content-panel glass principal-wide">
+    <div class="panel-header">
+      <p class="eyebrow">Department Performance</p>
+      <h2 class="panel-title">Operating spread</h2>
+      <span class="perf-badge">{{ insights.review_progress }}% reviewed</span>
+    </div>
+    <div class="principal-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Department</th>
+            <th>Staff</th>
+            <th>Reports</th>
+            <th>Pending</th>
+            <th>Reviewed</th>
+            <th>Approved</th>
+            <th>Approval</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in overview.department_rows %}
+            <tr>
+              <td><strong>{{ row.department }}</strong></td>
+              <td>{{ row.staff }}</td>
+              <td>{{ row.reports }}</td>
+              <td>{{ row.pending }}</td>
+              <td>{{ row.reviewed }}</td>
+              <td>{{ row.approved }}</td>
+              <td>
+                <div class="mini-progress">
+                  <span style="width: {{ row.approval_rate }}%"></span>
+                  <strong>{{ row.approval_rate }}%</strong>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7">No department activity yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="content-panel glass">
+    <div class="panel-header">
+      <p class="eyebrow">Roles</p>
+      <h2 class="panel-title">Staff composition</h2>
+    </div>
+    <div class="panel-body">
+      <div class="rank-list">
+        {% for role, count in overview.role_counts %}
+          <div><span>{{ role|replace('admin', ' admin')|title }}</span><strong>{{ count }}</strong></div>
+        {% else %}
+          <p class="empty">No staff accounts yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </article>
+
+  <article class="content-panel glass">
+    <div class="panel-header">
+      <p class="eyebrow">Recent Work</p>
+      <h2 class="panel-title">Latest reports</h2>
+    </div>
+    <div class="report-list">
+      {% for report in overview.recent_reports %}
+        <a class="report-item" href="{{ url_for('view_report', report_id=report.id) }}">
+          <div class="report-info">
+            <div class="report-title">{{ report.full_name }} - {{ report.department }}</div>
+            <div class="report-meta">{{ report.report_date }} &middot; {{ report.day_summary[:72] }}{% if report.day_summary|length > 72 %}...{% endif %}</div>
+          </div>
+          {% if report.status == 'approved' %}
+            <span class="badge approved">Approved</span>
+          {% elif report.status == 'reviewed' %}
+            <span class="badge reviewed">Reviewed</span>
+          {% else %}
+            <span class="badge pending">Pending</span>
+          {% endif %}
+          <span class="report-arrow">&rarr;</span>
+        </a>
+      {% else %}
+        <p class="empty" style="padding: 20px 22px">No recent reports yet.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

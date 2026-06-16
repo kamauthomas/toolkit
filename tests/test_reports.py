@@ -38,6 +38,42 @@ class TestReports:
         resp = client.get("/reports/export.csv", follow_redirects=False)
         assert resp.status_code in (200, 302)
 
+    def test_export_csv_escapes_formula_cells(self, client):
+        self._login_as_admin(client)
+        with app_module.app.app_context():
+            app_module.get_db().execute(
+                """
+                INSERT INTO reports (
+                    user_id, report_date, reporting_period, branch, department, position,
+                    day_summary, tasks_json, challenges_json, decisions, tomorrow_json,
+                    comments, metrics_json, status, archived, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    1,
+                    "2026-06-09",
+                    "08 Jun 2026 - 14 Jun 2026",
+                    "Toolkit Africa Main Office",
+                    "Management",
+                    "System Administrator",
+                    "=HYPERLINK(\"https://example.test\")",
+                    "[]",
+                    "[]",
+                    "",
+                    "[]",
+                    "",
+                    "{}",
+                    "submitted",
+                    0,
+                    app_module.now(),
+                ),
+            )
+            app_module.get_db().commit()
+
+        resp = client.get("/reports/export.csv")
+        assert resp.status_code == 200
+        assert b"\"'=HYPERLINK(\"\"https://example.test\"\")\"" in resp.data
+
     def test_submit_report_creates_visible_report(self, client):
         self._login_as_admin(client)
 
@@ -73,7 +109,7 @@ class TestReports:
 
     def test_report_form_session_survives_long_entry_window(self, client):
         self._login_as_admin(client)
-        within_timeout = datetime.now() - timedelta(hours=1)
+        within_timeout = datetime.now() - timedelta(minutes=5)
         with client.session_transaction() as sess:
             sess["_last_active"] = within_timeout.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -129,3 +165,20 @@ class TestReports:
 
         dashboard = client.get("/dashboard")
         assert b"Legacy blank archived report" in dashboard.data
+
+    def test_principal_overview_requires_executive_role(self, client):
+        self._login_as_admin(client)
+        with app_module.app.app_context():
+            app_module.get_db().execute("UPDATE users SET role = 'employee' WHERE id = 1")
+            app_module.get_db().commit()
+        resp = client.get("/principal")
+        assert resp.status_code == 403
+
+    def test_principal_overview_for_principal(self, client):
+        self._login_as_admin(client)
+        with app_module.app.app_context():
+            app_module.get_db().execute("UPDATE users SET role = 'principal' WHERE id = 1")
+            app_module.get_db().commit()
+        resp = client.get("/principal")
+        assert resp.status_code == 200
+        assert b"Institution executive overview" in resp.data

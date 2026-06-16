@@ -163,7 +163,7 @@ app.config["MAX_CONTENT_LENGTH"] = 512 * 1024
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("ENV") == "production"
-SESSION_IDLE_TIMEOUT = timedelta(hours=8)
+SESSION_IDLE_TIMEOUT = timedelta(minutes=10)
 app.config["PERMANENT_SESSION_LIFETIME"] = SESSION_IDLE_TIMEOUT
 app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=14)
 
@@ -458,6 +458,16 @@ def metric_int(value):
         return 0
 
 
+def csv_safe(value):
+    if value is None:
+        return ""
+    text = str(value)
+    stripped = text.lstrip()
+    if stripped[:1] in ("=", "+", "-", "@"):
+        return "'" + text
+    return text
+
+
 def safe_metrics(report):
     try:
         return json.loads(row_get(report, "metrics_json", "{}") or "{}")
@@ -549,7 +559,7 @@ def build_dashboard_insights(reports, staff_count=0):
 
 
 def get_visible_staff_count(db):
-    if g.user["role"] in SUPER_ROLES:
+    if g.user["role"] in EXECUTIVE_ROLES:
         row = db.execute("SELECT COUNT(*) AS c FROM users WHERE deleted_at IS NULL AND is_active = 1").fetchone()
         return row["c"] if row else 0
     if g.user["role"] == "admin":
@@ -604,14 +614,124 @@ def expansion_modules(insights=None):
             "label": "Meeting signals",
             "status": "Repository pending",
         },
-        {
-            "title": "Notifications",
-            "summary": "Reminder rules for pending reports, verification work, target reviews, and action items.",
-            "metric": insights.get("pending_review", 0),
-            "label": "Pending reviews",
-            "status": "Scheduling pending",
-        },
     ]
+
+
+def create_notification(user_id, kind, title, body="", link="", actor_id=None):
+    db = get_db()
+    db.execute(
+        "INSERT INTO notifications (user_id, actor_id, kind, title, body, link, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (user_id, actor_id, kind, title, body, link, now()),
+    )
+    db.commit()
+
+
+def count_unread_notifications():
+    db = get_db()
+    row = db.execute(
+        "SELECT COUNT(*) AS c FROM notifications WHERE user_id = ? AND is_read = 0",
+        (g.user["id"],),
+    ).fetchone()
+    return row["c"] if row else 0
+
+
+def get_notifications(limit=20):
+    db = get_db()
+    return db.execute(
+        """SELECT n.*, a.full_name AS actor_name
+           FROM notifications n
+           LEFT JOIN users a ON a.id = n.actor_id
+           WHERE n.user_id = ?
+           ORDER BY n.created_at DESC, n.id DESC
+           LIMIT ?""",
+        (g.user["id"], limit),
+    ).fetchall()
+
+
+def build_principal_overview(reports, users):
+    department_map = {}
+    role_counts = defaultdict(int)
+    active_staff = 0
+    locked_staff = 0
+
+    for user in users:
+        department = row_get(user, "department", "Other") or "Other"
+        if department not in department_map:
+            department_map[department] = {
+                "department": department,
+                "staff": 0,
+                "reports": 0,
+                "pending": 0,
+                "reviewed": 0,
+                "approved": 0,
+                "approval_rate": 0,
+            }
+        department_map[department]["staff"] += 1
+        role_counts[row_get(user, "role", "employee") or "employee"] += 1
+        if row_get(user, "is_active", 0):
+            active_staff += 1
+        if row_get(user, "locked_at", ""):
+            locked_staff += 1
+
+    metric_totals = defaultdict(int)
+    recent_reports = []
+    for report in reports:
+        department = row_get(report, "department", "Other") or "Other"
+        if department not in department_map:
+            department_map[department] = {
+                "department": department,
+                "staff": 0,
+                "reports": 0,
+                "pending": 0,
+                "reviewed": 0,
+                "approved": 0,
+                "approval_rate": 0,
+            }
+        status = row_get(report, "status", "submitted") or "submitted"
+        department_map[department]["reports"] += 1
+        if status == "approved":
+            department_map[department]["approved"] += 1
+        elif status == "reviewed":
+            department_map[department]["reviewed"] += 1
+        else:
+            department_map[department]["pending"] += 1
+
+        metrics = safe_metrics(report)
+        for key, value in metrics.items():
+            metric_totals[key] += metric_int(value)
+
+        if len(recent_reports) < 8:
+            recent_reports.append(report)
+
+    for item in department_map.values():
+        item["approval_rate"] = int((item["approved"] / item["reports"]) * 100) if item["reports"] else 0
+
+    department_rows = sorted(
+        department_map.values(),
+        key=lambda item: (item["reports"], item["staff"]),
+        reverse=True,
+    )
+
+    outstanding_reviews = sum(item["pending"] + item["reviewed"] for item in department_rows)
+    admissions_pipeline = metric_totals["applications_processed"] + metric_totals["interviews_scheduled"]
+    marketing_reach = (
+        metric_totals["leads_generated"]
+        + metric_totals["calls_made"]
+        + metric_totals["whatsapp_followups"]
+        + metric_totals["outreach_updates"]
+    )
+
+    return {
+        "active_staff": active_staff,
+        "locked_staff": locked_staff,
+        "department_total": len(department_rows),
+        "department_rows": department_rows,
+        "role_counts": sorted(role_counts.items(), key=lambda item: item[0]),
+        "recent_reports": recent_reports,
+        "outstanding_reviews": outstanding_reviews,
+        "admissions_pipeline": admissions_pipeline,
+        "marketing_reach": marketing_reach,
+    }
 
 
 def get_db():
@@ -802,6 +922,31 @@ def init_db():
     except Exception:
         pass
 
+    try:
+        conn.execute("SELECT 1 FROM notifications LIMIT 1")
+    except Exception:
+        conn.execute(
+            """
+            CREATE TABLE notifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                actor_id INTEGER,
+                kind TEXT NOT NULL DEFAULT 'info',
+                title TEXT NOT NULL,
+                body TEXT DEFAULT '',
+                link TEXT DEFAULT '',
+                is_read INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id),
+                FOREIGN KEY(actor_id) REFERENCES users(id)
+            )
+            """
+        )
+    try:
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_notif_user_read ON notifications(user_id, is_read)")
+    except Exception:
+        pass
+
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@toolkit.local").strip().lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "ChangeMe123!")
     exists = conn.execute("SELECT id FROM users WHERE role = 'superadmin' LIMIT 1").fetchone()
@@ -907,9 +1052,16 @@ def inject_globals():
         reg_open = reg and reg["value"] == "1"
     except Exception:
         reg_open = True
+    unread = 0
+    if g.user:
+        try:
+            unread = count_unread_notifications()
+        except Exception:
+            pass
     return dict(
         csrf_token=generate_csrf_token(),
         registration_open=reg_open,
+        unread_notifications=unread,
     )
 
 
@@ -928,8 +1080,9 @@ def login_required(view):
     return wrapped
 
 
-ADMIN_ROLES = ("admin", "superadmin", "shadowadmin")
+ADMIN_ROLES = ("admin", "principal", "superadmin", "shadowadmin")
 SUPER_ROLES = ("superadmin", "shadowadmin")
+EXECUTIVE_ROLES = ("principal", "superadmin", "shadowadmin")
 
 
 def admin_required(view):
@@ -956,8 +1109,35 @@ def superadmin_required(view):
     return wrapped
 
 
+def principal_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for("login"))
+        if g.user["role"] not in EXECUTIVE_ROLES:
+            abort(403)
+        return view(*args, **kwargs)
+
+    return wrapped
+
+
+@app.route("/notifications")
+@login_required
+def notifications():
+    return render_template("notifications.html", notifications=get_notifications(50))
+
+
+@app.route("/notifications/read", methods=["POST"])
+@login_required
+def mark_notifications_read():
+    csrf_protect()
+    get_db().execute("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0", (g.user["id"],))
+    get_db().commit()
+    return {"ok": True}
+
+
 def can_view_report(user, report):
-    if user["role"] in ("superadmin", "shadowadmin"):
+    if user["role"] in EXECUTIVE_ROLES:
         return True
     if report["user_id"] == user["id"]:
         return True
@@ -1573,11 +1753,11 @@ def draft_report():
                     (title, data["report_date"], data.get("department", ""), json.dumps(data), now(), draft_id),
                 )
             else:
-                db.execute(
+                cursor = db.execute(
                     "INSERT INTO report_drafts (user_id, title, report_date, department, data, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
                     (g.user["id"], title, data["report_date"], data.get("department", ""), json.dumps(data), now()),
                 )
-                draft_id = db.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+                draft_id = cursor.lastrowid
         db.commit()
         return {"ok": True, "draft_id": draft_id, "title": title}
     is_delete = request.method == "DELETE" or request.form.get("_method") == "DELETE"
@@ -1683,6 +1863,35 @@ def modules():
         ).fetchall()
     insights = build_dashboard_insights(reports, get_visible_staff_count(db))
     return render_template("modules.html", modules=expansion_modules(insights), insights=insights)
+
+@app.route("/principal")
+@principal_required
+def principal_overview():
+    db = get_db()
+    archived_expr = archived_filter("reports.archived")
+    reports = db.execute(
+        f"""
+        SELECT reports.*, users.full_name
+        FROM reports
+        JOIN users ON users.id = reports.user_id
+        WHERE {archived_expr} = 0 AND users.deleted_at IS NULL
+        ORDER BY reports.report_date DESC, reports.id DESC
+        LIMIT 500
+        """
+    ).fetchall()
+    users = db.execute(
+        """
+        SELECT id, full_name, department, position, branch, role, is_active, locked_at
+        FROM users
+        WHERE deleted_at IS NULL
+        ORDER BY department ASC, full_name ASC
+        """
+    ).fetchall()
+    insights = build_dashboard_insights(reports, get_visible_staff_count(db))
+    overview = build_principal_overview(reports, users)
+    return render_template("principal.html", insights=insights, overview=overview)
+
+
 
 
 @app.route("/reports/new", methods=["GET", "POST"])
@@ -1922,7 +2131,7 @@ def admin_users():
         user_id = int(request.form.get("user_id"))
         role = request.form.get("role")
         is_active = 1 if request.form.get("is_active") == "on" else 0
-        if role not in ("employee", "admin", "superadmin", "shadowadmin"):
+        if role not in ("employee", "admin", "principal", "superadmin", "shadowadmin"):
             abort(400)
         db.execute("UPDATE users SET role = ?, is_active = ? WHERE id = ?", (role, is_active, user_id))
         db.commit()
@@ -1963,7 +2172,7 @@ def admin_reset_password(user_id):
 @superadmin_required
 def admin_access(admin_id):
     db = get_db()
-    admin = db.execute("SELECT * FROM users WHERE id = ? AND role IN ('admin', 'superadmin')", (admin_id,)).fetchone()
+    admin = db.execute("SELECT * FROM users WHERE id = ? AND role IN ('admin', 'principal', 'superadmin')", (admin_id,)).fetchone()
     if not admin:
         abort(404)
     if request.method == "POST":
@@ -2121,7 +2330,7 @@ def admin_department():
             db.commit()
             user_id = db.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()["id"]
             dept_admins = db.execute(
-                "SELECT id FROM users WHERE department = ? AND role IN ('admin', 'superadmin') AND id != ?",
+                "SELECT id FROM users WHERE department = ? AND role IN ('admin', 'principal', 'superadmin') AND id != ?",
                 (dept, user_id),
             ).fetchall()
             for da in dept_admins:
@@ -2173,6 +2382,8 @@ def admin_department_reset_password(user_id):
 @login_required
 def update_status(report_id):
     csrf_protect()
+    if g.user["role"] not in ADMIN_ROLES:
+        abort(403)
     report = get_db().execute("SELECT * FROM reports WHERE id = ?", (report_id,)).fetchone()
     if not report:
         abort(404)
@@ -2183,6 +2394,17 @@ def update_status(report_id):
         abort(400)
     get_db().execute("UPDATE reports SET status = ? WHERE id = ?", (new_status, report_id))
     get_db().commit()
+    if new_status in ("reviewed", "approved") and report["user_id"] != g.user["id"]:
+        user = get_db().execute("SELECT full_name FROM users WHERE id = ?", (g.user["id"],)).fetchone()
+        actor = user["full_name"] if user else "An administrator"
+        create_notification(
+            user_id=report["user_id"],
+            kind="status",
+            title=f"Report {new_status}",
+            body=f"{actor} marked your report from {report['report_date']} as {new_status}.",
+            link=url_for("view_report", report_id=report_id),
+            actor_id=g.user["id"],
+        )
     flash(f"Report marked as {new_status}.", "success")
     return redirect(url_for("view_report", report_id=report_id))
 
@@ -2217,7 +2439,16 @@ def export_csv():
     writer = csv.writer(output)
     writer.writerow(["Date", "Employee", "Department", "Position", "Branch", "Summary", "Status", "Submitted At"])
     for r in rows:
-        writer.writerow([r["report_date"], r["full_name"], r["department"], r["position"], r["branch"], r["day_summary"], r["status"], r["created_at"]])
+        writer.writerow([
+            csv_safe(r["report_date"]),
+            csv_safe(r["full_name"]),
+            csv_safe(r["department"]),
+            csv_safe(r["position"]),
+            csv_safe(r["branch"]),
+            csv_safe(r["day_summary"]),
+            csv_safe(r["status"]),
+            csv_safe(r["created_at"]),
+        ])
 
     return Response(
         output.getvalue(),
@@ -2266,7 +2497,7 @@ def delete_report(report_id):
 @app.route("/reports/<int:report_id>/comment", methods=["POST"])
 @login_required
 def add_comment(report_id):
-    if g.user["role"] not in ("admin", "superadmin", "shadowadmin"):
+    if g.user["role"] not in ADMIN_ROLES:
         abort(403)
     csrf_protect()
     report = get_db().execute("SELECT * FROM reports WHERE id = ?", (report_id,)).fetchone()
@@ -2283,6 +2514,15 @@ def add_comment(report_id):
         (report_id, g.user["id"], g.user["full_name"], comment, now()),
     )
     get_db().commit()
+    if report["user_id"] != g.user["id"]:
+        create_notification(
+            user_id=report["user_id"],
+            kind="comment",
+            title="New comment on your report",
+            body=f"{g.user['full_name']} commented on your report from {report['report_date']}: {comment[:120]}{'...' if len(comment) > 120 else ''}",
+            link=url_for("view_report", report_id=report_id),
+            actor_id=g.user["id"],
+        )
     flash("Comment added.", "success")
     return redirect(url_for("view_report", report_id=report_id))
 
@@ -2291,6 +2531,7 @@ def cleanup_expired_resets():
     try:
         db = get_db()
         db.execute("DELETE FROM password_resets WHERE expires_at < ?", (now(),))
+        db.execute("DELETE FROM notifications WHERE is_read = 1 AND created_at < ?", (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S"))
         db.commit()
     except Exception:
         pass
