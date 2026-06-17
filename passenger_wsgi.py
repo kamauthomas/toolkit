@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 import traceback
 from pathlib import Path
 
@@ -21,6 +22,34 @@ try:
             return self.application(environ, start_response)
 
     application = ScriptNameMiddleware(app)
+
+except ModuleNotFoundError:
+    req = BASE / "requirements.txt"
+    pip = os.path.join(os.path.dirname(sys.executable), "pip3")
+    if req.exists() and os.path.isfile(pip):
+        try:
+            subprocess.run([pip, "install", "-r", str(req), "--quiet"], timeout=60)
+        except Exception:
+            pass
+    try:
+        from app import app
+
+        class ScriptNameMiddleware:
+            def __init__(self, application):
+                self.application = application
+
+            def __call__(self, environ, start_response):
+                script = environ.get("SCRIPT_NAME", "")
+                if script:
+                    environ["PATH_INFO"] = environ["PATH_INFO"].removeprefix(script)
+                return self.application(environ, start_response)
+
+        application = ScriptNameMiddleware(app)
+    except Exception:
+        log = BASE / "logs" / "passenger_error.log"
+        log.parent.mkdir(exist_ok=True)
+        log.write_text(traceback.format_exc())
+        raise
 
 except Exception:
     log = BASE / "logs" / "passenger_error.log"
