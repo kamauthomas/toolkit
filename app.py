@@ -163,7 +163,7 @@ app.config["MAX_CONTENT_LENGTH"] = 512 * 1024
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("ENV") == "production"
-SESSION_IDLE_TIMEOUT = timedelta(minutes=10)
+SESSION_IDLE_TIMEOUT = timedelta(hours=8)
 app.config["PERMANENT_SESSION_LIFETIME"] = SESSION_IDLE_TIMEOUT
 app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=14)
 
@@ -1725,6 +1725,16 @@ def draft_report():
         if draft:
             return json.loads(draft["data"])
         return {"_empty": True}
+    is_delete = request.method == "DELETE" or request.form.get("_method") == "DELETE"
+    if is_delete:
+        csrf_protect()
+        draft_id = (request.form.get("id") or "").strip()
+        if draft_id:
+            db.execute("DELETE FROM report_drafts WHERE id = ? AND user_id = ?", (draft_id, g.user["id"]))
+            db.commit()
+        if request.method == "POST":
+            return redirect(url_for("my_drafts"))
+        return {"ok": True}
     if request.method == "POST":
         csrf_protect()
         data = request.get_json(silent=True) or {}
@@ -1760,16 +1770,6 @@ def draft_report():
                 draft_id = cursor.lastrowid
         db.commit()
         return {"ok": True, "draft_id": draft_id, "title": title}
-    is_delete = request.method == "DELETE" or request.form.get("_method") == "DELETE"
-    if is_delete:
-        csrf_protect()
-        draft_id = (request.form.get("id") or "").strip()
-        if draft_id:
-            db.execute("DELETE FROM report_drafts WHERE id = ? AND user_id = ?", (draft_id, g.user["id"]))
-            db.commit()
-        if request.method == "POST":
-            return redirect(url_for("my_drafts"))
-        return {"ok": True}
 
 
 @app.route("/logout")
@@ -2567,7 +2567,10 @@ def not_found(_error):
 @app.errorhandler(500)
 def server_error(_error):
     log.exception("Unhandled server error")
-    return render_template("error.html", title="Server error", message="Something went wrong. Please try again or contact the administrator."), 500
+    try:
+        return render_template("error.html", title="Server error", message="Something went wrong. Please try again or contact the administrator."), 500
+    except Exception:
+        return "Internal Server Error", 500, {"Content-Type": "text/plain"}
 
 
 init_db()

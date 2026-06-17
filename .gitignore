@@ -10,3 +10,5 @@ dist/
 deploy_key*
 *.pem
 secrets/
+static/landing-bg.jpg
+DEPLOYMENT_POSTMORTEM.md
