@@ -1058,10 +1058,17 @@ def inject_globals():
             unread = count_unread_notifications()
         except Exception:
             pass
+    cache_bust = ""
+    try:
+        mtime = os.path.getmtime(os.path.join(os.path.dirname(__file__), "static", "styles.css"))
+        cache_bust = str(int(mtime))
+    except Exception:
+        pass
     return dict(
         csrf_token=generate_csrf_token(),
         registration_open=reg_open,
         unread_notifications=unread,
+        cache_bust=cache_bust,
     )
 
 
