@@ -947,6 +947,15 @@ def init_db():
     except Exception:
         pass
 
+    try:
+        conn.execute(
+            "UPDATE users SET is_active = 1, locked_at = NULL, lock_reason = '' "
+            "WHERE role IN ('admin','principal','superadmin','shadowadmin') AND locked_at IS NOT NULL"
+        )
+        conn.commit()
+    except Exception:
+        pass
+
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@toolkit.local").strip().lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "ChangeMe123!")
     exists = conn.execute("SELECT id FROM users WHERE role = 'superadmin' LIMIT 1").fetchone()
