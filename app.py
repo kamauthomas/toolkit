@@ -1626,7 +1626,7 @@ def login():
             if last_login:
                 try:
                     last_dt = datetime.strptime(last_login, "%Y-%m-%d %H:%M:%S")
-                    if (datetime.now() - last_dt) > timedelta(days=5):
+                    if (datetime.now() - last_dt) > timedelta(days=5) and user["role"] not in ("admin", "principal", "superadmin", "shadowadmin"):
                         db = get_db()
                         db.execute(
                             "UPDATE users SET is_active = 0, locked_at = ?, lock_reason = 'Auto-locked: inactive for 5+ days' WHERE id = ?",
