@@ -419,6 +419,154 @@ th, td {
   font-weight: 600;
 }
 
+/* === Phase 2 Part C: Section-specific consistency fixes === */
+
+/* Quick Links panel — restyle from olive to dark charcoal */
+.elementor-element-c3ca692 .elementor-widget-wrap {
+  background: #1e1e2a !important;
+}
+
+.elementor-element-c3ca692 .elementor-widget-heading .elementor-heading-title {
+  color: #FFFFFF !important;
+}
+
+.elementor-element-c3ca692 .elementor-icon-list-item .elementor-icon-list-text {
+  color: rgba(255,255,255,0.85) !important;
+}
+
+.elementor-element-c3ca692 .elementor-icon-list-item:hover .elementor-icon-list-text {
+  color: var(--brand-accent-orange, #ED6E0D) !important;
+}
+
+.elementor-element-c3ca692 .elementor-icon-list-item .elementor-icon-list-icon i {
+  color: var(--brand-accent-orange, #ED6E0D) !important;
+}
+
+/* Strategic Sectors — fix background and buttons */
+.elementor-element-79f1a83 {
+  background-color: #f7f7f7 !important;
+}
+
+/* Sector buttons: pill style to match hero CTA */
+.elementor-element-79f1a83 .elementor-button,
+.elementor-element-79f1a83 a.elementor-button,
+.elementor-element-79f1a83 .elementor-button-link {
+  border-radius: var(--brand-border-radius-pill, 50px) !important;
+  padding: var(--brand-button-padding, 14px 32px) !important;
+  font-size: var(--brand-button-font-size, 15px) !important;
+  font-weight: var(--brand-button-font-weight, 600) !important;
+  text-transform: none !important;
+  letter-spacing: var(--brand-button-letter-spacing, 0.5px) !important;
+  transition: all 0.2s ease !important;
+}
+
+.elementor-element-79f1a83 .elementor-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Testimonials section */
+.elementor-element-cc38fab {
+  background-color: #f7f7f7 !important;
+}
+
+.elementor-element-cc38fab .elementor-testimonial-wrapper {
+  border-radius: var(--brand-border-radius, 6px);
+}
+
+.elementor-element-cc38fab .elementor-testimonial-image img {
+  border-radius: var(--brand-border-radius-circle, 50%);
+}
+
+/* Carousel arrows — reposition outside track */
+.elementor-element-330c37b .thim-carousel-wrapper .owl-nav,
+.elementor-element-b4959db .thim-carousel-wrapper .owl-nav {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  left: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.elementor-element-330c37b .thim-carousel-wrapper .owl-nav button,
+.elementor-element-b4959db .thim-carousel-wrapper .owl-nav button {
+  pointer-events: all;
+  width: 44px;
+  height: 44px;
+  border-radius: 50% !important;
+  background: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+  color: #333333 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease !important;
+  position: relative;
+}
+
+.elementor-element-330c37b .thim-carousel-wrapper .owl-nav button:hover,
+.elementor-element-b4959db .thim-carousel-wrapper .owl-nav button:hover {
+  background: #f0f0f0 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18) !important;
+  transform: scale(1.05);
+}
+
+.elementor-element-330c37b .thim-carousel-wrapper .owl-nav .owl-prev,
+.elementor-element-b4959db .thim-carousel-wrapper .owl-nav .owl-prev {
+  margin-left: -22px;
+}
+
+.elementor-element-330c37b .thim-carousel-wrapper .owl-nav .owl-next,
+.elementor-element-b4959db .thim-carousel-wrapper .owl-nav .owl-next {
+  margin-right: -22px;
+}
+
+/* Footer — map border-radius */
+.elementor-element-f474e60 iframe,
+.elementor-element-f474e60 .elementor-custom-embed {
+  border-radius: var(--brand-border-radius, 6px);
+}
+
+/* Footer — heading underline consistency */
+.elementor-widget-thim-heading .sc_heading .title {
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.elementor-widget-thim-heading .sc_heading .title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--brand-heading-underline-width, 40px);
+  height: var(--brand-heading-underline-height, 3px);
+  background: var(--brand-accent-orange, #ED6E0D);
+  border-radius: 2px;
+}
+
+.elementor-widget-thim-heading .sc_heading.text-center .title::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Section heading underline — make all consistent */
+.widget-title,
+.elementor-heading-title {
+  color: var(--brand-text-dark, #333333) !important;
+}
+
+/* "Our Impact" stat numbers — already orange, just confirm spacing */
+.elementor-widget-counter .elementor-counter-number-wrapper {
+  color: var(--brand-accent-orange, #ED6E0D) !important;
+  font-weight: 700 !important;
+}
+
 /* === Responsive === */
 @media (max-width: 991px) {
   .footer {

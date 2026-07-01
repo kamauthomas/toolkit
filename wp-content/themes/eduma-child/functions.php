@@ -3,9 +3,13 @@
 function thim_child_enqueue_styles() {
 	wp_enqueue_style( 'thim-parent-style', get_template_directory_uri() . '/style.css', array(), THIM_THEME_VERSION );
 
+	// Brand tokens — shared design tokens used site-wide
+	$brand_ver = filemtime( get_stylesheet_directory() . '/brand-tokens.css' );
+	wp_enqueue_style( 'eduma-child-brand-tokens', get_stylesheet_directory_uri() . '/brand-tokens.css', array(), $brand_ver );
+
 	if ( is_front_page() ) {
 		$css_ver = filemtime( get_stylesheet_directory() . '/hero-slider.css' );
-		wp_enqueue_style( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.css', array(), $css_ver );
+		wp_enqueue_style( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.css', array( 'eduma-child-brand-tokens' ), $css_ver );
 
 		$js_ver = filemtime( get_stylesheet_directory() . '/hero-slider.js' );
 		wp_enqueue_script( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.js', array(), $js_ver, true );
