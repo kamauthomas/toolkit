@@ -1,0 +1,41 @@
+/* === Brand Design Tokens ===
+ * Shared across all sections for visual consistency.
+ * Imported by style.css before section-specific styles.
+ */
+
+:root {
+  /* === Colors === */
+  --brand-accent-orange: #ED6E0D;
+  --brand-accent-orange-hover: #d15f08;
+  --brand-accent-orange-light: #fde8d0;
+  --brand-accent-green-light: #d4edda;
+  --brand-accent-green: #28a745;
+  --brand-overlay-dark: rgba(10, 10, 10, 0.55);
+  --brand-text-light: #FFFFFF;
+  --brand-text-dark: #333333;
+  --brand-text-muted: #666666;
+  --brand-bg-light: #f7f7f7;
+  --brand-bg-dark: rgba(20, 20, 20, 0.85);
+  --brand-border-light: rgba(255, 255, 255, 0.3);
+
+  /* === Typography === */
+  --brand-font-heading: var(--thim-font-title-font-family, 'Roboto Slab'), serif;
+  --brand-font-body: var(--thim-font-body-font-family, 'Roboto'), sans-serif;
+
+  /* === Spacing === */
+  --brand-border-radius: 6px;
+  --brand-border-radius-pill: 50px;
+  --brand-border-radius-circle: 50%;
+  --brand-button-padding: 14px 32px;
+  --brand-container-padding: 20px;
+  --brand-container-max: 1170px;
+
+  /* === Buttons === */
+  --brand-button-font-size: 15px;
+  --brand-button-font-weight: 600;
+  --brand-button-letter-spacing: 0.5px;
+
+  /* === Section Heading Underline === */
+  --brand-heading-underline-height: 3px;
+  --brand-heading-underline-width: 40px;
+}
