@@ -115,9 +115,10 @@
   /* Scroll cue */
   if (scrollCue) {
     scrollCue.addEventListener('click', function () {
-      var mainContent = document.getElementById('main-content');
-      if (mainContent) {
-        mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var target = document.querySelector('.hero-features');
+      if (!target) target = document.getElementById('main-content');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
   }
