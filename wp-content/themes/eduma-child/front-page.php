@@ -1,7 +1,8 @@
 <?php
 /**
- * Front page template - renders hero slider + Elementor content.
- * This is used when 'elementor_theme' is set as the page template.
+ * Front page template - renders child-theme homepage sections + Elementor content.
+ * Keeping the first viewport here avoids homepage regressions from parent theme
+ * updates or page-builder template changes.
  */
 get_header();
 require_once get_stylesheet_directory() . '/inc/hero-slides.php';
@@ -122,6 +123,122 @@ $slides = eduma_child_get_hero_slides();
 				</div>
 				<h3 class="hero-features__title">Community<br>Impact</h3>
 				<p class="hero-features__desc">Building sustainable communities across Africa.</p>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section class="home-iw-banner" aria-label="Toolkit at the International Institute of Welding 2025">
+	<div class="home-iw-banner__inner">
+		<a class="home-iw-banner__link" href="https://toolkitiiwppt.my.canva.site/iiw-general-assembly-presentation">
+			<img
+				src="<?php echo esc_url( content_url( 'uploads/2025/06/toolkit-at-the-International-Institute-of-welding-2025-2.png' ) ); ?>"
+				alt="Toolkit at the International Institute of Welding 2025"
+				width="1600"
+				height="200"
+				loading="lazy">
+		</a>
+	</div>
+</section>
+
+<section id="home-who-we-are" class="home-who" aria-labelledby="home-who-title">
+	<div class="home-who__inner">
+		<div class="home-who__top">
+			<div class="home-who__video">
+				<button class="home-who__video-card"
+						type="button"
+						data-youtube-id="LmZhEabXyUc"
+						aria-label="Play The Toolkit Skills and Innovation Hub video">
+					<img
+						class="home-who__video-thumb"
+						src="https://img.youtube.com/vi/LmZhEabXyUc/hqdefault.jpg"
+						alt=""
+						loading="lazy"
+						width="480"
+						height="360">
+					<span class="home-who__video-channel" aria-hidden="true">
+						<span class="home-who__video-channel-icon">T</span>
+						<span class="home-who__video-channel-text">
+							<strong>The Toolkit iSkills TTI Ltd</strong>
+							<span>The Toolkit Skills &amp; Innovation Hub</span>
+						</span>
+					</span>
+					<span class="home-who__video-logo" aria-hidden="true">T</span>
+					<span class="home-who__video-play" aria-hidden="true">
+						<svg width="22" height="22" viewBox="0 0 22 22" focusable="false"><path d="M7 4.5L17 11L7 17.5V4.5Z" fill="currentColor"/></svg>
+					</span>
+					<span class="home-who__video-youtube" aria-hidden="true">
+						<span>Watch on</span>
+						<i class="fa fa-youtube-play"></i>
+						<strong>YouTube</strong>
+					</span>
+				</button>
+			</div>
+
+			<div class="home-who__copy">
+				<p class="home-who__eyebrow">Who We Are</p>
+				<h2 id="home-who-title" class="home-who__title">
+					<span>Empowering Youth.</span>
+					<span>Building Futures.</span>
+				</h2>
+				<p>The <strong>Toolkit</strong> for Skills and Innovation is a Kenya-based social enterprise founded in 2014 with the goal of disrupting youth unemployment. The Toolkit trains vulnerable youth and women, certifies their skills with regulatory bodies, and then links them to employment or entrepreneurship.</p>
+			</div>
+
+			<div class="home-who__quick">
+				<h3>Quick Links</h3>
+				<a class="home-who__pill" href="https://toolkit.mzizi.co.ke/portal/OnlineApplicationForm.aspx?q=d0d6b2f229d733c1e3156244805125a2">
+					<span class="home-who__pill-icon" aria-hidden="true"><i class="fas fa-graduation-cap"></i></span>
+					<span>Toolkit Courses: Apply Now</span>
+					<i class="fas fa-arrow-right" aria-hidden="true"></i>
+				</a>
+				<a class="home-who__pill" href="https://toolkitafrica.ac.ke/new/contact/">
+					<span class="home-who__pill-icon" aria-hidden="true"><i class="fas fa-headset"></i></span>
+					<span>Contact Us</span>
+					<i class="fas fa-arrow-right" aria-hidden="true"></i>
+				</a>
+			</div>
+		</div>
+
+		<div class="home-who__bottom">
+			<div class="home-who__beliefs">
+				<article class="home-who__belief">
+					<span class="home-who__badge home-who__badge--olive" aria-hidden="true"><i class="fas fa-eye"></i></span>
+					<h3>Our Vision</h3>
+					<p>A leader in powering Africa with skilled, confident, and productive youth.</p>
+				</article>
+				<article class="home-who__belief">
+					<span class="home-who__badge home-who__badge--olive" aria-hidden="true"><i class="fas fa-bullseye"></i></span>
+					<h3>Our Mission</h3>
+					<p>We transform vulnerable youth to prosperity through innovation and skills for current and future labour markets.</p>
+				</article>
+			</div>
+
+			<div class="home-who__stats" aria-label="Toolkit impact statistics">
+				<div class="home-who__stat">
+					<span class="home-who__badge home-who__badge--peach" aria-hidden="true"><i class="fas fa-users"></i></span>
+					<strong>11,190</strong>
+					<span>Total Youth Impacted</span>
+				</div>
+				<div class="home-who__stat">
+					<span class="home-who__badge home-who__badge--peach" aria-hidden="true"><i class="fas fa-tools"></i></span>
+					<strong>4,987</strong>
+					<span>Construction Sector</span>
+				</div>
+				<div class="home-who__stat">
+					<span class="home-who__badge home-who__badge--peach" aria-hidden="true"><i class="fas fa-desktop"></i></span>
+					<strong>3,537</strong>
+					<span>Digital Skills &amp; Online Jobs</span>
+				</div>
+				<div class="home-who__stat">
+					<span class="home-who__badge home-who__badge--peach" aria-hidden="true"><i class="fas fa-clipboard-list"></i></span>
+					<strong>554</strong>
+					<span>Consultancy &amp; Research</span>
+				</div>
+				<div class="home-who__stat">
+					<span class="home-who__badge home-who__badge--peach" aria-hidden="true"><i class="fas fa-seedling"></i></span>
+					<strong>2,112</strong>
+					<span>Organic Farming</span>
+				</div>
 			</div>
 		</div>
 	</div>

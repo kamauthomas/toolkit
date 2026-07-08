@@ -91,6 +91,7 @@ p {
 /* === Main Content Area === */
 #main-content {
   min-height: 50vh;
+  overflow: visible;
 }
 
 /* === Footer Normalization === */
@@ -164,24 +165,24 @@ th, td {
   left: 0;
   width: 100%;
   z-index: 100;
-  background: transparent;
-  box-shadow: none;
+  background: #FFFFFF;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
 }
 
 .header_overlay .site-header .navigation {
-  background: transparent !important;
+  background: #FFFFFF !important;
 }
 
 .header_overlay .site-header .thim-logo img {
-  filter: brightness(0) invert(1);
+  filter: none;
 }
 
 .header_overlay .site-header .navbar-nav > li > a {
-  color: #fff !important;
+  color: #1E1E2A !important;
 }
 
 .header_overlay .site-header .navbar-nav > li > a:hover {
-  color: #FF4C00 !important;
+  color: #ED6E0D !important;
 }
 
 .sina-slider-content {
@@ -234,9 +235,9 @@ th, td {
   letter-spacing: 1px;
   border-radius: 50px !important;
   transition: all 0.3s ease !important;
-  background: #FF4C00 !important;
+  background: var(--brand-accent-orange, #ED6E0D) !important;
   color: #fff !important;
-  border: 2px solid #FF4C00 !important;
+  border: 2px solid var(--brand-accent-orange, #ED6E0D) !important;
 }
 
 .sina-banner-sbtn:hover {
@@ -305,36 +306,127 @@ th, td {
 
 /* === Phase 2: Header & Nav Fixes === */
 
+/* Keep menu variables defined even when Thim Elementor Kit outputs unset values. */
+#masthead.site-header {
+  --thim-main-menu-text-color: #1E1E2A;
+  --thim-main-menu-text-hover-color: var(--brand-accent-orange, #ED6E0D);
+  --thim-sticky-main-menu-text-color: #1E1E2A;
+  --thim-sticky-main-menu-text-hover-color: var(--brand-accent-orange, #ED6E0D);
+  --menu-text-color: #1E1E2A;
+  --menu-text-hover-color: var(--brand-accent-orange, #ED6E0D);
+  --thim-ekits-menu-font-size-nav-link: 14px;
+}
+
+#masthead.site-header .navbar-nav > li > a,
+#masthead.site-header .navbar-nav > li > span:not(.icon-toggle),
+#masthead.site-header .navbar-nav > li > a .thim-ekits-menu__nav-link {
+  color: #1E1E2A !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+#masthead.site-header .navbar-nav > li > a:hover,
+#masthead.site-header .navbar-nav > li > span:not(.icon-toggle):hover,
+#masthead.site-header .navbar-nav > li.current-menu-item > a,
+#masthead.site-header .navbar-nav > li.current-menu-item > span:not(.icon-toggle) {
+  color: var(--brand-accent-orange, #ED6E0D) !important;
+}
+
 /* Override Thim Elementor Kit mega menu CSS that hides nav text */
 .thim-ekits-menu__nav {
+  --menu-text-color: #1E1E2A;
+  --menu-text-hover-color: var(--brand-accent-orange, #ED6E0D);
+  --thim-ekits-menu-font-size-nav-link: 14px;
   display: flex;
+  flex-wrap: nowrap;          /* Bug 1: keep nav on a single row at desktop */
   gap: 0;
   list-style: none;
   margin: 0;
   padding: 0;
   align-items: center;
+  white-space: nowrap;
+}
+
+.thim-ekits-menu__nav > li {
+  flex: 0 0 auto;              /* never let items grow/shrink and force wrap */
 }
 
 .thim-ekits-menu__nav > li > a {
   font-size: 14px !important;
-  color: inherit;
+  color: #1E1E2A !important;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .thim-ekits-menu__nav-link {
   font-size: 14px !important;
   line-height: 1.4 !important;
-  padding: 15px 12px;
+  padding: 15px 10px;          /* Bug 1: tighten inter-item spacing */
+  color: #1E1E2A !important;
+  white-space: nowrap;
+}
+
+@media (min-width: 992px) {
+  .thim-ekits-menu__nav {
+    justify-content: flex-end;
+  }
+
+  .thim-ekits-menu__nav-link,
+  .thim-ekits-menu__nav > li > a {
+    font-size: 13px !important;
+  }
+
+  .thim-ekits-menu__nav-link {
+    padding: 14px 7px;
+  }
+}
+
+/* Keep the menu_right CTA inline on the same row, not wrapping below */
+.thim-ekits-menu__nav > li.menu-right {
+  flex: 0 0 auto;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+.thim-ekits-menu__nav > li.menu-right > ul {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+
+/* Desktop: allow the full menu, search, and CTA to stay on one row. */
+@media (min-width: 992px) {
+  .header_overlay .site-header .thim-nav-wrapper.container {
+    width: 100%;
+    max-width: 1320px;
+  }
+
+  #masthead.site-header .tm-table {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  #masthead.site-header .width-logo {
+    flex: 0 0 auto;
+  }
+
+  #masthead.site-header .width-navigation {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
 }
 
 /* Fix header overlay nav styling */
 .header_overlay .site-header .thim-ekits-menu__nav > li > a {
-  color: #fff !important;
+  color: #1E1E2A !important;
 }
 
 .header_overlay .site-header .thim-ekits-menu__nav > li > a:hover,
 .header_overlay .site-header .thim-ekits-menu__nav > li.current-menu-item > a {
-  color: #FF4C00 !important;
+  color: var(--brand-accent-orange, #ED6E0D) !important;
 }
 
 /* Active menu item underline */
@@ -345,7 +437,7 @@ th, td {
   left: 12px;
   right: 12px;
   height: 3px;
-  background: #FF4C00;
+  background: var(--brand-accent-orange, #ED6E0D);
   border-radius: 2px;
 }
 
@@ -357,7 +449,7 @@ th, td {
 .header_overlay .site-header .thim-logo img {
   max-height: 50px;
   width: auto;
-  filter: brightness(0) invert(1);
+  filter: none;
 }
 
 /* When custom logo is set, don't invert colors */
@@ -365,7 +457,89 @@ th, td {
   filter: none;
 }
 
-/* Search icon in toolbar — hide text input, show icon */
+/* Search icon in toolbar — hidden on homepage; search lives inline in nav. */
+body.home #toolbar {
+  display: none !important;
+}
+
+body.home #masthead #toolbar,
+body.front-page #masthead #toolbar {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+body.home #preload {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+body.home.thim-body-preload,
+body.home.fixloader {
+  overflow: auto !important;
+}
+
+.thim-ekits-menu__nav > li.menu-search {
+  flex: 0 0 auto;
+  margin-left: 8px;
+}
+
+.menu-search__form {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 38px;
+}
+
+.menu-search__input {
+  width: 0;
+  max-width: 0;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  background: #FFFFFF;
+  color: #1E1E2A;
+  transition: width 0.2s ease, max-width 0.2s ease, opacity 0.2s ease, padding 0.2s ease, border-color 0.2s ease;
+}
+
+.menu-search__form:focus-within .menu-search__input {
+  width: 150px;
+  max-width: 150px;
+  padding: 7px 10px;
+  border: 1px solid var(--brand-border-light, #D8DCE2);
+  border-right: 0;
+  border-radius: 5px 0 0 5px;
+  opacity: 1;
+}
+
+.menu-search__button {
+  width: 38px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--brand-border-light, #D8DCE2);
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #1E1E2A;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.menu-search__form:focus-within .menu-search__button {
+  border-radius: 0 5px 5px 0;
+}
+
+.menu-search__button:hover,
+.menu-search__button:focus {
+  color: #FFFFFF;
+  border-color: var(--brand-accent-orange, #ED6E0D);
+  background: var(--brand-accent-orange, #ED6E0D);
+}
+
 #toolbar .widget_search .search-form {
   display: flex;
   align-items: center;
@@ -382,21 +556,21 @@ th, td {
   height: 32px;
   padding: 4px 10px;
   font-size: 13px;
-  border: 1px solid rgba(255,255,255,0.3);
-  background: rgba(255,255,255,0.1);
-  color: #fff;
+  border: 1px solid #D8DCE2;
+  background: #FFFFFF;
+  color: #1E1E2A;
   border-radius: 4px;
 }
 
 #toolbar .widget_search .search-field::placeholder {
-  color: rgba(255,255,255,0.5);
+  color: #6B7280;
 }
 
 #toolbar .widget_search .search-submit {
   height: 32px;
   padding: 4px 12px;
   font-size: 13px;
-  background: #FF4C00;
+  background: var(--brand-accent-orange, #ED6E0D);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -419,50 +593,28 @@ th, td {
   font-weight: 600;
 }
 
-/* === Phase 2 Part C: Section-specific consistency fixes === */
-
-/* Quick Links panel — restyle from olive to dark charcoal */
-.elementor-element-c3ca692 .elementor-widget-wrap {
-  background: #1e1e2a !important;
-}
-
-.elementor-element-c3ca692 .elementor-widget-heading .elementor-heading-title {
+.navigation .menu-right .header-apply-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  background: var(--brand-accent-orange, #ED6E0D);
   color: #FFFFFF !important;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
-.elementor-element-c3ca692 .elementor-icon-list-item .elementor-icon-list-text {
-  color: rgba(255,255,255,0.85) !important;
-}
-
-.elementor-element-c3ca692 .elementor-icon-list-item:hover .elementor-icon-list-text {
-  color: var(--brand-accent-orange, #ED6E0D) !important;
-}
-
-.elementor-element-c3ca692 .elementor-icon-list-item .elementor-icon-list-icon i {
-  color: var(--brand-accent-orange, #ED6E0D) !important;
-}
-
-/* Strategic Sectors — fix background and buttons */
-.elementor-element-79f1a83 {
-  background-color: #f7f7f7 !important;
-}
-
-/* Sector buttons: pill style to match hero CTA */
-.elementor-element-79f1a83 .elementor-button,
-.elementor-element-79f1a83 a.elementor-button,
-.elementor-element-79f1a83 .elementor-button-link {
-  border-radius: var(--brand-border-radius-pill, 50px) !important;
-  padding: var(--brand-button-padding, 14px 32px) !important;
-  font-size: var(--brand-button-font-size, 15px) !important;
-  font-weight: var(--brand-button-font-weight, 600) !important;
-  text-transform: none !important;
-  letter-spacing: var(--brand-button-letter-spacing, 0.5px) !important;
-  transition: all 0.2s ease !important;
-}
-
-.elementor-element-79f1a83 .elementor-button:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+.navigation .menu-right .header-apply-btn:hover,
+.navigation .menu-right .header-apply-btn:focus {
+  background: var(--brand-accent-orange-hover, #d15f08);
+  color: #FFFFFF !important;
 }
 
 /* Testimonials section */
@@ -567,15 +719,1235 @@ th, td {
   font-weight: 700 !important;
 }
 
+/* === Section: IIW Banner Image (id cc89460 / widget 30fed85) === */
+/* Constrains the bare full-width IIW wordmark strip into a centered,
+   rounded, padded banner card so it reads as a marquee/award strip,
+   not a misplaced progress bar. */
+.elementor-element-cc89460 .elementor-container {
+  max-width: var(--brand-container-max, 1170px);
+  margin: 24px auto;
+  padding: 0 var(--brand-container-padding, 20px);
+}
+
+.elementor-element-cc89460 .elementor-widget-image .elementor-widget-container {
+  border: 1px solid var(--brand-border-light, #D8DCE2);
+  border-radius: var(--brand-border-radius, 6px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  padding: 8px;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.elementor-element-cc89460 .elementor-widget-image img {
+  max-height: 80px;
+  width: auto;
+  object-fit: contain;
+  border-radius: var(--brand-border-radius, 6px);
+}
+
+/* ====== NEW WHO WE ARE (per guide 13-Who_we_are.md) ====== */
+
+/* ── Top block (tb10000): 3-column row ── */
+.elementor-element-tb10000 .elementor-container {
+  gap: 28px;
+}
+
+/* ── Column 1 (tb10001): Video card (custom HTML markup) ── */
+.elementor-element-tb10001 .elementor-widget-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Video card base: black rounded rectangle, 16:9, clickable link */
+.wwa-vcard {
+  display: block;
+  position: relative;
+  border-radius: var(--brand-border-radius, 6px);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #000000;
+  text-decoration: none;
+}
+
+/* YouTube thumbnail as background image */
+.wwa-vcard-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* Top channel info overlay bar */
+.wwa-vcard-channel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  pointer-events: none;
+}
+
+.wwa-vcard-channel-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brand-accent-orange, #ED6E0D);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+.wwa-vcard-channel-text { display: flex; flex-direction: column; }
+.wwa-vcard-channel-title { font-weight: 700; font-size: 13px; }
+.wwa-vcard-channel-sub { font-size: 11px; opacity: 0.85; }
+
+/* Top-right logo badge */
+.wwa-vcard-logo-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-accent-orange, #ED6E0D);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+/* Centered orange play button */
+.wwa-vcard-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--brand-accent-orange, #ED6E0D);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 22px;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* Bottom-left YouTube pill badge */
+.wwa-vcard-youtube-pill {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 4;
+  padding: 6px 12px;
+  border-radius: 50px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.wwa-vcard-youtube-pill .fa-youtube { color: #ff0000; font-size: 14px; }
+
+/* ── Column 2 (tb10002): Text column ── */
+/* WHO WE ARE eyebrow: orange underline via heading's ::after */
+.elementor-element-tb10010 .sc_heading .title {
+  color: var(--brand-accent-orange, #ED6E0D) !important;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* About paragraph: tidy spacing, inline Toolkit bold */
+.elementor-element-38da0e4 .desc-content {
+  color: var(--brand-text-muted, #666666);
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.elementor-element-38da0e4 .desc-content b,
+.elementor-element-38da0e4 .desc-content strong {
+  color: var(--brand-text-dark, #333333);
+}
+
+/* ── Column 3 (tb10003): Quick Links card ── */
+/* Light neutral rounded card, not dark charcoal */
+.elementor-element-tb10003 .elementor-widget-wrap {
+  background: #F7F7F7;
+  border-radius: var(--brand-border-radius, 6px);
+  padding: 28px 24px !important;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+
+/* Quick Links heading: dark text on light bg */
+.elementor-element-tb10003 .sc_heading .title,
+.elementor-element-tb10003 .sc_heading .title .thim-color {
+  color: var(--brand-text-dark, #333333) !important;
+}
+
+/* Custom Quick Links pills: olive-green body, white circular badge with icon */
+.wwa-pill {
+  display: flex !important;
+  align-items: center;
+  width: 100%;
+  height: 48px;
+  border-radius: var(--brand-border-radius-pill, 50px);
+  background: #969E2A;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  padding: 0;
+  border: none;
+  transition: opacity 0.2s ease;
+}
+
+.wwa-pill:hover { opacity: 0.92; }
+
+/* Left-side circular white badge with the icon */
+.wwa-pill-icon-badge {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  margin: 6px 8px 6px 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #969E2A;
+  font-size: 16px;
+}
+
+/* Pill label text — single line, nowrap */
+.wwa-pill-label {
+  white-space: nowrap;
+  padding-right: 8px;
+}
+
+/* Right-arrow icon, orange */
+.wwa-pill-arrow {
+  margin-left: auto;
+  padding-right: 16px;
+  color: var(--brand-accent-orange, #ED6E0D);
+  font-size: 13px;
+}
+
+/* ── Bottom block (tb20000): full-width light-gray rounded panel ── */
+/* Adds a subtle vertical divider between the two zones */
+.elementor-element-tb20000 .elementor-container {
+  gap: 0;
+}
+
+.elementor-element-tb20001 .elementor-widget-wrap {
+  border-right: 1px solid #DDDDDD;
+  padding-right: 30px !important;
+  margin-right: 15px;
+}
+
+.elementor-element-tb20002 .elementor-widget-wrap {
+  padding-left: 30px !important;
+}
+
+/* ── Left zone: Vision + Mission as 2 columns ── */
+/* Inner section for the 2-col layout */
+.elementor-element-tb20010 .elementor-container {
+  gap: 24px;
+}
+
+/* Vision / Mission headings: olive-green, smaller underline accent */
+.elementor-element-tb20010 .sc_heading .title,
+.elementor-element-tb20010 .sc_heading .title .thim-color {
+  color: #6B6E2A !important;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+/* Vision/Mission paragraphs: dark-gray, clean */
+.elementor-element-tb20010 .elementor-widget-text-editor,
+.elementor-element-tb20010 .elementor-widget-text-editor p {
+  color: var(--brand-text-muted, #666666) !important;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── Right zone: 5-stat row with icon badges ── */
+/* Force the inner section to render as a 5-column flex */
+.elementor-element-tb20020 .elementor-container {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+/* Each stat column: centered, compact */
+.elementor-element-tb20020 .elementor-column {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Counter box: compact, centered, no card */
+.elementor-element-tb20020 .counter-box.home-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+/* Stat number: orange, bold, large */
+.elementor-element-tb20020 .counter-box .display-percentage {
+  color: var(--brand-accent-orange, #ED6E0D) !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.elementor-element-tb20020 .counter-box .content-box-percentage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+}
+
+.elementor-element-tb20020 .counter-box .wrap-percentage {
+  margin: 0;
+}
+
+/* Stat label: small, uppercase, centered, two-line, muted gray */
+.elementor-element-tb20020 .counter-box .counter-content-container {
+  margin: 0;
+  padding: 0;
+}
+
+.elementor-element-tb20020 .counter-box .counter-box-content {
+  color: var(--brand-text-muted, #666666);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  font-weight: 500;
+  white-space: pre-line;
+}
+
+/* ====== STRATEGIC SECTORS (per guide 12) ====== */
+
+/* Section padding */
+.elementor-element-f4b1a1f {
+  padding: 40px 0 50px 0 !important;
+}
+
+/* Section heading + subtitle (13bbb59) — use shared orange underline token,
+   inherits from .sc_heading .title::after above */
+
+/* Accordion (f0949ee) panel headers → orange pill buttons */
+.elementor-element-f4b1a1f .thim-widget-accordion .panel-group {
+  margin-top: 18px;
+}
+
+.elementor-element-f4b1a1f .thim-widget-accordion .panel {
+  border: none;
+  border-radius: var(--brand-border-radius-pill, 50px) !important;
+  margin-bottom: 14px;
+  overflow: hidden;
+  box-shadow: none;
+  background: transparent;
+}
+
+.elementor-element-f4b1a1f .thim-widget-accordion .panel-heading {
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+/* The collapsed panel-title <a> becomes the orange pill button */
+.elementor-element-f4b1a1f .thim-widget-accordion .panel-title > a {
+  display: flex !important;
+  align-items: center;
+  width: 100%;
+  height: 50px;
+  padding: 0 22px 0 24px !important;
+  border-radius: var(--brand-border-radius-pill, 50px) !important;
+  background: var(--brand-accent-orange, #ED6E0D);
+  color: #FFFFFF !important;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  text-transform: none;
+  transition: opacity 0.2s ease;
+}
+
+.elementor-element-f4b1a1f .thim-widget-accordion .panel-title > a:hover,
+.elementor-element-f4b1a1f .thim-widget-accordion .panel-title > a:not(.collapsed) {
+  opacity: 0.92;
+  color: #FFFFFF !important;
+  background: var(--brand-accent-orange, #ED6E0D);
+}
+
+/* Right-chevron icon via ::after on the pill link */
+.elementor-element-f4b1a1f .thim-widget-accordion .panel-title > a::after {
+  content: '\f054';
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 13px;
+  color: #FFFFFF;
+  margin-left: auto;
+  padding-left: 14px;
+  transition: transform 0.2s ease;
+}
+
+/* Rotate chevron when expanded (aria-expanded or :not(.collapsed)) */
+.elementor-element-f4b1a1f .thim-widget-accordion .panel-title > a:not(.collapsed)::after {
+  transform: rotate(90deg);
+}
+
+/* Accordion panel-body (the content that expands) — clean white card */
+.elementor-element-f4b1a1f .thim-widget-accordion .panel-collapse .panel-body {
+  padding: 18px 22px !important;
+  background: #FFFFFF;
+  border: 1px solid var(--brand-border-light, #D8DCE2);
+  border-top: none;
+  border-radius: 0 0 var(--brand-border-radius, 6px) var(--brand-border-radius, 6px);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--brand-text-muted, #666666);
+}
+
+/* Inner click-here links in panel body */
+.elementor-element-f4b1a1f .thim-widget-accordion .panel-body a {
+  color: var(--brand-accent-orange, #ED6E0D) !important;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+/* Strategic Sectors video wrapper — rounded corners matching shared token */
+.elementor-element-f4b1a1f .ss-video-wrap {
+  border-radius: var(--brand-border-radius, 6px);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #000000;
+  position: relative;
+  width: 100%;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.elementor-element-f4b1a1f .ss-video-wrap iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ====== TESTIMONIALS (per guide 12) ====== */
+
+/* Section: replace pale-yellow tint with light-gray brand bg */
+.elementor-element-cc38fab {
+  background-color: var(--brand-bg-light, #f7f7f7) !important;
+  padding: 50px 0 60px 0 !important;
+}
+
+/* Inner testimonial cards: 3-col grid; backend uses elementor-col-33 */
+.elementor-element-cc38fab .elementor-inner-section .elementor-container {
+  gap: 24px;
+}
+
+/* Each testimonial card column */
+.elementor-element-cc38fab .elementor-inner-section .elementor-column .elementor-widget-wrap {
+  background: #FFFFFF;
+  border-radius: var(--brand-border-radius, 6px);
+  padding: 22px !important;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Testimonial video card (clickable thumbnail, 16:9, rounded) */
+.wwa-tcard-video {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--brand-border-radius, 6px);
+  overflow: hidden;
+  background: #000;
+  margin-bottom: 14px;
+  text-decoration: none;
+}
+
+.wwa-tcard-video img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.wwa-tcard-video:hover img { transform: scale(1.03); }
+
+/* Orange play button centered */
+.wwa-tcard-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--brand-accent-orange, #ED6E0D);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  pointer-events: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Testimonial name (heading widget, h2) */
+.elementor-element-cc38fab .elementor-widget-heading .elementor-heading-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: var(--brand-text-dark, #333333) !important;
+  margin-bottom: 4px !important;
+}
+
+/* Testimonial role/title (thim-icon-box h3 heading__primary) — orange */
+.elementor-element-cc38fab .thim-widget-icon-box .heading__primary {
+  color: var(--brand-accent-orange, #ED6E0D) !important;
+  font-size: 14px !important;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+/* Testimonial quote (icon-box .desc-content) — muted dark-gray */
+.elementor-element-cc38fab .thim-widget-icon-box .desc-content {
+  color: var(--brand-text-muted, #666666);
+  font-size: 14px;
+  line-height: 1.65;
+  margin-top: 4px;
+}
+
+/* Equal-height columns: make icons invisible (we use the play button on video instead) */
+.elementor-element-cc38fab .thim-widget-icon-box .boxes-icon { display: none; }
+
+/* Responsive: 2+1 on tablet, 1 on mobile */
+@media (max-width: 991px) {
+  .elementor-element-cc38fab .elementor-inner-section .elementor-container {
+    flex-wrap: wrap;
+  }
+  .elementor-element-cc38fab .elementor-inner-section .elementor-column {
+    flex: 0 0 calc(50% - 12px);
+  }
+}
+
+@media (max-width: 767px) {
+  .elementor-element-cc38fab .elementor-inner-section .elementor-column {
+    flex: 0 0 100%;
+  }
+}
+
+/* ====== MEMBERSHIPS / KEY PARTNERS (per guide 12) ====== */
+
+/* Section padding + consistent treatment with other sections */
+.elementor-element-330c37b,
+.elementor-element-b4959db {
+  padding: 40px 0 50px 0 !important;
+}
+
+/* Carousel container padding: leave gutter so arrows never overlap logos */
+.elementor-element-330c37b .thim-carousel-wrapper,
+.elementor-element-b4959db .thim-carousel-wrapper {
+  padding: 0 36px;
+  position: relative;
+}
+
+/* Normalize all logo sizes to a consistent bounding height */
+.elementor-element-330c37b .thim-carousel-wrapper img,
+.elementor-element-b4959db .thim-carousel-wrapper img {
+  height: 60px !important;
+  width: auto !important;
+  object-fit: contain;
+  max-width: 100%;
+  filter: grayscale(50%);
+  opacity: 0.85;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.elementor-element-330c37b .thim-carousel-wrapper img:hover,
+.elementor-element-b4959db .thim-carousel-wrapper img:hover {
+  filter: grayscale(0);
+  opacity: 1;
+}
+
+/* Center logos vertically inside the carousel track */
+.elementor-element-330c37b .thim-carousel-wrapper .owl-item,
+.elementor-element-b4959db .thim-carousel-wrapper .owl-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ====== FOOTER (per guide 12) ====== */
+
+/* Footer map iframe already gets border-radius via f474e60 rule above.
+   Add consistent spacing + icon-text alignment for contact list rows. */
+
+/* Icon-list items: icon vertical-center on first line of multi-line text */
+.elementor-element-7c7c8ce .elementor-icon-list-item {
+  align-items: flex-start !important;
+}
+
+.elementor-element-7c7c8ce .elementor-icon-list-icon {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.elementor-element-7c7c8ce .elementor-icon-list-text {
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Copyright section (999be8f): centered, low-key gray text */
+.elementor-element-999be8f {
+  background: #111118 !important;
+  padding: 18px 0 !important;
+  text-align: center;
+}
+
+.elementor-element-999be8f .elementor-heading-title {
+  font-size: 13px !important;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6) !important;
+  margin: 0 !important;
+}
+
+/* Newsletter section (53278f2): dark bg continues footer language */
+.elementor-element-53278f2 {
+  padding: 40px 0 !important;
+}
+
+.elementor-element-53278f2 .sc_heading .title,
+.elementor-element-53278f2 .elementor-heading-title {
+  color: #FFFFFF !important;
+}
+
+/* === Cross-section: heading underline canonicalization === */
+/* Hide the parent theme's full-width .line span — the orange ::after
+   underline (defined above) is the canonical treatment. */
+.sc_heading .line {
+  display: none !important;
+}
+
+/* Ensure every section heading inherits the orange underline token. */
+.elementor-widget-thim-heading .sc_heading .title {
+  position: relative;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  color: var(--brand-text-dark, #333333) !important;
+  font-weight: 700;
+}
+
 /* === Responsive === */
 @media (max-width: 991px) {
   .footer {
     padding: 30px 0 20px;
+  }
+  /* Top block stacks to single column: video → text → Quick Links */
+  .elementor-element-tb10000 .elementor-container {
+    flex-direction: column !important;
+    gap: 24px;
+  }
+  .elementor-element-tb10001,
+  .elementor-element-tb10002,
+  .elementor-element-tb10003 {
+    width: 100% !important;
+  }
+  /* Bottom block divider disappears, zones stack */
+  .elementor-element-tb20001 .elementor-widget-wrap {
+    border-right: none;
+    padding-right: 0 !important;
+    margin-right: 0;
+  }
+  .elementor-element-tb20002 .elementor-widget-wrap {
+    padding-left: 0 !important;
   }
 }
 
 @media (max-width: 767px) {
   body {
     font-size: 15px;
+  }
+  /* Vision + Mission stack to 1-col */
+  .elementor-element-tb20010 .elementor-container {
+    flex-direction: column !important;
+    gap: 20px;
+  }
+  /* Stat row wraps to 2-col grid */
+  .elementor-element-tb20020 .elementor-container {
+    flex-wrap: wrap;
+  }
+  .elementor-element-tb20020 .elementor-column {
+    flex: 0 0 calc(50% - 8px);
+  }
+}
+
+/* ── Icon badges: real Font Awesome <i> elements in tinted circles ── */
+/* Vision heading badge: olive-tint circle with eye icon */
+.wwa-vm-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--olive-green-tint-bg, #F0F1E0);
+  color: var(--olive-green, #6B6E2A);
+  font-size: 18px;
+  margin: 0 0 10px 0;
+}
+
+/* Stat badge: peach-tint circle with line icon */
+.wwa-stat-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--peach-tint-bg, #FDE8D0);
+  color: var(--brand-accent-orange, #ED6E0D);
+  font-size: 18px;
+  margin: 0 auto 10px auto;
+}
+
+/* Center the stat badge + counter together */
+.elementor-element-tb20020 .elementor-widget-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ====== FRONT-PAGE THEME-RENDERED IIW + WHO WE ARE ====== */
+body.home .elementor-element-5da9167,
+body.home .elementor-element-81bf8ec,
+body.home .elementor-element-cc89460,
+body.home .elementor-element-a0c8726,
+body.home .elementor-element-030a77b,
+body.home .elementor-element-79f1a83,
+body.home .elementor-element-81bf8ec .sina-banner-slider {
+  display: none !important;
+}
+
+.home-iw-banner {
+  background: #fff;
+  position: relative;
+  z-index: 1;
+  clear: both;
+}
+
+.home-iw-banner__inner {
+  max-width: var(--brand-container-max, 1170px);
+  margin: 24px auto;
+  padding: 0 var(--brand-container-padding, 20px);
+}
+
+.home-iw-banner__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 1px solid var(--brand-border-light, #D8DCE2);
+  border-radius: var(--brand-border-radius, 6px);
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.home-iw-banner__link img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+  border-radius: var(--brand-border-radius, 6px);
+}
+
+.home-who {
+  background: #fff;
+  padding: 18px var(--brand-container-padding, 20px) 48px;
+  position: relative;
+  z-index: 1;
+  clear: both;
+  overflow: clip;
+  isolation: isolate;
+}
+
+.home-who__inner {
+  max-width: var(--brand-container-max, 1170px);
+  margin: 0 auto;
+}
+
+.home-who__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) minmax(260px, 0.85fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.home-who__top > * {
+  min-width: 0;
+}
+
+.home-who__video {
+  position: relative;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  align-self: start;
+  overflow: hidden;
+  border-radius: var(--brand-border-radius, 6px);
+  background: #000;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  contain: layout paint;
+}
+
+.home-who__video-card {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  background: #000;
+  color: #FFFFFF;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-who__video-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.04);
+  transition: transform 0.25s ease;
+}
+
+.home-who__video-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.06) 42%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+}
+
+.home-who__video-card:hover .home-who__video-thumb,
+.home-who__video-card:focus .home-who__video-thumb {
+  transform: scale(1.08);
+}
+
+.home-who__video-channel,
+.home-who__video-logo,
+.home-who__video-play,
+.home-who__video-youtube {
+  position: absolute;
+  z-index: 2;
+}
+
+.home-who__video-channel {
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.54);
+}
+
+.home-who__video-channel-icon,
+.home-who__video-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.home-who__video-channel-icon {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brand-accent-orange, #ED6E0D);
+}
+
+.home-who__video-channel-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.home-who__video-channel-text strong {
+  font-size: 13px;
+  color: #FFFFFF;
+}
+
+.home-who__video-channel-text span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.home-who__video-logo {
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: var(--brand-accent-orange, #ED6E0D);
+  font-size: 16px;
+}
+
+.home-who__video-play {
+  top: 50%;
+  left: 50%;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--brand-accent-orange, #ED6E0D);
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
+}
+
+.home-who__video-youtube {
+  left: 12px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 50px;
+  background: rgba(0, 0, 0, 0.68);
+  color: #FFFFFF;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.home-who__video-youtube .fa {
+  color: #FF0000;
+  font-size: 15px;
+}
+
+.home-who__video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  z-index: 6;
+  border-radius: inherit;
+  background: #000;
+}
+
+.home-who__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.home-who__eyebrow,
+.home-who__quick h3,
+.home-who__belief h3 {
+  position: relative;
+  margin: 0 0 18px;
+  padding-bottom: 12px;
+  font-family: var(--brand-font-heading, serif);
+  font-weight: 700;
+}
+
+.home-who__eyebrow::after,
+.home-who__quick h3::after,
+.home-who__belief h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--brand-heading-underline-width, 40px);
+  height: var(--brand-heading-underline-height, 3px);
+  border-radius: 2px;
+  background: var(--brand-accent-orange, #ED6E0D);
+}
+
+.home-who__eyebrow {
+  color: var(--brand-accent-orange, #ED6E0D);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 13px;
+}
+
+.home-who__title {
+  margin: 0 0 16px;
+  font-family: var(--brand-font-heading, serif);
+  font-size: clamp(30px, 3.2vw, 44px);
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--brand-text-dark, #333333);
+}
+
+.home-who__title span {
+  display: block;
+}
+
+.home-who__title span:last-child {
+  color: var(--brand-accent-orange, #ED6E0D);
+}
+
+.home-who__copy p:not(.home-who__eyebrow) {
+  margin: 0;
+  color: var(--brand-text-muted, #666666);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.home-who__copy strong {
+  color: var(--brand-text-dark, #333333);
+}
+
+.home-who__quick {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px 24px;
+  border-radius: var(--brand-border-radius, 6px);
+  background:
+    linear-gradient(rgba(247, 247, 247, 0.9), rgba(247, 247, 247, 0.9)),
+    url("/wp-content/uploads/2023/09/iskill-banner-04.jpg") center/cover no-repeat;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+.home-who__quick h3 {
+  color: var(--brand-text-dark, #333333);
+  font-size: 24px;
+}
+
+.home-who__pill {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  margin-bottom: 12px;
+  border-radius: var(--brand-border-radius-pill, 50px);
+  background: var(--olive-green, #6B6E2A);
+  color: #fff !important;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.home-who__pill:hover,
+.home-who__pill:focus {
+  color: #fff !important;
+  opacity: 0.92;
+}
+
+.home-who__pill-icon {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  margin: 6px 10px 6px 6px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--olive-green, #6B6E2A);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.home-who__pill > span:not(.home-who__pill-icon) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-who__pill > .fa-arrow-right {
+  margin-left: auto;
+  padding: 0 16px 0 12px;
+  color: var(--brand-accent-orange, #ED6E0D);
+}
+
+.home-who__bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 30px;
+  margin-top: 30px;
+  padding: 30px;
+  border-radius: 12px;
+  background: #F5F5F5;
+}
+
+.home-who__beliefs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding-right: 30px;
+  border-right: 1px solid #DDDDDD;
+}
+
+.home-who__belief h3 {
+  color: var(--olive-green, #6B6E2A);
+  font-size: 17px;
+}
+
+.home-who__belief p {
+  margin: 0;
+  color: var(--brand-text-muted, #666666);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.home-who__badge {
+  width: 44px;
+  height: 44px;
+  margin: 0 0 10px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.home-who__badge--olive {
+  background: var(--olive-green-tint-bg, #F0F1E0);
+  color: var(--olive-green, #6B6E2A);
+}
+
+.home-who__badge--peach {
+  margin-left: auto;
+  margin-right: auto;
+  background: var(--peach-tint-bg, #FDE8D0);
+  color: var(--brand-accent-orange, #ED6E0D);
+}
+
+.home-who__stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+.home-who__stat {
+  text-align: center;
+}
+
+.home-who__stat strong {
+  display: block;
+  color: var(--brand-accent-orange, #ED6E0D);
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.home-who__stat span:last-child {
+  display: block;
+  color: var(--brand-text-muted, #666666);
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1023px) {
+  .home-who__top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-who__quick {
+    grid-column: 1 / -1;
+  }
+
+  .home-who__bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .home-who__beliefs {
+    padding-right: 0;
+    padding-bottom: 26px;
+    border-right: 0;
+    border-bottom: 1px solid #DDDDDD;
+  }
+
+  .home-who__stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .home-who {
+    padding-bottom: 36px;
+  }
+
+  .home-who__top,
+  .home-who__beliefs {
+    grid-template-columns: 1fr;
+  }
+
+  .home-who__bottom {
+    padding: 22px;
+  }
+
+  .home-who__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-who__pill {
+    white-space: normal;
   }
 }

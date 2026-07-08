@@ -15,8 +15,13 @@
   --brand-text-dark: #333333;
   --brand-text-muted: #666666;
   --brand-bg-light: #f7f7f7;
-  --brand-bg-dark: rgba(20, 20, 20, 0.85);
-  --brand-border-light: rgba(255, 255, 255, 0.3);
+  --brand-bg-dark: #1E1E2A;
+  --brand-border-light: #D8DCE2;
+
+  /* === Secondary accent (13-Who_we_are.md) === */
+  --olive-green: #6B6E2A;
+  --olive-green-tint-bg: #F0F1E0;
+  --peach-tint-bg: #FDE8D0;
 
   /* === Typography === */
   --brand-font-heading: var(--thim-font-title-font-family, 'Roboto Slab'), serif;

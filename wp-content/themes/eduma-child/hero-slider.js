@@ -208,6 +208,28 @@
     });
   }
 
+  /* Click-to-play YouTube card below the hero. Keeps the initial page lighter. */
+  var whoVideoCard = document.querySelector('.home-who__video-card');
+  if (whoVideoCard) {
+    whoVideoCard.addEventListener('click', function () {
+      var youtubeId = whoVideoCard.getAttribute('data-youtube-id');
+      if (!youtubeId) return;
+
+      var iframe = document.createElement('iframe');
+      iframe.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeId + '?autoplay=1&rel=0');
+      iframe.setAttribute('title', 'The Toolkit Skills and Innovation Hub video');
+      iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.setAttribute('loading', 'lazy');
+      iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+
+      if (whoVideoCard.parentElement) {
+        whoVideoCard.parentElement.classList.add('is-playing');
+      }
+      whoVideoCard.replaceWith(iframe);
+    });
+  }
+
   /* Start */
   startAutoplay();
 })();

@@ -1,0 +1,31 @@
+# WordPress runtime/core files for this local working copy.
+# Project-owned work lives in the child theme and docs.
+/.htaccess
+/index.php
+/license.txt
+/readme.html
+/router.php
+/xmlrpc.php
+/wp-*.php
+/wp-admin/
+/wp-includes/
+/wp-content/index.php
+
+# Local config, database dumps, packages, logs, and cache output.
+/wp-config.php
+/*.sql
+/*.tar
+/error_log
+/wp-content/debug.log
+/wp-content/litespeed/
+/wp-content/maintenance.php
+/wp-content/maintenance/
+/wp-content/temp-write-test-*
+/wp-content/uploads/
+/wp-content/languages/
+
+# Installed dependencies/vendor assets kept out of this repo.
+/wp-content/plugins/
+/wp-content/themes/eduma/
+/wp-content/themes/eduma.zip
+/wp-content/themes/index.php
