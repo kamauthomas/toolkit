@@ -40,10 +40,10 @@ add_action( 'after_setup_theme', function() {
 }, 20 );
 
 function eduma_child_toolkit_logo() {
-	$logo_url = content_url( 'uploads/2019/05/Toolkit-Logo.jpg' );
+	$logo_url = content_url( 'uploads/2019/05/toolkit-scaled.png' );
 
 	printf(
-		'<a href="%s" title="%s" rel="home" class="thim-logo"><img src="%s" alt="%s" width="300" height="141"></a>',
+		'<a href="%s" title="%s" rel="home" class="thim-logo"><img src="%s" alt="%s" width="200" height="132"></a>',
 		esc_url( home_url( '/' ) ),
 		esc_attr( get_bloginfo( 'name' ) . ' - ' . get_bloginfo( 'description' ) ),
 		esc_url( $logo_url ),
@@ -56,7 +56,7 @@ add_filter( 'theme_mod_thim_sticky_logo', 'eduma_child_toolkit_logo_url', 20 );
 add_filter( 'theme_mod_thim_logo_mobile', 'eduma_child_toolkit_logo_url', 20 );
 
 function eduma_child_toolkit_logo_url( $logo ) {
-	return content_url( 'uploads/2019/05/Toolkit-Logo.jpg' );
+	return content_url( 'uploads/2019/05/toolkit-scaled.png' );
 }
 
 /* === HOMEPAGE HEADER: Keep parent toolbar from creating a dark search band === */
@@ -159,10 +159,18 @@ add_filter( 'style_loader_src', function( $src ) {
 	return $src;
 });
 
-/* === SEO: Add meta description fallback === */
+/* === SEO: Add a homepage description only when no SEO plugin owns metadata === */
+
+function eduma_child_has_seo_plugin() {
+	return defined( 'WPSEO_VERSION' )
+		|| defined( 'RANK_MATH_VERSION' )
+		|| defined( 'AIOSEO_VERSION' )
+		|| defined( 'SEOPRESS_VERSION' )
+		|| class_exists( 'WPSEO_Frontend' );
+}
 
 add_action( 'wp_head', function() {
-	if ( defined( 'WPSEO_VERSION' ) || class_exists( 'WPSEO_Frontend' ) ) {
+	if ( eduma_child_has_seo_plugin() ) {
 		return;
 	}
 

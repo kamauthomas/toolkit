@@ -4,12 +4,30 @@
 Rebuild the homepage hero section as a synced image+text slider matching `02-HERO-SPEC.md`, then fix header navigation and apply site-wide visual consistency across all homepage sections.
 
 ## Status
-**PHASE 3 — IN PROGRESS** (Child-theme isolation, homepage header/video/UI hardening, deployment readiness)
+**PHASE 4 — IN PROGRESS** (SEO/accessibility handoff, remaining-page refinement planning, deployment readiness)
 
 ## Rollback point
 - Branch: `feature/hero-slider`
 - Latest commit: `b53a726` (Phase 2: Update PROGRESS.md with header fix, tokens, section consistency log)
 - Current working tree: Phase 3 corrective pass for child-theme navigation isolation, toolbar removal, homepage flow, and cleanup rules
+
+## 2026-07-13 Phase 4 - SEO and accessibility handoff
+
+### Applied
+- Kept the homepage to one semantic `h1`; decorative headings on inactive hero slides are no longer exposed as document headings.
+- Added `aria-hidden` state management for hero slides and made the carousel keyboard-focusable.
+- Expanded the SEO fallback guard to avoid duplicate metadata when Yoast, Rank Math, All in One SEO, or SEOPress manages the document head.
+- Added `guide/16-LAUNCH-SEO-HANDOFF.md` with production SEO setup, responsive QA, and release requirements.
+
+### Verification
+- PHP syntax: PASS (`functions.php`, `front-page.php`).
+- JavaScript syntax: PASS (`hero-slider.js`).
+- `git diff --check`: PASS.
+- Local runtime/browser verification: not repeated because the prior local server at `127.0.0.1:8001` is not running in this session.
+
+### Remaining
+- Configure the active SEO plugin and verify generated metadata, canonical URLs, sitemap, and social previews on the deployment environment.
+- Refine non-homepage templates only after page-specific designs/content and acceptance criteria are supplied; the existing documented build scope is homepage-focused.
 
 ## Environment Notes
 - Active theme: `eduma-child` (child of `eduma`)

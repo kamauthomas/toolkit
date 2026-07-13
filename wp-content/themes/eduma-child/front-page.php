@@ -8,7 +8,7 @@ get_header();
 require_once get_stylesheet_directory() . '/inc/hero-slides.php';
 $slides = eduma_child_get_hero_slides();
 ?>
-<div id="hero-slider" class="hero-slider" aria-roledescription="carousel" aria-label="Featured slides">
+<div id="hero-slider" class="hero-slider" aria-roledescription="carousel" aria-label="Featured slides" tabindex="0">
 
 	<div class="hero-slider__slides" role="list">
 		<?php foreach ( $slides as $index => $slide ) :
@@ -19,12 +19,17 @@ $slides = eduma_child_get_hero_slides();
 			 role="group"
 			 aria-roledescription="slide"
 			 aria-label="Slide <?php echo esc_attr( $slide_num ); ?> of <?php echo count( $slides ); ?>"
+			 aria-hidden="<?php echo $is_first ? 'false' : 'true'; ?>"
 			 data-slide="<?php echo esc_attr( $slide_num ); ?>"
 			 style="background-image: url(<?php echo esc_url( $slide['image'] ); ?>);">
 			<div class="hero-slider__overlay"></div>
 			<div class="hero-slider__content">
 				<span class="hero-slider__eyebrow"><?php echo esc_html( $slide['eyebrow'] ); ?></span>
-				<h1 class="hero-slider__heading"><?php echo wp_kses_post( $slide['heading'] ); ?></h1>
+				<?php if ( $is_first ) : ?>
+					<h1 class="hero-slider__heading"><?php echo wp_kses_post( $slide['heading'] ); ?></h1>
+				<?php else : ?>
+					<p class="hero-slider__heading" aria-hidden="true"><?php echo wp_kses_post( $slide['heading'] ); ?></p>
+				<?php endif; ?>
 				<p class="hero-slider__desc"><?php echo esc_html( $slide['description'] ); ?></p>
 				<div class="hero-slider__actions">
 					<a class="hero-slider__btn hero-slider__btn--primary" href="<?php echo esc_url( $slide['primary_cta']['url'] ); ?>">

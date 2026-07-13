@@ -30,7 +30,9 @@
     isAnimating = true;
 
     slides[current].classList.remove('is-active');
+    slides[current].setAttribute('aria-hidden', 'true');
     slides[index].classList.add('is-active');
+    slides[index].setAttribute('aria-hidden', 'false');
 
     dots[current].classList.remove('is-active');
     dots[current].setAttribute('aria-selected', 'false');
