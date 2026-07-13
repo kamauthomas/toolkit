@@ -1378,6 +1378,47 @@ body.home.fixloader {
   font-weight: 700;
 }
 
+/* === Footer sizing ===
+ * The Elementor footer uses a square source logo. Constraining the rendered
+ * media prevents it from setting an unnecessarily tall footer row. */
+#colophon .footer {
+  padding: 0;
+}
+
+#colophon .elementor-8920 .elementor-element.elementor-element-7c7c8ce {
+  padding: 36px 0 28px;
+}
+
+#colophon .elementor-8920 .elementor-element.elementor-element-6a2e73d,
+#colophon .elementor-8920 .elementor-element.elementor-element-6a2e73d img {
+  width: 148px;
+  max-width: 100%;
+}
+
+#colophon .elementor-8920 .elementor-element.elementor-element-6a2e73d img {
+  height: 148px;
+  object-fit: contain;
+}
+
+#colophon .elementor-8920 .elementor-element.elementor-element-f474e60 iframe {
+  height: 212px;
+  border-radius: 6px;
+}
+
+#colophon .elementor-8920 .elementor-element.elementor-element-e538bc8 > .elementor-widget-container {
+  margin-top: 18px;
+}
+
+@media (max-width: 767px) {
+  #colophon .elementor-8920 .elementor-element.elementor-element-7c7c8ce {
+    padding: 30px 0 22px;
+  }
+
+  #colophon .elementor-8920 .elementor-element.elementor-element-f474e60 iframe {
+    height: 190px;
+  }
+}
+
 /* === Responsive === */
 @media (max-width: 991px) {
   .footer {
