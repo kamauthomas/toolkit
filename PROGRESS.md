@@ -44,6 +44,25 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 ### Deployment history
 - The repository history and recorded work log contain no completed FTP upload/extraction command to reproduce. They only describe the intended demo-subdomain deployment. A versioned archive/deploy workflow still needs to be created before the next server release.
 
+## 2026-07-13 Page redesign - first major-page batch
+
+### Applied
+- Replaced the legacy Elementor render paths for Welding and Fabrication, Notice Board, and the course-application landing page with child-theme templates guided by the supplied UI references.
+- Suppressed stale public page content, including dated intake copy, poster stacks, duplicate apply controls, and historic impact claims, without deleting the original database content.
+- Added responsive shared page styling, notice search/filter and grid/list controls, and application course-selection guidance.
+- Kept the external admissions portal as the form submission system; the local page does not collect or store applicant personal data.
+- Added page-specific Yoast title, description, Open Graph, and WebPage schema overrides so metadata no longer derives from obsolete page content.
+- Corrected the child header logo URL to the existing 2025 Toolkit logo upload.
+
+### Verification
+- PHP syntax: PASS (`functions.php` and all three page templates).
+- JavaScript syntax: PASS (`page-redesign.js`).
+- `git diff --check`: PASS.
+- Canonical local render: Welding, Notice Board, and Applications templates render from the child theme. Welding desktop screenshot inspected.
+
+### Deployment hold
+- Do not upload this batch until the local pages are approved and the exact demo/production FTP target directory is confirmed. The supplied credentials do not identify a safe remote path by themselves.
+
 ## Environment Notes
 - Active theme: `eduma-child` (child of `eduma`)
 - Homepage: page ID 4519, Elementor, `elementor_theme` page template

@@ -14,6 +14,13 @@ function thim_child_enqueue_styles() {
 		$js_ver = filemtime( get_stylesheet_directory() . '/hero-slider.js' );
 		wp_enqueue_script( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.js', array(), $js_ver, true );
 	}
+
+	if ( is_page( array( 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ) {
+		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
+		$page_js_ver  = filemtime( get_stylesheet_directory() . '/page-redesign.js' );
+		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
+		wp_enqueue_script( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.js', array(), $page_js_ver, true );
+	}
 }
 
 add_action( 'wp_enqueue_scripts', 'thim_child_enqueue_styles', 1000 );
@@ -32,6 +39,102 @@ add_filter( 'template_include', function( $template ) {
 	return $template;
 }, 9999 );
 
+add_filter( 'template_include', function( $template ) {
+	if ( is_admin() ) {
+		return $template;
+	}
+
+	$page_templates = array(
+		'construction-sector-skills' => 'template-parts/pages/welding.php',
+		'notice-board'               => 'template-parts/pages/notice-board.php',
+		'toolkit-courses-apply-today' => 'template-parts/pages/apply.php',
+	);
+
+	foreach ( $page_templates as $slug => $relative_path ) {
+		if ( is_page( $slug ) ) {
+			$custom_template = get_stylesheet_directory() . '/' . $relative_path;
+			if ( file_exists( $custom_template ) ) {
+				return $custom_template;
+			}
+		}
+	}
+
+	return $template;
+}, 10000 );
+
+/* === SEO: curated metadata for child-theme page rebuilds === */
+
+function eduma_child_redesigned_page_metadata() {
+	if ( is_page( 'construction-sector-skills' ) ) {
+		return array(
+			'title'       => 'Welding and Fabrication Training | Toolkit Africa',
+			'description' => 'Develop practical welding and fabrication skills with hands-on training, VR-enabled learning, and career-focused support at Toolkit Africa.',
+			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/WELDING-6.jpg',
+		);
+	}
+
+	if ( is_page( 'notice-board' ) ) {
+		return array(
+			'title'       => 'Notice Board | Toolkit Africa',
+			'description' => 'Find current Toolkit Africa announcements, admissions guidance, opportunities, events, and important notices in one place.',
+			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/DAV8986-scaled.jpg',
+		);
+	}
+
+	if ( is_page( 'toolkit-courses-apply-today' ) ) {
+		return array(
+			'title'       => 'Apply for a Course | Toolkit Africa',
+			'description' => 'Prepare your Toolkit Africa course application, review the admission steps, and continue securely to the online application portal.',
+			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/TOOLKIT-scaled.jpg',
+		);
+	}
+
+	return false;
+}
+
+add_filter( 'wpseo_title', function( $title ) {
+	$metadata = eduma_child_redesigned_page_metadata();
+	return $metadata ? $metadata['title'] : $title;
+} );
+
+add_filter( 'wpseo_metadesc', function( $description ) {
+	$metadata = eduma_child_redesigned_page_metadata();
+	return $metadata ? $metadata['description'] : $description;
+} );
+
+add_filter( 'wpseo_opengraph_desc', function( $description ) {
+	$metadata = eduma_child_redesigned_page_metadata();
+	return $metadata ? $metadata['description'] : $description;
+} );
+
+add_filter( 'wpseo_opengraph_title', function( $title ) {
+	$metadata = eduma_child_redesigned_page_metadata();
+	return $metadata ? $metadata['title'] : $title;
+} );
+
+add_filter( 'wpseo_twitter_title', function( $title ) {
+	$metadata = eduma_child_redesigned_page_metadata();
+	return $metadata ? $metadata['title'] : $title;
+} );
+
+add_filter( 'wpseo_opengraph_image', function( $image ) {
+	$metadata = eduma_child_redesigned_page_metadata();
+	return $metadata ? $metadata['image'] : $image;
+} );
+
+add_filter( 'wpseo_schema_webpage', function( $data ) {
+	$metadata = eduma_child_redesigned_page_metadata();
+	if ( ! $metadata ) {
+		return $data;
+	}
+
+	$data['name']        = $metadata['title'];
+	$data['description'] = $metadata['description'];
+	unset( $data['primaryImageOfPage'], $data['image'], $data['thumbnailUrl'] );
+
+	return $data;
+} );
+
 /* === HEADER LOGO: avoid falling back to the parent Eduma logo === */
 
 add_action( 'after_setup_theme', function() {
@@ -40,7 +143,7 @@ add_action( 'after_setup_theme', function() {
 }, 20 );
 
 function eduma_child_toolkit_logo() {
-	$logo_url = content_url( 'uploads/2019/05/toolkit-scaled.png' );
+	$logo_url = content_url( 'uploads/2025/04/toolkit-scaled.png' );
 
 	printf(
 		'<a href="%s" title="%s" rel="home" class="thim-logo"><img src="%s" alt="%s" width="200" height="132"></a>',
@@ -56,7 +159,7 @@ add_filter( 'theme_mod_thim_sticky_logo', 'eduma_child_toolkit_logo_url', 20 );
 add_filter( 'theme_mod_thim_logo_mobile', 'eduma_child_toolkit_logo_url', 20 );
 
 function eduma_child_toolkit_logo_url( $logo ) {
-	return content_url( 'uploads/2019/05/toolkit-scaled.png' );
+	return content_url( 'uploads/2025/04/toolkit-scaled.png' );
 }
 
 /* === HOMEPAGE HEADER: Keep parent toolbar from creating a dark search band === */

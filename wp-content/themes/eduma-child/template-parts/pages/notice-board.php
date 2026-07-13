@@ -1,0 +1,15 @@
+<?php
+get_header();
+$uploads   = wp_get_upload_dir()['baseurl'];
+$apply_url = home_url( '/toolkit-courses-apply-today/' );
+?>
+<main id="main-content" class="toolkit-page toolkit-notice-page">
+	<section class="toolkit-notice-hero" style="background-image:url('<?php echo esc_url( $uploads . '/2025/05/DAV8986-scaled.jpg' ); ?>')"><div><p class="toolkit-kicker">Stay informed</p><h1>Notice board</h1><p>Current admissions guidance, opportunities, events, and important updates from Toolkit Africa.</p></div><label class="toolkit-notice-search"><i class="fas fa-search"></i><input type="search" placeholder="Search announcements" aria-label="Search announcements"></label></section>
+	<section class="toolkit-section toolkit-notices"><div class="toolkit-notice-controls"><div class="toolkit-filter-group" role="group" aria-label="Filter notices"><button class="is-active" data-filter="all">All</button><button data-filter="admissions">Admissions</button><button data-filter="notice">Notices</button><button data-filter="opportunity">Opportunities</button></div><div class="toolkit-view-controls"><span>Current information</span><button data-view="grid" class="is-active" aria-label="Grid view"><i class="fas fa-th"></i></button><button data-view="list" aria-label="List view"><i class="fas fa-list"></i></button></div></div><div class="toolkit-notice-grid">
+		<article data-category="admissions"><span class="toolkit-tag">Admissions</span><h2>Course applications</h2><p>Review application steps and continue to the secure online admissions portal when you are ready.</p><footer><span><i class="far fa-calendar"></i> Updated guidance</span><a href="<?php echo esc_url( $apply_url ); ?>">Start application <i class="fas fa-arrow-right"></i></a></footer></article>
+		<article data-category="notice"><span class="toolkit-tag toolkit-tag--orange">Important notice</span><h2>Protect yourself from fraud</h2><p>Toolkit does not request application or programme payments through unofficial channels. Confirm payment details with admissions before making a payment.</p><footer><span><i class="fas fa-shield-alt"></i> Admissions office</span><a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact us <i class="fas fa-arrow-right"></i></a></footer></article>
+		<article data-category="opportunity"><span class="toolkit-tag">Opportunities</span><h2>Skills and training opportunities</h2><p>Explore practical learning pathways across technical, digital, enterprise, and green-skills programmes.</p><footer><span><i class="fas fa-lightbulb"></i> Toolkit programmes</span><a href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Explore courses <i class="fas fa-arrow-right"></i></a></footer></article>
+	</div></section>
+	<section class="toolkit-subscribe"><i class="far fa-bell"></i><div><h2>Never miss an update</h2><p>For admissions and programme questions, speak directly with the Toolkit team.</p></div><a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact Toolkit</a></section>
+</main>
+<?php get_footer();
