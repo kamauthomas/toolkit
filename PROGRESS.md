@@ -63,6 +63,22 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 ### Deployment hold
 - Do not upload this batch until the local pages are approved and the exact demo/production FTP target directory is confirmed. The supplied credentials do not identify a safe remote path by themselves.
 
+## 2026-07-13 Demo deployment - major-page batch
+
+### Deployed
+- Demo host: `https://demo.toolkitafrica.ac.ke/`.
+- Confirmed FTP account root is the demo WordPress installation; files were deployed directly under `wp-content/themes/eduma-child/`.
+- Uploaded only the committed child-theme bundle for commits `be31851` and `f8417e8`: `functions.php`, `brand-tokens.css`, `page-redesign.css`, `page-redesign.js`, and the four custom page templates.
+- Backed up the replaced demo `functions.php` and `brand-tokens.css` locally before upload.
+
+### Remote verification
+- HTTP 200 and LiteSpeed cache MISS: `/our-ventures/`, `/our-ventures/construction-sector-skills/`, `/notice-board/`, and `/our-ventures/toolkit-courses-apply-today/`.
+- All four pages render the expected child-theme template marker and `page-redesign` assets.
+- Demo header now uses `/wp-content/uploads/2025/04/toolkit-scaled.png` rather than the missing 2019 path.
+
+### Security note
+- The demo FTPS certificate does not include the `demo.toolkitafrica.ac.ke` hostname. The verified deployment required certificate verification to be disabled for this host. Replace or correct that certificate before treating the connection as production-grade.
+
 ## Environment Notes
 - Active theme: `eduma-child` (child of `eduma`)
 - Homepage: page ID 4519, Elementor, `elementor_theme` page template
