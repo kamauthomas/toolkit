@@ -24,3 +24,19 @@
 ## Security requirement
 
 The current FTPS certificate does not match `demo.toolkitafrica.ac.ke`. This must be corrected before production deployment. Do not store FTP credentials in this repository or deployment scripts.
+
+## LiteSpeed cache requirement
+
+The demo root `.htaccess` must include a LiteSpeed cache lookup block before the WordPress rewrite block:
+
+```apache
+# BEGIN LSCACHE
+<IfModule LiteSpeed>
+RewriteEngine On
+CacheLookup on
+RewriteRule .* - [E=Cache-Control:no-autoflush]
+</IfModule>
+# END LSCACHE
+```
+
+Without this block, WordPress may emit public LiteSpeed cache headers while every request still reports `x-litespeed-cache: miss`. Verify a deployment by requesting the same public URL twice; the second response should report `x-litespeed-cache: hit`.

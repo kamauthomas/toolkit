@@ -27,11 +27,11 @@ add_action( 'wp_enqueue_scripts', 'thim_child_enqueue_styles', 1000 );
 
 /* Custom templates render immediately and do not need Eduma's blocking preloader. */
 add_filter( 'theme_mod_thim_preload', function( $enabled ) {
-	return is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ? false : $enabled;
+	return is_admin() ? $enabled : false;
 }, 100 );
 
 add_filter( 'body_class', function( $classes ) {
-	if ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ) {
+	if ( ! is_admin() ) {
 		$classes = array_diff( $classes, array( 'thim-body-preload', 'fixloader' ) );
 	}
 	return $classes;

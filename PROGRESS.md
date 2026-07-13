@@ -79,6 +79,16 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 ### Security note
 - The demo FTPS certificate does not include the `demo.toolkitafrica.ac.ke` hostname. The verified deployment required certificate verification to be disabled for this host. Replace or correct that certificate before treating the connection as production-grade.
 
+## 2026-07-13 Performance and notice-board refinement
+
+- Rebuilt the notice board to follow the supplied hero, filter, card, and update-strip reference more closely.
+- Replaced the Elementor footer widget with a compact child-theme footer and replaced the embedded header widget with a native Apply Now action.
+- Removed unrelated plugin assets from the rebuilt course, welding, notice-board, and application routes.
+- Reduced local notice-board response from approximately 0.71s / 105KB / 52 styles / 53 scripts to approximately 0.30s / 73KB / 9 styles / 13 scripts.
+- Disabled Eduma's blocking public preloader across rebuilt and untouched pages so uncached pages render progressively.
+- Restored the missing LiteSpeed `CacheLookup on` block in the demo root `.htaccess`. A pre-change backup is retained locally at `/tmp/demo-htaccess.before-b8476a5` for the current maintenance session.
+- Verified repeated demo requests return `x-litespeed-cache: hit`. Representative untouched pages improved from 1.4-2.3s cold time-to-first-byte to approximately 0.32-0.35s on a cache hit.
+
 ## Environment Notes
 - Active theme: `eduma-child` (child of `eduma`)
 - Homepage: page ID 4519, Elementor, `elementor_theme` page template
