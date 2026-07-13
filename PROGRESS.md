@@ -29,6 +29,21 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Configure the active SEO plugin and verify generated metadata, canonical URLs, sitemap, and social previews on the deployment environment.
 - Refine non-homepage templates only after page-specific designs/content and acceptance criteria are supplied; the existing documented build scope is homepage-focused.
 
+## 2026-07-13 Local database seed workflow
+
+### Applied
+- Recreated the isolated MariaDB instance at `/tmp/wp-mysql.sock` and imported `bfyigiln_new.sql`.
+- Added `scripts/seed-demo.php`, an idempotent post-import seed that activates `eduma-child`, sets Home as the static front page, forces the child template, clears stale Elementor caches, and assigns the verified primary menu.
+- Added `scripts/README.md` with the seed contract and environment URL boundary.
+
+### Verification
+- The local server at `http://127.0.0.1:8001/` responds with HTTP 200.
+- Rendered homepage includes `wp-child-theme-eduma-child`, the Toolkit logo, and one child `#hero-slider`.
+- Database verification: `stylesheet=eduma-child`, `page_on_front=4519`, and Home template=`default`.
+
+### Deployment history
+- The repository history and recorded work log contain no completed FTP upload/extraction command to reproduce. They only describe the intended demo-subdomain deployment. A versioned archive/deploy workflow still needs to be created before the next server release.
+
 ## Environment Notes
 - Active theme: `eduma-child` (child of `eduma`)
 - Homepage: page ID 4519, Elementor, `elementor_theme` page template
