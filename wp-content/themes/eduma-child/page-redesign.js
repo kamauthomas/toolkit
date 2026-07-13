@@ -11,7 +11,8 @@
       var filter = active ? active.getAttribute('data-filter') : 'all';
       var term = search ? search.value.toLowerCase().trim() : '';
       cards.forEach(function (card) {
-        var matchesFilter = filter === 'all' || card.getAttribute('data-category') === filter;
+        var categories = (card.getAttribute('data-category') || '').split(/\s+/);
+        var matchesFilter = filter === 'all' || categories.indexOf(filter) !== -1;
         var matchesSearch = !term || card.textContent.toLowerCase().indexOf(term) !== -1;
         card.hidden = !(matchesFilter && matchesSearch);
       });

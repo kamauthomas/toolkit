@@ -25,6 +25,18 @@ function thim_child_enqueue_styles() {
 
 add_action( 'wp_enqueue_scripts', 'thim_child_enqueue_styles', 1000 );
 
+/* Custom templates render immediately and do not need Eduma's blocking preloader. */
+add_filter( 'theme_mod_thim_preload', function( $enabled ) {
+	return is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ? false : $enabled;
+}, 100 );
+
+add_filter( 'body_class', function( $classes ) {
+	if ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ) {
+		$classes = array_diff( $classes, array( 'thim-body-preload', 'fixloader' ) );
+	}
+	return $classes;
+}, 100 );
+
 /* === HOMEPAGE TEMPLATE: prefer the child front-page over builder page templates === */
 
 add_filter( 'template_include', function( $template ) {
@@ -173,11 +185,7 @@ function eduma_child_toolkit_logo_url( $logo ) {
 /* === HOMEPAGE HEADER: Keep parent toolbar from creating a dark search band === */
 
 add_filter( 'theme_mod_thim_toolbar_show', function( $show ) {
-	if ( ! is_admin() && is_front_page() ) {
-		return false;
-	}
-
-	return $show;
+	return is_admin() ? $show : false;
 });
 
 /* === PERFORMANCE: Preload the first hero image on the front page === */
@@ -247,6 +255,134 @@ add_action( 'wp_enqueue_scripts', function() {
 		wp_deregister_script( '__tagembed__embbedJs' );
 	}
 }, 9999 );
+
+/* Rebuilt pages do not render Elementor or Contact Form 7 content. */
+add_action( 'wp_enqueue_scripts', function() {
+	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ) {
+		return;
+	}
+
+	$styles = array(
+		'sb-elementor-shared-style',
+		'cff',
+		'sb-font-awesome',
+		'sina-header-footer',
+		'inf-font-awesome',
+		'owl-carousel',
+		'bdpp-public-style',
+		'lvca-animate-styles',
+		'lvca-frontend-styles',
+		'lvca-icomoon-styles',
+		'tss',
+		'tribe-events-v2-single-skeleton',
+		'tribe-events-v2-single-skeleton-full',
+		'tec-events-elementor-widgets-base-styles',
+		'eae-css',
+		'eae-peel-css',
+		'vegas-css',
+		'lvca-accordion',
+		'lvca-slick',
+		'lvca-carousel',
+		'lvca-clients',
+		'lvca-heading',
+		'lvca-odometers',
+		'lvca-piecharts',
+		'lvca-posts-carousel',
+		'lvca-pricing-table',
+		'lvca-services',
+		'lvca-stats-bar',
+		'lvca-tabs',
+		'lvca-team-members',
+		'lvca-testimonials',
+		'lvca-flexslider',
+		'lvca-testimonials-slider',
+		'lvca-portfolio',
+		'h5p-plugin-fonts',
+		'h5p-plugin-styles',
+		'eael-general',
+		'bdt-uikit',
+		'ep-helper',
+		'contact-form-7',
+		'elementor-icons',
+		'elementor-frontend',
+		'thim-ekit-frontend',
+		'thim-ekit-widgets',
+		'widget-heading',
+		'widget-image-carousel',
+		'widget-icon-list',
+		'widget-google_maps',
+		'widget-social-icons',
+		'swiper',
+		'e-swiper',
+		'e-apple-webkit',
+		'elementor-icons-thim-ekits-fonts',
+	);
+	$scripts = array(
+		'__tagembed__embbedJs',
+		'cffscripts',
+		'tec-user-agent',
+		'lvca-waypoints',
+		'lvca-frontend-scripts',
+		'eae-iconHelper',
+		'lvca-accordion',
+		'lvca-slick-carousel',
+		'lvca-stats',
+		'lvca-odometers',
+		'lvca-piecharts',
+		'lvca-post-carousel',
+		'lvca-spacer',
+		'lvca-services',
+		'lvca-stats-bar',
+		'lvca-tabs',
+		'lvca-flexslider',
+		'lvca-testimonials-slider',
+		'lvca-isotope',
+		'lvca-imagesloaded',
+		'lvca-portfolio',
+		'eae-main',
+		'eae-index',
+		'font-awesome-4-shim',
+		'animated-main',
+		'eae-particles',
+		'wts-magnific',
+		'vegas',
+		'eael-general',
+		'bdt-uikit',
+		'element-pack-helper',
+		'contact-form-7',
+		'swv',
+		'elementor-webpack-runtime',
+		'elementor-frontend-modules',
+		'elementor-frontend',
+		'swiper',
+		'thim-ekit-frontend',
+		'thim-ekit-widgets',
+		'wp-api-fetch',
+		'wp-url',
+		'wp-hooks',
+		'wp-i18n',
+	);
+
+	foreach ( $styles as $handle ) {
+		wp_dequeue_style( $handle );
+		wp_deregister_style( $handle );
+	}
+	foreach ( $scripts as $handle ) {
+		wp_dequeue_script( $handle );
+		wp_deregister_script( $handle );
+	}
+}, PHP_INT_MAX );
+
+/* Some plugins enqueue again while rendering the footer. Remove those late additions. */
+add_action( 'wp_footer', function() {
+	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ) {
+		return;
+	}
+
+	foreach ( array( 'thim-ekit-frontend', 'thim-ekit-widgets', 'elementor-webpack-runtime', 'elementor-frontend-modules', 'elementor-frontend', 'swiper', 'wp-api-fetch', 'wp-url', 'wp-hooks', 'wp-i18n' ) as $handle ) {
+		wp_dequeue_script( $handle );
+	}
+}, 19 );
 
 /* === PERFORMANCE: Disable parent theme Google Fonts, serve locally === */
 

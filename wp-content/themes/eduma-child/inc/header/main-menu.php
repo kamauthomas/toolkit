@@ -133,17 +133,11 @@ if ( $menu_has_expected_labels( $primary_menu ) ) {
 		</li>
 		<?php
 
-		if ( is_active_sidebar( 'menu_right' ) ) {
-			echo '<li class="menu-right"><ul>';
-			dynamic_sidebar( 'menu_right' );
-			echo '</ul></li>';
-		} else {
-			printf(
-				'<li class="menu-right menu-right--fallback"><a class="header-apply-btn" href="%s">%s</a></li>',
-				esc_url( 'https://toolkit.mzizi.co.ke/portal/OnlineApplicationForm.aspx?q=d0d6b2f229d733c1e3156244805125a2' ),
-				esc_html__( 'Apply Now', 'eduma-child' )
-			);
-		}
+		printf(
+			'<li class="menu-right menu-right--fallback"><a class="header-apply-btn" href="%s">%s</a></li>',
+			esc_url( home_url( '/our-ventures/toolkit-courses-apply-today/' ) ),
+			esc_html__( 'Apply Now', 'eduma-child' )
+		);
 	}
 	?>
 </ul>
