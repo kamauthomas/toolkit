@@ -15,7 +15,7 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_script( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.js', array(), $js_ver, true );
 	}
 
-	if ( is_page( array( 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ) {
+	if ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ) {
 		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
 		$page_js_ver  = filemtime( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
@@ -45,6 +45,7 @@ add_filter( 'template_include', function( $template ) {
 	}
 
 	$page_templates = array(
+		'our-ventures'                 => 'template-parts/pages/courses.php',
 		'construction-sector-skills' => 'template-parts/pages/welding.php',
 		'notice-board'               => 'template-parts/pages/notice-board.php',
 		'toolkit-courses-apply-today' => 'template-parts/pages/apply.php',
@@ -65,6 +66,13 @@ add_filter( 'template_include', function( $template ) {
 /* === SEO: curated metadata for child-theme page rebuilds === */
 
 function eduma_child_redesigned_page_metadata() {
+	if ( is_page( 'our-ventures' ) ) {
+		return array(
+			'title'       => 'Our Courses | Toolkit Africa',
+			'description' => 'Explore practical Toolkit Africa courses in welding, renewable energy, digital skills, agriculture, and enterprise-focused learning.',
+			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/TOOLKIT-scaled.jpg',
+		);
+	}
 	if ( is_page( 'construction-sector-skills' ) ) {
 		return array(
 			'title'       => 'Welding and Fabrication Training | Toolkit Africa',
