@@ -15,7 +15,7 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_script( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.js', array(), $js_ver, true );
 	}
 
-	if ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ) {
+	if ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) ) {
 		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
 		$page_js_ver  = filemtime( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
@@ -57,6 +57,10 @@ add_filter( 'template_include', function( $template ) {
 	}
 
 	$page_templates = array(
+		'about-toolkit-africa'          => 'template-parts/pages/institutional.php',
+		'the-toolkit-foundation-copy'  => 'template-parts/pages/institutional.php',
+		'the-toolkit-foundation'       => 'template-parts/pages/institutional.php',
+		'contact'                      => 'template-parts/pages/contact.php',
 		'our-ventures'                 => 'template-parts/pages/courses.php',
 		'construction-sector-skills' => 'template-parts/pages/welding.php',
 		'notice-board'               => 'template-parts/pages/notice-board.php',
@@ -83,6 +87,34 @@ function eduma_child_redesigned_page_metadata() {
 			'title'       => 'Our Courses | Toolkit Africa',
 			'description' => 'Explore practical Toolkit Africa courses in welding, renewable energy, digital skills, agriculture, and enterprise-focused learning.',
 			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/TOOLKIT-scaled.jpg',
+		);
+	}
+	if ( is_page( 'about-toolkit-africa' ) ) {
+		return array(
+			'title'       => 'About Toolkit Africa | Skills, Innovation and Opportunity',
+			'description' => 'Learn how Toolkit Africa connects practical skills, innovation, industry exposure, employment, and entrepreneurship pathways for young people and women.',
+			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/TOOLKIT1-1536x863.jpg',
+		);
+	}
+	if ( is_page( 'the-toolkit-foundation-copy' ) ) {
+		return array(
+			'title'       => 'Impact and Insights | Toolkit Africa',
+			'description' => 'Explore how Toolkit Africa connects practical learning with employability, industrial exposure, livelihoods, and inclusive opportunity.',
+			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/DAV4119-1536x1025.jpg',
+		);
+	}
+	if ( is_page( 'the-toolkit-foundation' ) ) {
+		return array(
+			'title'       => 'The Toolkit Foundation | Inclusive Skills Development',
+			'description' => 'Discover Toolkit Foundation programmes supporting inclusive technical, digital, green, and enterprise skills for underserved communities.',
+			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/solar-2-website.jpg',
+		);
+	}
+	if ( is_page( 'contact' ) ) {
+		return array(
+			'title'       => 'Contact Toolkit Africa | Courses, Admissions and Partnerships',
+			'description' => 'Contact Toolkit Africa about courses, admissions, partnerships, and visiting the Toolkit Skills and Innovation Hub in Kikuyu, Kenya.',
+			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/DAV8986-scaled-e1747646195282-1536x554.jpg',
 		);
 	}
 	if ( is_page( 'construction-sector-skills' ) ) {
@@ -258,7 +290,7 @@ add_action( 'wp_enqueue_scripts', function() {
 
 /* Rebuilt pages do not render Elementor or Contact Form 7 content. */
 add_action( 'wp_enqueue_scripts', function() {
-	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ) {
+	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) ) {
 		return;
 	}
 
@@ -362,6 +394,10 @@ add_action( 'wp_enqueue_scripts', function() {
 		'wp-hooks',
 		'wp-i18n',
 	);
+	if ( is_page( 'contact' ) ) {
+		$styles = array_diff( $styles, array( 'contact-form-7' ) );
+		$scripts = array_diff( $scripts, array( 'contact-form-7', 'swv', 'wp-hooks', 'wp-i18n' ) );
+	}
 
 	foreach ( $styles as $handle ) {
 		wp_dequeue_style( $handle );
@@ -375,7 +411,7 @@ add_action( 'wp_enqueue_scripts', function() {
 
 /* Some plugins enqueue again while rendering the footer. Remove those late additions. */
 add_action( 'wp_footer', function() {
-	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today' ) ) ) {
+	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) ) {
 		return;
 	}
 
