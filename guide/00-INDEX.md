@@ -12,6 +12,7 @@ You are an autonomous coding agent modifying an existing WordPress theme to buil
 6. `06-VERIFICATION-CHECKLIST.md` — run after every build step, and again at the end.
 7. `07-DEPLOYMENT-SAFETY.md` — read before any `git commit`, `git push`, or deploy action.
 21. `21-COURSE-CATALOG-CUTOVER-AND-ASSISTANT.md` — authoritative 2026 catalog, legacy-page disposition, main-domain rollback, and registration-assistant boundaries.
+22. `22-MAIN-DOMAIN-CUTOVER-INVENTORY.md` — fresh production URL inventory, instant switches, rollout gates, and rollback order.
 8. `08-PROGRESS-LOG-TEMPLATE.md` — copy this to `PROGRESS.md` in the repo root on step 1 and update it continuously.
 
 ## Hard rules (apply across all files)

@@ -1,5 +1,31 @@
 <?php
 
+/**
+ * Deployment switches. Constants take priority so operations can change state
+ * instantly without editing theme files or deleting WordPress content.
+ */
+function eduma_child_switch( $constant, $option, $default = false ) {
+	if ( defined( $constant ) ) {
+		return (bool) constant( $constant );
+	}
+	$value = get_option( $option, null );
+	return null === $value ? $default : (bool) $value;
+}
+
+function eduma_child_redesign_enabled() {
+	$host = isset( $_SERVER['HTTP_HOST'] ) ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : '';
+	$default = 'demo.toolkitafrica.ac.ke' === $host || in_array( $host, array( '127.0.0.1:8001', 'localhost:8001' ), true );
+	return eduma_child_switch( 'TOOLKIT_REDESIGN_ENABLED', 'toolkit_redesign_enabled', $default );
+}
+
+function eduma_child_2026_catalog_enabled() {
+	return eduma_child_switch( 'TOOLKIT_2026_CATALOG_ENABLED', 'toolkit_2026_catalog_enabled', false );
+}
+
+function eduma_child_2026_pricing_enabled() {
+	return eduma_child_2026_catalog_enabled() && eduma_child_switch( 'TOOLKIT_2026_PRICING_ENABLED', 'toolkit_2026_pricing_enabled', false );
+}
+
 function thim_child_enqueue_styles() {
 	wp_enqueue_style( 'thim-parent-style', get_template_directory_uri() . '/style.css', array(), THIM_THEME_VERSION );
 
@@ -7,7 +33,7 @@ function thim_child_enqueue_styles() {
 	$brand_ver = filemtime( get_stylesheet_directory() . '/brand-tokens.css' );
 	wp_enqueue_style( 'eduma-child-brand-tokens', get_stylesheet_directory_uri() . '/brand-tokens.css', array(), $brand_ver );
 
-	if ( is_front_page() ) {
+	if ( is_front_page() && eduma_child_redesign_enabled() ) {
 		$css_ver = filemtime( get_stylesheet_directory() . '/hero-slider.css' );
 		wp_enqueue_style( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.css', array( 'eduma-child-brand-tokens' ), $css_ver );
 
@@ -15,7 +41,7 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_script( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.js', array(), $js_ver, true );
 	}
 
-	if ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) || get_query_var( 'toolkit_course' ) ) {
+	if ( eduma_child_redesign_enabled() && ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) || get_query_var( 'toolkit_course' ) ) ) {
 		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
 		$page_js_ver  = filemtime( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
@@ -40,7 +66,7 @@ add_filter( 'body_class', function( $classes ) {
 /* === HOMEPAGE TEMPLATE: prefer the child front-page over builder page templates === */
 
 add_filter( 'template_include', function( $template ) {
-	if ( ! is_admin() && is_front_page() ) {
+	if ( ! is_admin() && is_front_page() && eduma_child_redesign_enabled() ) {
 		$front_page_template = get_stylesheet_directory() . '/front-page.php';
 
 		if ( file_exists( $front_page_template ) ) {
@@ -52,11 +78,11 @@ add_filter( 'template_include', function( $template ) {
 }, 9999 );
 
 add_filter( 'template_include', function( $template ) {
-	if ( is_admin() ) {
+	if ( is_admin() || ! eduma_child_redesign_enabled() ) {
 		return $template;
 	}
 
-	if ( get_query_var( 'toolkit_course' ) ) {
+	if ( get_query_var( 'toolkit_course' ) && eduma_child_2026_catalog_enabled() ) {
 		return get_stylesheet_directory() . '/template-parts/pages/course-detail.php';
 	}
 
@@ -85,10 +111,13 @@ add_filter( 'template_include', function( $template ) {
 
 /* Theme-owned course routes keep the verified catalog separate from legacy pages. */
 add_action( 'init', function() {
-	add_rewrite_rule( '^courses/([^/]+)/?$', 'index.php?toolkit_course=$matches[1]', 'top' );
-	if ( get_option( 'eduma_child_course_routes_version' ) !== '2026-1' ) {
+	$routes_version = eduma_child_2026_catalog_enabled() ? '2026-2-on' : '2026-2-off';
+	if ( eduma_child_2026_catalog_enabled() ) {
+		add_rewrite_rule( '^courses/([^/]+)/?$', 'index.php?toolkit_course=$matches[1]', 'top' );
+	}
+	if ( get_option( 'eduma_child_course_routes_version' ) !== $routes_version ) {
 		flush_rewrite_rules( false );
-		update_option( 'eduma_child_course_routes_version', '2026-1', false );
+		update_option( 'eduma_child_course_routes_version', $routes_version, false );
 	}
 } );
 
@@ -100,6 +129,9 @@ add_filter( 'query_vars', function( $vars ) {
 /* === SEO: curated metadata for child-theme page rebuilds === */
 
 function eduma_child_redesigned_page_metadata() {
+	if ( ! eduma_child_redesign_enabled() ) {
+		return false;
+	}
 	$course_slug = get_query_var( 'toolkit_course' );
 	if ( $course_slug ) {
 		require_once get_stylesheet_directory() . '/inc/course-catalog.php';
@@ -116,42 +148,42 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'Our Courses | Toolkit Africa',
 			'description' => 'Explore practical Toolkit Africa courses in welding, renewable energy, digital skills, agriculture, and enterprise-focused learning.',
-			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/TOOLKIT-scaled.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
 	if ( is_page( 'about-toolkit-africa' ) ) {
 		return array(
 			'title'       => 'About Toolkit Africa | Skills, Innovation and Opportunity',
 			'description' => 'Learn how Toolkit Africa connects practical skills, innovation, industry exposure, employment, and entrepreneurship pathways for young people and women.',
-			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/TOOLKIT1-1536x863.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
 	if ( is_page( 'the-toolkit-foundation-copy' ) ) {
 		return array(
 			'title'       => 'Impact and Insights | Toolkit Africa',
 			'description' => 'Explore how Toolkit Africa connects practical learning with employability, industrial exposure, livelihoods, and inclusive opportunity.',
-			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/DAV4119-1536x1025.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
 		);
 	}
 	if ( is_page( 'the-toolkit-foundation' ) ) {
 		return array(
 			'title'       => 'The Toolkit Foundation | Inclusive Skills Development',
 			'description' => 'Discover Toolkit Foundation programmes supporting inclusive technical, digital, green, and enterprise skills for underserved communities.',
-			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/solar-2-website.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/foundation.jpg',
 		);
 	}
 	if ( is_page( 'contact' ) ) {
 		return array(
 			'title'       => 'Contact Toolkit Africa | Courses, Admissions and Partnerships',
 			'description' => 'Contact Toolkit Africa about courses, admissions, partnerships, and visiting the Toolkit Skills and Innovation Hub in Kikuyu, Kenya.',
-			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/DAV8986-scaled-e1747646195282-1536x554.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/contact.jpg',
 		);
 	}
 	if ( is_page( 'construction-sector-skills' ) ) {
 		return array(
 			'title'       => 'Welding and Fabrication Training | Toolkit Africa',
 			'description' => 'Develop practical welding and fabrication skills with hands-on training, VR-enabled learning, and career-focused support at Toolkit Africa.',
-			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/WELDING-6.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/welding.jpg',
 		);
 	}
 
@@ -159,7 +191,7 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'Notice Board | Toolkit Africa',
 			'description' => 'Find current Toolkit Africa announcements, admissions guidance, opportunities, events, and important notices in one place.',
-			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/DAV8986-scaled.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/notice-board.jpg',
 		);
 	}
 
@@ -167,7 +199,7 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'Apply for a Course | Toolkit Africa',
 			'description' => 'Prepare your Toolkit Africa course application, review the admission steps, and continue securely to the online application portal.',
-			'image'       => wp_get_upload_dir()['baseurl'] . '/2025/05/TOOLKIT-scaled.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
 

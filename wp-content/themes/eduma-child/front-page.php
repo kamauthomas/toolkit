@@ -4,6 +4,10 @@
  * Keeping the first viewport here avoids homepage regressions from parent theme
  * updates or page-builder template changes.
  */
+if ( function_exists( 'eduma_child_redesign_enabled' ) && ! eduma_child_redesign_enabled() ) {
+	include get_template_directory() . '/page.php';
+	return;
+}
 get_header();
 require_once get_stylesheet_directory() . '/inc/hero-slides.php';
 $slides = eduma_child_get_hero_slides();
@@ -137,7 +141,7 @@ $slides = eduma_child_get_hero_slides();
 	<div class="home-iw-banner__inner">
 		<a class="home-iw-banner__link" href="https://toolkitiiwppt.my.canva.site/iiw-general-assembly-presentation">
 			<img
-				src="<?php echo esc_url( content_url( 'uploads/2025/06/toolkit-at-the-International-Institute-of-welding-2025-2.png' ) ); ?>"
+				src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/pages/iiw-banner.png' ); ?>"
 				alt="Toolkit at the International Institute of Welding 2025"
 				width="1600"
 				height="200"

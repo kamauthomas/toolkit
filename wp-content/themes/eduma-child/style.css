@@ -1427,12 +1427,12 @@ body.home.fixloader {
 }
 
 /* Child-theme footer: compact and independent of page-builder widgets. */
-.toolkit-site-footer { color:#dfe9e3; background:#0b3023; font-size:14px; line-height:1.55; }
+.toolkit-site-footer { color:#f0f1e7; background:#41451b; font-size:14px; line-height:1.55; }
 .toolkit-site-footer__main { padding:38px 20px 30px; }
 .toolkit-site-footer__inner { display:grid; grid-template-columns:1.2fr .75fr 1.15fr 1.1fr; gap:42px; width:min(1180px,100%); margin:0 auto; }
 .toolkit-site-footer h2 { margin:0 0 15px; color:#fff; font-size:15px; font-weight:700; letter-spacing:0; }
-.toolkit-site-footer p { margin:0; color:#c5d2cb; }
-.toolkit-site-footer a { color:#e7efea; text-decoration:none; transition:color .18s ease,background-color .18s ease; }
+.toolkit-site-footer p { margin:0; color:#d9dcc8; }
+.toolkit-site-footer a { color:#f2f3e9; text-decoration:none; transition:color .18s ease,background-color .18s ease; }
 .toolkit-site-footer a:hover { color:#fff; }
 .toolkit-site-footer__brand img { display:block; width:118px; height:auto; margin-bottom:12px; }
 .toolkit-site-footer__brand p { max-width:230px; }
@@ -1443,7 +1443,7 @@ body.home.fixloader {
 .toolkit-site-footer__action p { margin-bottom:16px; }
 .toolkit-site-footer__button { display:inline-flex; align-items:center; gap:9px; min-height:42px; padding:10px 18px; border-radius:6px; color:#fff!important; background:#ed5d12; font-weight:700; }
 .toolkit-site-footer__button:hover { background:#d8510d; }
-.toolkit-site-footer__bottom { padding:13px 20px; border-top:1px solid rgba(255,255,255,.13); text-align:center; background:#08271c; }
+.toolkit-site-footer__bottom { padding:13px 20px; border-top:1px solid rgba(255,255,255,.13); text-align:center; background:#303314; }
 .toolkit-site-footer__bottom p { font-size:12px; }
 
 @media (max-width:991px) { .toolkit-site-footer__inner { grid-template-columns:1fr 1fr; gap:30px 42px; } }

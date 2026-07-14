@@ -1,4 +1,8 @@
 <?php
+if ( function_exists( 'eduma_child_redesign_enabled' ) && ! eduma_child_redesign_enabled() ) {
+	include get_template_directory() . '/inc/header/main-menu.php';
+	return;
+}
 /**
  * Child-theme override for Eduma's main menu.
  *

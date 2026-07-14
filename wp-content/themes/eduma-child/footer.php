@@ -1,15 +1,19 @@
 <?php
+if ( function_exists( 'eduma_child_redesign_enabled' ) && ! eduma_child_redesign_enabled() ) {
+	include get_template_directory() . '/footer.php';
+	return;
+}
 /**
  * Lightweight site footer owned by the child theme.
  */
-$uploads = wp_get_upload_dir()['baseurl'];
+$logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 ?>
 <footer id="colophon" class="toolkit-site-footer">
 	<div class="toolkit-site-footer__main">
 		<div class="toolkit-site-footer__inner">
 			<div class="toolkit-site-footer__brand">
 				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="Toolkit Africa home">
-					<img src="<?php echo esc_url( $uploads . '/2025/06/Ff4c00-969E2a-006A68-TOOLKIT-LOGO-Edited-e1750710440852-300x216.png' ); ?>" width="180" height="130" alt="Toolkit Africa">
+					<img src="<?php echo esc_url( $logo ); ?>" width="180" height="130" alt="Toolkit Africa">
 				</a>
 				<p>Practical skills, innovation, and opportunity for Africa's young people.</p>
 			</div>

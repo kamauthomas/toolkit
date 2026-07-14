@@ -20,6 +20,16 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Local verification: PHP syntax, `git diff --check`, seven HTTP 200 course routes, eight HTTP 200 packaged assets, desktop 1440px and mobile 390px screenshots.
 - Demo deployment: commit `b2442ea` deployed on 14 July 2026. Homepage, catalog, all seven course routes, packaged logo, course assets, canonical/schema hierarchy, catalog scope, and LiteSpeed cache hits verified. FTPS rollback copies are retained at `/tmp/toolkit-demo-backup-5b0c0ea` for this maintenance session.
 
+## 2026-07-14 Asset and cutover safety patch
+
+- Replaced every child-theme upload-directory image dependency with packaged theme assets, including homepage slides/banner, institutional pages, Contact, Notice Board, welding, footer, and SEO previews.
+- Replaced the incorrect Electrical Installation visual with an electrical-work image and the generic digital image with a digital-program asset.
+- Shifted redesigned pages from teal to the logo-derived olive palette while retaining orange for primary actions.
+- Added instant redesign, 2026 catalog, pricing, and per-course switches. The main domain, 2026 catalog, and 2026 pricing default off; demo/local redesign defaults on.
+- Restored the legacy programme catalog as the default while retaining the prospectus catalog behind its switch.
+- Fresh main-domain crawl: six sitemap indexes and 39 page URLs recorded in `guide/22-MAIN-DOMAIN-CUTOVER-INVENTORY.md`.
+- Verification: all child-theme PHP syntax, `git diff --check`, legacy catalog mode, disabled 2026 route, per-course hide, independent pricing gate, safe option reset, packaged page assets, and desktop/mobile screenshots passed.
+
 ## 2026-07-13 Phase 4 - SEO and accessibility handoff
 
 ### Applied

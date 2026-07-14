@@ -2,13 +2,13 @@
 get_header();
 
 $slug    = get_post_field( 'post_name', get_queried_object_id() );
-$uploads = wp_get_upload_dir()['baseurl'];
+$assets  = get_stylesheet_directory_uri() . '/assets/images/pages/';
 $pages   = array(
 	'about-toolkit-africa' => array(
 		'kicker'      => 'About Toolkit',
 		'title'       => 'Skills that open real opportunities',
 		'intro'       => 'Toolkit is a Kenya-based social enterprise founded in 2014 to help young people and women build market-relevant skills and move towards employment or entrepreneurship.',
-		'image'       => $uploads . '/2025/05/TOOLKIT1-1536x863.jpg',
+		'image'       => $assets . 'about.jpg',
 		'section'     => 'Who we are',
 		'body'        => 'Our programmes combine practical technical training with employability, digital, and entrepreneurship skills. We work with public institutions, development partners, and employers so learning remains connected to changing labour markets.',
 		'cards'       => array(
@@ -25,7 +25,7 @@ $pages   = array(
 		'kicker'      => 'Impact and insights',
 		'title'       => 'From practical learning to lasting livelihoods',
 		'intro'       => 'Toolkit connects hands-on learning with industrial exposure, employability skills, and pathways into work and enterprise.',
-		'image'       => $uploads . '/2025/05/DAV4119-1536x1025.jpg',
+		'image'       => $assets . 'impact.jpg',
 		'section'     => 'Our foundational purpose',
 		'body'        => 'We equip vulnerable young people with professional, life, digital, and entrepreneurship skills for current and future labour markets. Learners gain practical experience and guidance designed to help them enter the workplace with confidence.',
 		'cards'       => array(
@@ -42,7 +42,7 @@ $pages   = array(
 		'kicker'      => 'The Toolkit Foundation',
 		'title'       => 'Skills and opportunity where they are needed most',
 		'intro'       => 'The Toolkit Foundation supports inclusive skills development for underserved communities, including women and displaced young people.',
-		'image'       => $uploads . '/2025/05/solar-2-website.jpg',
+		'image'       => $assets . 'foundation.jpg',
 		'section'     => 'Building practical pathways',
 		'body'        => 'Foundation programmes use technical, digital, and enterprise learning to strengthen confidence, livelihoods, and community resilience. Work in Kakuma has included renewable-energy and solar-skills training delivered with institutional and development partners.',
 		'cards'       => array(

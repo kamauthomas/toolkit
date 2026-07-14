@@ -1,6 +1,6 @@
 <?php
 
-function eduma_child_course_catalog() {
+function eduma_child_2026_course_catalog() {
 	$assets = get_stylesheet_directory_uri() . '/assets/images/courses/';
 
 	return array(
@@ -49,7 +49,36 @@ function eduma_child_course_catalog() {
 	);
 }
 
+function eduma_child_legacy_course_catalog() {
+	$assets = get_stylesheet_directory_uri() . '/assets/images/courses/';
+	return array(
+		'welding-and-fabrication' => array( 'title' => 'Welding and Fabrication', 'short' => 'Develop practical workshop skills with industry-aware training and modern learning tools.', 'image' => $assets . 'welding.jpg', 'icon' => 'fa-fire', 'url' => home_url( '/our-ventures/construction-sector-skills/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions' ),
+		'renewable-energy' => array( 'title' => 'Renewable Energy', 'short' => 'Build technical foundations for solar and emerging green-skills opportunities.', 'image' => $assets . 'solar.jpg', 'icon' => 'fa-solar-panel', 'url' => home_url( '/our-ventures/renewable-energy/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions' ),
+		'organic-farming-skills' => array( 'title' => 'Organic Farming Skills', 'short' => 'Learn practical and sustainable approaches to agriculture and enterprise.', 'image' => $assets . 'agriculture.jpg', 'icon' => 'fa-seedling', 'url' => home_url( '/our-ventures/organic-farming-skills/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions' ),
+		'digital-skills-online-jobs' => array( 'title' => 'Digital Skills and Online Jobs', 'short' => 'Strengthen digital capability for changing work and entrepreneurship.', 'image' => $assets . 'digital.jpg', 'icon' => 'fa-laptop-code', 'url' => home_url( '/our-ventures/access-online-jobs/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions' ),
+		'recognition-prior-learning' => array( 'title' => 'Recognition of Prior Learning', 'short' => 'Turn existing skills and experience into recognised progression pathways.', 'image' => $assets . 'entrepreneurship.jpg', 'icon' => 'fa-award', 'url' => home_url( '/our-ventures/construction-sector-skills/recognition-of-prior-learning-rpl/' ), 'duration' => 'Assessment-led pathway', 'intakes' => 'Confirmed by admissions' ),
+		'consultancy-research' => array( 'title' => 'Consultancy and Research', 'short' => 'Access practical support for workforce development, training, and research needs.', 'image' => $assets . 'languages.jpg', 'icon' => 'fa-chart-line', 'url' => home_url( '/our-ventures/tti-consultancy-and-research/' ), 'duration' => 'Engagement-based', 'intakes' => 'Contact the Toolkit team' ),
+	);
+}
+
+function eduma_child_course_is_enabled( $slug ) {
+	$constant = 'TOOLKIT_COURSE_' . strtoupper( str_replace( '-', '_', $slug ) ) . '_ENABLED';
+	return eduma_child_switch( $constant, 'toolkit_course_' . $slug . '_enabled', true );
+}
+
+function eduma_child_course_catalog() {
+	if ( ! eduma_child_2026_catalog_enabled() ) {
+		return eduma_child_legacy_course_catalog();
+	}
+	return array_filter( eduma_child_2026_course_catalog(), function( $course, $slug ) {
+		return eduma_child_course_is_enabled( $slug );
+	}, ARRAY_FILTER_USE_BOTH );
+}
+
 function eduma_child_get_course( $slug ) {
+	if ( ! eduma_child_2026_catalog_enabled() ) {
+		return false;
+	}
 	$catalog = eduma_child_course_catalog();
 	return isset( $catalog[ $slug ] ) ? $catalog[ $slug ] : false;
 }
