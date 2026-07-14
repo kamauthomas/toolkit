@@ -29,6 +29,7 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Restored the legacy programme catalog as the default while retaining the prospectus catalog behind its switch.
 - Fresh main-domain crawl: six sitemap indexes and 39 page URLs recorded in `guide/22-MAIN-DOMAIN-CUTOVER-INVENTORY.md`.
 - Verification: all child-theme PHP syntax, `git diff --check`, legacy catalog mode, disabled 2026 route, per-course hide, independent pricing gate, safe option reset, packaged page assets, and desktop/mobile screenshots passed.
+- Demo deployment: commit `4ec5b05` deployed and cache-purged on 14 July 2026. Eighteen referenced demo image assets return HTTP 200; homepage, About, and legacy catalog return HTTP 200/cache hit; the disabled 2026 course route returns HTTP 404/cache hit. Pre-deployment file backups are retained at `/tmp/toolkit-demo-backup-4ec5b05` for this maintenance session. Main-domain deployment was not performed.
 
 ## 2026-07-13 Phase 4 - SEO and accessibility handoff
 
