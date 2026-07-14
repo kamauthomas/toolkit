@@ -11,6 +11,14 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Latest commit: `b53a726` (Phase 2: Update PROGRESS.md with header fix, tokens, section consistency log)
 - Current working tree: Phase 3 corrective pass for child-theme navigation isolation, toolbar removal, homepage flow, and cleanup rules
 
+## 2026-07-14 Prospectus catalog release
+
+- Pre-release rollback commit: `08b7242668bc00fbfffad2310ba6caaa4b1e24ff`.
+- Replaced the demo-dependent uploads logo with a packaged child-theme asset after both referenced demo upload URLs returned HTTP 404.
+- Added seven prospectus-backed course families and reusable `/courses/{slug}/` detail routes with accurate SEO canonicals.
+- Kept legacy WordPress pages intact for review and rollback; see `guide/21-COURSE-CATALOG-CUTOVER-AND-ASSISTANT.md`.
+- Local verification: PHP syntax, `git diff --check`, seven HTTP 200 course routes, eight HTTP 200 packaged assets, desktop 1440px and mobile 390px screenshots.
+
 ## 2026-07-13 Phase 4 - SEO and accessibility handoff
 
 ### Applied

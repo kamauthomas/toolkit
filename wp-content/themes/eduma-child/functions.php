@@ -15,7 +15,7 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_script( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.js', array(), $js_ver, true );
 	}
 
-	if ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) ) {
+	if ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) || get_query_var( 'toolkit_course' ) ) {
 		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
 		$page_js_ver  = filemtime( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
@@ -56,6 +56,10 @@ add_filter( 'template_include', function( $template ) {
 		return $template;
 	}
 
+	if ( get_query_var( 'toolkit_course' ) ) {
+		return get_stylesheet_directory() . '/template-parts/pages/course-detail.php';
+	}
+
 	$page_templates = array(
 		'about-toolkit-africa'          => 'template-parts/pages/institutional.php',
 		'the-toolkit-foundation-copy'  => 'template-parts/pages/institutional.php',
@@ -79,9 +83,35 @@ add_filter( 'template_include', function( $template ) {
 	return $template;
 }, 10000 );
 
+/* Theme-owned course routes keep the verified catalog separate from legacy pages. */
+add_action( 'init', function() {
+	add_rewrite_rule( '^courses/([^/]+)/?$', 'index.php?toolkit_course=$matches[1]', 'top' );
+	if ( get_option( 'eduma_child_course_routes_version' ) !== '2026-1' ) {
+		flush_rewrite_rules( false );
+		update_option( 'eduma_child_course_routes_version', '2026-1', false );
+	}
+} );
+
+add_filter( 'query_vars', function( $vars ) {
+	$vars[] = 'toolkit_course';
+	return $vars;
+} );
+
 /* === SEO: curated metadata for child-theme page rebuilds === */
 
 function eduma_child_redesigned_page_metadata() {
+	$course_slug = get_query_var( 'toolkit_course' );
+	if ( $course_slug ) {
+		require_once get_stylesheet_directory() . '/inc/course-catalog.php';
+		$course = eduma_child_get_course( sanitize_key( $course_slug ) );
+		if ( $course ) {
+			return array(
+				'title'       => $course['title'] . ' | Toolkit Africa',
+				'description' => $course['short'] . ' Review 2026 entry requirements, duration, fees, intakes, and application steps.',
+				'image'       => $course['image'],
+			);
+		}
+	}
 	if ( is_page( 'our-ventures' ) ) {
 		return array(
 			'title'       => 'Our Courses | Toolkit Africa',
@@ -169,6 +199,21 @@ add_filter( 'wpseo_twitter_title', function( $title ) {
 	return $metadata ? $metadata['title'] : $title;
 } );
 
+function eduma_child_course_canonical_url() {
+	$slug = sanitize_key( get_query_var( 'toolkit_course' ) );
+	return $slug ? home_url( '/courses/' . $slug . '/' ) : false;
+}
+
+add_filter( 'wpseo_canonical', function( $canonical ) {
+	$course_url = eduma_child_course_canonical_url();
+	return $course_url ? $course_url : $canonical;
+} );
+
+add_filter( 'wpseo_opengraph_url', function( $url ) {
+	$course_url = eduma_child_course_canonical_url();
+	return $course_url ? $course_url : $url;
+} );
+
 add_filter( 'wpseo_opengraph_image', function( $image ) {
 	$metadata = eduma_child_redesigned_page_metadata();
 	return $metadata ? $metadata['image'] : $image;
@@ -182,6 +227,11 @@ add_filter( 'wpseo_schema_webpage', function( $data ) {
 
 	$data['name']        = $metadata['title'];
 	$data['description'] = $metadata['description'];
+	$course_url = eduma_child_course_canonical_url();
+	if ( $course_url ) {
+		$data['url'] = $course_url;
+		$data['@id'] = $course_url . '#webpage';
+	}
 	unset( $data['primaryImageOfPage'], $data['image'], $data['thumbnailUrl'] );
 
 	return $data;
@@ -195,7 +245,7 @@ add_action( 'after_setup_theme', function() {
 }, 20 );
 
 function eduma_child_toolkit_logo() {
-	$logo_url = content_url( 'uploads/2025/04/toolkit-scaled.png' );
+	$logo_url = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 
 	printf(
 		'<a href="%s" title="%s" rel="home" class="thim-logo"><img src="%s" alt="%s" width="200" height="132"></a>',
@@ -211,7 +261,7 @@ add_filter( 'theme_mod_thim_sticky_logo', 'eduma_child_toolkit_logo_url', 20 );
 add_filter( 'theme_mod_thim_logo_mobile', 'eduma_child_toolkit_logo_url', 20 );
 
 function eduma_child_toolkit_logo_url( $logo ) {
-	return content_url( 'uploads/2025/04/toolkit-scaled.png' );
+	return get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 }
 
 /* === HOMEPAGE HEADER: Keep parent toolbar from creating a dark search band === */
@@ -290,7 +340,7 @@ add_action( 'wp_enqueue_scripts', function() {
 
 /* Rebuilt pages do not render Elementor or Contact Form 7 content. */
 add_action( 'wp_enqueue_scripts', function() {
-	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) ) {
+	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) && ! get_query_var( 'toolkit_course' ) ) {
 		return;
 	}
 
@@ -411,7 +461,7 @@ add_action( 'wp_enqueue_scripts', function() {
 
 /* Some plugins enqueue again while rendering the footer. Remove those late additions. */
 add_action( 'wp_footer', function() {
-	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) ) {
+	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) && ! get_query_var( 'toolkit_course' ) ) {
 		return;
 	}
 

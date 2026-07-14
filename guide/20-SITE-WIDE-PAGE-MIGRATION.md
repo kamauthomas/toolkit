@@ -30,6 +30,8 @@ LearnPress account, checkout, profile, instructor, login, registration, and pass
 
 The duplicate `/courses/` and `/blog/` routes should redirect to `/our-ventures/` and `/toolkit-blog/`. The Eventer preview page should not be indexable or appear in navigation.
 
+The course directory now follows the 2026 admissions prospectus and links to theme-owned detail routes under `/courses/{course-slug}/`. The old construction, organic farming, RPL, online jobs, and consultancy records remain in WordPress for review and rollback, but are not part of the active catalog. See `21-COURSE-CATALOG-CUTOVER-AND-ASSISTANT.md` before changing their status.
+
 ## Content policy
 
 - Remove expired application dates, empty links, old app-store badges, preview content, and duplicated sections.

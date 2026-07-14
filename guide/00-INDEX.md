@@ -11,6 +11,7 @@ You are an autonomous coding agent modifying an existing WordPress theme to buil
 5. `04-ANIMATION-BEST-PRACTICES.md` — read before writing any CSS/JS transitions.
 6. `06-VERIFICATION-CHECKLIST.md` — run after every build step, and again at the end.
 7. `07-DEPLOYMENT-SAFETY.md` — read before any `git commit`, `git push`, or deploy action.
+21. `21-COURSE-CATALOG-CUTOVER-AND-ASSISTANT.md` — authoritative 2026 catalog, legacy-page disposition, main-domain rollback, and registration-assistant boundaries.
 8. `08-PROGRESS-LOG-TEMPLATE.md` — copy this to `PROGRESS.md` in the repo root on step 1 and update it continuously.
 
 ## Hard rules (apply across all files)
