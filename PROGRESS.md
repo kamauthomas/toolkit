@@ -89,6 +89,16 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Restored the missing LiteSpeed `CacheLookup on` block in the demo root `.htaccess`. A pre-change backup is retained locally at `/tmp/demo-htaccess.before-b8476a5` for the current maintenance session.
 - Verified repeated demo requests return `x-litespeed-cache: hit`. Representative untouched pages improved from 1.4-2.3s cold time-to-first-byte to approximately 0.32-0.35s on a cache hit.
 
+## 2026-07-14 Site-wide migration - institutional batch
+
+- Added modern shared templates for About Toolkit, Impact and Insights, The Toolkit Foundation, and Contact.
+- Removed stale counters and expired promotional elements while retaining verified organisational history, programme purpose, contact information, and Foundation context.
+- Added curated SEO titles, descriptions, and social images for all four routes.
+- Preserved the working Contact Form 7 form while removing unrelated Elementor assets from the rebuilt output.
+- Deployed commit `bf3bbe8` to the demo child theme and issued a one-time LiteSpeed purge; the temporary purge handler was immediately replaced with the committed `functions.php`.
+- Verified canonical HTTP 200 responses, expected template markers, a functional contact form, and LiteSpeed cache hits on all four routes.
+- The remaining course, insights/media, legal, student, account, duplicate, and preview routes are tracked in `guide/20-SITE-WIDE-PAGE-MIGRATION.md`.
+
 ## Environment Notes
 - Active theme: `eduma-child` (child of `eduma`)
 - Homepage: page ID 4519, Elementor, `elementor_theme` page template
