@@ -231,9 +231,29 @@ add_filter( 'wpseo_schema_webpage', function( $data ) {
 	if ( $course_url ) {
 		$data['url'] = $course_url;
 		$data['@id'] = $course_url . '#webpage';
+		$data['breadcrumb'] = array( '@id' => $course_url . '#breadcrumb' );
 	}
 	unset( $data['primaryImageOfPage'], $data['image'], $data['thumbnailUrl'] );
 
+	return $data;
+} );
+
+add_filter( 'wpseo_schema_breadcrumb', function( $data ) {
+	$course_url = eduma_child_course_canonical_url();
+	if ( ! $course_url ) {
+		return $data;
+	}
+	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
+	$course = eduma_child_get_course( sanitize_key( get_query_var( 'toolkit_course' ) ) );
+	if ( ! $course ) {
+		return $data;
+	}
+	$data['@id'] = $course_url . '#breadcrumb';
+	$data['itemListElement'] = array(
+		array( '@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => home_url( '/' ) ),
+		array( '@type' => 'ListItem', 'position' => 2, 'name' => 'Our Courses', 'item' => home_url( '/our-ventures/' ) ),
+		array( '@type' => 'ListItem', 'position' => 3, 'name' => $course['title'] ),
+	);
 	return $data;
 } );
 
