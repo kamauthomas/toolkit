@@ -18,6 +18,7 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Added seven prospectus-backed course families and reusable `/courses/{slug}/` detail routes with accurate SEO canonicals.
 - Kept legacy WordPress pages intact for review and rollback; see `guide/21-COURSE-CATALOG-CUTOVER-AND-ASSISTANT.md`.
 - Local verification: PHP syntax, `git diff --check`, seven HTTP 200 course routes, eight HTTP 200 packaged assets, desktop 1440px and mobile 390px screenshots.
+- Demo deployment: commit `b2442ea` deployed on 14 July 2026. Homepage, catalog, all seven course routes, packaged logo, course assets, canonical/schema hierarchy, catalog scope, and LiteSpeed cache hits verified. FTPS rollback copies are retained at `/tmp/toolkit-demo-backup-5b0c0ea` for this maintenance session.
 
 ## 2026-07-13 Phase 4 - SEO and accessibility handoff
 
