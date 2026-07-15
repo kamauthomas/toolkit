@@ -22,6 +22,7 @@
 /wp-content/maintenance/
 /wp-content/temp-write-test-*
 /wp-content/uploads/
+/rollbacks/
 /wp-content/languages/
 
 # Installed dependencies/vendor assets kept out of this repo.

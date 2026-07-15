@@ -137,16 +137,9 @@ $slides = eduma_child_get_hero_slides();
 	</div>
 </section>
 
-<section class="home-iw-banner" aria-label="Toolkit at the International Institute of Welding 2025">
+<section class="home-iw-banner" aria-label="Toolkit at the International Institute of Welding 2026">
 	<div class="home-iw-banner__inner">
-		<a class="home-iw-banner__link" href="https://toolkitiiwppt.my.canva.site/iiw-general-assembly-presentation">
-			<img
-				src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/pages/iiw-banner.png' ); ?>"
-				alt="Toolkit at the International Institute of Welding 2025"
-				width="1600"
-				height="200"
-				loading="lazy">
-		</a>
+		<a class="home-iw-banner__link" href="https://toolkitiiwppt.my.canva.site/iiw-general-assembly-presentation"><span>International Institute of Welding</span><strong>Toolkit at IIW 2026</strong><em>See the presentation <i class="fas fa-arrow-right" aria-hidden="true"></i></em></a>
 	</div>
 </section>
 
@@ -225,27 +218,27 @@ $slides = eduma_child_get_hero_slides();
 			<div class="home-who__stats" aria-label="Toolkit impact statistics">
 				<div class="home-who__stat">
 					<span class="home-who__badge home-who__badge--peach" aria-hidden="true"><i class="fas fa-users"></i></span>
-					<strong>11,190</strong>
+					<strong data-impact-count="11190">11,190</strong>
 					<span>Total Youth Impacted</span>
 				</div>
 				<div class="home-who__stat">
 					<span class="home-who__badge home-who__badge--peach" aria-hidden="true"><i class="fas fa-tools"></i></span>
-					<strong>4,987</strong>
+					<strong data-impact-count="4987">4,987</strong>
 					<span>Construction Sector</span>
 				</div>
 				<div class="home-who__stat">
 					<span class="home-who__badge home-who__badge--peach" aria-hidden="true"><i class="fas fa-desktop"></i></span>
-					<strong>3,537</strong>
+					<strong data-impact-count="3537">3,537</strong>
 					<span>Digital Skills &amp; Online Jobs</span>
 				</div>
 				<div class="home-who__stat">
 					<span class="home-who__badge home-who__badge--peach" aria-hidden="true"><i class="fas fa-clipboard-list"></i></span>
-					<strong>554</strong>
+					<strong data-impact-count="554">554</strong>
 					<span>Consultancy &amp; Research</span>
 				</div>
 				<div class="home-who__stat">
 					<span class="home-who__badge home-who__badge--peach" aria-hidden="true"><i class="fas fa-seedling"></i></span>
-					<strong>2,112</strong>
+					<strong data-impact-count="2112">2,112</strong>
 					<span>Organic Farming</span>
 				</div>
 			</div>
@@ -260,18 +253,24 @@ $slides = eduma_child_get_hero_slides();
 			<p>Choose practical training that combines workshop experience, recognised assessment and the confidence to move into employment or enterprise.</p>
 		</div>
 		<div class="home-pathways__grid">
-			<a class="home-pathway home-pathway--featured" href="<?php echo esc_url( home_url( '/courses/welding-and-fabrication/' ) ); ?>">
-				<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/courses/welding.jpg' ); ?>" width="760" height="560" loading="lazy" alt="Welding learner working in a Toolkit workshop">
-				<span><small>Technical pathway</small><strong>Welding &amp; Fabrication</strong><em>Explore course <i class="fas fa-arrow-right" aria-hidden="true"></i></em></span>
-			</a>
+			<div class="home-pathways__video"><iframe src="https://www.youtube-nocookie.com/embed/my0S14iTew8?rel=0" title="Toolkit skills training" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
 			<div class="home-pathways__list">
-				<a class="home-pathway" href="<?php echo esc_url( home_url( '/courses/electrical-installation-with-solar-technology/' ) ); ?>"><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/courses/electrical.jpg' ); ?>" width="360" height="220" loading="lazy" alt="Electrical installation practical training"><span><small>Technical pathway</small><strong>Electrical &amp; Solar</strong><em>View details <i class="fas fa-arrow-right" aria-hidden="true"></i></em></span></a>
-				<a class="home-pathway" href="<?php echo esc_url( home_url( '/courses/language-courses/' ) ); ?>"><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/courses/languages.jpg' ); ?>" width="360" height="220" loading="lazy" alt="Online language learning"><span><small>Online pathway</small><strong>Language Courses</strong><em>View details <i class="fas fa-arrow-right" aria-hidden="true"></i></em></span></a>
+				<a class="home-pathway" href="<?php echo esc_url( home_url( '/our-ventures/construction-sector-skills/' ) ); ?>"><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/courses/welding.jpg' ); ?>" width="520" height="300" loading="lazy" alt="Practical welding training"><span><small>Training pathway</small><strong>Welding Sector</strong><em>Learn more <i class="fas fa-arrow-right" aria-hidden="true"></i></em></span></a>
+				<a class="home-pathway" href="<?php echo esc_url( home_url( '/our-ventures/renewable-energy/' ) ); ?>"><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/courses/solar.jpg' ); ?>" width="520" height="300" loading="lazy" alt="Solar and renewable energy training"><span><small>Strategic sector</small><strong>Renewable Sector</strong><em>Learn more <i class="fas fa-arrow-right" aria-hidden="true"></i></em></span></a>
 			</div>
 		</div>
 		<a class="home-modern__text-link" href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Browse all current courses <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
 	</div>
 </section>
+
+<section class="home-testimonials" aria-labelledby="home-testimonials-title"><div class="home-modern__inner">
+	<div class="home-modern__heading"><div><p class="home-modern__kicker">Learner voices</p><h2 id="home-testimonials-title">Testimonials</h2></div><p>Stories from graduates who have turned practical training into confidence, employment and new opportunities.</p></div>
+	<div class="home-testimonials__grid">
+		<article><div class="home-testimonial__video"><iframe src="https://www.youtube-nocookie.com/embed/VOIpU5tRRvo?rel=0" title="Caroline Kieru testimonial" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><span class="home-testimonial__quote" aria-hidden="true">“</span><blockquote>Toolkit transformed my passion into a profession. MIG welding and Virtual Reality training built the skills that took me from a humble background into the welding industry and now to work in France.</blockquote><footer><strong>Caroline Kieru</strong><span>International 6G Welder</span></footer></article>
+		<article><div class="home-testimonial__video"><iframe src="https://www.youtube-nocookie.com/embed/0sjNPAXN8pw?rel=0" title="Clifford Leisi testimonial" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><span class="home-testimonial__quote" aria-hidden="true">“</span><blockquote>The hands-on, immersive experience sharpened my skills, built my confidence and prepared me for real-world challenges. Today I am working as a professional welder.</blockquote><footer><strong>Clifford Leisi</strong><span>Toolkit MIG Welder</span></footer></article>
+		<article><div class="home-testimonial__video"><iframe src="https://www.youtube-nocookie.com/embed/LJGs1t8T6Bc?rel=0" title="Carol Njoki testimonial" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><span class="home-testimonial__quote" aria-hidden="true">“</span><blockquote>Through hands-on training, mentorship and support from passionate instructors, I gained skills and confidence I never thought possible. Toolkit helped me discover my potential.</blockquote><footer><strong>Carol Njoki</strong><span>Toolkit MIG Welder</span></footer></article>
+	</div>
+</div></section>
 
 <section class="home-method" aria-labelledby="home-method-title">
 	<div class="home-modern__inner home-method__layout">

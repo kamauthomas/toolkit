@@ -8,8 +8,8 @@
   var deepest = 0;
   var sentScroll = {};
 
-  function send(event, value) {
-    var body = JSON.stringify({ event: event, path: path, value: Math.round(value || 0) });
+  function send(event, value, label) {
+    var body = JSON.stringify({ event: event, path: path, value: Math.round(value || 0), label: label || '' });
     if (navigator.sendBeacon) {
       navigator.sendBeacon(endpoint, new Blob([body], { type: 'application/json' }));
     } else {
@@ -43,8 +43,16 @@
 
   document.addEventListener('click', function (event) {
     var link = event.target.closest && event.target.closest('a[href]');
+    var control = event.target.closest && event.target.closest('[data-metric]');
+    if (control) send('interaction', 1, control.getAttribute('data-metric'));
     if (!link) return;
-    try { if (new URL(link.href, location.href).host !== location.host) send('outbound_click', 1); } catch (ignore) {}
+    try {
+      var target = new URL(link.href, location.href);
+      if (target.host !== location.host) send('outbound_click', 1);
+      if (target.pathname.indexOf('toolkit-courses-apply-today') !== -1) send('interaction', 1, 'application_start');
+      else if (target.pathname.indexOf('our-ventures') !== -1) send('interaction', 1, 'course_navigation');
+      else if (/youtu|youtube/.test(target.host)) send('interaction', 1, 'testimonial_video');
+    } catch (ignore) {}
   });
 
   function finish() {

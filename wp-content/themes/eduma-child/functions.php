@@ -41,6 +41,8 @@ function thim_child_enqueue_styles() {
 
 		$js_ver = filemtime( get_stylesheet_directory() . '/hero-slider.js' );
 		wp_enqueue_script( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.js', array(), $js_ver, true );
+		$experience_path = get_stylesheet_directory() . '/assets/js/home-experience.js';
+		wp_enqueue_script( 'toolkit-home-experience', get_stylesheet_directory_uri() . '/assets/js/home-experience.js', array(), filemtime( $experience_path ), true );
 	}
 
 	if ( eduma_child_redesign_enabled() && ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) || get_query_var( 'toolkit_course' ) ) ) {

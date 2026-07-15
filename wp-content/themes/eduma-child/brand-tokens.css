@@ -5,11 +5,12 @@
 
 :root {
   /* === Colors === */
-  --brand-accent-orange: #ED6E0D;
-  --brand-accent-orange-hover: #d15f08;
+  --brand-accent-orange: #ff6600;
+  --brand-accent-orange-hover: #e65c00;
   --brand-accent-orange-light: #fde8d0;
   --brand-accent-green-light: #d4edda;
-  --brand-accent-green: #28a745;
+  --brand-accent-green: #969e2a;
+	--brand-accent-teal: #006a68;
   --brand-overlay-dark: rgba(10, 10, 10, 0.55);
   --brand-text-light: #FFFFFF;
   --brand-text-dark: #333333;
@@ -19,9 +20,9 @@
   --brand-border-light: #D8DCE2;
 
   /* === Secondary accent (13-Who_we_are.md) === */
-  --olive-green: #6B6E2A;
-  --olive-green-strong: #55591f;
-  --olive-green-bright: #929b28;
+  --olive-green: #969e2a;
+  --olive-green-strong: #70771f;
+  --olive-green-bright: #969e2a;
   --olive-green-tint-bg: #F3F4E9;
   --peach-tint-bg: #FDE8D0;
 

@@ -31,6 +31,14 @@ $logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 				<a href="tel:+254709549200"><i class="fas fa-phone-alt" aria-hidden="true"></i><span>+254 709 549 200</span></a>
 				<a href="mailto:office@toolkitafrica.ac.ke"><i class="far fa-envelope" aria-hidden="true"></i><span>office@toolkitafrica.ac.ke</span></a>
 				<p><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span>Karen-Kikuyu Southern Bypass, Kikuyu, Kenya</span></p>
+				<div class="toolkit-site-footer__socials" aria-label="Toolkit social media">
+					<a href="https://www.facebook.com/toolkitafrica" aria-label="Facebook" title="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+					<a href="https://twitter.com/toolkitafrica" aria-label="X / Twitter" title="X / Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+					<a href="https://www.instagram.com/thetoolkitafrika?igsh=MXV3aGN3bHZrMHZ5aw==" aria-label="Instagram" title="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+					<a href="https://www.linkedin.com/company/the-toolkit-iskills-tti-ltd" aria-label="LinkedIn" title="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+					<a href="https://www.youtube.com/@toolkitafrica" aria-label="YouTube" title="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
+					<a href="https://whatsapp.com/channel/0029Vb6PfqR5Ejy79JAJlb1f" aria-label="WhatsApp channel" title="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+				</div>
 			</div>
 
 			<div class="toolkit-site-footer__action">
@@ -44,6 +52,16 @@ $logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 		<p>&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> Toolkit Africa. All rights reserved.</p>
 	</div>
 </footer>
+<?php if ( is_front_page() ) : ?>
+<aside class="toolkit-chat" aria-label="Toolkit website assistant">
+	<button class="toolkit-chat__toggle" data-metric="chat_open" type="button" aria-expanded="false" aria-controls="toolkit-chat-panel"><i class="far fa-comment-dots" aria-hidden="true"></i><span>Need help?</span></button>
+	<div id="toolkit-chat-panel" class="toolkit-chat__panel" hidden>
+		<header><div><strong>Toolkit Assistant</strong><span>Course and admissions help</span></div><button type="button" data-chat-close aria-label="Close assistant"><i class="fas fa-times" aria-hidden="true"></i></button></header>
+		<div class="toolkit-chat__messages" aria-live="polite"><p class="is-assistant">Hello. What would you like help with?</p></div>
+		<div class="toolkit-chat__choices"><button type="button" data-chat-topic="courses" data-metric="chat_courses">Courses</button><button type="button" data-chat-topic="fees" data-metric="chat_fees">Fees</button><button type="button" data-chat-topic="apply" data-metric="chat_apply">How to apply</button><button type="button" data-chat-topic="contact" data-metric="chat_contact">Contact Toolkit</button></div>
+	</div>
+</aside>
+<?php endif; ?>
 </div><!-- #main-content -->
 <?php do_action( 'thim_end_content_pusher' ); ?>
 </div><!-- .content-pusher -->

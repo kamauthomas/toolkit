@@ -9,6 +9,7 @@ The child theme includes a lightweight first-party metrics system for the redesi
 - Maximum scroll-depth bucket: 25, 50, 75, or 100 percent
 - Page load duration
 - Aggregate outbound-link clicks
+- Aggregate interactions with applications, course navigation, testimonial videos and chatbot topics
 
 It does not store raw IP addresses, cookies, names, email addresses, full referrers, or individual visitor profiles. Browsers with Do Not Track enabled are excluded. A short-lived hashed rate-limit key is used only to protect the public endpoint.
 
