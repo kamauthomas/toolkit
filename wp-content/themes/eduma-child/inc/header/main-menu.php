@@ -126,15 +126,7 @@ if ( $menu_has_expected_labels( $primary_menu ) ) {
 
 	if ( get_theme_mod( 'thim_header_style', 'header_v1' ) !== 'header_v4' ) {
 		?>
-		<li class="menu-search">
-			<form class="menu-search__form" role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-				<label class="screen-reader-text" for="header-menu-search"><?php esc_html_e( 'Search', 'eduma-child' ); ?></label>
-				<input id="header-menu-search" class="menu-search__input" type="search" name="s" placeholder="<?php esc_attr_e( 'Search', 'eduma-child' ); ?>">
-				<button class="menu-search__button" type="submit" aria-label="<?php esc_attr_e( 'Search', 'eduma-child' ); ?>">
-					<i class="fa fa-search" aria-hidden="true"></i>
-				</button>
-			</form>
-		</li>
+		<li class="menu-contact"><a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>" aria-label="<?php esc_attr_e( 'Contact Toolkit', 'eduma-child' ); ?>" title="<?php esc_attr_e( 'Contact Toolkit', 'eduma-child' ); ?>"><i class="fas fa-envelope" aria-hidden="true"></i></a></li>
 		<?php
 
 		printf(

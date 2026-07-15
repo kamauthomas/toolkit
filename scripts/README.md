@@ -20,4 +20,14 @@ The seed script is idempotent and only applies project-owned configuration:
 It does not change `home` or `siteurl`; set those per environment through
 `wp-config.php`, WP-CLI, or the target environment's deployment configuration.
 
+## Meta chatbot knowledge validation
+
+Run this after changing current or scheduled admissions knowledge:
+
+```bash
+php scripts/validate-meta-chatbot-data.php
+```
+
+The validator checks the approved current fees and durations, confirms the September 2026 schedule remains quarantined, and prevents selected future catalog amounts from leaking into the current Meta training file.
+
 Use `php scripts/seed-demo.php --dry-run` to inspect the actions first.

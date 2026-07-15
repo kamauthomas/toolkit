@@ -195,12 +195,12 @@ $slides = eduma_child_get_hero_slides();
 
 			<div class="home-who__quick">
 				<h3>Quick Links</h3>
-				<a class="home-who__pill" href="https://toolkit.mzizi.co.ke/portal/OnlineApplicationForm.aspx?q=d0d6b2f229d733c1e3156244805125a2">
+				<a class="home-who__pill" href="<?php echo esc_url( home_url( '/our-ventures/toolkit-courses-apply-today/' ) ); ?>">
 					<span class="home-who__pill-icon" aria-hidden="true"><i class="fas fa-graduation-cap"></i></span>
 					<span>Toolkit Courses: Apply Now</span>
 					<i class="fas fa-arrow-right" aria-hidden="true"></i>
 				</a>
-				<a class="home-who__pill" href="https://toolkitafrica.ac.ke/new/contact/">
+				<a class="home-who__pill" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">
 					<span class="home-who__pill-icon" aria-hidden="true"><i class="fas fa-headset"></i></span>
 					<span>Contact Us</span>
 					<i class="fas fa-arrow-right" aria-hidden="true"></i>
@@ -253,9 +253,49 @@ $slides = eduma_child_get_hero_slides();
 	</div>
 </section>
 
+<section class="home-pathways" aria-labelledby="home-pathways-title">
+	<div class="home-modern__inner">
+		<div class="home-modern__heading">
+			<div><p class="home-modern__kicker">Learning pathways</p><h2 id="home-pathways-title">Skills built around real work</h2></div>
+			<p>Choose practical training that combines workshop experience, recognised assessment and the confidence to move into employment or enterprise.</p>
+		</div>
+		<div class="home-pathways__grid">
+			<a class="home-pathway home-pathway--featured" href="<?php echo esc_url( home_url( '/courses/welding-and-fabrication/' ) ); ?>">
+				<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/courses/welding.jpg' ); ?>" width="760" height="560" loading="lazy" alt="Welding learner working in a Toolkit workshop">
+				<span><small>Technical pathway</small><strong>Welding &amp; Fabrication</strong><em>Explore course <i class="fas fa-arrow-right" aria-hidden="true"></i></em></span>
+			</a>
+			<div class="home-pathways__list">
+				<a class="home-pathway" href="<?php echo esc_url( home_url( '/courses/electrical-installation-with-solar-technology/' ) ); ?>"><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/courses/electrical.jpg' ); ?>" width="360" height="220" loading="lazy" alt="Electrical installation practical training"><span><small>Technical pathway</small><strong>Electrical &amp; Solar</strong><em>View details <i class="fas fa-arrow-right" aria-hidden="true"></i></em></span></a>
+				<a class="home-pathway" href="<?php echo esc_url( home_url( '/courses/language-courses/' ) ); ?>"><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/courses/languages.jpg' ); ?>" width="360" height="220" loading="lazy" alt="Online language learning"><span><small>Online pathway</small><strong>Language Courses</strong><em>View details <i class="fas fa-arrow-right" aria-hidden="true"></i></em></span></a>
+			</div>
+		</div>
+		<a class="home-modern__text-link" href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Browse all current courses <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+	</div>
+</section>
+
+<section class="home-method" aria-labelledby="home-method-title">
+	<div class="home-modern__inner home-method__layout">
+		<div class="home-method__copy"><p class="home-modern__kicker">The Toolkit approach</p><h2 id="home-method-title">A clearer route from learning to opportunity</h2><p>Training works best when technical ability is supported by recognised standards, workplace habits and access to industry. Our programmes bring those elements together.</p><a class="home-modern__button" href="<?php echo esc_url( home_url( '/about-toolkit-africa/' ) ); ?>">How Toolkit works <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+		<ol class="home-method__steps">
+			<li><span>01</span><div><h3>Train</h3><p>Build practical competence through workshop-led and applied learning.</p></div></li>
+			<li><span>02</span><div><h3>Certify</h3><p>Prepare for assessment aligned with relevant regulatory and industry standards.</p></div></li>
+			<li><span>03</span><div><h3>Connect</h3><p>Strengthen employability and create pathways towards work or enterprise.</p></div></li>
+		</ol>
+	</div>
+</section>
+
 <?php
-while ( have_posts() ) : the_post();
-	the_content();
-endwhile;
+$home_stories = new WP_Query( array( 'post_type' => 'post', 'post_status' => 'publish', 'posts_per_page' => 3, 'ignore_sticky_posts' => true ) );
+if ( $home_stories->have_posts() ) :
+	$story_images = array( 'impact.jpg', 'about.jpg', 'foundation.jpg' );
+?>
+<section class="home-stories" aria-labelledby="home-stories-title"><div class="home-modern__inner">
+	<div class="home-modern__heading"><div><p class="home-modern__kicker">From the field</p><h2 id="home-stories-title">Ideas, partnerships and progress</h2></div><a class="home-modern__text-link" href="<?php echo esc_url( home_url( '/toolkit-blog/' ) ); ?>">Visit Toolkit Blog <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+	<div class="home-stories__grid"><?php $story_index = 0; while ( $home_stories->have_posts() ) : $home_stories->the_post(); ?><article><a class="home-story__image" href="<?php the_permalink(); ?>"><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/pages/' . $story_images[ $story_index % count( $story_images ) ] ); ?>" width="620" height="380" loading="lazy" alt=""></a><div><time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time><h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3><p><?php echo esc_html( wp_trim_words( get_the_excerpt(), 20 ) ); ?></p><a href="<?php the_permalink(); ?>">Read story <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div></article><?php $story_index++; endwhile; ?></div>
+</div></section>
+<?php wp_reset_postdata(); endif; ?>
+
+<section class="home-apply-band"><div><p>Admissions</p><h2>Ready to build practical skills?</h2><span>Review the current courses and complete a guided application.</span></div><div><a class="home-modern__button home-modern__button--orange" href="<?php echo esc_url( home_url( '/our-ventures/toolkit-courses-apply-today/' ) ); ?>">Apply now <i class="fas fa-arrow-right" aria-hidden="true"></i></a><a class="home-modern__button home-modern__button--outline" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Talk to admissions</a></div></section>
+<?php
 
 get_footer();

@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "knowledge_version": "2026-07-14.1",
+  "status": "production_non_price_facts",
+  "source": "Toolkit 2026 Course Catalogue (2) (1).docx",
+  "pricing_instruction": "This file contains no approved current prices. Use knowledge-current.json for prices and never infer a price from programme facts.",
+  "flagship_programmes": [
+    {
+      "name": "Electrical Installation",
+      "description": "Prepares learners to install, maintain, test, and troubleshoot electrical systems in residential, commercial, and industrial environments.",
+      "qualification": "Electrical Installation Skills Certificate",
+      "examining_body": "NITA Trade Test",
+      "entry_requirement": "KCPE or KCSE certificate",
+      "career_pathways": ["Electrical Installation Technician", "Building Services Technician", "Electrical Maintenance Assistant", "Self-Employment Contractor", "Electrical Contractor Assistant"]
+    },
+    {
+      "name": "Solar Photovoltaic Installer",
+      "description": "Develops practical skills in solar PV installation, maintenance, troubleshooting, and renewable-energy technologies.",
+      "qualification": "Solar Photovoltaic Installation Skills Certificate",
+      "examining_body": "NITA Solar PV Assessment",
+      "entry_requirement": "KCPE or KCSE certificate",
+      "career_pathways": ["Solar PV Installer", "Solar Maintenance Technician", "Solar Technician", "Solar Entrepreneur", "Renewable Energy Technician"]
+    },
+    {
+      "name": "Solar Electrician",
+      "description": "Combines electrical installation, maintenance, troubleshooting, equipment repair, and solar-system design.",
+      "qualification": "Solar Electrician Skills Certificate",
+      "examining_body": "NITA Wireman Grade III or Solar T1",
+      "entry_requirement": "KCPE or KCSE certificate",
+      "career_pathways": ["Solar Electrician", "Solar System Installer", "Renewable Energy Technician", "Solar Project Supervisor", "Electrical Maintenance Technician"]
+    },
+    {
+      "name": "Solar Upskilling",
+      "description": "An intensive practical programme for electrical practitioners seeking competencies in solar design and grid-tied systems.",
+      "qualification": "Solar Upskilling Certificate",
+      "examining_body": "NITA Solar T1/T2",
+      "entry_requirement": "Evidence of electrical training or industry experience",
+      "career_pathways": ["Solar Design Consultant", "Renewable Energy Contractor", "Solar Installation Specialist", "Solar Project Technician"]
+    },
+    {
+      "name": "Advanced Welding with VR Technology",
+      "description": "Combines practical welding with virtual-reality simulations to improve precision, safety, and productivity.",
+      "qualification": "Advanced Welding Skills Certificate and VR Welding Certificate",
+      "examining_body": "KEBS, NITA or IIW",
+      "entry_requirement": "KCPE or KCSE certificate",
+      "career_pathways": ["Welder", "Manufacturing Technician", "Fabricator", "Welding Assistant", "Steel Structure Technician"]
+    },
+    {
+      "name": "Advanced Welding Upskilling with VR Technology",
+      "description": "A specialist programme for practising welders who want to advance their skills using VR technology.",
+      "qualification": "Advanced Welding Upskilling Certificate",
+      "examining_body": "KEBS or NITA",
+      "entry_requirement": "Prior welding training or industry experience",
+      "career_pathways": ["Advanced Welder", "Welding Supervisor", "Fabrication Specialist", "Workshop Technician"]
+    },
+    {
+      "name": "Climate Smart Agriculture",
+      "description": "Builds practical knowledge in climate-resilient agriculture, organic farming, and agribusiness development.",
+      "qualification": "Climate Smart Agriculture Certificate",
+      "examining_body": "NITA Assessment",
+      "entry_requirement": "KCPE or KCSE certificate",
+      "career_pathways": ["Farm Manager", "Sustainable Agriculture Practitioner", "Agribusiness Entrepreneur", "Agricultural Extension Assistant"]
+    }
+  ],
+  "digital_programmes": ["Computer Packages and Digital Literacy", "Advanced Computer Applications", "Cyber Security", "Web Design and Development", "Graphic Design", "AI Automation", "Digital Marketing"],
+  "agriculture_programmes": ["Horticulture Production", "General Agriculture", "Irrigation Technician", "Rabbit Production and Management", "Landscape and Gardening", "Agribusiness Management", "Bee Keeping", "Climate Smart Farming", "Organic Farming", "Rabbit Farming", "Dairy Farming", "Kitchen Gardening", "Compost Making and Soil Health", "Agribusiness Basics"],
+  "entrepreneurship_programmes": ["Entrepreneurship Essentials", "Youth Enterprise Development", "Agribusiness Entrepreneurship", "Entrepreneurship and Employability Skills", "Small Business Management"]
+}

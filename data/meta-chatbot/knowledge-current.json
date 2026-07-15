@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "knowledge_version": "2026-07-14.1",
+  "status": "production_current",
+  "valid_from": "2026-07-14",
+  "valid_until": "2026-08-31",
+  "currency": "KES",
+  "source_priority": [
+    "Admissions pricing instruction supplied 2026-07-14",
+    "Toolkit 2026 Course Catalogue for non-price programme facts"
+  ],
+  "organization": {
+    "name": "Toolkit Africa",
+    "vision": "A leader in powering Africa with skilled, confident and productive youth.",
+    "mission": "We transform vulnerable youth and women to prosperity through innovation and skills for current and future labour markets.",
+    "values": ["Reliability", "Integrity", "Sustainability", "Excellence"],
+    "accreditation": {
+      "tveta": "TVETA/PRIVATE/TVC/0076/2022",
+      "nita": "NITA-certified training provider",
+      "welding_standard": "ISO 9606",
+      "iiw": "International Institute of Welding member since June 2025",
+      "language_bodies": ["Alliance Francaise", "Goethe-Institut"],
+      "digital_body": "CDACC"
+    }
+  },
+  "pricing_policy": {
+    "quote_only_active_records": true,
+    "future_schedule_effective_from": "2026-09-01",
+    "future_schedule_approved": false,
+    "pre_effective_message": "The current fee is shown below. Toolkit expects a revised fee schedule from September 2026, but future amounts are not yet available for customer quotation.",
+    "missing_price_message": "Please contact Toolkit admissions for the current fee. I do not have an approved current amount for this course.",
+    "never_infer_inclusions": true
+  },
+  "courses": [
+    {
+      "id": "electrical_solar_t1_t2",
+      "name": "Electrical Installation Technician with Solar T1 and T2",
+      "aliases": ["electrical installation with solar technology", "electrical installation technician", "electrical with solar T1 and T2"],
+      "duration": {"display": "3 months", "days": null},
+      "study_mode": "Contact admissions",
+      "fee": {"amount": 44050, "display": "KES 44,050", "type": "current course fee", "inclusions": "Not specified"},
+      "effective_from": "2026-07-14",
+      "effective_until": "2026-08-31",
+      "source": "Admissions pricing instruction supplied 2026-07-14"
+    },
+    {
+      "id": "solar_t1_t2_upskilling",
+      "name": "Solar T1 and T2 Upskilling",
+      "aliases": ["solar upskilling", "solar T1/T2", "solar T1 and T2 intensive"],
+      "duration": {"display": "13 days", "days": 13},
+      "study_mode": "Contact admissions",
+      "fee": {"amount": 16950, "display": "KES 16,950", "type": "current course fee", "inclusions": "Not specified"},
+      "effective_from": "2026-07-14",
+      "effective_until": "2026-08-31",
+      "source": "Admissions pricing instruction supplied 2026-07-14"
+    },
+    {
+      "id": "advanced_mig_mag_welding_vr",
+      "name": "Advanced MIG/MAG Welding with VR Technology",
+      "aliases": ["advanced welding with virtual reality", "advanced welding with VR", "MIG MAG welding"],
+      "duration": {"display": "3 months", "days": null},
+      "study_mode": "Contact admissions",
+      "fee": {"amount": 46950, "display": "KES 46,950", "type": "tuition fee", "inclusions": "Tuition only"},
+      "effective_from": "2026-07-14",
+      "effective_until": "2026-08-31",
+      "source": "Admissions pricing instruction supplied 2026-07-14"
+    },
+    {
+      "id": "advanced_mig_mag_welding_vr_upskilling",
+      "name": "Advanced MIG/MAG Welding with VR Technology Upskilling",
+      "aliases": ["advanced welding upskilling", "VR welding upskilling", "MIG MAG upskilling"],
+      "duration": {"display": "1 month", "days": null},
+      "study_mode": "Contact admissions",
+      "fee": {"amount": 16950, "display": "KES 16,950", "type": "tuition fee", "inclusions": "Tuition only"},
+      "effective_from": "2026-07-14",
+      "effective_until": "2026-08-31",
+      "source": "Admissions pricing instruction supplied 2026-07-14"
+    },
+    {
+      "id": "german_a1_a2",
+      "name": "German Language A1 and A2",
+      "aliases": ["German course", "German A1 A2", "online German"],
+      "duration": {"display": "6 months", "days": null},
+      "study_mode": "Online classes",
+      "fee": {"amount": 110000, "display": "KES 110,000", "type": "tuition fee", "inclusions": "Tuition only"},
+      "effective_from": "2026-07-14",
+      "effective_until": "2026-08-31",
+      "source": "Admissions pricing instruction supplied 2026-07-14",
+      "interpretation": "A1 and A2 represented as one combined pathway"
+    },
+    {
+      "id": "french_a1_a2",
+      "name": "French Language A1 and A2",
+      "aliases": ["French course", "French A1 A2", "online French"],
+      "duration": {"display": "3 months", "days": null},
+      "study_mode": "Online classes",
+      "fee": {"amount": 36250, "display": "KES 36,250", "type": "tuition fee", "inclusions": "Tuition only"},
+      "effective_from": "2026-07-14",
+      "effective_until": "2026-08-31",
+      "source": "Admissions pricing instruction supplied 2026-07-14",
+      "interpretation": "A1 and A2 represented as one combined pathway; confirm whether fee is combined or per level"
+    }
+  ],
+  "other_catalog_programmes": {
+    "price_handling": "Do not quote the September catalog price before activation. Escalate for a current price.",
+    "names": [
+      "Climate Smart Agriculture",
+      "Computer Packages and Digital Literacy",
+      "Advanced Computer Applications",
+      "Cyber Security",
+      "Web Design and Development",
+      "Graphic Design",
+      "AI Automation",
+      "Digital Marketing",
+      "Horticulture Production",
+      "General Agriculture",
+      "Irrigation Technician",
+      "Rabbit Production and Management",
+      "Landscape and Gardening",
+      "Agribusiness Management",
+      "Bee Keeping",
+      "Entrepreneurship Essentials",
+      "Youth Enterprise Development",
+      "Agribusiness Entrepreneurship",
+      "Entrepreneurship and Employability Skills",
+      "Small Business Management"
+    ]
+  }
+}

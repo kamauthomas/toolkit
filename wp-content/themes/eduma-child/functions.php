@@ -1,5 +1,7 @@
 <?php
 
+require_once get_stylesheet_directory() . '/inc/site-metrics.php';
+
 /**
  * Deployment switches. Constants take priority so operations can change state
  * instantly without editing theme files or deleting WordPress content.
@@ -41,7 +43,7 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_script( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.js', array(), $js_ver, true );
 	}
 
-	if ( eduma_child_redesign_enabled() && ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) || get_query_var( 'toolkit_course' ) ) ) {
+	if ( eduma_child_redesign_enabled() && ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) || get_query_var( 'toolkit_course' ) ) ) {
 		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
 		$page_js_ver  = filemtime( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
@@ -91,6 +93,7 @@ add_filter( 'template_include', function( $template ) {
 		'the-toolkit-foundation-copy'  => 'template-parts/pages/institutional.php',
 		'the-toolkit-foundation'       => 'template-parts/pages/institutional.php',
 		'contact'                      => 'template-parts/pages/contact.php',
+		'toolkit-blog'                 => 'template-parts/pages/blog.php',
 		'our-ventures'                 => 'template-parts/pages/courses.php',
 		'construction-sector-skills' => 'template-parts/pages/welding.php',
 		'notice-board'               => 'template-parts/pages/notice-board.php',
@@ -177,6 +180,13 @@ function eduma_child_redesigned_page_metadata() {
 			'title'       => 'Contact Toolkit Africa | Courses, Admissions and Partnerships',
 			'description' => 'Contact Toolkit Africa about courses, admissions, partnerships, and visiting the Toolkit Skills and Innovation Hub in Kikuyu, Kenya.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/contact.jpg',
+		);
+	}
+	if ( is_page( 'toolkit-blog' ) ) {
+		return array(
+			'title'       => 'Toolkit Blog | Skills, Innovation and Opportunity',
+			'description' => 'Read Toolkit Africa news, learner stories, skills insights, programme updates, and perspectives on youth employment and innovation.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
 		);
 	}
 	if ( is_page( 'construction-sector-skills' ) ) {
@@ -392,7 +402,7 @@ add_action( 'wp_enqueue_scripts', function() {
 
 /* Rebuilt pages do not render Elementor or Contact Form 7 content. */
 add_action( 'wp_enqueue_scripts', function() {
-	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) && ! get_query_var( 'toolkit_course' ) ) {
+	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) && ! get_query_var( 'toolkit_course' ) ) {
 		return;
 	}
 
@@ -513,7 +523,7 @@ add_action( 'wp_enqueue_scripts', function() {
 
 /* Some plugins enqueue again while rendering the footer. Remove those late additions. */
 add_action( 'wp_footer', function() {
-	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact' ) ) && ! get_query_var( 'toolkit_course' ) ) {
+	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) && ! get_query_var( 'toolkit_course' ) ) {
 		return;
 	}
 

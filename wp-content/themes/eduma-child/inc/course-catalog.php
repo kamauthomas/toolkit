@@ -7,19 +7,19 @@ function eduma_child_2026_course_catalog() {
 		'electrical-installation' => array(
 			'title' => 'Electrical Installation', 'short' => 'Build practical installation, wiring, safety, and testing skills for the electrical trade.',
 			'image' => $assets . 'electrical.jpg', 'icon' => 'fa-bolt', 'qualification' => 'Electrical Installation Skills Certificate', 'examining' => 'NITA Trade Test',
-			'duration' => '6 months: 3 months at the Hub and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 150,000 standard; KES 120,961.50 subsidised', 'intakes' => 'January, April, July and October',
+			'duration' => '6 months: 3 months at the Hub and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 150,000 standard; KES 120,962 subsidised', 'intakes' => 'January, April, July and October',
 			'outcomes' => array( 'Electrical safety and tools', 'Domestic and commercial wiring', 'Installation testing', 'Industry attachment' ),
 		),
 		'solar-technician' => array(
 			'title' => 'Solar Technician Pathway', 'short' => 'Train for solar PV installation and electrical work, with a focused upskilling option for experienced learners.',
 			'image' => $assets . 'solar.jpg', 'icon' => 'fa-solar-panel', 'qualification' => 'Solar PV Installer or Solar Electrician Skills Certificate', 'examining' => 'NITA Solar PV Assessment, Wireman Grade III or Solar T1',
-			'duration' => '6 months: 3 months at the Hub and 3 months in industry; upskilling course: 10 days', 'entry' => 'KCPE or KCSE certificate; prior electrical experience for upskilling', 'fees' => 'KES 150,000 standard; KES 120,961.50 subsidised; upskilling KES 30,683.02', 'intakes' => 'January, April, July and October; upskilling monthly',
+			'duration' => '6 months: 3 months at the Hub and 3 months in industry; upskilling course: 10 days', 'entry' => 'KCPE or KCSE certificate; prior electrical experience for upskilling', 'fees' => 'KES 150,000 standard; KES 120,962 subsidised; upskilling KES 30,684', 'intakes' => 'January, April, July and October; upskilling monthly',
 			'outcomes' => array( 'Solar PV system fundamentals', 'Safe installation practice', 'Testing and maintenance', 'Industry attachment' ),
 		),
 		'advanced-welding-vr' => array(
 			'title' => 'Advanced Welding with VR', 'short' => 'Develop advanced welding skills through workshop practice, simulation, and industry placement.',
 			'image' => $assets . 'welding.jpg', 'icon' => 'fa-fire', 'qualification' => 'Advanced Welding Skills Certificate with VR', 'examining' => 'KEBS, NITA or IIW',
-			'duration' => '6 months: 3 months at the Hub and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 176,276 standard; KES 120,961.50 subsidised', 'intakes' => 'January, April, July and October',
+			'duration' => '6 months: 3 months at the Hub and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 176,276 standard; KES 120,962 subsidised', 'intakes' => 'January, April, July and October',
 			'outcomes' => array( 'Workshop safety', 'Advanced welding techniques', 'VR-supported practice', 'Quality control and industry attachment' ),
 		),
 		'smart-agriculture' => array(

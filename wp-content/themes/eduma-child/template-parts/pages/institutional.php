@@ -58,6 +58,15 @@ $pages   = array(
 );
 
 $page = $pages[ $slug ] ?? $pages['about-toolkit-africa'];
+$is_about = 'about-toolkit-africa' === $slug;
+$team = array(
+	array( 'name' => 'Jane Muigai Kamphuis', 'role' => 'Founder & Director', 'image' => 'jane-muigai-kamphuis.jpg', 'bio' => 'Jane founded Toolkit in 2014 and leads its mission to connect vulnerable young people and women with skills, certification and pathways to work.' ),
+	array( 'name' => 'Hosea Mugera', 'role' => 'Manager', 'image' => 'hosea-mugera.jpg', 'bio' => 'Hosea supports the day-to-day management of Toolkit and the delivery of its skills and innovation programmes.' ),
+	array( 'name' => 'Marion Ngige', 'role' => 'HR Manager', 'image' => 'marion-ngige.jpg', 'bio' => 'Marion brings more than eight years of human-resource experience to the people, systems and culture behind Toolkit programmes.' ),
+	array( 'name' => 'Reuben Waburi', 'role' => 'Career Development Manager', 'image' => 'reuben-waburi.jpg', 'bio' => 'Reuben is an electrical engineer and project manager with more than two decades of experience supporting career and technical development.' ),
+	array( 'name' => 'Ann Nyokabi', 'role' => 'Youth Skills Manager', 'image' => 'ann-nyokabi.jpg', 'bio' => 'Ann has more than eleven years of experience spanning technical practice, training and learner engagement.' ),
+	array( 'name' => 'Daniel Omondi', 'role' => 'Head of Welding', 'image' => 'daniel-omondi.jpg', 'bio' => 'Daniel brings mechanical-engineering and welding experience to the leadership of Toolkit’s practical welding programmes.' ),
+);
 ?>
 <main id="main-content" class="toolkit-page toolkit-institutional-page">
 	<section class="toolkit-institutional-hero" style="background-image:url('<?php echo esc_url( $page['image'] ); ?>')">
@@ -65,6 +74,11 @@ $page = $pages[ $slug ] ?? $pages['about-toolkit-africa'];
 	</section>
 	<section class="toolkit-institutional-intro toolkit-section"><div><p class="toolkit-kicker">Toolkit Africa</p><h2><?php echo esc_html( $page['section'] ); ?></h2><p><?php echo esc_html( $page['body'] ); ?></p></div><img src="<?php echo esc_url( $page['image'] ); ?>" width="760" height="520" alt="<?php echo esc_attr( $page['section'] ); ?>"></section>
 	<section class="toolkit-institutional-values toolkit-section"><div class="toolkit-section__heading"><p class="toolkit-kicker">What guides the work</p><h2>Purpose in practice</h2></div><div><?php foreach ( $page['cards'] as $card ) : ?><article><i class="fas <?php echo esc_attr( $card['icon'] ); ?>" aria-hidden="true"></i><h3><?php echo esc_html( $card['title'] ); ?></h3><p><?php echo esc_html( $card['text'] ); ?></p></article><?php endforeach; ?></div></section>
+	<?php if ( $is_about ) : ?>
+	<section class="toolkit-about-method toolkit-section" aria-labelledby="toolkit-about-method-title"><div><p class="toolkit-kicker">From training to livelihoods</p><h2 id="toolkit-about-method-title">Built for the full learner journey</h2><p>Toolkit’s model is designed around the practical steps a learner needs to move forward, from gaining job-relevant competence to demonstrating it and navigating the next opportunity.</p></div><ol><li><span>01</span><h3>Train</h3><p>Hands-on technical, digital, employability and enterprise learning.</p></li><li><span>02</span><h3>Certify</h3><p>Preparation for skills recognition through relevant assessment bodies.</p></li><li><span>03</span><h3>Connect</h3><p>Industry exposure and pathways towards employment or entrepreneurship.</p></li></ol></section>
+	<section class="toolkit-team toolkit-section" aria-labelledby="toolkit-team-title"><div class="toolkit-team__heading"><div><p class="toolkit-kicker">People behind the work</p><h2 id="toolkit-team-title">Toolkit leadership</h2></div><p>A multidisciplinary team connects technical delivery, learner support, career development and organisational leadership.</p></div><div class="toolkit-team__grid"><?php foreach ( $team as $member ) : ?><article><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/team/' . $member['image'] ); ?>" width="900" height="900" loading="lazy" alt="Portrait of <?php echo esc_attr( $member['name'] ); ?>"><div><p><?php echo esc_html( $member['role'] ); ?></p><h3><?php echo esc_html( $member['name'] ); ?></h3><span><?php echo esc_html( $member['bio'] ); ?></span></div></article><?php endforeach; ?></div></section>
+	<section class="toolkit-about-partner"><div><p class="toolkit-kicker">Work with Toolkit</p><h2>Skills development takes an ecosystem</h2><p>Toolkit works with employers, public institutions and development partners to keep training relevant and extend opportunity to more learners.</p></div><a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Discuss a partnership <i class="fas fa-arrow-right" aria-hidden="true"></i></a></section>
+	<?php endif; ?>
 	<section class="toolkit-institutional-cta"><div><h2><?php echo esc_html( $page['cta_title'] ); ?></h2><p><?php echo esc_html( $page['cta_text'] ); ?></p></div><a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( $page['cta_url'] ); ?>"><?php echo esc_html( $page['cta_label'] ); ?> <i class="fas fa-arrow-right" aria-hidden="true"></i></a></section>
 </main>
 <?php get_footer();

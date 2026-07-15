@@ -54,8 +54,45 @@
 .toolkit-contact-map { width:min(1280px,calc(100% - 40px)); margin:0 auto 64px; overflow:hidden; border-radius:8px; }
 .toolkit-contact-map iframe { display:block; width:100%; height:340px; border:0; }
 
-@media (max-width:900px) { .toolkit-institutional-intro,.toolkit-contact-layout { grid-template-columns:1fr; }.toolkit-institutional-values>div:last-child { grid-template-columns:1fr; }.toolkit-institutional-intro img { height:320px; } }
-@media (max-width:767px) { .toolkit-institutional-page,.toolkit-contact-page { padding-top:14px; }.toolkit-institutional-hero,.toolkit-contact-hero { width:calc(100% - 28px); min-height:390px; margin-bottom:46px; padding:44px 24px; background-position:62% center; }.toolkit-institutional-hero h1,.toolkit-contact-hero h1 { font-size:36px; }.toolkit-institutional-intro h2,.toolkit-institutional-values h2,.toolkit-contact-layout h2 { font-size:28px; }.toolkit-institutional-cta { align-items:flex-start; flex-direction:column; width:calc(100% - 28px); padding:24px; }.toolkit-institutional-cta .toolkit-btn { width:100%; }.toolkit-contact-form { padding:22px; } }
+/* About leadership and operating model. */
+.toolkit-about-method { display:grid; grid-template-columns:.75fr 1.25fr; gap:64px; align-items:start; padding:54px; background:#f6f7f1; border-left:5px solid var(--toolkit-orange); }
+.toolkit-about-method h2,.toolkit-team h2,.toolkit-about-partner h2 { margin:0 0 16px; color:var(--toolkit-green); font-size:34px; letter-spacing:0; }
+.toolkit-about-method>div>p:last-child { color:#566158; line-height:1.75; }
+.toolkit-about-method ol { display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin:0; padding:0; list-style:none; }
+.toolkit-about-method li { padding:0 22px; border-left:1px solid #d7dac8; }
+.toolkit-about-method li>span { color:var(--toolkit-orange); font-size:12px; font-weight:800; }
+.toolkit-about-method h3 { margin:20px 0 8px; color:var(--toolkit-green-dark); font-size:22px; }
+.toolkit-about-method li p { margin:0; color:#626b61; font-size:14px; line-height:1.65; }
+.toolkit-team__heading,.toolkit-blog-feed__heading { display:flex; justify-content:space-between; gap:48px; align-items:end; margin-bottom:30px; }
+.toolkit-team__heading>p,.toolkit-blog-feed__heading>p { max-width:470px; margin:0; color:#5c675d; line-height:1.65; }
+.toolkit-team__grid { display:grid; grid-template-columns:repeat(3,1fr); gap:28px 18px; }
+.toolkit-team article { position:relative; overflow:hidden; min-height:430px; background:var(--toolkit-green-dark); }
+.toolkit-team article img { display:block; width:100%; height:430px; object-fit:cover; filter:saturate(.88); transition:transform .35s ease; }
+.toolkit-team article:hover img { transform:scale(1.025); }
+.toolkit-team article>div { position:absolute; right:0; bottom:0; left:0; padding:72px 22px 22px; color:#fff; background:linear-gradient(transparent,rgba(31,34,12,.94)); }
+.toolkit-team article p { margin:0 0 5px; color:#f3a26e; font-size:11px; font-weight:800; text-transform:uppercase; }
+.toolkit-team article h3 { margin:0 0 8px; color:#fff; font-size:21px; }
+.toolkit-team article span { display:block; max-height:0; overflow:hidden; color:#eef0e8; font-size:13px; line-height:1.55; opacity:0; transition:max-height .3s ease,opacity .3s ease; }
+.toolkit-team article:hover span,.toolkit-team article:focus-within span { max-height:130px; opacity:1; }
+.toolkit-about-partner { display:flex; align-items:center; gap:36px; width:min(1280px,calc(100% - 40px)); margin:0 auto 72px; padding:50px 54px; color:#fff; background:var(--toolkit-green-dark); }
+.toolkit-about-partner>div { flex:1; max-width:760px; }.toolkit-about-partner h2 { margin-bottom:8px; color:#fff; }.toolkit-about-partner p:last-child { margin:0; color:#e4e6da; }
+
+/* Editorial blog. */
+.toolkit-blog-page { padding-top:26px; }
+.toolkit-blog-hero { display:grid; grid-template-columns:.92fr 1.08fr; width:min(1440px,calc(100% - 56px)); min-height:440px; margin:0 auto 72px; background:var(--toolkit-green-dark); }
+.toolkit-blog-hero>div { display:flex; flex-direction:column; justify-content:center; padding:64px max(42px,calc((100vw - 1280px)/2)); padding-right:48px; }
+.toolkit-blog-hero h1 { margin:0 0 18px; color:#fff; font-size:48px; line-height:1.08; letter-spacing:0; }.toolkit-blog-hero p:not(.toolkit-kicker) { color:#e6e8de; font-size:17px; line-height:1.7; }
+.toolkit-blog-hero img { width:100%; height:100%; min-height:440px; object-fit:cover; }
+.toolkit-blog-feature { display:grid; grid-template-columns:1.1fr .9fr; gap:54px; align-items:center; }.toolkit-blog-feature>a img { display:block; width:100%; height:430px; object-fit:cover; }
+.toolkit-blog-feature time,.toolkit-blog-grid time { color:#70796d; font-size:12px; }.toolkit-blog-feature h2 { margin:14px 0; font-size:34px; line-height:1.18; letter-spacing:0; }.toolkit-blog-feature h2 a,.toolkit-blog-grid h3 a { color:var(--toolkit-green-dark); }.toolkit-blog-feature div>p:not(.toolkit-kicker) { margin-bottom:25px; color:#586259; line-height:1.72; }
+.toolkit-blog-feed__heading h2 { margin:0; color:var(--toolkit-green); font-size:34px; }.toolkit-blog-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:28px 18px; }
+.toolkit-blog-grid article { border-bottom:1px solid var(--toolkit-line); }.toolkit-blog-card__image { display:block; overflow:hidden; }.toolkit-blog-card__image img { display:block; width:100%; height:220px; object-fit:cover; transition:transform .3s ease; }.toolkit-blog-card__image:hover img { transform:scale(1.025); }
+.toolkit-blog-grid article>div { padding:20px 2px 24px; }.toolkit-blog-grid h3 { margin:10px 0; font-size:21px; line-height:1.3; }.toolkit-blog-grid p { color:#5e685f; font-size:14px; line-height:1.6; }.toolkit-blog-grid article>div>a { color:var(--toolkit-green); font-size:13px; font-weight:800; }.toolkit-blog-empty { padding:60px; text-align:center; background:#f5f6f1; }
+
+.toolkit-notice-search button { display:grid; place-items:center; flex:0 0 32px; width:32px; height:32px; padding:0; border:0; color:#6b746d; background:transparent; cursor:pointer; }.toolkit-notice-results { margin:0 0 14px; color:#647065; font-size:12px; }.toolkit-notice-empty { padding:60px 20px; text-align:center; background:#f7f8f5; }.toolkit-notice-empty i { color:var(--toolkit-orange); font-size:30px; }.toolkit-notice-empty h2 { margin:14px 0 6px; color:var(--toolkit-green); }.toolkit-notice-empty p { margin:0; color:#626c63; }
+
+@media (max-width:900px) { .toolkit-institutional-intro,.toolkit-contact-layout,.toolkit-about-method,.toolkit-blog-hero,.toolkit-blog-feature { grid-template-columns:1fr; }.toolkit-institutional-values>div:last-child { grid-template-columns:1fr; }.toolkit-institutional-intro img { height:320px; }.toolkit-about-method ol { grid-template-columns:1fr; gap:22px; }.toolkit-about-method li { padding:0 0 0 20px; }.toolkit-team__grid,.toolkit-blog-grid { grid-template-columns:repeat(2,1fr); }.toolkit-blog-hero img { min-height:330px; }.toolkit-blog-hero>div { padding:50px 40px; } }
+@media (max-width:767px) { .toolkit-institutional-page,.toolkit-contact-page,.toolkit-blog-page { padding-top:14px; }.toolkit-institutional-hero,.toolkit-contact-hero { width:calc(100% - 28px); min-height:390px; margin-bottom:46px; padding:44px 24px; background-position:62% center; }.toolkit-institutional-hero h1,.toolkit-contact-hero h1,.toolkit-blog-hero h1 { font-size:36px; }.toolkit-institutional-intro h2,.toolkit-institutional-values h2,.toolkit-contact-layout h2,.toolkit-about-method h2,.toolkit-team h2,.toolkit-blog-feature h2 { font-size:28px; }.toolkit-institutional-cta,.toolkit-about-partner { align-items:flex-start; flex-direction:column; width:calc(100% - 28px); padding:24px; }.toolkit-institutional-cta .toolkit-btn,.toolkit-about-partner .toolkit-btn { width:100%; }.toolkit-contact-form { padding:22px; }.toolkit-about-method { width:calc(100% - 28px); padding:30px 24px; }.toolkit-team__heading,.toolkit-blog-feed__heading { display:block; }.toolkit-team__heading>p,.toolkit-blog-feed__heading>p { margin-top:12px; }.toolkit-team__grid,.toolkit-blog-grid { grid-template-columns:1fr; }.toolkit-team article span { max-height:130px; opacity:1; }.toolkit-blog-hero { width:calc(100% - 28px); margin-bottom:46px; }.toolkit-blog-hero>div { padding:42px 24px; }.toolkit-blog-hero img { min-height:260px; }.toolkit-blog-feature>a img { height:280px; } }
 
 /* Notice board: reference-aligned layout. */
 .toolkit-notice-page { padding-top:26px; }
