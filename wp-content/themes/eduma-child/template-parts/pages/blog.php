@@ -1,11 +1,18 @@
 <?php
 get_header();
 $assets = get_stylesheet_directory_uri() . '/assets/images/pages/';
+$excluded_posts = array();
+foreach ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'posts_per_page' => -1 ) ) as $candidate ) {
+	if ( '__trashed' === $candidate->post_name || preg_match( '/\bcopy\b/i', $candidate->post_title ) ) {
+		$excluded_posts[] = $candidate->ID;
+	}
+}
 $posts  = new WP_Query( array(
 	'post_type'           => 'post',
 	'post_status'         => 'publish',
 	'posts_per_page'      => 12,
 	'ignore_sticky_posts' => true,
+	'post__not_in'        => $excluded_posts,
 ) );
 $images = array( 'impact.jpg', 'about.jpg', 'foundation.jpg', 'notice-board.jpg' );
 ?>
