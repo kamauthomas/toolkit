@@ -21,6 +21,10 @@ define( 'TOOLKIT_2026_PRICING_ENABLED', false );
 
 Equivalent WordPress options are `toolkit_redesign_enabled`, `toolkit_2026_catalog_enabled`, `toolkit_2026_pricing_enabled`, and `toolkit_course_{slug}_enabled`.
 
+Administrators can manage the three primary options from **Toolkit Control** in WordPress. Environment constants still take priority and are the recommended production rollback mechanism. Switching `TOOLKIT_REDESIGN_ENABLED` to `false` immediately restores the parent-theme templates and existing database content after a cache purge; no content or files are moved or deleted.
+
+The most recent pre-deployment demo rollback is stored locally under the ignored `rollbacks/latest-demo/` directory. Refresh this directory before each release and retain only the latest verified rollback after acceptance.
+
 ## Page URL preservation contract
 
 The following routes must remain available or receive an explicitly tested 301 redirect. Do not delete their database records during rollout.

@@ -19,6 +19,20 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Demo verification: homepage, About, Blog and Notice Board return HTTP 200; warm-cache TTFB is approximately 0.30-0.34 seconds; logo, six team portraits and both JavaScript assets return HTTP 200 with exact expected byte sizes; metrics REST endpoint returns HTTP 204.
 - The local MariaDB runtime could not be started in the managed sandbox because Unix-socket creation was denied. PHP lint, JavaScript syntax, data validation and `git diff --check` passed before deployment.
 
+## 2026-07-15 Content-preservation correction
+
+- Restored the full 18-person live-site team under the heading **Our Team**, using optimized local portraits and preserving Who We Are, vision, mission and organisational context.
+- Restored homepage depth with the 2026 IIW strip, animated impact metrics, the live strategic-sector video, Welding Sector and Renewable Sector pathways, the Toolkit approach, three embedded YouTube testimonials, recent stories, admissions actions and a floating assistant.
+- Matched the approved palette: olive `#969e2a`, orange `#ff6600` and teal `#006a68`; removed remaining legacy dark-olive section colors from the rebuilt homepage.
+- Renamed the public digital course label to **Digital Skills** and replaced its unrelated portrait with an optimized live-site digital-learning image.
+- Restored verified Facebook, X/Twitter, Instagram, LinkedIn, YouTube and WhatsApp links plus the authoritative phone, email and address.
+- Expanded first-party metrics to aggregate application, course-navigation and chatbot interactions. Added the **Toolkit Control** admin page for rollout switches, system status and metrics.
+- Corrected duplicate navigation arrows by retaining the accessible theme toggle and suppressing the legacy pseudo-element.
+- Established `main` as the source-of-truth branch at commit `67e85bd`; removed the fully merged feature branch. The project has no Git remote configured.
+- Refreshed the persistent ignored rollback at `rollbacks/latest-demo/`, deployed the correction batch to the demo by FTPS and removed the temporary cache-purge handler.
+- Demo verification: HTTP 200 on homepage, About, courses and application; 18 team cards, three testimonial embeds, floating assistant, Welding Sector and Digital Skills markers; no disallowed legacy section colors in deployed child CSS. Main domain remained untouched.
+- Local review is served at `http://127.0.0.1:8001` with the imported database, child theme and redesign enabled.
+
 ## Rollback point
 - Branch: `feature/hero-slider`
 - Latest commit: `b53a726` (Phase 2: Update PROGRESS.md with header fix, tokens, section consistency log)
