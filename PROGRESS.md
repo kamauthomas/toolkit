@@ -6,6 +6,19 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 ## Status
 **PHASE 4 — IN PROGRESS** (SEO/accessibility handoff, remaining-page refinement planning, deployment readiness)
 
+## 2026-07-15 About, homepage, Blog and measurement release
+
+- Rebuilt the About page around the verified live-site mission and six current leadership profiles, with packaged portraits and an olive/orange visual system.
+- Replaced the inherited builder content below the homepage Who We Are section with course pathways, the Train/Certify/Connect model, dynamic recent stories and a two-action admissions band.
+- Added a dynamic editorial template for Toolkit Blog and excluded the legacy published `__trashed` and duplicate `Copy` records.
+- Completed Notice Board search, reset, category filtering, three sort modes, grid/list switching, result counts and empty state.
+- Replaced the contextless header search with a Contact action and separated dropdown toggles from menu labels.
+- Added first-party aggregate metrics for views, engaged time, scroll depth, load time and outbound clicks, with a 30-day WordPress dashboard and 90-day retention. See `docs/SITE-METRICS.md`.
+- Commits `a973f6c` and `1485034` deployed to `demo.toolkitafrica.ac.ke` by guarded FTPS upload. Theme files were backed up to `/tmp/toolkit-demo-backup-a973f6c`; assets/templates were uploaded first and `functions.php` last.
+- LiteSpeed cache was purged with a temporary handler, and that handler was removed immediately after use.
+- Demo verification: homepage, About, Blog and Notice Board return HTTP 200; warm-cache TTFB is approximately 0.30-0.34 seconds; logo, six team portraits and both JavaScript assets return HTTP 200 with exact expected byte sizes; metrics REST endpoint returns HTTP 204.
+- The local MariaDB runtime could not be started in the managed sandbox because Unix-socket creation was denied. PHP lint, JavaScript syntax, data validation and `git diff --check` passed before deployment.
+
 ## Rollback point
 - Branch: `feature/hero-slider`
 - Latest commit: `b53a726` (Phase 2: Update PROGRESS.md with header fix, tokens, section consistency log)
