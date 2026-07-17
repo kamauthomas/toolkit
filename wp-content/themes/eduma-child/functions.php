@@ -283,7 +283,12 @@ add_filter( 'wpseo_twitter_title', function( $title ) {
 
 function eduma_child_course_canonical_url() {
 	$slug = sanitize_key( get_query_var( 'toolkit_course' ) );
-	return $slug ? home_url( '/courses/' . $slug . '/' ) : false;
+	if ( $slug ) {
+		return home_url( '/courses/' . $slug . '/' );
+	}
+	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
+	$legacy_course = eduma_child_get_legacy_course_for_page();
+	return $legacy_course ? $legacy_course['url'] : false;
 }
 
 add_filter( 'wpseo_canonical', function( $canonical ) {
