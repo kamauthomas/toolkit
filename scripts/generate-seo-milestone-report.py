@@ -139,6 +139,8 @@ bullets(doc, [
     "Click-to-load YouTube facades for the pathways video and all three graduate testimonials.",
     "Keyword-focused title, standard meta description, self-canonical URL, Open Graph description, and dedicated 1200 x 630 social image.",
     "Meaningful image alternative text, HSTS response header, and live validation of SPF, robots.txt, sitemap, analytics, and cache behaviour.",
+    "Public llms.txt and llms-full.txt discovery documents with canonical resources, organization context, learning areas, and safeguards against premature pricing disclosure.",
+    "Removal of Thim's generated Roboto/Roboto Slab subsets and non-blocking fallback delivery of the 641 KB parent stylesheet.",
 ])
 doc.add_page_break()
 
@@ -164,6 +166,8 @@ for row in (
     ("Missing alt attributes", "Added descriptive alt text to video and story images.", "No empty homepage alt attributes."),
     ("Heavy third-party embeds", "Replaced initial iframes with accessible click-to-load facades.", "Zero initial YouTube iframes."),
     ("Missing HSTS", "Added one-year includeSubDomains policy on secure frontend responses.", "Header verified live."),
+    ("LLM discovery", "Published concise and expanded AI-readable site guides with pricing rules.", "Both endpoints return indexed text/plain."),
+    ("Font/render blocking", "Removed generated font subsets and moved parent CSS to asynchronous fallback loading.", "No live font-face output; parent CSS is non-blocking."),
 ):
     cells = table.add_row().cells
     for cell, value in zip(cells, row):
@@ -189,8 +193,8 @@ bullets(doc, [
 ])
 heading(doc, "Remaining Opportunities", 2)
 bullets(doc, [
-    "Reduce remaining font-display delay by consolidating parent-theme icon/font families.",
-    "Further isolate critical header/footer CSS from the parent Eduma stylesheet after full regression testing.",
+    "Measure the new Speed Index through repeated PageSpeed runs after regional caches have warmed.",
+    "Continue reducing the remaining 74 KB of child-owned critical CSS through per-template extraction after regression testing.",
     "Retest PageSpeed across multiple runs because lab scores vary with network and test location.",
     "Review accessibility findings individually; the current PageSpeed accessibility score remains 80.",
     "Ads.txt is only required if Toolkit becomes an advertising publisher; it is not an SEO requirement for this site.",

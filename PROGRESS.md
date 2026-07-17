@@ -13,6 +13,7 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Google PageSpeed API remeasurement was attempted after deployment but the public API quota was exhausted. A new browser PageSpeed run is still required for the post-release score.
 - The subsequent browser audit recorded performance 84, FCP 1.7 seconds, LCP 3.1 seconds, blocking time 60 ms, CLS 0.045, best practices 96, and SEO 92. Follow-up commits `c78c4d5` and `6ef80f3` added homepage metadata, self-canonical URLs, HSTS, complete alt text, click-to-load YouTube facades, and a correctly described 1200 x 630 social image.
 - Added `WMR-08`, titled **SEO Milestones and Fixes**, with baseline/post-release screenshots, measured outcomes, audit reconciliation, deployment controls, and remaining accessibility/font work.
+- Deployed commit `f9d3931` to remove generated Roboto/Roboto Slab font subsets, move the 641 KB parent stylesheet and icon packs off the blocking path, and publish `/llms.txt` plus `/llms-full.txt`. Both AI discovery endpoints return HTTP 200 as indexed plain text and include canonical resources, course scope, organization context, and explicit safeguards against premature future-pricing answers.
 
 ## 2026-07-17 Complete course-page correction and meeting brief
 
