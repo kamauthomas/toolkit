@@ -6,6 +6,15 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 ## Status
 **PHASE 4 — IN PROGRESS** (SEO/accessibility handoff, remaining-page refinement planning, deployment readiness)
 
+## 2026-07-17 Complete course-page correction and meeting brief
+
+- Audited the imported WordPress database and identified eight published course-related pages beneath Our Courses. Only the Welding parent page had previously been intercepted by a modern detail template; the remaining established URLs fell through to legacy Elementor layouts.
+- Added an explicit legacy-course page map and extended the shared course data so Welding and Fabrication, Renewable Energy, Organic Farming Skills, Digital Skills, Recognition of Prior Learning, Consultancy and Research, Online Training Portal - Jielimishe, and Training Welders with Virtual Reality use the same modern detail renderer while retaining their existing URLs and approved names.
+- Kept current fee display gated: legacy pages direct visitors to admissions, while the prospectus pricing switch remains independent and disabled until approved.
+- Applied the rebuilt-page asset cleanup to every mapped course page. Local smoke tests returned HTTP 200 and modern markup for all eight pages; warm response times were approximately 0.35-0.47 seconds and HTML payloads approximately 54 KB, compared with roughly 155-205 KB for the legacy render.
+- Added a seven-page executive meeting summary under `reports/meeting-summary/`, with before/after evidence, SEO and measurement coverage, course-page scope, rollout controls, and minor reference to the available outreach posters. Selected poster, solar, VR, and graduation sources were optimized for reproducible report generation.
+- Main-domain files remain untouched. Demo deployment and cache-hit verification must be recorded below after guarded upload.
+
 ## 2026-07-15 About, homepage, Blog and measurement release
 
 - Rebuilt the About page around the verified live-site mission and six current leadership profiles, with packaged portraits and an olive/orange visual system.

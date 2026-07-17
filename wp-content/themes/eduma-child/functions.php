@@ -29,6 +29,8 @@ function eduma_child_2026_pricing_enabled() {
 }
 
 function thim_child_enqueue_styles() {
+	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
+	$legacy_course = eduma_child_get_legacy_course_for_page();
 	wp_enqueue_style( 'thim-parent-style', get_template_directory_uri() . '/style.css', array(), THIM_THEME_VERSION );
 
 	// Brand tokens — shared design tokens used site-wide
@@ -45,7 +47,7 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_script( 'toolkit-home-experience', get_stylesheet_directory_uri() . '/assets/js/home-experience.js', array(), filemtime( $experience_path ), true );
 	}
 
-	if ( eduma_child_redesign_enabled() && ( is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) || get_query_var( 'toolkit_course' ) ) ) {
+	if ( eduma_child_redesign_enabled() && ( is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) || $legacy_course || get_query_var( 'toolkit_course' ) ) ) {
 		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
 		$page_js_ver  = filemtime( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
@@ -90,6 +92,11 @@ add_filter( 'template_include', function( $template ) {
 		return get_stylesheet_directory() . '/template-parts/pages/course-detail.php';
 	}
 
+	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
+	if ( eduma_child_get_legacy_course_for_page() ) {
+		return get_stylesheet_directory() . '/template-parts/pages/course-detail.php';
+	}
+
 	$page_templates = array(
 		'about-toolkit-africa'          => 'template-parts/pages/institutional.php',
 		'the-toolkit-foundation-copy'  => 'template-parts/pages/institutional.php',
@@ -97,7 +104,6 @@ add_filter( 'template_include', function( $template ) {
 		'contact'                      => 'template-parts/pages/contact.php',
 		'toolkit-blog'                 => 'template-parts/pages/blog.php',
 		'our-ventures'                 => 'template-parts/pages/courses.php',
-		'construction-sector-skills' => 'template-parts/pages/welding.php',
 		'notice-board'               => 'template-parts/pages/notice-board.php',
 		'toolkit-courses-apply-today' => 'template-parts/pages/apply.php',
 	);
@@ -148,6 +154,15 @@ function eduma_child_redesigned_page_metadata() {
 				'image'       => $course['image'],
 			);
 		}
+	}
+	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
+	$legacy_course = eduma_child_get_legacy_course_for_page();
+	if ( $legacy_course ) {
+		return array(
+			'title'       => $legacy_course['title'] . ' | Toolkit Africa',
+			'description' => $legacy_course['short'] . ' Review the learning focus, delivery details, and application steps.',
+			'image'       => $legacy_course['image'],
+		);
 	}
 	if ( is_page( 'our-ventures' ) ) {
 		return array(
@@ -404,7 +419,8 @@ add_action( 'wp_enqueue_scripts', function() {
 
 /* Rebuilt pages do not render Elementor or Contact Form 7 content. */
 add_action( 'wp_enqueue_scripts', function() {
-	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) && ! get_query_var( 'toolkit_course' ) ) {
+	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
+	if ( ! is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) && ! eduma_child_get_legacy_course_for_page() && ! get_query_var( 'toolkit_course' ) ) {
 		return;
 	}
 
@@ -525,7 +541,8 @@ add_action( 'wp_enqueue_scripts', function() {
 
 /* Some plugins enqueue again while rendering the footer. Remove those late additions. */
 add_action( 'wp_footer', function() {
-	if ( ! is_page( array( 'our-ventures', 'construction-sector-skills', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) && ! get_query_var( 'toolkit_course' ) ) {
+	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
+	if ( ! is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) && ! eduma_child_get_legacy_course_for_page() && ! get_query_var( 'toolkit_course' ) ) {
 		return;
 	}
 
