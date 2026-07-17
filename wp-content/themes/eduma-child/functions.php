@@ -182,8 +182,8 @@ function eduma_child_redesigned_page_metadata() {
 	$legacy_course = eduma_child_get_legacy_course_for_page();
 	if ( $legacy_course ) {
 		return array(
-			'title'       => $legacy_course['title'] . ' | Toolkit Africa',
-			'description' => $legacy_course['short'] . ' Review the learning focus, delivery details, and application steps.',
+			'title'       => isset( $legacy_course['seo_title'] ) ? $legacy_course['seo_title'] : $legacy_course['title'] . ' | Toolkit Africa',
+			'description' => isset( $legacy_course['seo_description'] ) ? $legacy_course['seo_description'] : $legacy_course['short'] . ' Review the learning focus, delivery details, and application steps.',
 			'image'       => $legacy_course['image'],
 		);
 	}
@@ -362,6 +362,74 @@ add_filter( 'wpseo_schema_breadcrumb', function( $data ) {
 	return $data;
 } );
 
+/* Strengthen the Toolkit Africa entity and course relationships for search engines. */
+add_action( 'wp_head', function() {
+	if ( ! eduma_child_redesign_enabled() ) {
+		return;
+	}
+
+	$home = home_url( '/' );
+	$graph = array(
+		array(
+			'@type'         => array( 'Organization', 'EducationalOrganization' ),
+			'@id'           => $home . '#organization',
+			'name'          => 'Toolkit Africa',
+			'alternateName' => array( 'Toolkit', 'Toolkit for Skills and Innovation', 'Toolkit Skills and Innovation Hub' ),
+			'url'           => $home,
+			'logo'          => get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png',
+			'email'         => 'office@toolkitafrica.ac.ke',
+			'telephone'     => '+254709549200',
+			'address'       => array(
+				'@type'           => 'PostalAddress',
+				'streetAddress'   => 'Karen-Kikuyu Southern Bypass',
+				'addressLocality' => 'Kikuyu',
+				'addressCountry'  => 'KE',
+			),
+			'sameAs'        => array(
+				'https://www.facebook.com/toolkitafrica',
+				'https://twitter.com/toolkitafrica',
+				'https://www.instagram.com/thetoolkitafrika',
+				'https://www.linkedin.com/company/the-toolkit-iskills-tti-ltd',
+				'https://www.youtube.com/@toolkitafrica',
+			),
+		),
+	);
+
+	if ( is_front_page() ) {
+		$graph[] = array(
+			'@type'         => 'WebSite',
+			'@id'           => $home . '#website',
+			'url'           => $home,
+			'name'          => 'Toolkit Africa',
+			'alternateName' => array( 'Toolkit', 'Toolkit for Skills and Innovation' ),
+			'publisher'     => array( '@id' => $home . '#organization' ),
+			'inLanguage'    => 'en-KE',
+		);
+	}
+
+	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
+	$slug   = sanitize_key( get_query_var( 'toolkit_course' ) );
+	$course = $slug ? eduma_child_get_course( $slug ) : eduma_child_get_legacy_course_for_page();
+	if ( $course ) {
+		$course_url = $slug ? home_url( '/courses/' . $slug . '/' ) : $course['url'];
+		$graph[] = array(
+			'@type'            => 'Course',
+			'@id'              => $course_url . '#course',
+			'name'             => $course['title'],
+			'description'      => $course['short'],
+			'url'              => $course_url,
+			'image'            => $course['image'],
+			'provider'         => array( '@id' => $home . '#organization' ),
+			'inLanguage'       => 'en-KE',
+			'courseMode'       => 'Onsite',
+			'educationalLevel' => isset( $course['entry'] ) ? $course['entry'] : 'Contact admissions',
+			'teaches'          => $course['outcomes'],
+		);
+	}
+
+	echo '<script type="application/ld+json">' . wp_json_encode( array( '@context' => 'https://schema.org', '@graph' => $graph ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}, 30 );
+
 /* === HEADER LOGO: avoid falling back to the parent Eduma logo === */
 
 add_action( 'after_setup_theme', function() {
@@ -492,11 +560,13 @@ add_action( 'template_redirect', function() {
 	$lines = array(
 		'# Toolkit Africa',
 		'> Toolkit Africa is a Kenya-based social enterprise providing practical vocational skills, assessment support, and pathways to employment or entrepreneurship for young people and women.',
+		'> The names Toolkit, Toolkit Africa, Toolkit for Skills and Innovation, and Toolkit Skills and Innovation Hub refer to this organization.',
 		'',
 		'## Canonical resources',
 		'- [Homepage](' . home_url( '/' ) . ')',
 		'- [About Toolkit Africa](' . home_url( '/about-toolkit-africa/' ) . ')',
 		'- [Current course directory](' . home_url( '/our-ventures/' ) . ')',
+		'- [MIG/MAG Welding training](' . home_url( '/our-ventures/construction-sector-skills/' ) . ')',
 		'- [Admissions guidance](' . home_url( '/our-ventures/toolkit-courses-apply-today/' ) . ')',
 		'- [Notice Board](' . home_url( '/notice-board/' ) . ')',
 		'- [Toolkit Blog](' . home_url( '/toolkit-blog/' ) . ')',
