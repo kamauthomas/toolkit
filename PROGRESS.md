@@ -24,6 +24,8 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Corrected the Organic Farming asset mismatch. The prior `agriculture.jpg` depicted solar training; Organic Farming now uses a dedicated teaching-farm scene with crop beds, compost practice and applied learner activity.
 - Added optimized Toolkit solar field-training, VR welding and graduation/outcome photographs for the relevant Renewable Energy, VR, RPL and consultancy page experiences. Digital Skills and Jielimishe retain their correct laptop-learning imagery.
 - All new page variants stay within the approved olive `#969e2a`, orange `#ff6600` and teal `#006a68` palette, with neutral surfaces for readability.
+- Deployed commit `9c22dae` to the demo child theme by guarded FTPS after refreshing the persistent rollback. A one-request LiteSpeed purge endpoint was uploaded, called successfully and immediately replaced with the committed `functions.php`.
+- Post-purge verification used plain URLs with no cache-busting parameters: all eight course pages returned HTTP 200, the correct discipline theme, the new experience section and the expected heading. All four new experience assets returned HTTP 200, repeated Organic Farming requests reported cache hits, and the former `Welding and Fabrication` label was absent from the directory, application and course pages.
 
 ## 2026-07-15 About, homepage, Blog and measurement release
 
