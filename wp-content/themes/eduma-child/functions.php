@@ -208,8 +208,8 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_page( 'construction-sector-skills' ) ) {
 		return array(
-			'title'       => 'Welding and Fabrication Training | Toolkit Africa',
-			'description' => 'Develop practical welding and fabrication skills with hands-on training, VR-enabled learning, and career-focused support at Toolkit Africa.',
+			'title'       => 'MIG/MAG Welding Training | Toolkit Africa',
+			'description' => 'Develop practical MIG/MAG welding skills with hands-on training, VR-enabled learning, and career-focused support at Toolkit Africa.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/welding.jpg',
 		);
 	}

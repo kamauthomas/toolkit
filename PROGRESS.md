@@ -16,6 +16,15 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Deployed commit `3fe3a0d` to the demo child theme by guarded FTPS on 17 July 2026 after refreshing `rollbacks/latest-demo/`. All eight public course URLs returned HTTP 200 with the modern template marker and correct headings. Welding, solar, agriculture, digital and enterprise image assets returned HTTP 200; Renewable Energy emitted the curated SEO title, description and solar social image; repeated route requests reported LiteSpeed cache hits.
 - Main-domain files remain untouched.
 
+## 2026-07-17 Discipline-specific course experiences
+
+- Confirmed that normal demo course URLs were still serving stale LiteSpeed copies even though cache-busted URLs rendered the new template. The next release includes an explicit one-time purge followed by verification of the plain URLs.
+- Reworked the shared course detail template into discipline-specific experience variants with an immersive hero, learning-environment narrative, three applied-learning moments, course facts, capability map and admissions CTA.
+- Renamed the public Welding course presentation to `MIG/MAG Welding` throughout the catalogue, course page, application selector and SEO wording. The legacy URL remains unchanged to avoid broken links.
+- Corrected the Organic Farming asset mismatch. The prior `agriculture.jpg` depicted solar training; Organic Farming now uses a dedicated teaching-farm scene with crop beds, compost practice and applied learner activity.
+- Added optimized Toolkit solar field-training, VR welding and graduation/outcome photographs for the relevant Renewable Energy, VR, RPL and consultancy page experiences. Digital Skills and Jielimishe retain their correct laptop-learning imagery.
+- All new page variants stay within the approved olive `#969e2a`, orange `#ff6600` and teal `#006a68` palette, with neutral surfaces for readability.
+
 ## 2026-07-15 About, homepage, Blog and measurement release
 
 - Rebuilt the About page around the verified live-site mission and six current leadership profiles, with packaged portraits and an olive/orange visual system.

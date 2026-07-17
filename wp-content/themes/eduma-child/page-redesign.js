@@ -45,7 +45,7 @@
   }
   var courseChoice = document.getElementById('toolkit-course-choice');
   if (courseChoice) {
-    var descriptions = { 'Welding and Fabrication':'Gain modern metal joining and fabrication skills in workshop and industry settings.', 'Renewable Energy':'Build practical foundations for work in renewable-energy and solar-focused environments.', 'Organic Farming Skills':'Develop practical skills for sustainable agriculture and enterprise.', 'Digital Skills':'Strengthen digital capabilities for changing work opportunities.', 'Consultancy and Research':'Explore Toolkit support for research and professional services.' };
+    var descriptions = { 'MIG/MAG Welding':'Build MIG/MAG welding technique through guided workshop practice and modern learning tools.', 'Renewable Energy':'Build practical foundations for work in renewable-energy and solar-focused environments.', 'Organic Farming Skills':'Develop practical skills for sustainable agriculture and enterprise.', 'Digital Skills':'Strengthen digital capabilities for changing work opportunities.', 'Consultancy and Research':'Explore Toolkit support for research and professional services.' };
     courseChoice.addEventListener('change', function () { document.getElementById('toolkit-course-title').textContent = courseChoice.value; document.getElementById('toolkit-course-description').textContent = descriptions[courseChoice.value]; });
   }
 })();

@@ -2,7 +2,7 @@
 
 ## Pages in this batch
 
-- Welding and Fabrication: `/our-ventures/construction-sector-skills/`
+- MIG/MAG Welding: `/our-ventures/construction-sector-skills/`
 - Notice Board: `/notice-board/`
 - Apply for a Course: `/our-ventures/toolkit-courses-apply-today/`
 

@@ -4,11 +4,11 @@ $image     = get_stylesheet_directory_uri() . '/assets/images/pages/welding.jpg'
 $apply_url = 'https://toolkit.mzizi.co.ke/portal/OnlineApplicationForm.aspx?q=d0d6b2f229d733c1e3156244805125a2';
 ?>
 <main id="main-content" class="toolkit-page toolkit-course-page">
-	<div class="toolkit-breadcrumb"><a href="<?php echo esc_url( home_url( '/' ) ); ?>">Home</a><span>/</span><a href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Our Courses</a><span>/</span><span>Welding and Fabrication</span></div>
+	<div class="toolkit-breadcrumb"><a href="<?php echo esc_url( home_url( '/' ) ); ?>">Home</a><span>/</span><a href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Our Courses</a><span>/</span><span>MIG/MAG Welding</span></div>
 	<section class="toolkit-course-hero" style="background-image:url('<?php echo esc_url( $image ); ?>')">
 		<div class="toolkit-course-hero__content">
 			<p class="toolkit-kicker">Practical. Industry-relevant. Future-ready.</p>
-			<h1>Welding and<br>Fabrication</h1>
+			<h1>MIG/MAG<br>Welding</h1>
 			<p>Build confidence in welding and metal fabrication through workshop practice, simulation, and instructor-led training.</p>
 			<ul class="toolkit-course-facts" aria-label="Course facts"><li><i class="fas fa-clock"></i><span>Format<strong>Hands-on learning</strong></span></li><li><i class="fas fa-user-graduate"></i><span>Level<strong>Beginner to intermediate</strong></span></li><li><i class="fas fa-briefcase"></i><span>Outcome<strong>Career-ready skills</strong></span></li></ul>
 		</div>
