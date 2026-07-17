@@ -26,6 +26,18 @@
     counters.forEach(function (counter) { observer.observe(counter); });
   }
 
+  document.querySelectorAll('.toolkit-video-facade').forEach(function (facade) {
+    facade.addEventListener('click', function () {
+      var videoId = facade.getAttribute('data-video-id');
+      var iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&rel=0';
+      iframe.title = facade.getAttribute('aria-label').replace(/^Play /, '');
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      facade.replaceWith(iframe);
+    });
+  });
+
   var chat = document.querySelector('.toolkit-chat');
   if (!chat) return;
   var toggle = chat.querySelector('.toolkit-chat__toggle');

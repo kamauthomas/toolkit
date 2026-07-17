@@ -143,6 +143,13 @@ function eduma_child_redesigned_page_metadata() {
 	if ( ! eduma_child_redesign_enabled() ) {
 		return false;
 	}
+	if ( is_front_page() ) {
+		return array(
+			'title'       => 'Practical Skills Training in Kenya | Toolkit Africa',
+			'description' => 'Toolkit Africa equips young people and women with practical vocational skills, recognised assessment, and pathways to employment or entrepreneurship.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/hero-slide-1.webp',
+		);
+	}
 	$course_slug = get_query_var( 'toolkit_course' );
 	if ( $course_slug ) {
 		require_once get_stylesheet_directory() . '/inc/course-catalog.php';
@@ -264,11 +271,17 @@ function eduma_child_course_canonical_url() {
 }
 
 add_filter( 'wpseo_canonical', function( $canonical ) {
+	if ( is_front_page() && eduma_child_redesign_enabled() ) {
+		return home_url( '/' );
+	}
 	$course_url = eduma_child_course_canonical_url();
 	return $course_url ? $course_url : $canonical;
 } );
 
 add_filter( 'wpseo_opengraph_url', function( $url ) {
+	if ( is_front_page() && eduma_child_redesign_enabled() ) {
+		return home_url( '/' );
+	}
 	$course_url = eduma_child_course_canonical_url();
 	return $course_url ? $course_url : $url;
 } );
@@ -374,6 +387,12 @@ remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
 remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
 remove_action( 'wp_head', 'wp_shortlink_wp_head', 10 );
 remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head', 10 );
+
+add_action( 'send_headers', function() {
+	if ( is_ssl() && ! is_admin() ) {
+		header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
+	}
+} );
 
 add_filter( 'wp_resource_hints', function( $urls, $relation_type ) {
 	if ( 'dns-prefetch' === $relation_type ) {
