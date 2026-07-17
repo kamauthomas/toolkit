@@ -27,8 +27,8 @@
   --peach-tint-bg: #FDE8D0;
 
   /* === Typography === */
-  --brand-font-heading: var(--thim-font-title-font-family, 'Roboto Slab'), serif;
-  --brand-font-body: var(--thim-font-body-font-family, 'Roboto'), sans-serif;
+  --brand-font-heading: Arial, Helvetica, sans-serif;
+  --brand-font-body: Arial, Helvetica, sans-serif;
 
   /* === Spacing === */
   --brand-border-radius: 6px;
@@ -47,6 +47,9 @@
   --brand-heading-underline-height: 3px;
   --brand-heading-underline-width: 40px;
 }
+
+body { font-family: Arial, Helvetica, sans-serif; }
+h1,h2,h3,h4,h5,h6 { font-family: Arial, Helvetica, sans-serif; }
 
 /* === Nav: constrain logo height so large images don't stretch the bar === */
 .thim-logo img {

@@ -98,7 +98,7 @@
 }
 
 .hero-slider__heading {
-  font-family: var(--thim-font-title-font-family, 'Roboto Slab'), sans-serif;
+  font-family: var(--brand-font-heading);
   font-size: 48px;
   font-weight: 700;
   line-height: 1.2;
@@ -498,7 +498,7 @@
 }
 
 .hero-features__title {
-  font-family: var(--thim-font-title-font-family, 'Roboto Slab'), sans-serif;
+  font-family: var(--brand-font-heading);
   font-size: 18px;
   font-weight: 700;
   color: #333;
