@@ -6,6 +6,12 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 ## Status
 **PHASE 4 — IN PROGRESS** (SEO/accessibility handoff, remaining-page refinement planning, deployment readiness)
 
+## 2026-07-17 Mobile performance correction
+
+- Deployed homepage performance commit `68dce70` to the demo child theme. The release added responsive WebP hero assets, mobile-specific LCP preloading, and homepage removal of unused Elementor, Contact Form 7, Thim eKit, and Sina bundles.
+- The first post-purge request reported a LiteSpeed cache miss and the second a hit. Deployed HTML references the 184 KB mobile hero asset; the temporary purge endpoint was removed and verified as HTTP 404.
+- Google PageSpeed API remeasurement was attempted after deployment but the public API quota was exhausted. A new browser PageSpeed run is still required for the post-release score.
+
 ## 2026-07-17 Complete course-page correction and meeting brief
 
 - Audited the imported WordPress database and identified eight published course-related pages beneath Our Courses. Only the Welding parent page had previously been intercepted by a modern detail template; the remaining established URLs fell through to legacy Elementor layouts.
