@@ -362,10 +362,8 @@ add_action( 'wp_head', function() {
 		return;
 	}
 
-	printf(
-		'<link rel="preload" as="image" href="%s" fetchpriority="high">' . "\n",
-		esc_url( $slides[0]['image'] )
-	);
+	printf( '<link rel="preload" as="image" href="%s" type="image/webp" media="(min-width: 768px)" fetchpriority="high">' . "\n", esc_url( $slides[0]['image'] ) );
+	printf( '<link rel="preload" as="image" href="%s" type="image/webp" media="(max-width: 767px)" fetchpriority="high">' . "\n", esc_url( $slides[0]['image_mobile'] ) );
 }, 2 );
 
 /* === PERFORMANCE: Remove bloat === */
@@ -420,7 +418,7 @@ add_action( 'wp_enqueue_scripts', function() {
 /* Rebuilt pages do not render Elementor or Contact Form 7 content. */
 add_action( 'wp_enqueue_scripts', function() {
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
-	if ( ! is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) && ! eduma_child_get_legacy_course_for_page() && ! get_query_var( 'toolkit_course' ) ) {
+	if ( ! is_front_page() && ! is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) && ! eduma_child_get_legacy_course_for_page() && ! get_query_var( 'toolkit_course' ) ) {
 		return;
 	}
 
@@ -429,6 +427,10 @@ add_action( 'wp_enqueue_scripts', function() {
 		'cff',
 		'sb-font-awesome',
 		'sina-header-footer',
+		'icofont',
+		'animate-merge',
+		'sina-tooltip',
+		'sina-widgets',
 		'inf-font-awesome',
 		'owl-carousel',
 		'bdpp-public-style',
@@ -542,7 +544,7 @@ add_action( 'wp_enqueue_scripts', function() {
 /* Some plugins enqueue again while rendering the footer. Remove those late additions. */
 add_action( 'wp_footer', function() {
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
-	if ( ! is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) && ! eduma_child_get_legacy_course_for_page() && ! get_query_var( 'toolkit_course' ) ) {
+	if ( ! is_front_page() && ! is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) && ! eduma_child_get_legacy_course_for_page() && ! get_query_var( 'toolkit_course' ) ) {
 		return;
 	}
 
