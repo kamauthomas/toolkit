@@ -147,7 +147,7 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'Practical Skills Training in Kenya | Toolkit Africa',
 			'description' => 'Toolkit Africa equips young people and women with practical vocational skills, recognised assessment, and pathways to employment or entrepreneurship.',
-			'image'       => get_stylesheet_directory_uri() . '/assets/images/hero-slide-1.webp',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
 		);
 	}
 	$course_slug = get_query_var( 'toolkit_course' );
@@ -287,6 +287,23 @@ add_filter( 'wpseo_opengraph_url', function( $url ) {
 } );
 
 add_filter( 'wpseo_opengraph_image', function( $image ) {
+	$metadata = eduma_child_redesigned_page_metadata();
+	return $metadata ? $metadata['image'] : $image;
+} );
+
+add_filter( 'wpseo_opengraph_image_width', function( $width ) {
+	return is_front_page() && eduma_child_redesign_enabled() ? 1200 : $width;
+} );
+
+add_filter( 'wpseo_opengraph_image_height', function( $height ) {
+	return is_front_page() && eduma_child_redesign_enabled() ? 630 : $height;
+} );
+
+add_filter( 'wpseo_opengraph_image_type', function( $type ) {
+	return is_front_page() && eduma_child_redesign_enabled() ? 'image/webp' : $type;
+} );
+
+add_filter( 'wpseo_twitter_image', function( $image ) {
 	$metadata = eduma_child_redesigned_page_metadata();
 	return $metadata ? $metadata['image'] : $image;
 } );
