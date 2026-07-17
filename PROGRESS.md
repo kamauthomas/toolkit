@@ -13,7 +13,8 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 - Kept current fee display gated: legacy pages direct visitors to admissions, while the prospectus pricing switch remains independent and disabled until approved.
 - Applied the rebuilt-page asset cleanup to every mapped course page. Local smoke tests returned HTTP 200 and modern markup for all eight pages; warm response times were approximately 0.35-0.47 seconds and HTML payloads approximately 54 KB, compared with roughly 155-205 KB for the legacy render.
 - Added a seven-page executive meeting summary under `reports/meeting-summary/`, with before/after evidence, SEO and measurement coverage, course-page scope, rollout controls, and minor reference to the available outreach posters. Selected poster, solar, VR, and graduation sources were optimized for reproducible report generation.
-- Main-domain files remain untouched. Demo deployment and cache-hit verification must be recorded below after guarded upload.
+- Deployed commit `3fe3a0d` to the demo child theme by guarded FTPS on 17 July 2026 after refreshing `rollbacks/latest-demo/`. All eight public course URLs returned HTTP 200 with the modern template marker and correct headings. Welding, solar, agriculture, digital and enterprise image assets returned HTTP 200; Renewable Energy emitted the curated SEO title, description and solar social image; repeated route requests reported LiteSpeed cache hits.
+- Main-domain files remain untouched.
 
 ## 2026-07-15 About, homepage, Blog and measurement release
 
