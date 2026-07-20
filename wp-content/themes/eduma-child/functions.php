@@ -205,8 +205,30 @@ add_action( 'template_redirect', function() {
 	}
 }, 1 );
 
+function eduma_child_non_public_page_slugs() {
+	return array(
+		'students-portal',
+		'eventer-shortcode-preview-page',
+		'courses',
+		'blog',
+		'account',
+		'user-register',
+		'user-login',
+		'forgot-password',
+		'reset-password',
+		'user-account',
+		'my-account',
+		'lp-profile',
+		'lp-term-conditions',
+		'lp-become-a-teacher',
+		'lp-checkout',
+		'instructors',
+		'instructor',
+	);
+}
+
 add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function( $ids ) {
-	foreach ( array( 'students-portal', 'eventer-shortcode-preview-page', 'courses', 'blog' ) as $path ) {
+	foreach ( eduma_child_non_public_page_slugs() as $path ) {
 		$page = get_page_by_path( $path );
 		if ( $page ) {
 			$ids[] = (int) $page->ID;
@@ -219,7 +241,7 @@ add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function( $ids ) {
 add_filter( 'wpseo_sitemap_exclude_author', '__return_empty_array' );
 
 add_filter( 'wpseo_robots_array', function( $robots ) {
-	if ( is_author() || is_page( array( 'students-portal', 'eventer-shortcode-preview-page', 'courses', 'blog' ) ) ) {
+	if ( is_author() || is_page( eduma_child_non_public_page_slugs() ) ) {
 		$robots['index']  = 'noindex';
 		$robots['follow'] = 'follow';
 	}
@@ -329,6 +351,48 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'Apply for a Course | Toolkit Africa',
 			'description' => 'Prepare your Toolkit Africa course application, review the admission steps, and continue securely to the online application portal.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
+		);
+	}
+	if ( is_page( 'privacy-policy' ) ) {
+		return array(
+			'title'       => 'Privacy Policy | Toolkit Africa',
+			'description' => 'Read how Toolkit Africa handles website, enquiry, application, and communications information, including your privacy choices and contact route.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
+		);
+	}
+	if ( is_page( 'research' ) ) {
+		return array(
+			'title'       => 'Skills and Employment Research | Toolkit Africa',
+			'description' => 'Explore Toolkit Africa research and evidence on vocational skills, youth employment, industry needs, green jobs, and practical workforce development.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
+		);
+	}
+	if ( is_page( 'building-young-female-farmers-of-tomorrow' ) ) {
+		return array(
+			'title'       => 'Young Women in Agriculture | Toolkit Africa',
+			'description' => 'Learn about Toolkit Africa initiatives supporting young women to build practical agriculture, enterprise, and livelihood skills.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/courses/experiences/organic-farm.jpg',
+		);
+	}
+	if ( is_page( 'toolkit-in-brief' ) ) {
+		return array(
+			'title'       => 'Toolkit in Brief | Skills and Youth Opportunity',
+			'description' => 'Review Toolkit Africa’s mission, vision, values, skills-development model, and commitment to employment and entrepreneurship pathways.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
+		);
+	}
+	if ( is_page( 'tti-media' ) ) {
+		return array(
+			'title'       => 'Toolkit Africa Videos | Skills in Action',
+			'description' => 'Watch Toolkit Africa learners, trainers, partners, workshops, and practical skills programmes in action.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
+		);
+	}
+	if ( is_page( 'gallery-2' ) ) {
+		return array(
+			'title'       => 'Toolkit Africa Gallery | Learning in Action',
+			'description' => 'View images from Toolkit Africa training, workshops, learner activities, partnerships, events, and skills-development programmes.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
