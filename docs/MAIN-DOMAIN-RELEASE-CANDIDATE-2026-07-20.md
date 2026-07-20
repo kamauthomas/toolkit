@@ -48,6 +48,21 @@ With these values, main continues serving the existing presentation. After the l
 5. Recorded production file ownership and permissions for `wp-content/themes/eduma-child`.
 6. Named release operator, checker, rollback owner, and maintenance window.
 
+## Production Access Preflight
+
+The credentials supplied on 20 July 2026 authenticate successfully over explicit FTPS only when the certificate-valid hosting name `wp46.host-ww.net` is used. The certificate is valid for that hostname and not for `toolkitafrica.ac.ke`; production transfer commands must not bypass certificate verification.
+
+The FTP account is currently jailed to an empty directory containing only `.ftpquota`. It cannot access `public_html`, `www`, `htdocs`, `domains/toolkitafrica.ac.ke/public_html`, or `wp-content`. No production file was uploaded or modified during this preflight. The hosting administrator must remap the account to the main-domain document root, or issue a least-privilege account rooted at that directory, before backup or deployment can proceed.
+
+The public HTTP baseline currently shows:
+
+- Eduma parent-theme assets are active; the redesign has not been accidentally activated.
+- LiteSpeed is serving cached responses.
+- Anonymous `/wp-json/wp/v2/users` is available and must return 404 after activation.
+- `readme.html` and `license.txt` are publicly readable and should be denied by server configuration or removed after a full backup.
+- `wp-config.php` and `.htaccess` are not publicly readable; XML-RPC is blocked by the server.
+- HSTS, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, and `Permissions-Policy` are absent and must appear after activation.
+
 ## Deployment Sequence
 
 1. Build the archive with `bash scripts/build-main-release.sh 20260720-rc1`.
