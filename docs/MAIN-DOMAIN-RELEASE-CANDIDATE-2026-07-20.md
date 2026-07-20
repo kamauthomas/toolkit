@@ -33,6 +33,8 @@ Production screenshot evidence is stored persistently under ignored `rollbacks/p
 
 An end-user screenshot subsequently proved that the unparameterized homepage still served a stale pre-redesign LiteSpeed object even though cache-busted checks rendered the modern theme. Exact desktop, mobile, and curl probes reproduced the split: the plain URL returned a 283 KB legacy cache hit while query-string probes returned a 157 KB modern cache miss. The account-owned `/home/bfyigiln/lscache` contents were purged through a private one-time cPanel cron; the cron and completion marker were then removed. Final acceptance used the exact `https://toolkitafrica.ac.ke/` URL with no query string: the first desktop request was a modern cache miss and subsequent desktop/mobile requests were modern cache hits of the same 157 KB response. `home-plain-desktop-final.png` and `home-plain-mobile-final.png` are the definitive post-purge screenshots.
 
+Review of that screenshot then identified a desktop navigation alignment defect: Eduma computed `.width-logo` as absolutely positioned, removing it from the header flex row and allowing navigation to begin beneath the logo. A rejected grid experiment was reverted before acceptance. Browser DevTools geometry confirmed the cause, after which the child theme restored the logo to normal flex flow and disabled the legacy desktop floats. The exact plain URL was purged and rechecked at 1440, 1366, and 390 pixels. `home-nav-corrected-desktop.png` and `home-nav-corrected-mobile.png` supersede the earlier homepage evidence and show the accepted header layout.
+
 ## Integrity Result
 
 - Demo sitemap: 24 public/indexable pages after unused student/account/LearnPress utilities were removed from discovery.

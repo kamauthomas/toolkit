@@ -420,20 +420,30 @@ th, td {
     max-width: 1400px;
   }
 
+  #masthead.site-header .navigation {
+    float: none !important;
+    width: 100% !important;
+  }
+
   #masthead.site-header .tm-table {
-    display: flex;
+    display: flex !important;
     align-items: center;
     width: 100%;
   }
 
   #masthead.site-header .width-logo {
+    position: static !important;
+    display: flex !important;
+    align-items: center;
     flex: 0 0 128px;
-    width: 128px;
+    width: 128px !important;
+    overflow: visible !important;
   }
 
   #masthead.site-header .width-navigation {
+    float: none !important;
     flex: 1 1 auto;
-    width: auto;
+    width: auto !important;
     min-width: 0;
   }
 
