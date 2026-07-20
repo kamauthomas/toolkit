@@ -83,6 +83,9 @@ add_filter( 'theme_mod_thim_preload', function( $enabled ) {
 add_filter( 'body_class', function( $classes ) {
 	if ( ! is_admin() ) {
 		$classes = array_diff( $classes, array( 'thim-body-preload', 'fixloader' ) );
+		if ( eduma_child_is_custom_surface() ) {
+			$classes[] = 'toolkit-modern-surface';
+		}
 	}
 	return $classes;
 }, 100 );

@@ -35,6 +35,8 @@ An end-user screenshot subsequently proved that the unparameterized homepage sti
 
 Review of that screenshot then identified a desktop navigation alignment defect: Eduma computed `.width-logo` as absolutely positioned, removing it from the header flex row and allowing navigation to begin beneath the logo. A rejected grid experiment was reverted before acceptance. Browser DevTools geometry confirmed the cause, after which the child theme restored the logo to normal flex flow and disabled the legacy desktop floats. The exact plain URL was purged and rechecked at 1440, 1366, and 390 pixels. `home-nav-corrected-desktop.png` and `home-nav-corrected-mobile.png` supersede the earlier homepage evidence and show the accepted header layout.
 
+A final scroll-return check exposed a second parent-theme interaction on the production header: default-header mode retained 60 pixels of `.content-pusher` padding after the sticky header returned to the top. Modern child-theme surfaces now carry a dedicated `toolkit-modern-surface` body class that removes only that obsolete reservation. The desktop navigation container is capped and centered, the logo has a distinct divider and fixed flex allocation, and the right-side Apply action retains an equivalent outer gutter. Mobile header geometry was also normalized to a 76-pixel row so the full Toolkit logo remains visible instead of clipping above the viewport. After redeployment, LiteSpeed was purged again and its temporary cron and completion marker were removed. `home-header-balanced-desktop.png` and `home-header-balanced-mobile.png` are the final exact-URL header evidence.
+
 ## Integrity Result
 
 - Demo sitemap: 24 public/indexable pages after unused student/account/LearnPress utilities were removed from discovery.
