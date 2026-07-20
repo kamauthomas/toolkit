@@ -21,6 +21,11 @@
   if (!sessionStorage.getItem(viewKey)) {
     send('page_view', 1);
     sessionStorage.setItem(viewKey, '1');
+
+	var source = new URLSearchParams(window.location.search).get('utm_source');
+	if (source && /^[a-z0-9_-]{1,32}$/i.test(source)) {
+	  send('interaction', 1, 'arrival_' + source.toLowerCase());
+	}
   }
 
   function measureScroll() {

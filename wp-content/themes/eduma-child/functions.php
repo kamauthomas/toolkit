@@ -32,7 +32,7 @@ function eduma_child_is_custom_surface() {
 	if ( ! eduma_child_redesign_enabled() || is_admin() ) {
 		return false;
 	}
-	if ( is_front_page() || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) || get_query_var( 'toolkit_course' ) ) {
+	if ( get_query_var( 'toolkit_connect' ) || is_front_page() || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) || get_query_var( 'toolkit_course' ) ) {
 		return true;
 	}
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
@@ -63,6 +63,13 @@ function thim_child_enqueue_styles() {
 		$page_js_ver  = filemtime( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
 		wp_enqueue_script( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.js', array(), $page_js_ver, true );
+	}
+
+	if ( eduma_child_redesign_enabled() && get_query_var( 'toolkit_connect' ) ) {
+		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
+		$connect_ver  = filemtime( get_stylesheet_directory() . '/assets/css/connect.css' );
+		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
+		wp_enqueue_style( 'toolkit-connect', get_stylesheet_directory_uri() . '/assets/css/connect.css', array( 'eduma-child-page-redesign' ), $connect_ver );
 	}
 }
 
@@ -101,6 +108,9 @@ add_filter( 'template_include', function( $template ) {
 
 	if ( get_query_var( 'toolkit_course' ) && eduma_child_2026_catalog_enabled() ) {
 		return get_stylesheet_directory() . '/template-parts/pages/course-detail.php';
+	}
+	if ( get_query_var( 'toolkit_connect' ) ) {
+		return get_stylesheet_directory() . '/template-parts/pages/connect.php';
 	}
 
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
@@ -143,10 +153,36 @@ add_action( 'init', function() {
 	}
 } );
 
+/* Database-independent profile landing page for social account bios. */
+add_action( 'init', function() {
+	$route_version = eduma_child_redesign_enabled() ? '2026-1-on' : '2026-1-off';
+	if ( eduma_child_redesign_enabled() ) {
+		add_rewrite_rule( '^connect/?$', 'index.php?toolkit_connect=1', 'top' );
+	}
+	if ( $route_version !== get_option( 'eduma_child_connect_route_version' ) ) {
+		flush_rewrite_rules( false );
+		update_option( 'eduma_child_connect_route_version', $route_version, false );
+	}
+} );
+
 add_filter( 'query_vars', function( $vars ) {
 	$vars[] = 'toolkit_course';
+	$vars[] = 'toolkit_connect';
 	return $vars;
 } );
+
+add_action( 'template_redirect', function() {
+	if ( get_query_var( 'toolkit_connect' ) ) {
+		global $wp_query;
+		if ( ! eduma_child_redesign_enabled() ) {
+			$wp_query->set_404();
+			status_header( 404 );
+			return;
+		}
+		$wp_query->is_404 = false;
+		status_header( 200 );
+	}
+}, 0 );
 
 add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
 	$path = wp_parse_url( $requested_url, PHP_URL_PATH );
@@ -200,6 +236,13 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'Practical Skills Training in Kenya | Toolkit Africa',
 			'description' => 'Toolkit Africa equips young people and women with practical vocational skills, recognised assessment, and pathways to employment or entrepreneurship.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
+		);
+	}
+	if ( get_query_var( 'toolkit_connect' ) ) {
+		return array(
+			'title'       => 'Connect with Toolkit Africa | Courses, Admissions and Updates',
+			'description' => 'Apply for practical skills training, explore Toolkit Africa courses, read current notices, contact admissions, and follow our official social channels.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
 		);
 	}
@@ -329,6 +372,9 @@ function eduma_child_course_canonical_url() {
 }
 
 add_filter( 'wpseo_canonical', function( $canonical ) {
+	if ( get_query_var( 'toolkit_connect' ) ) {
+		return home_url( '/connect/' );
+	}
 	if ( is_front_page() && eduma_child_redesign_enabled() ) {
 		return home_url( '/' );
 	}
@@ -337,11 +383,21 @@ add_filter( 'wpseo_canonical', function( $canonical ) {
 } );
 
 add_filter( 'wpseo_opengraph_url', function( $url ) {
+	if ( get_query_var( 'toolkit_connect' ) ) {
+		return home_url( '/connect/' );
+	}
 	if ( is_front_page() && eduma_child_redesign_enabled() ) {
 		return home_url( '/' );
 	}
 	$course_url = eduma_child_course_canonical_url();
 	return $course_url ? $course_url : $url;
+} );
+
+add_filter( 'wpseo_sitemap_page_content', function( $content ) {
+	if ( ! eduma_child_redesign_enabled() ) {
+		return $content;
+	}
+	return $content . '<url><loc>' . esc_url( home_url( '/connect/' ) ) . '</loc><lastmod>' . esc_html( gmdate( DATE_W3C, filemtime( get_stylesheet_directory() . '/template-parts/pages/connect.php' ) ) ) . '</lastmod></url>';
 } );
 
 add_filter( 'wpseo_opengraph_image', function( $image ) {
@@ -374,6 +430,14 @@ add_filter( 'wpseo_schema_webpage', function( $data ) {
 
 	$data['name']        = $metadata['title'];
 	$data['description'] = $metadata['description'];
+	if ( get_query_var( 'toolkit_connect' ) ) {
+		$connect_url        = home_url( '/connect/' );
+		$data['@type']      = 'WebPage';
+		$data['url']        = $connect_url;
+		$data['@id']        = $connect_url . '#webpage';
+		$data['breadcrumb'] = array( '@id' => $connect_url . '#breadcrumb' );
+		unset( $data['datePublished'], $data['dateModified'] );
+	}
 	$course_url = eduma_child_course_canonical_url();
 	if ( $course_url ) {
 		$data['url'] = $course_url;
@@ -386,6 +450,15 @@ add_filter( 'wpseo_schema_webpage', function( $data ) {
 } );
 
 add_filter( 'wpseo_schema_breadcrumb', function( $data ) {
+	if ( get_query_var( 'toolkit_connect' ) ) {
+		$connect_url = home_url( '/connect/' );
+		$data['@id'] = $connect_url . '#breadcrumb';
+		$data['itemListElement'] = array(
+			array( '@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => home_url( '/' ) ),
+			array( '@type' => 'ListItem', 'position' => 2, 'name' => 'Connect' ),
+		);
+		return $data;
+	}
 	$course_url = eduma_child_course_canonical_url();
 	if ( ! $course_url ) {
 		return $data;
@@ -429,7 +502,7 @@ add_action( 'wp_head', function() {
 			),
 			'sameAs'        => array(
 				'https://www.facebook.com/toolkitafrica',
-				'https://twitter.com/toolkitafrica',
+				'https://x.com/toolkitafrica',
 				'https://www.instagram.com/thetoolkitafrika',
 				'https://www.linkedin.com/company/the-toolkit-iskills-tti-ltd',
 				'https://www.youtube.com/@toolkitafrica',
