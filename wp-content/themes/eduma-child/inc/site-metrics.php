@@ -22,7 +22,9 @@ add_action( 'rest_api_init', function() {
 
 function toolkit_record_site_metric( WP_REST_Request $request ) {
 	$origin = $request->get_header( 'origin' );
-	if ( $origin && wp_parse_url( $origin, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
+	$referer = $request->get_header( 'referer' );
+	$source  = $origin ? $origin : $referer;
+	if ( ! $source || wp_parse_url( $source, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
 		return new WP_Error( 'invalid_origin', 'Invalid metric origin.', array( 'status' => 403 ) );
 	}
 
@@ -42,8 +44,8 @@ function toolkit_record_site_metric( WP_REST_Request $request ) {
 
 	$path = '/' . ltrim( sanitize_text_field( (string) $request->get_param( 'path' ) ), '/' );
 	$path = strtok( $path, '?' );
-	if ( strlen( $path ) > 180 ) {
-		$path = substr( $path, 0, 180 );
+	if ( strlen( $path ) > 180 || ! preg_match( '#^/[A-Za-z0-9/_-]*$#', $path ) ) {
+		return new WP_Error( 'invalid_path', 'Invalid metric path.', array( 'status' => 400 ) );
 	}
 	$value = max( 0, min( 600000, absint( $request->get_param( 'value' ) ) ) );
 	$label = sanitize_key( (string) $request->get_param( 'label' ) );

@@ -79,7 +79,7 @@ $slides = eduma_child_get_hero_slides();
 		</button>
 	</div>
 
-	<div class="hero-slider__video-badge" role="button" tabindex="0" aria-label="Play video: Watch Our Story">
+	<div class="hero-slider__video-badge" role="button" tabindex="0" data-video-id="LmZhEabXyUc" aria-label="Play video: Watch Our Story">
 		<span class="hero-slider__video-play">
 			<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" fill="#ED6E0D"/><path d="M7 5.5L12 9L7 12.5V5.5Z" fill="white"/></svg>
 		</span>
@@ -94,10 +94,8 @@ $slides = eduma_child_get_hero_slides();
 	<div class="hero-slider__modal" role="dialog" aria-modal="true" aria-label="Video player" hidden>
 		<div class="hero-slider__modal-backdrop"></div>
 		<div class="hero-slider__modal-content">
-			<button class="hero-slider__modal-close" aria-label="Close video">&times;</button>
-			<div class="hero-slider__modal-video">
-				<p style="color:#fff;text-align:center;padding:4rem;">Video placeholder — embed URL here.</p>
-			</div>
+			<button class="hero-slider__modal-close" type="button" aria-label="Close video">&times;</button>
+			<div class="hero-slider__modal-video" data-video-container></div>
 		</div>
 	</div>
 </div>

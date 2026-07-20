@@ -153,6 +153,43 @@ add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
 	return in_array( untrailingslashit( $path ), array( '/llms.txt', '/llms-full.txt' ), true ) ? false : $redirect_url;
 }, 10, 2 );
 
+/* Retire unused public routes without deleting their WordPress records. */
+add_action( 'template_redirect', function() {
+	if ( is_page( 'students-portal' ) ) {
+		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'Toolkit Africa' );
+		exit;
+	}
+	if ( is_page( 'courses' ) ) {
+		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'Toolkit Africa' );
+		exit;
+	}
+	if ( is_page( 'blog' ) ) {
+		wp_safe_redirect( home_url( '/toolkit-blog/' ), 301, 'Toolkit Africa' );
+		exit;
+	}
+}, 1 );
+
+add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function( $ids ) {
+	foreach ( array( 'students-portal', 'eventer-shortcode-preview-page', 'courses', 'blog' ) as $path ) {
+		$page = get_page_by_path( $path );
+		if ( $page ) {
+			$ids[] = (int) $page->ID;
+		}
+	}
+	return array_values( array_unique( $ids ) );
+} );
+
+/* Staff accounts are operational identities, not public author profile pages. */
+add_filter( 'wpseo_sitemap_exclude_author', '__return_empty_array' );
+
+add_filter( 'wpseo_robots_array', function( $robots ) {
+	if ( is_author() || is_page( array( 'students-portal', 'eventer-shortcode-preview-page', 'courses', 'blog' ) ) ) {
+		$robots['index']  = 'noindex';
+		$robots['follow'] = 'follow';
+	}
+	return $robots;
+} );
+
 /* === SEO: curated metadata for child-theme page rebuilds === */
 
 function eduma_child_redesigned_page_metadata() {
@@ -495,8 +532,14 @@ remove_action( 'wp_head', 'wp_shortlink_wp_head', 10 );
 remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head', 10 );
 
 add_action( 'send_headers', function() {
-	if ( is_ssl() && ! is_admin() ) {
-		header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
+	if ( ! is_admin() ) {
+		header( 'X-Content-Type-Options: nosniff' );
+		header( 'X-Frame-Options: SAMEORIGIN' );
+		header( 'Referrer-Policy: strict-origin-when-cross-origin' );
+		header( 'Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()' );
+		if ( is_ssl() ) {
+			header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
+		}
 	}
 } );
 
@@ -889,6 +932,21 @@ remove_action( 'wp_head', 'wp_generator' );
 /* === SECURITY: Disable XML-RPC === */
 
 add_filter( 'xmlrpc_enabled', '__return_false' );
+
+add_action( 'init', function() {
+	if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+		status_header( 403 );
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		exit( 'XML-RPC is disabled.' );
+	}
+}, 0 );
+
+add_filter( 'rest_endpoints', function( $endpoints ) {
+	if ( ! is_user_logged_in() ) {
+		unset( $endpoints['/wp/v2/users'], $endpoints['/wp/v2/users/(?P<id>[\d]+)'] );
+	}
+	return $endpoints;
+} );
 
 /* === SECURITY: Remove Windows Live Writer manifest === */
 

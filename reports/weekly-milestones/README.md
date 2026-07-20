@@ -12,6 +12,8 @@ This reporting series documents the website-modernisation programme from the Jun
 | WMR-06 | 06-12 July 2026 | Child-theme hardening and runtime performance |
 | WMR-07 | 13-16 July 2026 | Major pages, SEO, analytics and demo release |
 | WMR-08 | 17 July 2026 | SEO milestones, performance fixes and live verification |
+| WMR-09 | 17 July 2026 | Search discoverability, entity SEO and AI discovery files |
+| WMR-10 | 20 July 2026 | Production-readiness audit, security hardening and rollout gates |
 
 Each DOCX uses the Toolkit logo and includes document control, milestone status, completed work, risks, next steps and paired visual evidence. Screenshots were captured on 16 July 2026 using consistent production and demo URLs; this capture date is stated inside every report so the weekly chronology is not confused with the evidence date.
 
@@ -19,4 +21,7 @@ The `evidence/` directory contains optimized copies of the images embedded in th
 
 ```bash
 python3 scripts/generate-weekly-milestone-reports.py
+python3 scripts/generate-seo-milestone-report.py
+python3 scripts/generate-discoverability-milestone-report.py
+python3 scripts/generate-production-readiness-report.py
 ```

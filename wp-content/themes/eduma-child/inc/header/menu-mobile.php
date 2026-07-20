@@ -100,9 +100,9 @@ if ( $menu_has_expected_labels( $primary_menu ) ) {
 	} else {
 		$fallback_items = array(
 			array( 'label' => __( 'Home', 'eduma-child' ), 'url' => home_url( '/' ) ),
-			array( 'label' => __( 'About Us', 'eduma-child' ), 'url' => home_url( '/about-us/' ) ),
+			array( 'label' => __( 'About Us', 'eduma-child' ), 'url' => home_url( '/about-toolkit-africa/' ) ),
 			array( 'label' => __( 'Our Courses', 'eduma-child' ), 'url' => home_url( '/our-ventures/' ) ),
-			array( 'label' => __( 'Impact and Insights', 'eduma-child' ), 'url' => home_url( '/impact-and-insights/' ) ),
+			array( 'label' => __( 'Impact and Insights', 'eduma-child' ), 'url' => home_url( '/the-toolkit-foundation-copy/' ) ),
 			array( 'label' => __( 'Toolkit Blog', 'eduma-child' ), 'url' => home_url( '/toolkit-blog/' ) ),
 			array( 'label' => __( 'Notice Board', 'eduma-child' ), 'url' => home_url( '/notice-board/' ) ),
 			array( 'label' => __( 'The Toolkit Foundation', 'eduma-child' ), 'url' => home_url( '/the-toolkit-foundation-copy/' ) ),

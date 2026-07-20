@@ -14,6 +14,7 @@
   var videoBadge = slider.querySelector('.hero-slider__video-badge');
   var modal = slider.querySelector('.hero-slider__modal');
   var modalClose = slider.querySelector('.hero-slider__modal-close');
+  var modalVideo = slider.querySelector('[data-video-container]');
   var pauseIcon = slider.querySelector('.hero-slider__pause-icon');
   var playIcon = slider.querySelector('.hero-slider__play-icon');
 
@@ -174,6 +175,15 @@
   /* Video badge / modal */
   if (videoBadge && modal) {
     videoBadge.addEventListener('click', function () {
+	  if (modalVideo && !modalVideo.querySelector('iframe')) {
+		var iframe = document.createElement('iframe');
+		iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(videoBadge.getAttribute('data-video-id')) + '?autoplay=1&rel=0';
+		iframe.title = 'The Toolkit Skills and Innovation Hub video';
+		iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+		iframe.allowFullscreen = true;
+		iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+		modalVideo.appendChild(iframe);
+	  }
       modal.removeAttribute('hidden');
       setTimeout(function () { modal.classList.add('is-open'); }, 10);
       modalClose.focus();
@@ -189,6 +199,7 @@
   if (modalClose && modal) {
     modalClose.addEventListener('click', function () {
       modal.classList.remove('is-open');
+	  if (modalVideo) modalVideo.replaceChildren();
       var onTransition = function () {
         modal.setAttribute('hidden', '');
         modal.removeEventListener('transitionend', onTransition);

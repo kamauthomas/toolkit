@@ -31,3 +31,15 @@ php scripts/validate-meta-chatbot-data.php
 The validator checks the approved current fees and durations, confirms the September 2026 schedule remains quarantined, and prevents selected future catalog amounts from leaking into the current Meta training file.
 
 Use `php scripts/seed-demo.php --dry-run` to inspect the actions first.
+
+## Production readiness report
+
+Generate the fresh 20 July 2026 audit milestone with:
+
+```bash
+python3 scripts/generate-production-readiness-report.py
+```
+
+The report records verified demo fixes separately from unresolved main-domain
+release gates. Its responsive screenshots are captured audit evidence and are
+not used as deployable site assets.
