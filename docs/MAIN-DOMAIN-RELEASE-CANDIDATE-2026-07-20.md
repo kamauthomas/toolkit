@@ -29,6 +29,8 @@ Post-activation verification passed:
 - Homepage HTML contains no demo-domain reference and no insecure `http://toolkitafrica.ac.ke` reference.
 - The saved production configuration defines both `WP_HOME` and `WP_SITEURL` with HTTPS. A non-HTTPS `site_url()` observed only during the cron/CGI execution context did not appear in public HTML and required no production configuration change.
 
+Production screenshot evidence is stored persistently under ignored `rollbacks/production-20260720/screenshots/`: Home, About, and Courses were captured at 1440 by 1000 and 390 by 844. The first desktop capture exposed legacy submenu items rendering visibly over the hero. The child-theme dropdown CSS was corrected and redeployed; `home-desktop-postfix.png` confirms the submenu is hidden at rest while the modern header, hero, Apply actions, media prompt, and chatbot render together without that overlap. These screenshots supplement, rather than replace, the HTTP and HTML assertions above.
+
 ## Integrity Result
 
 - Demo sitemap: 24 public/indexable pages after unused student/account/LearnPress utilities were removed from discovery.
