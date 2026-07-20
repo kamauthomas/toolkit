@@ -29,7 +29,7 @@ Research, Toolkit in Brief, TTI Videos, Gallery, and the young-women-in-agricult
 
 ## Production Preservation Model
 
-The main-domain WordPress installation is not reinstalled. Do not import the demo database, replace WordPress core, overwrite plugins/uploads, or change DNS/site URLs. Synchronize only the reviewed `eduma-child` package while the three constants below are false:
+The main-domain WordPress installation is not reinstalled. Do not import the demo database, replace WordPress core, overwrite plugins/uploads, or change DNS/site URLs. The fresh production export may be restored into an isolated local or staging database for validation, but it must not be replaced with the demo database. Synchronize only the reviewed `eduma-child` package while the three constants below are false:
 
 ```php
 define( 'TOOLKIT_REDESIGN_ENABLED', false );
@@ -56,9 +56,24 @@ The FTP account is currently jailed to an empty directory containing only `.ftpq
 
 A second, non-jailed deployment account was subsequently supplied and successfully validated through `wp46.host-ww.net`. It can read the main WordPress document root through both `public_html/` and `domains/toolkitafrica.ac.ke/public_html/`. No write operation has been performed. The existing production child theme contains only `functions.php`, `style.css`, and `screenshot.png`; persistent preflight copies of those files and the critical root configuration are stored under ignored `rollbacks/latest-main-preflight/` with checksums.
 
-Checksum comparison confirms the two document-root paths expose the same `wp-config.php`; use `public_html/` as the deployment path and do not upload twice. SSH port 22 is unavailable and the DirectAdmin endpoint did not respond during the preflight. The public WordPress settings API correctly requires authentication, so FTP cannot confirm or change the active theme. Obtain WordPress administrator access or a working hosting/database control channel before the cutover to record the active `template`/`stylesheet`, take the database export, and activate the child theme if necessary.
+Checksum comparison confirms the two document-root paths expose the same `wp-config.php`; use `public_html/` as the deployment path and do not upload twice. SSH port 22 is unavailable and the DirectAdmin endpoint did not respond during the preflight. The public WordPress settings API correctly requires authentication, so FTP cannot confirm or change the active theme. The supplied production export now records the active `template`/`stylesheet`; WordPress administrator access or a working hosting/database control channel is still required to activate the child theme and manage the rollout switches safely.
 
-The server contains a 1.9 GB `local.tar` dated 30 June 2026, but this is not accepted as the required same-day backup. `wordpress-backups/` is currently empty. A fresh server-side files archive and database export remain mandatory.
+The server contains a 1.9 GB `local.tar` dated 30 June 2026, but this is not accepted as the required same-day files backup. `wordpress-backups/` is currently empty. A fresh server-side files archive remains mandatory.
+
+## Production Database Snapshot
+
+The user supplied `bfyigiln_new.sql2` as a local backup of the live production database on 20 July 2026. It is excluded from Git by the repository's root SQL-dump ignore rule and must not be deployed into a public directory.
+
+- phpMyAdmin export timestamp: 20 July 2026, 13:19
+- Source database: `bfyigiln_new`
+- Source server: MariaDB 10.6.27
+- SHA-256: `707cac4fe906dbbc004623e16d226ec5c6f2fbe1b248a76aeec103f769b95746`
+- Isolated import: passed with 131 tables, all three checked core tables, and zero import errors
+- Content inventory: 40 published pages, 150 published posts, 18 published products, and five WordPress users; no personal records were printed or copied into the report
+- Active theme settings: `template=eduma`, `stylesheet=eduma`, `current_theme=Eduma`
+- Permalink structure: `/%postname%/`
+
+The snapshot exposes a configuration inconsistency: `home` is `https://toolkitafrica.ac.ke`, while `siteurl` is `https://mail.toolkitafrica.ac.ke`. Confirm the intended WordPress core location before changing it. If WordPress is installed at the root domain, correct `siteurl` to `https://toolkitafrica.ac.ke` during the approved maintenance window, then purge LiteSpeed and test login, admin assets, REST, uploads, and permalinks. Do not apply a blind search-and-replace to serialized data.
 
 The public HTTP baseline currently shows:
 
