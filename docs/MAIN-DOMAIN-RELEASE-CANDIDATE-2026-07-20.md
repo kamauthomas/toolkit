@@ -54,6 +54,12 @@ The credentials supplied on 20 July 2026 authenticate successfully over explicit
 
 The FTP account is currently jailed to an empty directory containing only `.ftpquota`. It cannot access `public_html`, `www`, `htdocs`, `domains/toolkitafrica.ac.ke/public_html`, or `wp-content`. No production file was uploaded or modified during this preflight. The hosting administrator must remap the account to the main-domain document root, or issue a least-privilege account rooted at that directory, before backup or deployment can proceed.
 
+A second, non-jailed deployment account was subsequently supplied and successfully validated through `wp46.host-ww.net`. It can read the main WordPress document root through both `public_html/` and `domains/toolkitafrica.ac.ke/public_html/`. No write operation has been performed. The existing production child theme contains only `functions.php`, `style.css`, and `screenshot.png`; persistent preflight copies of those files and the critical root configuration are stored under ignored `rollbacks/latest-main-preflight/` with checksums.
+
+Checksum comparison confirms the two document-root paths expose the same `wp-config.php`; use `public_html/` as the deployment path and do not upload twice. SSH port 22 is unavailable and the DirectAdmin endpoint did not respond during the preflight. The public WordPress settings API correctly requires authentication, so FTP cannot confirm or change the active theme. Obtain WordPress administrator access or a working hosting/database control channel before the cutover to record the active `template`/`stylesheet`, take the database export, and activate the child theme if necessary.
+
+The server contains a 1.9 GB `local.tar` dated 30 June 2026, but this is not accepted as the required same-day backup. `wordpress-backups/` is currently empty. A fresh server-side files archive and database export remain mandatory.
+
 The public HTTP baseline currently shows:
 
 - Eduma parent-theme assets are active; the redesign has not been accidentally activated.
@@ -62,6 +68,9 @@ The public HTTP baseline currently shows:
 - `readme.html` and `license.txt` are publicly readable and should be denied by server configuration or removed after a full backup.
 - `wp-config.php` and `.htaccess` are not publicly readable; XML-RPC is blocked by the server.
 - HSTS, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, and `Permissions-Policy` are absent and must appear after activation.
+- `WP_DEBUG` is false and dashboard file editing is disabled; no Toolkit rollout constants are currently defined.
+- The production `.htaccess` contains plaintext `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ENV`, and `SECRET_KEY` environment directives. Remove the block from the live file during the approved maintenance procedure and rotate the password/secret values; never copy them into Git, reports, release archives, or chat output.
+- The 106 MB production error log is active. Its latest 64 KB contains 18 memory-exhaustion fatal/uncaught entries at the 128 MB PHP limit and 303 Eduma undefined-option warnings/notices between 14 and 20 July. The fatal components observed most often were Elementor and WP Carousel; this baseline must be compared immediately after activation.
 
 ## Deployment Sequence
 
