@@ -74,17 +74,23 @@ add_action( 'admin_menu', function() {
 add_action( 'admin_post_toolkit_save_controls', function() {
 	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'You do not have permission to update Toolkit controls.' );
 	check_admin_referer( 'toolkit_save_controls' );
-	$controls = array(
-		'toolkit_redesign_enabled'      => 'redesign',
-		'toolkit_2026_catalog_enabled'  => 'catalog',
-		'toolkit_2026_pricing_enabled'  => 'pricing',
+	$catalog_enabled = isset( $_POST['catalog'] );
+	$controls        = array(
+		'toolkit_redesign_enabled'     => isset( $_POST['redesign'] ),
+		'toolkit_2026_catalog_enabled' => $catalog_enabled,
+		// Pricing cannot remain armed behind a disabled catalogue switch.
+		'toolkit_2026_pricing_enabled' => $catalog_enabled && isset( $_POST['pricing'] ),
 	);
-	foreach ( $controls as $option => $field ) update_option( $option, isset( $_POST[ $field ] ) ? 1 : 0, false );
+	foreach ( $controls as $option => $enabled ) update_option( $option, $enabled ? 1 : 0, false );
 	wp_safe_redirect( add_query_arg( array( 'page' => 'toolkit-control', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
 	exit;
 } );
 
 function toolkit_render_metrics_page() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'You do not have permission to view Toolkit controls.' );
+	}
+
 	$data  = get_option( 'toolkit_site_metrics', array() );
 	$since = gmdate( 'Y-m-d', strtotime( '-30 days' ) );
 	$rows  = array();
