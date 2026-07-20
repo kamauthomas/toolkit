@@ -6,7 +6,28 @@
 
 **Release source:** `main`, deployed from `origin/wordpress-modernisation`
 
-**Activation decision:** Hold until backup and production-access gates pass
+**Activation decision:** Explicitly authorized and completed after production database and access validation; full-files backup gap retained as a recorded residual risk
+
+**Production result:** Activated and verified on 20 July 2026
+
+## Production Activation Record
+
+The reviewed 74-file `eduma-child` release was synchronized to `public_html/wp-content/themes/eduma-child` over certificate-verified FTPS. The existing parent theme and database content were retained; WordPress was not reinstalled and the demo database was not imported.
+
+The host was positively identified as cPanel on TLS port 2083. Authenticated cPanel API access confirmed account `bfyigiln`, home `/home/bfyigiln`, WP Toolkit availability, Cron availability, and a `noshell` account shell. Because external SSH and interactive shell access were unavailable, activation ran through a CLI-only PHP file stored outside every document root and a temporary authenticated cPanel cron entry. The cron entry, result, script, and log were removed immediately after use; the final cron and private-home inventory found no `toolkit-release` artifact.
+
+Activation set `template=eduma`, `stylesheet=eduma-child`, enabled `toolkit_redesign_enabled`, and kept both `toolkit_2026_catalog_enabled` and `toolkit_2026_pricing_enabled` disabled. Home page ID 4519 remains the static front page. LiteSpeed and rewrite state were purged/refreshed as part of activation.
+
+Post-activation verification passed:
+
+- Homepage, About, Courses, Notice Board, Blog, Contact, Connect, `llms.txt`, and `llms-full.txt` return HTTP 200.
+- All eight preserved course routes return HTTP 200 with their distinct redesigned H1 and child-theme surface.
+- Anonymous `/wp-json/wp/v2/users` returns HTTP 404.
+- HSTS, nosniff, frame, referrer, and permissions headers are present.
+- Child stylesheet, Toolkit logo, and responsive hero image return HTTP 200.
+- Homepage contains the child-theme and Toolkit surface signatures, Apply actions, chatbot references, and YouTube media references.
+- Homepage HTML contains no demo-domain reference and no insecure `http://toolkitafrica.ac.ke` reference.
+- The saved production configuration defines both `WP_HOME` and `WP_SITEURL` with HTTPS. A non-HTTPS `site_url()` observed only during the cron/CGI execution context did not appear in public HTML and required no production configuration change.
 
 ## Integrity Result
 
