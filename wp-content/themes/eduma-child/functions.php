@@ -501,6 +501,7 @@ add_action( 'wp_head', function() {
 				'addressCountry'  => 'KE',
 			),
 			'sameAs'        => array(
+				'https://www.tiktok.com/@thetoolkitafrika',
 				'https://www.facebook.com/toolkitafrica',
 				'https://x.com/toolkitafrica',
 				'https://www.instagram.com/thetoolkitafrika',

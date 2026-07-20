@@ -32,6 +32,7 @@ $logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 				<a href="mailto:office@toolkitafrica.ac.ke"><i class="far fa-envelope" aria-hidden="true"></i><span>office@toolkitafrica.ac.ke</span></a>
 				<p><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span>Karen-Kikuyu Southern Bypass, Kikuyu, Kenya</span></p>
 				<div class="toolkit-site-footer__socials" aria-label="Toolkit social media">
+					<a href="https://www.tiktok.com/@thetoolkitafrika" aria-label="TikTok" title="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
 					<a href="https://www.facebook.com/toolkitafrica" aria-label="Facebook" title="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
 					<a href="https://x.com/toolkitafrica" aria-label="X" title="X"><i class="fab fa-twitter" aria-hidden="true"></i></a>
 					<a href="https://www.instagram.com/thetoolkitafrika" aria-label="Instagram" title="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>

@@ -8,14 +8,13 @@
 
 | Channel | Destination | Verification note |
 |---|---|---|
+| TikTok | `https://www.tiktok.com/@thetoolkitafrika` | TikTok oEmbed confirms “The Toolkit Afrika” and the `thetoolkitafrika` profile ID |
 | Facebook | `https://www.facebook.com/toolkitafrica` | Resolves and is referenced by Toolkit/GIZ material |
 | Instagram | `https://www.instagram.com/thetoolkitafrika` | Existing Toolkit website destination; resolves |
 | LinkedIn | `https://www.linkedin.com/company/the-toolkit-iskills-tti-ltd` | Search result identifies The Toolkit for Skills and Innovation in Kikuyu, Kenya |
 | YouTube | `https://www.youtube.com/@toolkitafrica` | Existing Toolkit website destination; resolves |
 | X | `https://x.com/toolkitafrica` | Existing Toolkit handle; resolves from the former Twitter URL |
 | WhatsApp Channel | `https://whatsapp.com/channel/0029Vb6PfqR5Ejy79JAJlb1f` | Existing Toolkit website destination; resolves |
-
-No TikTok account is linked until its exact official profile is confirmed by the account owner. TikTok visitors can still reach this page through the tracked website link in the TikTok bio.
 
 ## Profile URLs
 

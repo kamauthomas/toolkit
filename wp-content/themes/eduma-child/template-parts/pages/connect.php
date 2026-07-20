@@ -51,6 +51,7 @@ $apply  = home_url( '/our-ventures/toolkit-courses-apply-today/' );
 		<p class="connect-kicker">Official channels</p>
 		<h2 id="connect-social-title">Follow the work</h2>
 		<div class="connect-socials__grid">
+			<a href="https://www.tiktok.com/@thetoolkitafrika" target="_blank" rel="noopener noreferrer" data-metric="connect_tiktok"><i class="fab fa-tiktok" aria-hidden="true"></i><span>TikTok<small>@thetoolkitafrika</small></span></a>
 			<a href="https://www.instagram.com/thetoolkitafrika" target="_blank" rel="noopener noreferrer" data-metric="connect_instagram"><i class="fab fa-instagram" aria-hidden="true"></i><span>Instagram<small>@thetoolkitafrika</small></span></a>
 			<a href="https://www.facebook.com/toolkitafrica" target="_blank" rel="noopener noreferrer" data-metric="connect_facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i><span>Facebook<small>Toolkit Africa</small></span></a>
 			<a href="https://www.linkedin.com/company/the-toolkit-iskills-tti-ltd" target="_blank" rel="noopener noreferrer" data-metric="connect_linkedin"><i class="fab fa-linkedin-in" aria-hidden="true"></i><span>LinkedIn<small>Toolkit iSkills</small></span></a>
