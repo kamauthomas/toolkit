@@ -1,6 +1,6 @@
 # Toolkit Africa Weekly Milestone Reports
 
-This reporting series documents the website-modernisation programme from the June 2026 discovery work through the verified demo release on 16 July 2026.
+This reporting series documents the website-modernisation programme from the June 2026 discovery work through the 20 July production activation and the 23 July support/admin release.
 
 | Report | Reporting period | Primary milestone |
 |---|---|---|
@@ -14,8 +14,10 @@ This reporting series documents the website-modernisation programme from the Jun
 | WMR-08 | 17 July 2026 | SEO milestones, performance fixes and live verification |
 | WMR-09 | 17 July 2026 | Search discoverability, entity SEO and AI discovery files |
 | WMR-10 | 20 July 2026 | Production-readiness audit, security hardening and rollout gates |
+| WMR-11 | 20 July 2026 | Production activation, cache correction and responsive navigation acceptance |
+| WMR-12 | 23 July 2026 | Enquiries, website poll, chatbot controls, admin operations and application-layer status |
 
-Each DOCX uses the Toolkit logo and includes document control, milestone status, completed work, risks, next steps and paired visual evidence. Screenshots were captured on 16 July 2026 using consistent production and demo URLs; this capture date is stated inside every report so the weekly chronology is not confused with the evidence date.
+Each DOCX uses the Toolkit logo and includes document control, milestone status, completed work, risks, next steps, and available visual evidence. Evidence dates are stated inside the relevant report so the reporting chronology is not confused with the screenshot capture date.
 
 The `evidence/` directory contains optimized copies of the images embedded in the reports. The source documents can be regenerated with:
 
@@ -24,4 +26,5 @@ python3 scripts/generate-weekly-milestone-reports.py
 python3 scripts/generate-seo-milestone-report.py
 python3 scripts/generate-discoverability-milestone-report.py
 python3 scripts/generate-production-readiness-report.py
+python3 scripts/generate-dated-milestone-reports.py
 ```
