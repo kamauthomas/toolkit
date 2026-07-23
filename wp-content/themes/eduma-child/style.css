@@ -1361,6 +1361,31 @@ body.home.fixloader {
 .toolkit-chat { position:fixed; z-index:9999; right:22px; bottom:22px; font-family:var(--brand-font-body); }.toolkit-chat__toggle { display:flex; align-items:center; gap:9px; min-height:50px; padding:12px 18px; border:0; border-radius:25px; color:#fff; background:#969e2a; box-shadow:0 8px 24px rgba(36,48,19,.24); cursor:pointer; font-weight:800; }.toolkit-chat__toggle i { font-size:19px; }
 .toolkit-chat__panel { position:absolute; right:0; bottom:62px; width:min(360px,calc(100vw - 28px)); overflow:hidden; border:1px solid #dfe2d6; border-radius:8px; background:#fff; box-shadow:0 16px 42px rgba(31,42,28,.22); }.toolkit-chat__panel>header { display:flex; justify-content:space-between; align-items:center; padding:18px; color:#fff; background:#006a68; }.toolkit-chat__panel header div { display:grid; }.toolkit-chat__panel header span { color:#cde3e2; font-size:11px; }.toolkit-chat__panel header button { display:grid; place-items:center; width:34px; height:34px; padding:0; border:0; color:#fff; background:transparent; cursor:pointer; }
 .toolkit-chat__messages { min-height:132px; max-height:240px; overflow:auto; padding:18px; background:#f7f8f4; }.toolkit-chat__messages p { width:88%; margin:0 0 10px; padding:11px 13px; border-radius:6px; font-size:13px; line-height:1.55; }.toolkit-chat__messages .is-assistant { background:#fff; border-left:3px solid #969e2a; }.toolkit-chat__messages .is-user { margin-left:auto; color:#fff; background:#006a68; }.toolkit-chat__messages a { display:block; margin-top:7px; color:#70771f; font-weight:800; }.toolkit-chat__choices { display:grid; grid-template-columns:1fr 1fr; gap:7px; padding:14px; }.toolkit-chat__choices button { min-height:38px; padding:8px; border:1px solid #dfe2d6; border-radius:5px; color:#555d22; background:#fff; cursor:pointer; font-size:12px; font-weight:700; }.toolkit-chat__choices button:hover { border-color:#969e2a; background:#f7f8ef; }
+.toolkit-chat__choices:has(.toolkit-chat__form) { display:block; max-height:420px; overflow:auto; }
+.toolkit-chat__form { display:grid; gap:10px; }
+.toolkit-chat__form>strong { color:#25281a; font-size:15px; }
+.toolkit-chat__form>p { margin:0; color:#60634f; font-size:12px; line-height:1.5; }
+.toolkit-chat__form label,
+.toolkit-chat__form legend { color:#3d4128; font-size:11px; font-weight:800; }
+.toolkit-chat__form input:not([type="checkbox"]):not([type="radio"]),
+.toolkit-chat__form textarea { display:block; width:100%; margin-top:4px; padding:9px 10px; border:1px solid #ccd0bd; border-radius:4px; color:#23251a; background:#fff; font:inherit; font-size:13px; }
+.toolkit-chat__form input:focus,
+.toolkit-chat__form textarea:focus { outline:2px solid rgba(150,158,42,.35); border-color:#969e2a; }
+.toolkit-chat__form fieldset { min-width:0; margin:0; padding:0; border:0; }
+.toolkit-chat__consent { display:grid; grid-template-columns:18px 1fr; gap:6px; align-items:start; font-weight:500!important; line-height:1.45; }
+.toolkit-chat__trap { position:absolute!important; left:-10000px!important; width:1px!important; height:1px!important; }
+.toolkit-chat__form-actions { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.toolkit-chat__form-actions button.is-primary { border-color:#969e2a; color:#fff; background:#969e2a; }
+.toolkit-chat__form-actions button:disabled { cursor:wait; opacity:.6; }
+.toolkit-chat__status { min-height:18px; color:#8b2f18!important; font-weight:700; }
+.toolkit-chat__rating { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin-top:6px; }
+.toolkit-chat__rating label { position:relative; }
+.toolkit-chat__rating input { position:absolute; opacity:0; }
+.toolkit-chat__rating span { display:grid; place-items:center; min-height:36px; border:1px solid #ccd0bd; border-radius:4px; cursor:pointer; }
+.toolkit-chat__rating input:checked+span { border-color:#ff6600; color:#fff; background:#ff6600; }
+.toolkit-chat__rating input:focus+span { outline:2px solid rgba(255,102,0,.3); }
+.toolkit-chat__aspects { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:6px; }
+.toolkit-chat__aspects label { font-weight:600; }
 
 @media (max-width:900px) { .home-pathways__video,.home-pathways__video iframe { min-height:420px; }.home-testimonials__grid { grid-template-columns:1fr; }.home-testimonials article { min-height:0; } }
 @media (max-width:767px) { .home-iw-banner__link { align-items:flex-start; flex-direction:column; gap:6px; }.home-iw-banner__link strong { font-size:23px; }.home-pathways__video,.home-pathways__video iframe { min-height:280px; }.home-testimonials { padding:54px 0; }.toolkit-chat { right:14px; bottom:14px; }.toolkit-chat__toggle span { display:none; }.toolkit-chat__toggle { width:52px; justify-content:center; padding:0; } }

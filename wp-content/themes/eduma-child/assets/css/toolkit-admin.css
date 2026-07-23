@@ -1,0 +1,161 @@
+.toolkit-admin {
+  --toolkit-olive: #969e2a;
+  --toolkit-orange: #ff6600;
+  --toolkit-teal: #006a68;
+  --toolkit-ink: #22261c;
+  --toolkit-line: #dde1d2;
+  max-width: 1280px;
+}
+
+.toolkit-admin__hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 20px 0 18px;
+  padding: 26px 30px;
+  border-left: 5px solid var(--toolkit-orange);
+  color: #fff;
+  background: var(--toolkit-ink);
+}
+
+.toolkit-admin__hero p,
+.toolkit-admin__hero h1,
+.toolkit-admin__hero span {
+  margin: 0;
+  color: inherit;
+}
+
+.toolkit-admin__hero p {
+  color: #d7dc93;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.toolkit-admin__hero h1 {
+  margin: 4px 0;
+  font-size: 30px;
+}
+
+.toolkit-admin__state {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, .25);
+  font-weight: 700;
+}
+
+.toolkit-admin__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.toolkit-admin__stats a,
+.toolkit-admin__panel {
+  border: 1px solid var(--toolkit-line);
+  background: #fff;
+  box-shadow: 0 3px 14px rgba(30, 40, 20, .05);
+}
+
+.toolkit-admin__stats a {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+  color: var(--toolkit-ink);
+  text-decoration: none;
+}
+
+.toolkit-admin__stats a:hover {
+  border-color: var(--toolkit-olive);
+}
+
+.toolkit-admin__stats span,
+.toolkit-admin__stats small {
+  color: #626858;
+}
+
+.toolkit-admin__stats strong {
+  color: var(--toolkit-teal);
+  font-size: 28px;
+}
+
+.toolkit-admin__grid {
+  display: grid;
+  grid-template-columns: minmax(340px, .9fr) minmax(0, 1.1fr);
+  gap: 18px;
+}
+
+.toolkit-admin__panel {
+  padding: 22px;
+}
+
+.toolkit-admin__panel h2 {
+  margin-top: 0;
+}
+
+.toolkit-admin__status {
+  margin: 0;
+}
+
+.toolkit-admin__status div {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 15px;
+  padding: 11px 0;
+  border-bottom: 1px solid #edf0e7;
+}
+
+.toolkit-admin__status dt {
+  color: #626858;
+  font-weight: 600;
+}
+
+.toolkit-admin__status dd {
+  margin: 0;
+  color: var(--toolkit-ink);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.toolkit-admin__links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.toolkit-admin__links a {
+  padding: 10px 12px;
+  border-left: 3px solid var(--toolkit-olive);
+  color: #424831;
+  background: #f6f7f1;
+  text-decoration: none;
+}
+
+.toolkit-support-admin .nav-tab-wrapper {
+  margin-bottom: 18px;
+}
+
+@media (max-width: 1000px) {
+  .toolkit-admin__stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .toolkit-admin__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .toolkit-admin__hero {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 22px;
+  }
+
+  .toolkit-admin__stats,
+  .toolkit-admin__links {
+    grid-template-columns: 1fr;
+  }
+}

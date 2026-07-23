@@ -1,6 +1,8 @@
 <?php
 /** Privacy-conscious, aggregate first-party site metrics. */
 
+require_once get_stylesheet_directory() . '/inc/support-hub.php';
+
 add_action( 'wp_enqueue_scripts', function() {
 	if ( is_admin() || ! eduma_child_redesign_enabled() ) {
 		return;
@@ -69,6 +71,15 @@ function toolkit_record_site_metric( WP_REST_Request $request ) {
 
 add_action( 'admin_menu', function() {
 	add_menu_page( 'Toolkit Control', 'Toolkit Control', 'manage_options', 'toolkit-control', 'toolkit_render_metrics_page', 'dashicons-chart-area', 3 );
+	add_submenu_page( 'toolkit-control', 'Site analytics', 'Site analytics', 'manage_options', 'toolkit-analytics', 'toolkit_render_analytics_page' );
+} );
+
+add_action( 'admin_enqueue_scripts', function( $hook ) {
+	if ( false === strpos( $hook, 'toolkit' ) ) {
+		return;
+	}
+	$path = get_stylesheet_directory() . '/assets/css/toolkit-admin.css';
+	wp_enqueue_style( 'toolkit-admin', get_stylesheet_directory_uri() . '/assets/css/toolkit-admin.css', array(), filemtime( $path ) );
 } );
 
 add_action( 'admin_post_toolkit_save_controls', function() {
@@ -91,6 +102,44 @@ function toolkit_render_metrics_page() {
 		wp_die( 'You do not have permission to view Toolkit controls.' );
 	}
 
+	$poll_counts   = wp_count_posts( 'toolkit_poll' );
+	$new_enquiries = get_posts( array(
+		'post_type'      => 'toolkit_enquiry',
+		'post_status'    => 'private',
+		'posts_per_page' => 100,
+		'fields'         => 'ids',
+		'meta_key'       => '_toolkit_status',
+		'meta_value'     => 'new',
+	) );
+	echo '<div class="wrap toolkit-admin"><header class="toolkit-admin__hero"><div><p>Website operations</p><h1>Toolkit Control</h1><span>Manage visitor support, feedback, rollout state, and performance.</span></div><span class="toolkit-admin__state">' . ( toolkit_support_settings()['enabled'] ? 'Assistant active' : 'Assistant disabled' ) . '</span></header>';
+	if ( isset( $_GET['updated'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Toolkit controls updated.</p></div>';
+	echo '<section class="toolkit-admin__stats">';
+	printf( '<a href="%s"><span>New enquiries</span><strong>%s</strong><small>Open support inbox</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-enquiries' ) ), number_format_i18n( count( $new_enquiries ) ) );
+	printf( '<a href="%s"><span>Poll responses</span><strong>%s</strong><small>Review website ratings</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-poll' ) ), number_format_i18n( (int) ( $poll_counts->private ?? 0 ) ) );
+	printf( '<a href="%s"><span>Assistant</span><strong>%s</strong><small>Manage answers and poll</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-chatbot' ) ), toolkit_support_settings()['enabled'] ? 'On' : 'Off' );
+	printf( '<a href="%s"><span>Analytics</span><strong>30d</strong><small>Open site performance</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-analytics' ) ) );
+	echo '</section><section class="toolkit-admin__grid">';
+	echo '<form class="toolkit-admin__panel" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="toolkit_save_controls">';
+	wp_nonce_field( 'toolkit_save_controls' );
+	echo '<h2>Release controls</h2><p>Constants in <code>wp-config.php</code> take priority over these settings.</p>';
+	toolkit_render_control_toggle( 'redesign', 'Modern redesign', eduma_child_redesign_enabled(), 'Activates child-theme pages, navigation, footer, chatbot and metrics.' );
+	toolkit_render_control_toggle( 'catalog', '2026 course catalogue', eduma_child_2026_catalog_enabled(), 'Switches from preserved legacy courses to the separately managed 2026 catalogue.' );
+	toolkit_render_control_toggle( 'pricing', 'September 2026 pricing', eduma_child_2026_pricing_enabled(), 'Must remain off until the approved September pricing effective date.' );
+	echo '<p><button class="button button-primary" type="submit">Save release controls</button></p></form>';
+	echo '<div class="toolkit-admin__panel"><h2>System status</h2><dl class="toolkit-admin__status">';
+	printf( '<div><dt>Site</dt><dd>%s</dd></div>', esc_html( home_url() ) );
+	printf( '<div><dt>Theme</dt><dd>%s</dd></div>', esc_html( wp_get_theme()->get( 'Name' ) ) );
+	printf( '<div><dt>WordPress</dt><dd>%s</dd></div>', esc_html( get_bloginfo( 'version' ) ) );
+	echo '<div><dt>Metrics retention</dt><dd>90 days</dd></div></dl>';
+	echo '<h3>Operational modules</h3><div class="toolkit-admin__links"><a href="' . esc_url( admin_url( 'admin.php?page=toolkit-enquiries' ) ) . '">Enquiry inbox</a><a href="' . esc_url( admin_url( 'admin.php?page=toolkit-poll' ) ) . '">Website poll</a><a href="' . esc_url( admin_url( 'admin.php?page=toolkit-chatbot' ) ) . '">Chatbot settings</a><a href="' . esc_url( admin_url( 'admin.php?page=toolkit-analytics' ) ) . '">Site analytics</a></div></div>';
+	echo '</section></div>';
+}
+
+function toolkit_render_analytics_page() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'You do not have permission to view Toolkit analytics.' );
+	}
+
 	$data  = get_option( 'toolkit_site_metrics', array() );
 	$since = gmdate( 'Y-m-d', strtotime( '-30 days' ) );
 	$rows  = array();
@@ -111,6 +160,20 @@ function toolkit_render_metrics_page() {
 	echo '<div class="wrap"><h1>Toolkit Control</h1>';
 	if ( isset( $_GET['updated'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Toolkit controls updated.</p></div>';
 	echo '<p>Manage rollout switches and monitor aggregate site activity from one operational view.</p>';
+	$poll_counts    = wp_count_posts( 'toolkit_poll' );
+	$new_enquiries  = get_posts( array(
+		'post_type'      => 'toolkit_enquiry',
+		'post_status'    => 'private',
+		'posts_per_page' => 100,
+		'fields'         => 'ids',
+		'meta_key'       => '_toolkit_status',
+		'meta_value'     => 'new',
+	) );
+	echo '<div style="display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:16px;margin:22px 0">';
+	printf( '<div class="card"><h2>New enquiries</h2><p style="font-size:30px;margin:8px 0">%s</p><a class="button" href="%s">Open enquiry inbox</a></div>', number_format_i18n( count( $new_enquiries ) ), esc_url( admin_url( 'admin.php?page=toolkit-enquiries' ) ) );
+	printf( '<div class="card"><h2>Poll responses</h2><p style="font-size:30px;margin:8px 0">%s</p><a class="button" href="%s">View poll results</a></div>', number_format_i18n( (int) ( $poll_counts->private ?? 0 ) ), esc_url( admin_url( 'admin.php?page=toolkit-poll' ) ) );
+	printf( '<div class="card"><h2>Website assistant</h2><p style="font-size:22px;margin:12px 0">%s</p><a class="button" href="%s">Manage chatbot</a></div>', toolkit_support_settings()['enabled'] ? 'Active' : 'Disabled', esc_url( admin_url( 'admin.php?page=toolkit-chatbot' ) ) );
+	echo '</div>';
 	echo '<div style="display:grid;grid-template-columns:minmax(340px,.75fr) minmax(0,1.25fr);gap:20px;align-items:start;margin:22px 0">';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="padding:22px;background:#fff;border:1px solid #dcdcde">';
 	echo '<input type="hidden" name="action" value="toolkit_save_controls">';

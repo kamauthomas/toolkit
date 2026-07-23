@@ -53,13 +53,14 @@ $logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 		<p>&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> Toolkit Africa. All rights reserved.</p>
 	</div>
 </footer>
-<?php if ( is_front_page() ) : ?>
+<?php $support_settings = function_exists( 'toolkit_support_settings' ) ? toolkit_support_settings() : array( 'enabled' => 0 ); ?>
+<?php if ( ! empty( $support_settings['enabled'] ) ) : ?>
 <aside class="toolkit-chat" aria-label="Toolkit website assistant">
 	<button class="toolkit-chat__toggle" data-metric="chat_open" type="button" aria-expanded="false" aria-controls="toolkit-chat-panel"><i class="far fa-comment-dots" aria-hidden="true"></i><span>Need help?</span></button>
 	<div id="toolkit-chat-panel" class="toolkit-chat__panel" hidden>
-		<header><div><strong>Toolkit Assistant</strong><span>Course and admissions help</span></div><button type="button" data-chat-close aria-label="Close assistant"><i class="fas fa-times" aria-hidden="true"></i></button></header>
-		<div class="toolkit-chat__messages" aria-live="polite"><p class="is-assistant">Hello. What would you like help with?</p></div>
-		<div class="toolkit-chat__choices"><button type="button" data-chat-topic="courses" data-metric="chat_courses">Courses</button><button type="button" data-chat-topic="fees" data-metric="chat_fees">Fees</button><button type="button" data-chat-topic="apply" data-metric="chat_apply">How to apply</button><button type="button" data-chat-topic="contact" data-metric="chat_contact">Contact Toolkit</button></div>
+		<header><div><strong>Toolkit Assistant</strong><span>Information, enquiries and feedback</span></div><button type="button" data-chat-close aria-label="Close assistant"><i class="fas fa-times" aria-hidden="true"></i></button></header>
+		<div class="toolkit-chat__messages" aria-live="polite"><p class="is-assistant">Loading support options...</p></div>
+		<div class="toolkit-chat__choices"></div>
 	</div>
 </aside>
 <?php endif; ?>
