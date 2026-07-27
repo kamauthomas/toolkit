@@ -16,6 +16,8 @@ This reporting series documents the website-modernisation programme from the Jun
 | WMR-10 | 20 July 2026 | Production-readiness audit, security hardening and rollout gates |
 | WMR-11 | 20 July 2026 | Production activation, cache correction and responsive navigation acceptance |
 | WMR-12 | 23 July 2026 | Enquiries, website poll, chatbot controls, admin operations and application-layer status |
+| WMR-13 | 27-31 July 2026 | Reception integration, secure website relay, demo acceptance and production readiness |
+| WMR-14 | 27-31 July 2026 | Smart Lecturer 3D asset, rigging and local integration |
 
 Each DOCX uses the Toolkit logo and includes document control, milestone status, completed work, risks, next steps, and available visual evidence. Evidence dates are stated inside the relevant report so the reporting chronology is not confused with the screenshot capture date.
 
@@ -27,4 +29,5 @@ python3 scripts/generate-seo-milestone-report.py
 python3 scripts/generate-discoverability-milestone-report.py
 python3 scripts/generate-production-readiness-report.py
 python3 scripts/generate-dated-milestone-reports.py
+python3 scripts/generate-reception-week-report-2026-07-27.py
 ```

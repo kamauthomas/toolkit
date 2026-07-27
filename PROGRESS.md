@@ -2492,3 +2492,28 @@ time
                                 deprecated. Please use the --enable-unsafe-swiftshader flag to opt in to lower security
                                 guarantees for trusted content.
                                 5114 bytes written to file /tmp/toolkit-who-mobile.png
+# Reception integration checkpoint — 27 July 2026
+
+- Implemented and committed the Laravel signed website-follow-up endpoint in the independent `reception-system` repository at commit `e8bf6cc`.
+- Automated local integration checks passed, including the WordPress REST relay to Laravel and record-state verification. These checks did **not** constitute a browser review environment: no local reception server, WordPress server, or reviewable form was left running for the owner.
+- Created independent cPanel directories outside all WordPress document roots:
+  - `/home/bfyigiln/reception-system-demo`
+  - `/home/bfyigiln/reception-public-demo`
+  - `/home/bfyigiln/reception-system`
+  - `/home/bfyigiln/reception-public`
+- Created `reception-demo.toolkitafrica.ac.ke` with its document root mapped to `/home/bfyigiln/reception-public-demo`.
+- Uploaded and extracted the reviewed Laravel demo package into the private/public demo directories. Temporary archives, web installers and cron entries were removed.
+- The demo backend is **not configured or accepted**. `https://reception-demo.toolkitafrica.ac.ke/` currently returns HTTP 500 because the private demo `.env`, application key, database, migrations, writable runtime directories and staff seed have not yet been completed.
+- Implemented local child-theme templates for `/gallery-2/` and `/tti-media/`, but they have not yet been committed, deployed to demo or visually accepted.
+- The WordPress reception form exists locally in the child theme but has not been deployed to demo and no public review form is currently available.
+- Production directories were created only. No production reception hostname, database, application configuration, form activation or gallery deployment has occurred.
+
+## Exact restart point
+
+1. Create the demo database and least-privilege database user.
+2. Generate and install private demo-only Laravel `APP_KEY` and website HMAC secret; do not record either in Git or reports.
+3. Set the demo `.env`, ensure `storage/` and `bootstrap/cache/` are writable, run migrations and create the authorized staff account.
+4. Verify the demo backend returns HTTP 200, login works, signed requests reject replay/stale signatures, and website records remain follow-ups rather than physical check-ins.
+5. Commit the scoped WordPress reception/gallery/report changes without absorbing unrelated working-tree files.
+6. Back up the demo child theme, deploy the reception form and both gallery templates to `demo.toolkitafrica.ac.ke`, configure the matching demo API URL/secret privately, purge LiteSpeed and provide those demo URLs for owner review.
+7. Update WMR-13 with actual demo evidence. Do not start production promotion before explicit demo acceptance.
