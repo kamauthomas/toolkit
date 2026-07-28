@@ -1,6 +1,8 @@
 <?php
 
 require_once get_stylesheet_directory() . '/inc/site-metrics.php';
+require_once get_stylesheet_directory() . '/inc/application-adapter.php';
+require_once get_stylesheet_directory() . '/inc/reception-integration.php';
 
 /**
  * Deployment switches. Constants take priority so operations can change state
@@ -32,7 +34,7 @@ function eduma_child_is_custom_surface() {
 	if ( ! eduma_child_redesign_enabled() || is_admin() ) {
 		return false;
 	}
-	if ( get_query_var( 'toolkit_connect' ) || is_front_page() || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) || get_query_var( 'toolkit_course' ) ) {
+	if ( get_query_var( 'toolkit_connect' ) || get_query_var( 'toolkit_reception' ) || is_front_page() || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || get_query_var( 'toolkit_course' ) ) {
 		return true;
 	}
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
@@ -58,11 +60,32 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_script( 'toolkit-home-experience', get_stylesheet_directory_uri() . '/assets/js/home-experience.js', array(), filemtime( $experience_path ), true );
 	}
 
-	if ( eduma_child_redesign_enabled() && ( is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog' ) ) || $legacy_course || get_query_var( 'toolkit_course' ) ) ) {
+	if ( eduma_child_redesign_enabled() && ( is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || $legacy_course || get_query_var( 'toolkit_course' ) ) ) {
 		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
 		$page_js_ver  = filemtime( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
 		wp_enqueue_script( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.js', array(), $page_js_ver, true );
+	}
+
+	if ( eduma_child_redesign_enabled() && is_page( 'toolkit-courses-apply-today' ) ) {
+		$application_path = get_stylesheet_directory() . '/assets/js/application-form.js';
+		$captcha_site_key = toolkit_application_turnstile_site_key();
+		if ( $captcha_site_key ) {
+			wp_enqueue_script( 'cloudflare-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', array(), null, true );
+		}
+		wp_enqueue_script( 'toolkit-application-form', get_stylesheet_directory_uri() . '/assets/js/application-form.js', array(), filemtime( $application_path ), true );
+		wp_localize_script( 'toolkit-application-form', 'toolkitApplication', array(
+			'endpoint'          => esc_url_raw( rest_url( 'toolkit/v1/application/submit' ) ),
+			'optionsEndpoint'   => esc_url_raw( rest_url( 'toolkit/v1/application/options' ) ),
+			'coursesEndpoint'   => esc_url_raw( rest_url( 'toolkit/v1/application/courses' ) ),
+			'intakesEndpoint'   => esc_url_raw( rest_url( 'toolkit/v1/application/intakes' ) ),
+			'nonce'             => wp_create_nonce( 'wp_rest' ),
+			'integrationActive' => toolkit_mzizi_submission_enabled(),
+			'captchaSiteKey'    => $captcha_site_key,
+			'mziziHandoff'      => toolkit_mzizi_application_url(),
+			'admissionsEmail'   => 'office@toolkitafrica.ac.ke',
+			'admissionsPhone'   => '+254 709 549 200',
+		) );
 	}
 
 	if ( eduma_child_redesign_enabled() && get_query_var( 'toolkit_connect' ) ) {
@@ -70,6 +93,19 @@ function thim_child_enqueue_styles() {
 		$connect_ver  = filemtime( get_stylesheet_directory() . '/assets/css/connect.css' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
 		wp_enqueue_style( 'toolkit-connect', get_stylesheet_directory_uri() . '/assets/css/connect.css', array( 'eduma-child-page-redesign' ), $connect_ver );
+	}
+
+	if ( eduma_child_redesign_enabled() && get_query_var( 'toolkit_reception' ) ) {
+		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
+		$form_css     = get_stylesheet_directory() . '/assets/css/reception-form.css';
+		$form_js      = get_stylesheet_directory() . '/assets/js/reception-form.js';
+		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
+		wp_enqueue_style( 'toolkit-reception-form', get_stylesheet_directory_uri() . '/assets/css/reception-form.css', array( 'eduma-child-page-redesign' ), filemtime( $form_css ) );
+		wp_enqueue_script( 'toolkit-reception-form', get_stylesheet_directory_uri() . '/assets/js/reception-form.js', array(), filemtime( $form_js ), true );
+		wp_localize_script( 'toolkit-reception-form', 'toolkitReception', array(
+			'endpoint' => esc_url_raw( rest_url( 'toolkit/v1/reception/submit' ) ),
+			'nonce'    => wp_create_nonce( 'wp_rest' ),
+		) );
 	}
 }
 
@@ -115,6 +151,9 @@ add_filter( 'template_include', function( $template ) {
 	if ( get_query_var( 'toolkit_connect' ) ) {
 		return get_stylesheet_directory() . '/template-parts/pages/connect.php';
 	}
+	if ( get_query_var( 'toolkit_reception' ) ) {
+		return get_stylesheet_directory() . '/template-parts/pages/reception.php';
+	}
 
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
 	if ( eduma_child_get_legacy_course_for_page() ) {
@@ -127,6 +166,8 @@ add_filter( 'template_include', function( $template ) {
 		'the-toolkit-foundation'       => 'template-parts/pages/institutional.php',
 		'contact'                      => 'template-parts/pages/contact.php',
 		'toolkit-blog'                 => 'template-parts/pages/blog.php',
+		'gallery-2'                    => 'template-parts/pages/media-gallery.php',
+		'tti-media'                    => 'template-parts/pages/media-gallery.php',
 		'our-ventures'                 => 'template-parts/pages/courses.php',
 		'notice-board'               => 'template-parts/pages/notice-board.php',
 		'toolkit-courses-apply-today' => 'template-parts/pages/apply.php',
@@ -156,6 +197,18 @@ add_action( 'init', function() {
 	}
 } );
 
+/* Database-independent public reception request page. */
+add_action( 'init', function() {
+	$route_version = eduma_child_redesign_enabled() ? '2026-1-on' : '2026-1-off';
+	if ( eduma_child_redesign_enabled() ) {
+		add_rewrite_rule( '^reception/?$', 'index.php?toolkit_reception=1', 'top' );
+	}
+	if ( $route_version !== get_option( 'eduma_child_reception_route_version' ) ) {
+		flush_rewrite_rules( false );
+		update_option( 'eduma_child_reception_route_version', $route_version, false );
+	}
+} );
+
 /* Database-independent profile landing page for social account bios. */
 add_action( 'init', function() {
 	$route_version = eduma_child_redesign_enabled() ? '2026-1-on' : '2026-1-off';
@@ -171,11 +224,22 @@ add_action( 'init', function() {
 add_filter( 'query_vars', function( $vars ) {
 	$vars[] = 'toolkit_course';
 	$vars[] = 'toolkit_connect';
+	$vars[] = 'toolkit_reception';
 	return $vars;
 } );
 
 add_action( 'template_redirect', function() {
 	if ( get_query_var( 'toolkit_connect' ) ) {
+		global $wp_query;
+		if ( ! eduma_child_redesign_enabled() ) {
+			$wp_query->set_404();
+			status_header( 404 );
+			return;
+		}
+		$wp_query->is_404 = false;
+		status_header( 200 );
+	}
+	if ( get_query_var( 'toolkit_reception' ) ) {
 		global $wp_query;
 		if ( ! eduma_child_redesign_enabled() ) {
 			$wp_query->set_404();

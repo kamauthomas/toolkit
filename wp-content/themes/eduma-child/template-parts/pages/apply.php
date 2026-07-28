@@ -1,10 +1,74 @@
 <?php
 get_header();
-$apply_url = 'https://toolkit.mzizi.co.ke/portal/OnlineApplicationForm.aspx?q=d0d6b2f229d733c1e3156244805125a2';
+$course_key = isset( $_GET['course'] ) ? sanitize_key( wp_unslash( $_GET['course'] ) ) : '';
 ?>
 <main id="main-content" class="toolkit-page toolkit-apply-page">
-	<section class="toolkit-apply-hero"><div><p class="toolkit-kicker">Toolkit admissions</p><h1>Start your course application</h1><p>Review the steps, choose your area of interest, then continue to the secure application portal.</p></div><span>Step 1 of 3</span></section>
-	<nav class="toolkit-apply-steps" aria-label="Application steps"><span class="is-active"><b>1</b>Choose a course<small>Tell us your interest</small></span><span><b>2</b>Prepare documents<small>Have your details ready</small></span><span><b>3</b>Apply securely<small>Complete the portal form</small></span></nav>
-	<section class="toolkit-apply-layout"><div class="toolkit-apply-card"><div class="toolkit-apply-card__heading"><i class="far fa-user"></i><div><h2>Choose your course</h2><p>Select an area to view the application route.</p></div></div><label for="toolkit-course-choice">Course interest</label><select id="toolkit-course-choice"><option value="MIG/MAG Welding">MIG/MAG Welding</option><option value="Renewable Energy">Renewable Energy</option><option value="Organic Farming Skills">Organic Farming Skills</option><option value="Digital Skills">Digital Skills</option><option value="Consultancy and Research">Consultancy and Research</option></select><div class="toolkit-apply-checklist"><h3>Before you continue</h3><ul><li><i class="fas fa-check"></i> Your full legal name and contact details</li><li><i class="fas fa-check"></i> Preferred course and intake information</li><li><i class="fas fa-check"></i> Supporting documents requested by admissions</li></ul></div><a class="toolkit-btn toolkit-btn--primary toolkit-apply-continue" href="<?php echo esc_url( $apply_url ); ?>" target="_blank" rel="noopener">Continue to secure application <i class="fas fa-arrow-right"></i></a></div><aside class="toolkit-apply-guide"><p class="toolkit-kicker">Course and field guide</p><h2 id="toolkit-course-title">MIG/MAG Welding</h2><p id="toolkit-course-description">Build MIG/MAG welding technique through guided workshop practice and modern learning tools.</p><div class="toolkit-apply-guide__meta"><span>Format <b>Hands-on learning</b></span><span>Support <b>Admissions guidance</b></span></div><h3>What happens next?</h3><ol><li>Complete the official online application.</li><li>Admissions reviews your details and any required documents.</li><li>Toolkit contacts you with the next steps for your selected programme.</li></ol><a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Need application help? Contact admissions <i class="fas fa-arrow-right"></i></a></aside></section>
+	<header class="application-shell__header">
+		<div><p class="toolkit-kicker">Toolkit admissions</p><h1>Online Student Application Form</h1><p>Step-by-step application <span aria-hidden="true">•</span> Clear guidance <span aria-hidden="true">•</span> Easy completion</p></div>
+		<div class="application-progress"><strong>Step <span data-step-number>1</span> of 6</strong><span data-progress-label>16% complete</span><div><i data-progress-bar></i></div></div>
+	</header>
+
+	<nav class="application-steps" aria-label="Application progress">
+		<?php
+		$steps = array(
+			array( 'Personal Details', 'Basic information', 'far fa-user' ),
+			array( 'Contact Details', 'Reachability', 'far fa-address-card' ),
+			array( 'Course Selection', 'Choose your course', 'fas fa-graduation-cap' ),
+			array( 'Background', 'Education & experience', 'far fa-file-alt' ),
+			array( 'Documents', 'Prepare supporting files', 'far fa-file' ),
+			array( 'Review & Submit', 'Confirm & submit', 'far fa-check-circle' ),
+		);
+		foreach ( $steps as $index => $step ) :
+			?><button type="button" data-step-target="<?php echo esc_attr( $index ); ?>" <?php echo 0 === $index ? 'class="is-active" aria-current="step"' : ''; ?>><b><?php echo esc_html( $index + 1 ); ?></b><i class="<?php echo esc_attr( $step[2] ); ?>" aria-hidden="true"></i><span><?php echo esc_html( $step[0] ); ?><small><?php echo esc_html( $step[1] ); ?></small></span></button><?php
+		endforeach;
+		?>
+	</nav>
+
+	<div class="application-layout">
+		<form id="toolkit-application-form" class="application-form" novalidate>
+			<div class="application-form__heading"><i class="far fa-user" aria-hidden="true"></i><div><h2 data-step-title>1. Personal Details</h2><p data-step-help>Tell us who you are.</p></div><span><b>*</b> Required fields</span></div>
+			<div class="application-message" role="status" aria-live="polite" hidden></div>
+			<input class="application-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+			<fieldset data-step-panel="0"><legend class="screen-reader-text">Personal details</legend><div class="application-grid application-grid--3">
+				<label>First name <b>*</b><input name="first_name" autocomplete="given-name" required></label>
+				<label>Middle name<input name="middle_name" autocomplete="additional-name"></label>
+				<label>Surname <b>*</b><input name="surname" autocomplete="family-name" required></label>
+				<label>Gender <b>*</b><select name="gender" required><option value="">Select gender</option><option value="F">Female</option><option value="M">Male</option><option value="I">Intersex</option></select></label>
+				<label>Date of birth<input type="date" name="date_of_birth" autocomplete="bday"></label>
+				<label>Nationality<input name="nationality" autocomplete="country-name" maxlength="80" value="Kenya"></label>
+			</div></fieldset>
+
+			<fieldset data-step-panel="1" hidden><legend class="screen-reader-text">Contact details</legend><div class="application-grid application-grid--2">
+				<label>Email address <b>*</b><input type="email" name="email" autocomplete="email" required></label>
+				<label>County of residence <b>*</b><select name="county" autocomplete="address-level1" required><option value="">Loading counties…</option></select></label>
+				<label>Primary phone <b>*</b><input type="tel" name="primary_phone" autocomplete="tel" placeholder="+254 7xx xxx xxx" required></label>
+				<label>Secondary or guardian phone <b>*</b><input type="tel" name="secondary_phone" placeholder="+254 7xx xxx xxx" required></label>
+			</div></fieldset>
+
+			<fieldset data-step-panel="2" hidden><legend class="screen-reader-text">Course selection</legend><div class="application-grid application-grid--2">
+				<label>Campus <b>*</b><select name="school_id" required><option value="">Loading campuses…</option></select></label>
+				<label>Course interested in <b>*</b><select name="course_id" id="toolkit-course-choice" data-initial-course="<?php echo esc_attr( $course_key ); ?>" required disabled><option value="">Select a campus first</option></select></label>
+				<label>Intake <b>*</b><select name="intake_id" required disabled><option value="">Select a course first</option></select></label>
+				<label>Study mode<select name="study_mode"><option value="">Select mode, if applicable</option><option value="Physical">Physical</option><option value="Online">Online</option></select></label>
+				<label>Who will pay the fees?<select name="sponsorship_type"><option value="">Select one, if applicable</option><option value="Self-Sponsored">Self-Sponsored</option><option value="Sponsored">Sponsored</option></select></label>
+				<label>How did you hear about us?<select name="referral_source"><option value="">Loading sources…</option></select></label>
+			</div></fieldset>
+
+			<fieldset data-step-panel="3" hidden><legend class="screen-reader-text">Education and experience</legend><div class="application-grid application-grid--2">
+				<label>KCSE mean grade<input name="mean_grade" maxlength="20" placeholder="e.g. C-"></label>
+				<label>High school attended<input name="high_school" maxlength="160"></label>
+				<label class="application-grid__wide">Other qualifications<textarea name="qualifications" rows="5" maxlength="1200" placeholder="List any relevant certificates, qualifications or prior training."></textarea></label>
+			</div></fieldset>
+
+			<fieldset data-step-panel="4" hidden><legend class="screen-reader-text">Documents</legend><div class="application-document-note"><i class="far fa-folder-open" aria-hidden="true"></i><div><h3>Prepare your supporting documents</h3><p>Mzizi’s approved public contract does not yet confirm document-upload fields. Admissions may request identification, education certificates or other supporting documents after reviewing your application.</p><ul><li>Use clear, readable copies.</li><li>Do not email sensitive documents unless Admissions requests them through an approved channel.</li><li>Keep originals available for verification.</li></ul></div></div></fieldset>
+
+			<fieldset data-step-panel="5" hidden><legend class="screen-reader-text">Review and submit</legend><div id="application-review" class="application-review"></div><label class="application-consent"><input type="checkbox" name="consent" value="1" required><span>I confirm that the information is accurate and consent to Toolkit Africa sending it to Mzizi for admissions processing. I have read the <a href="<?php echo esc_url( home_url( '/privacy-policy/' ) ); ?>" target="_blank" rel="noopener">privacy notice</a>. <b>*</b></span></label><?php if ( toolkit_application_turnstile_site_key() ) : ?><div class="cf-turnstile" data-sitekey="<?php echo esc_attr( toolkit_application_turnstile_site_key() ); ?>"></div><?php endif; ?><p class="application-submit-note" data-submit-note></p></fieldset>
+
+		<footer class="application-form__footer"><button type="button" class="toolkit-btn toolkit-btn--secondary" data-previous hidden><i class="fas fa-arrow-left" aria-hidden="true"></i> Previous</button><span>Your progress: <b data-progress-label>16% complete</b></span><button type="button" class="toolkit-btn toolkit-btn--primary" data-next>Save & Continue <i class="fas fa-arrow-right" aria-hidden="true"></i></button><button type="submit" class="toolkit-btn toolkit-btn--primary" data-submit hidden>Submit application <i class="fas fa-arrow-right" aria-hidden="true"></i></button></footer>
+		</form>
+
+		<aside class="application-guide"><p class="toolkit-kicker">Course & field guide</p><h2 id="toolkit-course-title">Choose your course</h2><p id="toolkit-course-description">Select a programme to see its current learning focus and admissions guidance.</p><div class="application-guide__meta"><span>Duration <b id="toolkit-course-duration">Confirmed by Admissions</b></span><span>Location <b>Kikuyu, Kenya</b></span></div><h3>Application guidance</h3><ul><li><i class="fas fa-check-circle" aria-hidden="true"></i> Complete all required contact details.</li><li><i class="fas fa-check-circle" aria-hidden="true"></i> Admissions confirms current fees and intake dates.</li><li><i class="fas fa-check-circle" aria-hidden="true"></i> Keep your reference after successful submission.</li></ul><div class="application-help"><i class="far fa-lightbulb" aria-hidden="true"></i><p><strong>Need more help?</strong> Contact Admissions on <a href="tel:+254709549200">+254 709 549 200</a> or <a href="mailto:office@toolkitafrica.ac.ke">office@toolkitafrica.ac.ke</a>.</p></div></aside>
+	</div>
 </main>
 <?php get_footer();
