@@ -4,7 +4,7 @@
 
 **Automated local status:** request path verified; no review server remains running
 
-**Remote status:** independent demo files deployed; demo currently returns HTTP 500 and is not configured
+**Remote status:** isolated demo backend, database, website relay and staff portal operational; production is acceptance-gated
 
 ## Outcome
 
@@ -137,20 +137,19 @@ administrator to provide:
 - a scheduler/cron facility; and
 - certificate-valid HTTPS for both hosts.
 
-## Deployment checkpoint — 27 July 2026
+## Deployment checkpoint — 28 July 2026
 
-The hosting-root blocker was partially resolved. Independent demo and
-production application/public directories were created outside WordPress. The
-demo hostname `reception-demo.toolkitafrica.ac.ke` maps to the independent demo
-public directory, and Laravel commit `e8bf6cc` was extracted successfully.
+The demo deployment is complete and ready for acceptance. The independent
+Laravel application has a private environment, dedicated least-privilege
+database/user, applied migrations, seeded administrator, writable runtime and
+cached production configuration. Public setup tooling was removed after use.
 
-This is not a completed demo deployment. The hostname currently returns HTTP
-500 because the demo application still lacks its private environment,
-application key, database/user, migrations, writable runtime confirmation and
-staff seed. No local server or form has been left running for visual review.
-The WordPress reception form and modern image/video gallery templates remain
-local-only and are not yet reviewable on demo.
+The WordPress demo now exposes the reception form and modern image/video
+galleries. A same-origin WordPress submission returned a `WEB-` reference and
+appeared in the authenticated Reception Control dashboard as a website
+follow-up without increasing physical attendance. Review evidence is stored in
+`reports/deployment-evidence/2026-07-28/`.
 
-Resume from the “Exact restart point” in `PROGRESS.md`. Demo must become healthy
-before the WordPress form is enabled. Production remains untouched apart from
-creation of empty independent directories.
+Production remains unchanged and gated on explicit acceptance. The exact
+review URLs, cleanup items and promotion sequence are recorded in
+`RECEPTION-DEMO-RESTART-HANDOFF-2026-07-27.md`.

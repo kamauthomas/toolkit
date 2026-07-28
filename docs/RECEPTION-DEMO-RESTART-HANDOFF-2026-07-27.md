@@ -1,73 +1,70 @@
-# Reception Demo Restart Handoff
+# Reception Demo Review Handoff
 
-**Checkpoint:** 27 July 2026
+**Updated:** 28 July 2026
 
-**Current public result:** `https://reception-demo.toolkitafrica.ac.ke/` returns HTTP 500
+**Demo result:** Healthy and ready for user acceptance review
 
-**Acceptance status:** Not ready for review
+**Production status:** Hold — unchanged pending explicit approval
 
-## Completed
+## Review points
 
-- Laravel signed website-request implementation committed as `e8bf6cc`.
-- Independent cPanel demo and production application/public directories created
-  outside WordPress.
-- Demo hostname created and mapped to the independent demo public directory.
-- Reviewed application/public archives uploaded and extracted.
-- Temporary deployment archives, public installers and cron entries removed.
-- Automated Laravel tests passed: 18 tests and 92 assertions.
-- Automated local WordPress-to-Laravel request path passed and test records were
-  removed.
-- Local reception form, image-gallery and video-gallery templates implemented.
+- Website reception form: <https://demo.toolkitafrica.ac.ke/reception/>
+- Redesigned image gallery: <https://demo.toolkitafrica.ac.ke/gallery-2/>
+- Redesigned video gallery: <https://demo.toolkitafrica.ac.ke/tti-media/>
+- Reception Control login: <https://reception-demo.toolkitafrica.ac.ke/staff/login>
 
-## Important qualification
+The administrator credentials and website HMAC secret are not recorded in Git
+or this report. They are retained in the private deployment handoff.
 
-No persistent local review environment was provided. The local PHP, WordPress
-and reception processes used for automated checks were stopped. Therefore there
-is no locally accessible form or browser-review URL.
+## Completed on demo
 
-The reception form and redesigned `/gallery-2/` and `/tti-media/` templates have
-not been deployed to the demo WordPress site.
+- Created the dedicated least-privilege demo database and database user.
+- Uploaded a private production-style Laravel environment outside the public
+  document root.
+- Applied all migrations, seeded the authorized administrator and built
+  configuration, route and view caches.
+- Corrected hosted MariaDB datetime compatibility in reception commits
+  `7ed75ae` and `f16790c`; 18 tests and 92 assertions pass.
+- Confirmed reception public and staff login surfaces return HTTP 200.
+- Confirmed a valid signed website request returns HTTP 201 and appears as a
+  `website` / `follow_up` record in Reception Control.
+- Confirmed an invalid signature is rejected with HTTP 401.
+- Removed the one-time public setup runner and confirmed it returns HTTP 404.
+- Created a private rollback archive before changing the WordPress demo.
+- Added the demo-only API URL and HMAC secret to private WordPress
+  configuration; WordPress stores no visitor submission copy.
+- Deployed the reception form, application dependency and redesigned image and
+  video galleries to the WordPress demo.
+- Confirmed the WordPress relay returns a generated `WEB-` reference and the
+  labelled review record appears in the staff dashboard.
+- Recorded the WordPress code in commits `34ce395` and `7b08ae7`.
+- Captured headless browser evidence under
+  `reports/deployment-evidence/2026-07-28/`.
 
-## Why demo returns HTTP 500
+## Review data
 
-The code files exist, but the demo Laravel runtime has not been completed. The
-remaining causes to address are:
+Two clearly labelled non-personal verification records remain in the demo
+dashboard so the reviewer can confirm staff visibility:
 
-- missing private production-style `.env`;
-- missing demo `APP_KEY`;
-- missing demo database and least-privilege user;
-- unapplied migrations and staff seed;
-- unconfirmed writable `storage/` and `bootstrap/cache/`;
-- uncached/unchecked production configuration; and
-- no demo-only website HMAC secret shared privately with WordPress.
+- `Demo Review Record`
+- `Website Demo Review`
 
-## Resume in this order
+Delete them after acceptance and before any production data exercise.
 
-1. Create the demo database and database user through cPanel.
-2. Generate private demo keys locally and upload `.env` outside the public root.
-3. Set correct ownership/permissions for Laravel runtime directories.
-4. Run migrations and create the authorized demo staff account through a
-   private one-time account-owner process.
-5. Confirm homepage/login HTTP 200 and no sensitive error output.
-6. Test valid signed requests, invalid signatures, stale timestamps and replay.
-7. Verify website requests appear as follow-ups and do not count as attendance.
-8. Commit the scoped WordPress changes.
-9. Back up and deploy the child-theme reception and gallery files to demo.
-10. Configure WordPress privately, enable the form last, purge LiteSpeed and
-    provide these review points:
-    - `https://demo.toolkitafrica.ac.ke/reception/`
-    - `https://demo.toolkitafrica.ac.ke/gallery-2/`
-    - `https://demo.toolkitafrica.ac.ke/tti-media/`
-    - `https://reception-demo.toolkitafrica.ac.ke/staff/login`
-11. Record owner acceptance and actual evidence in WMR-13.
-12. Do not configure or deploy production before demo acceptance.
+## Remaining scope and production gate
 
-## Git and reporting state
+1. User reviews all four demo URLs on desktop and mobile.
+2. Reception owner signs off field wording, purposes, staff workflow and access.
+3. Confirm outbound follow-up procedure, retention owner and backup schedule.
+4. Remove the two labelled demo records.
+5. Rehearse the documented rollback and record the result.
+6. Create fresh production database/application/HMAC/admin secrets; never reuse
+   demo secrets.
+7. Take same-day production WordPress and database backups.
+8. Deploy backend first, migrate and verify it, then deploy the reviewed child
+   theme and enable the production form last.
+9. Run production smoke tests, remove the labelled production test record,
+   monitor errors and rotate the supplied cPanel credentials.
 
-- Reception backend checkpoint: `e8bf6cc`.
-- WordPress reception, gallery and reporting changes remain uncommitted because
-  the WordPress worktree also contains unrelated prior edits that must not be
-  absorbed accidentally.
-- `PROGRESS.md`, WMR-13, the weekly work plan and the reception integration
-  report must continue to distinguish automated checks from accessible review
-  environments.
+No production configuration, database or public page was changed during this
+demo deployment.

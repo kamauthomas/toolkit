@@ -35,7 +35,7 @@ range: approximately **KES 14.1m–29.6m**. These are ROM estimates, not quotati
 |---|---|---|
 | Website/SEO | Modern WordPress child theme is live with metadata, schema, security headers, sitemaps, AI discovery and first-party metrics; some legacy media/research routes remain. | Optimise existing platform; do not replatform. |
 | Smart Lecturer | Vite prototype has controlled grounded answers, captions, speech, 3D controller and licensed Meshy model; production RAG/LMS/final rig remain. | Bounded academic pilot. |
-| Reception | Laravel app has encrypted PII, roles, audit, retention and signed website relay tests. Demo files exist but demo currently returns HTTP 500 pending environment/database. | Stabilise before Smart Farm extension. |
+| Reception | Laravel app has encrypted PII, roles, audit, retention and a signed WordPress relay. The isolated demo database, staff portal, website form and media galleries are live for acceptance. | Complete UAT before production and Smart Farm extension. |
 | Staff reporting | Flask app has authentication, roles, reports, notifications, principal/admin views and tests. | Harden and extend. |
 | Admissions | Accessible WordPress/Mzizi adapter exists but is fail-closed pending vendor authority, sandbox tests, CAPTCHA and privacy acceptance. | Keep Mzizi as system of record. |
 | Chatbot | Python chatbot and WordPress assistant exist with FAQ, flow and lead capture. | Consolidate knowledge and handoff. |
@@ -74,7 +74,7 @@ privacy, retention and access controls are approved.
 
 ### Phase 1 — Stabilise existing assets (September–October 2026)
 
-- Resolve reception demo HTTP 500, complete UAT and controlled rollout.
+- Complete reception demo UAT and make a controlled production decision.
 - Security-review/deploy reporting with daily, weekly and monthly workflows.
 - Finish media/gallery and technical SEO gaps; establish Search Console/Bing baseline.
 - Complete Mzizi sandbox/contract testing.
@@ -252,9 +252,9 @@ separate implementation, licence, usage and media.
 
 ## First 90 days
 
-**Days 1–30:** approve governance/budget; security/data baseline; resolve reception
-demo HTTP 500; review reporting deployment; confirm Mzizi sandbox; decide CRM;
-finish gallery/video/SEO gaps.
+**Days 1–30:** approve governance/budget; security/data baseline; complete reception
+demo UAT and production decision; review reporting deployment; confirm Mzizi
+sandbox; decide CRM; finish remaining SEO gaps.
 
 **Days 31–60:** pilot reporting; reception UAT/production decision; configure CRM
 and SLAs; prepare SEO/Ads pilot; consolidate chatbot; select HR/ATS and EDR;
