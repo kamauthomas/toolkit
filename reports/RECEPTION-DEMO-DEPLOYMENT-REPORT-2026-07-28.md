@@ -125,3 +125,22 @@ player with six adjacent playlist controls, a reduced-height video hero and the
 complete WordPress header/footer. Demo verification recorded HTTP 200,
 `X-Toolkit-Release: 2026.07.28.6`, a LiteSpeed cache miss, versioned assets and
 the expected player/playlist/footer markers. Production remains unchanged.
+
+## Video caption correction
+
+**Updated:** 28 July 2026
+
+Review identified duplicated subtitles on videos that already include visible
+text or respect the viewer's YouTube caption preference. The gallery embed was
+explicitly sending `cc_load_policy=1`, which instructed YouTube to force
+captions on regardless of the viewer's normal setting.
+
+The forced-caption parameter was removed from:
+
+- the initial primary-player embed;
+- every playlist-driven player URL; and
+- the database-independent local review harness.
+
+The YouTube player's native caption control remains available, so viewers can
+enable captions when required. The fix is packaged as release
+`2026.07.28.7`; production remains unchanged.

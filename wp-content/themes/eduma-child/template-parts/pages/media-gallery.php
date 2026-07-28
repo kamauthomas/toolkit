@@ -26,7 +26,7 @@ $images = array(
 		</section>
 		<section class="video-watch-desk" aria-label="Toolkit video gallery">
 			<div class="video-watch-player">
-				<div class="video-watch-player__frame"><iframe data-video-player src="https://www.youtube-nocookie.com/embed/0sjNPAXN8pw?rel=0&amp;playsinline=1&amp;cc_load_policy=1" title="From virtual reality to real-world welding" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+				<div class="video-watch-player__frame"><iframe data-video-player src="https://www.youtube-nocookie.com/embed/0sjNPAXN8pw?rel=0&amp;playsinline=1" title="From virtual reality to real-world welding" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
 				<div class="video-watch-player__details" aria-live="polite"><span data-video-number>Episode 01</span><h2 data-video-title>From virtual reality to real-world welding</h2><p>Toolkit originals <i aria-hidden="true">•</i> Practical skills in action</p></div>
 			</div>
 			<div class="video-watch-playlist">

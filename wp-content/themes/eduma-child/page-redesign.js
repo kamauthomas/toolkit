@@ -78,7 +78,7 @@
         var id = choice.getAttribute('data-video-id');
         var title = choice.getAttribute('data-video-title');
         var episode = parseInt(choice.getAttribute('data-video-episode'), 10);
-        videoPlayer.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?rel=0&playsinline=1&cc_load_policy=1&autoplay=1';
+        videoPlayer.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?rel=0&playsinline=1&autoplay=1';
         videoPlayer.title = title;
         videoTitle.textContent = title;
         videoNumber.textContent = 'Episode ' + String(episode).padStart(2, '0');

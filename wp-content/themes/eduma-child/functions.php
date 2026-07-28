@@ -9,7 +9,7 @@ require_once get_stylesheet_directory() . '/inc/reception-integration.php';
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.07.28.6';
+	return '2026.07.28.7';
 }
 
 function toolkit_asset_version( $path ) {

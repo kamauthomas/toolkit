@@ -64,3 +64,12 @@ thumbnail-based discovery, an unmistakable active selection and less scrolling.
   so inactive playlist choices remain neutral and the selected choice alone
   carries the olive active treatment.
 - Production promotion remains separately approval-gated.
+
+## Caption correction
+
+Demo review found that the gallery forced YouTube captions through
+`cc_load_policy=1`, producing duplicate subtitles where the source already
+contained visible text or the viewer had captions enabled. Release
+`2026.07.28.7` removes that forced policy from the initial player and
+playlist-selection code. Native YouTube caption controls remain available and
+caption preference returns to the viewer.

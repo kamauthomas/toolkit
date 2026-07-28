@@ -83,5 +83,8 @@ journey wall and single-player video gallery were approved locally and deployed
 to demo as release `2026.07.28.6`. Both retain the full Toolkit site footer.
 Production remains unchanged pending its separate approval gate.
 
+Release `2026.07.28.7` subsequently removed the forced YouTube caption policy
+that caused duplicate subtitles. Native caption controls remain available.
+
 No production configuration, database or public page was changed during this
 demo deployment.
