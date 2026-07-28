@@ -40,6 +40,11 @@ or this report. They are retained in the private deployment handoff.
 - Recorded the WordPress code in commits `34ce395` and `7b08ae7`.
 - Captured headless browser evidence under
   `reports/deployment-evidence/2026-07-28/`.
+- Completed a second gallery iteration: the image gallery is now an editorial
+  photo zine, while the video gallery is a separate dark watch-room experience.
+- Fixed stale releases by retaining WordPress asset version keys, adding a
+  release-aware LiteSpeed/object-cache purge and exposing the active release in
+  the `X-Toolkit-Release` header. Current demo release: `2026.07.28.4`.
 
 ## Review data
 
@@ -65,6 +70,10 @@ Delete them after acceptance and before any production data exercise.
    theme and enable the production form last.
 9. Run production smoke tests, remove the labelled production test record,
    monitor errors and rotate the supplied cPanel credentials.
+
+For every future change, increment `toolkit_theme_release()`, upload assets
+before `functions.php`, trigger one uncached request and verify the new release
+header and cache miss before asking users to review.
 
 No production configuration, database or public page was changed during this
 demo deployment.

@@ -5,6 +5,35 @@ require_once get_stylesheet_directory() . '/inc/application-adapter.php';
 require_once get_stylesheet_directory() . '/inc/reception-integration.php';
 
 /**
+ * Increment for every public demo/production release. It is included in asset
+ * URLs and triggers one server-side object/page-cache purge per environment.
+ */
+function toolkit_theme_release() {
+	return '2026.07.28.4';
+}
+
+function toolkit_asset_version( $path ) {
+	return toolkit_theme_release() . '.' . ( file_exists( $path ) ? filemtime( $path ) : '0' );
+}
+
+add_action( 'init', function() {
+	if ( get_option( 'toolkit_theme_release' ) === toolkit_theme_release() ) {
+		return;
+	}
+
+	wp_cache_flush();
+	do_action( 'litespeed_purge_all' );
+	do_action( 'litespeed_purge_cssjs' );
+	update_option( 'toolkit_theme_release', toolkit_theme_release(), false );
+}, 1 );
+
+add_action( 'send_headers', function() {
+	if ( eduma_child_is_custom_surface() ) {
+		header( 'X-Toolkit-Release: ' . toolkit_theme_release() );
+	}
+} );
+
+/**
  * Deployment switches. Constants take priority so operations can change state
  * instantly without editing theme files or deleting WordPress content.
  */
@@ -47,22 +76,22 @@ function thim_child_enqueue_styles() {
 	wp_enqueue_style( 'thim-parent-style', get_template_directory_uri() . '/style.css', array(), THIM_THEME_VERSION );
 
 	// Brand tokens — shared design tokens used site-wide
-	$brand_ver = filemtime( get_stylesheet_directory() . '/brand-tokens.css' );
+	$brand_ver = toolkit_asset_version( get_stylesheet_directory() . '/brand-tokens.css' );
 	wp_enqueue_style( 'eduma-child-brand-tokens', get_stylesheet_directory_uri() . '/brand-tokens.css', array(), $brand_ver );
 
 	if ( is_front_page() && eduma_child_redesign_enabled() ) {
-		$css_ver = filemtime( get_stylesheet_directory() . '/hero-slider.css' );
+		$css_ver = toolkit_asset_version( get_stylesheet_directory() . '/hero-slider.css' );
 		wp_enqueue_style( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.css', array( 'eduma-child-brand-tokens' ), $css_ver );
 
-		$js_ver = filemtime( get_stylesheet_directory() . '/hero-slider.js' );
+		$js_ver = toolkit_asset_version( get_stylesheet_directory() . '/hero-slider.js' );
 		wp_enqueue_script( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.js', array(), $js_ver, true );
 		$experience_path = get_stylesheet_directory() . '/assets/js/home-experience.js';
-		wp_enqueue_script( 'toolkit-home-experience', get_stylesheet_directory_uri() . '/assets/js/home-experience.js', array(), filemtime( $experience_path ), true );
+		wp_enqueue_script( 'toolkit-home-experience', get_stylesheet_directory_uri() . '/assets/js/home-experience.js', array(), toolkit_asset_version( $experience_path ), true );
 	}
 
 	if ( eduma_child_redesign_enabled() && ( is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || $legacy_course || get_query_var( 'toolkit_course' ) ) ) {
-		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
-		$page_js_ver  = filemtime( get_stylesheet_directory() . '/page-redesign.js' );
+		$page_css_ver = toolkit_asset_version( get_stylesheet_directory() . '/page-redesign.css' );
+		$page_js_ver  = toolkit_asset_version( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
 		wp_enqueue_script( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.js', array(), $page_js_ver, true );
 	}
@@ -73,7 +102,7 @@ function thim_child_enqueue_styles() {
 		if ( $captcha_site_key ) {
 			wp_enqueue_script( 'cloudflare-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', array(), null, true );
 		}
-		wp_enqueue_script( 'toolkit-application-form', get_stylesheet_directory_uri() . '/assets/js/application-form.js', array(), filemtime( $application_path ), true );
+		wp_enqueue_script( 'toolkit-application-form', get_stylesheet_directory_uri() . '/assets/js/application-form.js', array(), toolkit_asset_version( $application_path ), true );
 		wp_localize_script( 'toolkit-application-form', 'toolkitApplication', array(
 			'endpoint'          => esc_url_raw( rest_url( 'toolkit/v1/application/submit' ) ),
 			'optionsEndpoint'   => esc_url_raw( rest_url( 'toolkit/v1/application/options' ) ),
@@ -89,19 +118,19 @@ function thim_child_enqueue_styles() {
 	}
 
 	if ( eduma_child_redesign_enabled() && get_query_var( 'toolkit_connect' ) ) {
-		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
-		$connect_ver  = filemtime( get_stylesheet_directory() . '/assets/css/connect.css' );
+		$page_css_ver = toolkit_asset_version( get_stylesheet_directory() . '/page-redesign.css' );
+		$connect_ver  = toolkit_asset_version( get_stylesheet_directory() . '/assets/css/connect.css' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
 		wp_enqueue_style( 'toolkit-connect', get_stylesheet_directory_uri() . '/assets/css/connect.css', array( 'eduma-child-page-redesign' ), $connect_ver );
 	}
 
 	if ( eduma_child_redesign_enabled() && get_query_var( 'toolkit_reception' ) ) {
-		$page_css_ver = filemtime( get_stylesheet_directory() . '/page-redesign.css' );
+		$page_css_ver = toolkit_asset_version( get_stylesheet_directory() . '/page-redesign.css' );
 		$form_css     = get_stylesheet_directory() . '/assets/css/reception-form.css';
 		$form_js      = get_stylesheet_directory() . '/assets/js/reception-form.js';
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
-		wp_enqueue_style( 'toolkit-reception-form', get_stylesheet_directory_uri() . '/assets/css/reception-form.css', array( 'eduma-child-page-redesign' ), filemtime( $form_css ) );
-		wp_enqueue_script( 'toolkit-reception-form', get_stylesheet_directory_uri() . '/assets/js/reception-form.js', array(), filemtime( $form_js ), true );
+		wp_enqueue_style( 'toolkit-reception-form', get_stylesheet_directory_uri() . '/assets/css/reception-form.css', array( 'eduma-child-page-redesign' ), toolkit_asset_version( $form_css ) );
+		wp_enqueue_script( 'toolkit-reception-form', get_stylesheet_directory_uri() . '/assets/js/reception-form.js', array(), toolkit_asset_version( $form_js ), true );
 		wp_localize_script( 'toolkit-reception-form', 'toolkitReception', array(
 			'endpoint' => esc_url_raw( rest_url( 'toolkit/v1/reception/submit' ) ),
 			'nonce'    => wp_create_nonce( 'wp_rest' ),
@@ -1025,21 +1054,11 @@ add_action( 'wp_enqueue_scripts', function() {
 	wp_dequeue_style( 'thim-fontgoogle-default' );
 }, 9999 );
 
-/* === PERFORMANCE: Remove query strings from static assets === */
-
-add_filter( 'script_loader_src', function( $src ) {
-	if ( strpos( $src, 'ver=' ) !== false && ! is_admin() ) {
-		$src = remove_query_arg( 'ver', $src );
-	}
-	return $src;
-});
-
-add_filter( 'style_loader_src', function( $src ) {
-	if ( strpos( $src, 'ver=' ) !== false && ! is_admin() ) {
-		$src = remove_query_arg( 'ver', $src );
-	}
-	return $src;
-});
+/*
+ * Keep WordPress asset version query strings. They are deliberate cache keys,
+ * and stripping them caused browsers to retain superseded CSS and JavaScript
+ * after a release.
+ */
 
 /* === SEO: Add a homepage description only when no SEO plugin owns metadata === */
 

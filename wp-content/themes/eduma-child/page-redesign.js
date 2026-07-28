@@ -48,4 +48,22 @@
     var descriptions = { 'MIG/MAG Welding':'Build MIG/MAG welding technique through guided workshop practice and modern learning tools.', 'Renewable Energy':'Build practical foundations for work in renewable-energy and solar-focused environments.', 'Organic Farming Skills':'Develop practical skills for sustainable agriculture and enterprise.', 'Digital Skills':'Strengthen digital capabilities for changing work opportunities.', 'Consultancy and Research':'Explore Toolkit support for research and professional services.' };
     courseChoice.addEventListener('change', function () { document.getElementById('toolkit-course-title').textContent = courseChoice.value; document.getElementById('toolkit-course-description').textContent = descriptions[courseChoice.value]; });
   }
+
+  var galleryDialog = document.querySelector('[data-gallery-dialog]');
+  if (galleryDialog && typeof galleryDialog.showModal === 'function') {
+    var dialogImage = galleryDialog.querySelector('img');
+    var dialogCaption = galleryDialog.querySelector('p');
+    document.querySelectorAll('[data-gallery-image]').forEach(function (trigger) {
+      trigger.addEventListener('click', function () {
+        dialogImage.src = trigger.getAttribute('data-gallery-image');
+        dialogImage.alt = trigger.getAttribute('data-gallery-alt');
+        dialogCaption.textContent = trigger.getAttribute('data-gallery-alt');
+        galleryDialog.showModal();
+      });
+    });
+    galleryDialog.querySelector('[data-gallery-close]').addEventListener('click', function () { galleryDialog.close(); });
+    galleryDialog.addEventListener('click', function (event) {
+      if (event.target === galleryDialog) galleryDialog.close();
+    });
+  }
 })();
