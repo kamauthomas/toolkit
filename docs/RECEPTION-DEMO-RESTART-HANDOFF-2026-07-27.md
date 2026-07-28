@@ -75,5 +75,13 @@ For every future change, increment `toolkit_theme_release()`, upload assets
 before `functions.php`, trigger one uncached request and verify the new release
 header and cache miss before asking users to review.
 
+### Gallery review qualification
+
+Stakeholder feedback received after release `2026.07.28.4` rejected the current
+demo gallery styling as off-brand and overworked. The replacement vintage
+journey wall and single-player video gallery were approved locally and deployed
+to demo as release `2026.07.28.6`. Both retain the full Toolkit site footer.
+Production remains unchanged pending its separate approval gate.
+
 No production configuration, database or public page was changed during this
 demo deployment.

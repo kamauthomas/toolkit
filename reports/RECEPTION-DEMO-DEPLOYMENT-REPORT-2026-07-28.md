@@ -91,3 +91,37 @@ For future releases, increment `toolkit_theme_release()` in `functions.php`.
 Deploy changed assets before `functions.php`, then request one demo URL with a
 unique query parameter and verify the new `X-Toolkit-Release`, versioned asset
 URLs and a LiteSpeed cache miss.
+
+## Local gallery review hold
+
+**Updated after stakeholder feedback:** 28 July 2026
+
+The bright photo-zine and dark watch-room treatment deployed in release
+`2026.07.28.4` was judged insufficiently aligned to Toolkit's established
+orange, olive, teal and neutral palette. No further gallery change is
+authorized for demo or production until the replacement is reviewed locally.
+
+The replacement working concept is:
+
+- an image gallery presented as a restrained vintage journey wall, using
+  pinned photographs, a guide path and field-note captions; and
+- a separate video gallery with a playable featured video in the hero,
+  olive/orange brand treatment and a clear chapter library.
+
+After UX research, the local video concept was refined to one large player with
+an adjacent thumbnail playlist. This avoids multiple competing embeds, reduces
+scrolling and makes the active story clear. Selection updates the player,
+episode and title; native YouTube controls retain captions, keyboard playback
+and full-screen access. Research references and the approval gate are recorded
+in `docs/GALLERY-DESIGN-REVIEW-2026-07-28.md`.
+
+A database-independent local review harness lives in
+`review/gallery-preview/`. It reads existing public media, writes no data and
+does not change WordPress.
+
+The replacement was approved and deployed to demo as release `2026.07.28.6`.
+The final release uses the vintage pinned journey wall, one primary video
+player with six adjacent playlist controls, a reduced-height video hero and the
+complete WordPress header/footer. Demo verification recorded HTTP 200,
+`X-Toolkit-Release: 2026.07.28.6`, a LiteSpeed cache miss, versioned assets and
+the expected player/playlist/footer markers. Production remains unchanged.

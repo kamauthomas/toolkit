@@ -66,4 +66,32 @@
       if (event.target === galleryDialog) galleryDialog.close();
     });
   }
+
+  var videoPlayer = document.querySelector('[data-video-player]');
+  var videoChoices = document.querySelectorAll('[data-video-id]');
+  if (videoPlayer && videoChoices.length) {
+    var videoTitle = document.querySelector('[data-video-title]');
+    var videoNumber = document.querySelector('[data-video-number]');
+    var videoCurrent = document.querySelector('[data-video-current]');
+    videoChoices.forEach(function (choice) {
+      choice.addEventListener('click', function () {
+        var id = choice.getAttribute('data-video-id');
+        var title = choice.getAttribute('data-video-title');
+        var episode = parseInt(choice.getAttribute('data-video-episode'), 10);
+        videoPlayer.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?rel=0&playsinline=1&cc_load_policy=1&autoplay=1';
+        videoPlayer.title = title;
+        videoTitle.textContent = title;
+        videoNumber.textContent = 'Episode ' + String(episode).padStart(2, '0');
+        videoCurrent.textContent = episode;
+        videoChoices.forEach(function (item) {
+          var active = item === choice;
+          item.classList.toggle('is-active', active);
+          item.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+        if (window.matchMedia('(max-width: 860px)').matches) {
+          document.querySelector('.video-watch-player').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  }
 })();

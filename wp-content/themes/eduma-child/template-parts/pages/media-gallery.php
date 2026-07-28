@@ -19,45 +19,50 @@ $images = array(
 	array( '2025/08/20250814_091329-scaled.jpg', 'Learning beyond the classroom', 'Field notes' ),
 );
 ?>
-<main id="main-content" class="toolkit-page toolkit-media-page <?php echo $videos ? 'toolkit-watch-room' : 'toolkit-photo-zine'; ?>">
+<main id="main-content" class="toolkit-page toolkit-media-page <?php echo $videos ? 'toolkit-video-journey' : 'toolkit-memory-wall'; ?>">
 	<?php if ( $videos ) : ?>
-		<section class="watch-room-hero">
-			<div class="watch-room-hero__signal"><i></i> Toolkit TV <span>Now streaming</span></div>
-			<div class="watch-room-hero__copy"><p class="toolkit-kicker">Real people. Real skills. No filler.</p><h1>Press play on <em>possibility.</em></h1><p>Six short stories from the people turning technical skills into momentum.</p></div>
-			<div class="watch-room-hero__orb" aria-hidden="true"><span>▶</span></div>
+		<section class="video-journey-hero">
+			<div class="video-journey-hero__copy"><p class="toolkit-kicker">Toolkit stories</p><h1>See skills<br><em>come to life.</em></h1><p>Choose a story, press play and meet the people turning practical knowledge into opportunity.</p></div>
 		</section>
-		<section class="watch-room-grid" aria-label="Toolkit video stories">
-			<?php $episode = 1; foreach ( $items as $id => $title ) : ?>
-				<article class="watch-card">
-					<div class="watch-card__frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/<?php echo esc_attr( $id ); ?>?rel=0" title="<?php echo esc_attr( $title ); ?>" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
-					<div class="watch-card__meta"><span>EP <?php echo esc_html( str_pad( (string) $episode, 2, '0', STR_PAD_LEFT ) ); ?></span><p>Toolkit originals</p></div>
-					<h2><?php echo esc_html( $title ); ?></h2>
-				</article>
-			<?php $episode++; endforeach; ?>
-		</section>
-		<footer class="watch-room-footer"><p>Still scrolling? We have more stories where these came from.</p><a class="watch-room-button" href="https://www.youtube.com/@toolkitafrica" target="_blank" rel="noopener">Enter the full channel <span>↗</span></a></footer>
-	<?php else : ?>
-		<section class="photo-zine-hero">
-			<div class="photo-zine-hero__issue">ISSUE 01 <span>●</span> KIKUYU, KE</div>
-			<p class="photo-zine-hero__eyebrow">A visual diary from Toolkit Africa</p>
-			<h1>Good energy.<br><em>Great work.</em></h1>
-			<p class="photo-zine-hero__intro">The workshops, wins and wonderfully human moments behind the skills.</p>
-			<div class="photo-zine-sticker photo-zine-sticker--one" aria-hidden="true">100%<br>HANDS ON</div>
-			<div class="photo-zine-sticker photo-zine-sticker--two" aria-hidden="true">SCROLL<br>THE STORY ↓</div>
-		</section>
-		<section class="photo-zine-grid" aria-label="Toolkit image gallery">
-			<?php foreach ( $images as $index => $image ) : ?>
-				<figure class="photo-zine-card photo-zine-card--<?php echo esc_attr( $index + 1 ); ?>">
-					<button type="button" data-gallery-image="<?php echo esc_url( $uploads . $image[0] ); ?>" data-gallery-alt="<?php echo esc_attr( $image[1] ); ?>">
-						<img loading="<?php echo 0 === $index ? 'eager' : 'lazy'; ?>" src="<?php echo esc_url( $uploads . $image[0] ); ?>" alt="<?php echo esc_attr( $image[1] ); ?>">
-						<span class="photo-zine-card__zoom" aria-hidden="true">↗</span>
+		<section class="video-watch-desk" aria-label="Toolkit video gallery">
+			<div class="video-watch-player">
+				<div class="video-watch-player__frame"><iframe data-video-player src="https://www.youtube-nocookie.com/embed/0sjNPAXN8pw?rel=0&amp;playsinline=1&amp;cc_load_policy=1" title="From virtual reality to real-world welding" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+				<div class="video-watch-player__details" aria-live="polite"><span data-video-number>Episode 01</span><h2 data-video-title>From virtual reality to real-world welding</h2><p>Toolkit originals <i aria-hidden="true">•</i> Practical skills in action</p></div>
+			</div>
+			<div class="video-watch-playlist">
+				<header><div><p class="toolkit-kicker">Watch next</p><h2>Stories from the hub</h2></div><span><b data-video-current>1</b> / <?php echo esc_html( count( $items ) ); ?></span></header>
+				<div class="video-watch-playlist__items" role="list">
+				<?php $episode = 1; foreach ( $items as $id => $title ) : ?>
+					<button type="button" role="listitem" class="video-watch-choice <?php echo 1 === $episode ? 'is-active' : ''; ?>" data-video-id="<?php echo esc_attr( $id ); ?>" data-video-title="<?php echo esc_attr( $title ); ?>" data-video-episode="<?php echo esc_attr( $episode ); ?>" aria-pressed="<?php echo 1 === $episode ? 'true' : 'false'; ?>">
+						<span class="video-watch-choice__thumb"><img loading="lazy" src="https://i.ytimg.com/vi/<?php echo esc_attr( $id ); ?>/mqdefault.jpg" alt=""><i aria-hidden="true">▶</i></span>
+						<span class="video-watch-choice__copy"><small><?php echo esc_html( 'Episode ' . str_pad( (string) $episode, 2, '0', STR_PAD_LEFT ) ); ?></small><strong><?php echo esc_html( $title ); ?></strong></span>
 					</button>
-					<figcaption><span><?php echo esc_html( str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?> / <?php echo esc_html( $image[2] ); ?></span><strong><?php echo esc_html( $image[1] ); ?></strong></figcaption>
+				<?php $episode++; endforeach; ?>
+				</div>
+			</div>
+		</section>
+		<section class="video-watch-note"><div><strong>Accessible viewing</strong><p>Use the YouTube controls for captions, volume, playback speed and full screen.</p></div><a href="https://www.youtube.com/@toolkitafrica" target="_blank" rel="noopener">View the complete channel <span>↗</span></a></section>
+	<?php else : ?>
+		<section class="memory-wall-hero">
+			<div><p class="toolkit-kicker">Our journey in pictures</p><h1>Moments that<br><em>made the journey.</em></h1><p>Follow the thread through workshops, partnerships, learning and celebration at Toolkit Africa.</p></div>
+			<aside><span>FIELD NOTES</span><strong>Kikuyu, Kenya</strong><small>People • Practice • Progress</small></aside>
+		</section>
+		<section class="memory-wall" aria-label="Toolkit image gallery">
+			<header class="memory-wall__guide"><span>START HERE</span><div></div><p>Every pin marks a step forward.</p></header>
+			<div class="memory-wall__path" aria-hidden="true"></div>
+			<?php foreach ( $images as $index => $image ) : ?>
+				<figure class="memory-card memory-card--<?php echo esc_attr( $index + 1 ); ?>">
+					<button type="button" data-gallery-image="<?php echo esc_url( $uploads . $image[0] ); ?>" data-gallery-alt="<?php echo esc_attr( $image[1] ); ?>">
+						<i class="memory-pin" aria-hidden="true"></i>
+						<img loading="<?php echo 0 === $index ? 'eager' : 'lazy'; ?>" src="<?php echo esc_url( $uploads . $image[0] ); ?>" alt="<?php echo esc_attr( $image[1] ); ?>">
+						<span class="memory-card__zoom" aria-hidden="true">View image ↗</span>
+					</button>
+					<figcaption><span>STOP <?php echo esc_html( str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span><strong><?php echo esc_html( $image[1] ); ?></strong><small><?php echo esc_html( $image[2] ); ?></small></figcaption>
 				</figure>
 			<?php endforeach; ?>
+			<footer class="memory-wall__finish"><span>THE JOURNEY CONTINUES</span><p>New skills. New stories. The same purpose.</p></footer>
 		</section>
-		<div class="photo-zine-ticker" aria-hidden="true"><div>MAKE • LEARN • BUILD • SHARE • MAKE • LEARN • BUILD • SHARE •</div></div>
-		<dialog class="photo-zine-lightbox" data-gallery-dialog aria-label="Expanded gallery image"><button type="button" data-gallery-close aria-label="Close image">×</button><img src="" alt=""><p></p></dialog>
+		<dialog class="memory-lightbox" data-gallery-dialog aria-label="Expanded gallery image"><button type="button" data-gallery-close aria-label="Close image">×</button><img src="" alt=""><p></p></dialog>
 	<?php endif; ?>
 </main>
 <?php get_footer(); ?>
