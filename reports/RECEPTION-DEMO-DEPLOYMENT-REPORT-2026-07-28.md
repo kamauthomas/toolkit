@@ -1,7 +1,9 @@
 # Reception and Media Demo Deployment Report
 
-**Date:** 28 July 2026  
-**Environment:** Demo only  
+**Date:** 28 July 2026
+
+**Environment:** Demo only
+
 **Production decision:** Hold pending user acceptance
 
 ## Outcome
