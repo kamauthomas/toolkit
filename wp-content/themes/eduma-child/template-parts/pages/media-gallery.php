@@ -1,7 +1,7 @@
 <?php
 get_header();
 $videos = is_page( 'tti-media' );
-$uploads = content_url( '/uploads/' );
+$uploads = 'https://toolkitafrica.ac.ke/wp-content/uploads/';
 $items = array(
 	'0sjNPAXN8pw' => 'From virtual reality to real-world welding',
 	'ROArAgWDOTI' => 'Transforming the skills sector',
