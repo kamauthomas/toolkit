@@ -41,3 +41,49 @@ The form currently requires first name, surname, email, primary and secondary ph
 4. Enable production submission behind a feature flag, monitor redacted failures, then retire the external-form handoff.
 
 No Mzizi credentials, applicant records, or endpoint cookies are stored in this repository.
+
+## WordPress implementation
+
+The child theme now exposes these same-origin routes:
+
+- `GET /wp-json/toolkit/v1/application/options` for campuses, counties, and referral sources.
+- `POST /wp-json/toolkit/v1/application/courses` with `school_id`.
+- `POST /wp-json/toolkit/v1/application/intakes` with `course_id`.
+- `POST /wp-json/toolkit/v1/application/submit` for the final allow-listed application.
+
+Direct submission is deliberately fail-closed. Production activation requires all three constants below in environment-managed WordPress configuration, not in the repository:
+
+```php
+define( 'TOOLKIT_MZIZI_SUBMISSION_ENABLED', true );
+define( 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY', 'managed-outside-git' );
+define( 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY', 'managed-outside-git' );
+```
+
+Until those values are present, applicants are offered the official Mzizi form and no Toolkit form data is transmitted.
+
+## Field mapping
+
+Only these fields cross the server boundary. Browser-only fields such as date of birth and document readiness are not forwarded because the confirmed Mzizi contract has no corresponding fields.
+
+| Toolkit field | Mzizi field |
+| --- | --- |
+| `first_name` | `FirstName` |
+| `middle_name` | `SecondName` |
+| `last_name` | `LastName` |
+| `nationality` | `Nationality` |
+| `county` | `County` |
+| `email` | `Email` |
+| `phone` | `MobileNo` |
+| `alternate_phone` | `altPhoneno` |
+| `mean_grade` | `MeanGrade` |
+| `qualifications` | `Qualifications` |
+| `school_id` | `SchoolID` |
+| `high_school` | `HighSchoolAttended` |
+| `intake_id` | `IntakeMonth` |
+| `study_mode` | `ModeOfStudy` |
+| `sponsorship_type` | `SponsorshipType` |
+| `referral_source` | `Channel` |
+| `course_id` | `ClassApplied` |
+| `gender` | `Gender` |
+
+Before submitting, the adapter opens a fresh tenant session and re-fetches the selected campus's courses and the course's intakes. This prevents stale or invented IDs from reaching Mzizi. It does not retry a submission automatically because the upstream response may be ambiguous after a timeout.
