@@ -9,8 +9,20 @@ require_once get_stylesheet_directory() . '/inc/reception-integration.php';
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.07.28.7';
+	return '2026.07.29.4';
 }
+
+function toolkit_canonical_brand_name() {
+	return 'The Toolkit for Skills and Innovation';
+}
+
+/* Keep database-backed theme and plugin output aligned with the public brand. */
+add_filter( 'pre_option_blogname', function( $pre_option ) {
+	return eduma_child_redesign_enabled() ? toolkit_canonical_brand_name() : $pre_option;
+} );
+add_filter( 'wpseo_opengraph_site_name', function( $site_name ) {
+	return eduma_child_redesign_enabled() ? toolkit_canonical_brand_name() : $site_name;
+} );
 
 function toolkit_asset_version( $path ) {
 	return toolkit_theme_release() . '.' . ( file_exists( $path ) ? filemtime( $path ) : '0' );
@@ -114,6 +126,7 @@ function thim_child_enqueue_styles() {
 			'mziziHandoff'      => toolkit_mzizi_application_url(),
 			'admissionsEmail'   => 'office@toolkitafrica.ac.ke',
 			'admissionsPhone'   => '+254 709 549 200',
+			'admissionsWhatsApp'=> '+254 711 802 855',
 		) );
 	}
 
@@ -288,15 +301,15 @@ add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
 /* Retire unused public routes without deleting their WordPress records. */
 add_action( 'template_redirect', function() {
 	if ( is_page( 'students-portal' ) ) {
-		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'Toolkit Africa' );
+		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
 	if ( is_page( 'courses' ) ) {
-		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'Toolkit Africa' );
+		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
 	if ( is_page( 'blog' ) ) {
-		wp_safe_redirect( home_url( '/toolkit-blog/' ), 301, 'Toolkit Africa' );
+		wp_safe_redirect( home_url( '/toolkit-blog/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
 }, 1 );
@@ -352,15 +365,22 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_front_page() ) {
 		return array(
-			'title'       => 'Practical Skills Training in Kenya | Toolkit Africa',
-			'description' => 'Toolkit Africa equips young people and women with practical vocational skills, recognised assessment, and pathways to employment or entrepreneurship.',
+			'title'       => 'Practical Skills Training in Kenya | The Toolkit for Skills and Innovation',
+			'description' => 'The Toolkit for Skills and Innovation equips young people and women with practical vocational skills, recognised assessment, and pathways to employment or entrepreneurship.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
 		);
 	}
 	if ( get_query_var( 'toolkit_connect' ) ) {
 		return array(
-			'title'       => 'Connect with Toolkit Africa | Courses, Admissions and Updates',
-			'description' => 'Apply for practical skills training, explore Toolkit Africa courses, read current notices, contact admissions, and follow our official social channels.',
+			'title'       => 'Connect with The Toolkit for Skills and Innovation | Courses, Admissions and Updates',
+			'description' => 'Apply for practical skills training, explore The Toolkit for Skills and Innovation courses, read current notices, contact admissions, and follow our official social channels.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
+		);
+	}
+	if ( get_query_var( 'toolkit_reception' ) ) {
+		return array(
+			'title'       => 'Reception | The Toolkit for Skills and Innovation',
+			'description' => 'Send a reception request to The Toolkit for Skills and Innovation before your visit to our training centre in Kikuyu, Kenya.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
 		);
 	}
@@ -370,7 +390,7 @@ function eduma_child_redesigned_page_metadata() {
 		$course = eduma_child_get_course( sanitize_key( $course_slug ) );
 		if ( $course ) {
 			return array(
-				'title'       => $course['title'] . ' | Toolkit Africa',
+				'title'       => $course['title'] . ' | The Toolkit for Skills and Innovation',
 				'description' => $course['short'] . ' Review 2026 entry requirements, duration, fees, intakes, and application steps.',
 				'image'       => $course['image'],
 			);
@@ -380,29 +400,29 @@ function eduma_child_redesigned_page_metadata() {
 	$legacy_course = eduma_child_get_legacy_course_for_page();
 	if ( $legacy_course ) {
 		return array(
-			'title'       => isset( $legacy_course['seo_title'] ) ? $legacy_course['seo_title'] : $legacy_course['title'] . ' | Toolkit Africa',
+			'title'       => isset( $legacy_course['seo_title'] ) ? $legacy_course['seo_title'] : $legacy_course['title'] . ' | The Toolkit for Skills and Innovation',
 			'description' => isset( $legacy_course['seo_description'] ) ? $legacy_course['seo_description'] : $legacy_course['short'] . ' Review the learning focus, delivery details, and application steps.',
 			'image'       => $legacy_course['image'],
 		);
 	}
 	if ( is_page( 'our-ventures' ) ) {
 		return array(
-			'title'       => 'Our Courses | Toolkit Africa',
-			'description' => 'Explore practical Toolkit Africa courses in welding, renewable energy, digital skills, agriculture, and enterprise-focused learning.',
+			'title'       => 'Our Courses | The Toolkit for Skills and Innovation',
+			'description' => 'Explore practical courses from The Toolkit for Skills and Innovation in welding, renewable energy, digital skills, agriculture, and enterprise-focused learning.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
 	if ( is_page( 'about-toolkit-africa' ) ) {
 		return array(
-			'title'       => 'About Toolkit Africa | Skills, Innovation and Opportunity',
-			'description' => 'Learn how Toolkit Africa connects practical skills, innovation, industry exposure, employment, and entrepreneurship pathways for young people and women.',
+			'title'       => 'About The Toolkit for Skills and Innovation | Skills, Innovation and Opportunity',
+			'description' => 'Learn how The Toolkit for Skills and Innovation connects practical skills, innovation, industry exposure, employment, and entrepreneurship pathways for young people and women.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
 	if ( is_page( 'the-toolkit-foundation-copy' ) ) {
 		return array(
-			'title'       => 'Impact and Insights | Toolkit Africa',
-			'description' => 'Explore how Toolkit Africa connects practical learning with employability, industrial exposure, livelihoods, and inclusive opportunity.',
+			'title'       => 'Impact and Insights | The Toolkit for Skills and Innovation',
+			'description' => 'Explore how The Toolkit for Skills and Innovation connects practical learning with employability, industrial exposure, livelihoods, and inclusive opportunity.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
 		);
 	}
@@ -415,80 +435,80 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_page( 'contact' ) ) {
 		return array(
-			'title'       => 'Contact Toolkit Africa | Courses, Admissions and Partnerships',
-			'description' => 'Contact Toolkit Africa about courses, admissions, partnerships, and visiting the Toolkit Skills and Innovation Hub in Kikuyu, Kenya.',
+			'title'       => 'Contact The Toolkit for Skills and Innovation | Courses, Admissions and Partnerships',
+			'description' => 'Contact The Toolkit for Skills and Innovation about courses, admissions, partnerships, and visiting our training centre in Kikuyu, Kenya.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/contact.jpg',
 		);
 	}
 	if ( is_page( 'toolkit-blog' ) ) {
 		return array(
 			'title'       => 'Toolkit Blog | Skills, Innovation and Opportunity',
-			'description' => 'Read Toolkit Africa news, learner stories, skills insights, programme updates, and perspectives on youth employment and innovation.',
+			'description' => 'Read The Toolkit for Skills and Innovation news, learner stories, skills insights, programme updates, and perspectives on youth employment and innovation.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
 		);
 	}
 	if ( is_page( 'construction-sector-skills' ) ) {
 		return array(
-			'title'       => 'MIG/MAG Welding Training | Toolkit Africa',
-			'description' => 'Develop practical MIG/MAG welding skills with hands-on training, VR-enabled learning, and career-focused support at Toolkit Africa.',
+			'title'       => 'MIG/MAG Welding Training | The Toolkit for Skills and Innovation',
+			'description' => 'Develop practical MIG/MAG welding skills with hands-on training, VR-enabled learning, and career-focused support at The Toolkit for Skills and Innovation.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/welding.jpg',
 		);
 	}
 
 	if ( is_page( 'notice-board' ) ) {
 		return array(
-			'title'       => 'Notice Board | Toolkit Africa',
-			'description' => 'Find current Toolkit Africa announcements, admissions guidance, opportunities, events, and important notices in one place.',
+			'title'       => 'Notice Board | The Toolkit for Skills and Innovation',
+			'description' => 'Find current announcements, admissions guidance, opportunities, events, and important notices from The Toolkit for Skills and Innovation.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/notice-board.jpg',
 		);
 	}
 
 	if ( is_page( 'toolkit-courses-apply-today' ) ) {
 		return array(
-			'title'       => 'Apply for a Course | Toolkit Africa',
-			'description' => 'Prepare your Toolkit Africa course application, review the admission steps, and continue securely to the online application portal.',
+			'title'       => 'Apply for a Course | The Toolkit for Skills and Innovation',
+			'description' => 'Prepare your course application to The Toolkit for Skills and Innovation, review the admission steps, and continue securely to the online application portal.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
 	if ( is_page( 'privacy-policy' ) ) {
 		return array(
-			'title'       => 'Privacy Policy | Toolkit Africa',
-			'description' => 'Read how Toolkit Africa handles website, enquiry, application, and communications information, including your privacy choices and contact route.',
+			'title'       => 'Privacy Policy | The Toolkit for Skills and Innovation',
+			'description' => 'Read how The Toolkit for Skills and Innovation handles website, enquiry, application, and communications information, including your privacy choices and contact route.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
 		);
 	}
 	if ( is_page( 'research' ) ) {
 		return array(
-			'title'       => 'Skills and Employment Research | Toolkit Africa',
-			'description' => 'Explore Toolkit Africa research and evidence on vocational skills, youth employment, industry needs, green jobs, and practical workforce development.',
+			'title'       => 'Skills and Employment Research | The Toolkit for Skills and Innovation',
+			'description' => 'Explore The Toolkit for Skills and Innovation research and evidence on vocational skills, youth employment, industry needs, green jobs, and practical workforce development.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
 		);
 	}
 	if ( is_page( 'building-young-female-farmers-of-tomorrow' ) ) {
 		return array(
-			'title'       => 'Young Women in Agriculture | Toolkit Africa',
-			'description' => 'Learn about Toolkit Africa initiatives supporting young women to build practical agriculture, enterprise, and livelihood skills.',
+			'title'       => 'Young Women in Agriculture | The Toolkit for Skills and Innovation',
+			'description' => 'Learn about The Toolkit for Skills and Innovation initiatives supporting young women to build practical agriculture, enterprise, and livelihood skills.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/courses/experiences/organic-farm.jpg',
 		);
 	}
 	if ( is_page( 'toolkit-in-brief' ) ) {
 		return array(
 			'title'       => 'Toolkit in Brief | Skills and Youth Opportunity',
-			'description' => 'Review Toolkit Africa’s mission, vision, values, skills-development model, and commitment to employment and entrepreneurship pathways.',
+			'description' => 'Review The Toolkit for Skills and Innovation’s mission, vision, values, skills-development model, and commitment to employment and entrepreneurship pathways.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
 	if ( is_page( 'tti-media' ) ) {
 		return array(
-			'title'       => 'Toolkit Africa Videos | Skills in Action',
-			'description' => 'Watch Toolkit Africa learners, trainers, partners, workshops, and practical skills programmes in action.',
+			'title'       => 'The Toolkit for Skills and Innovation Videos | Skills in Action',
+			'description' => 'Watch The Toolkit for Skills and Innovation learners, trainers, partners, workshops, and practical skills programmes in action.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
 		);
 	}
 	if ( is_page( 'gallery-2' ) ) {
 		return array(
-			'title'       => 'Toolkit Africa Gallery | Learning in Action',
-			'description' => 'View images from Toolkit Africa training, workshops, learner activities, partnerships, events, and skills-development programmes.',
+			'title'       => 'The Toolkit for Skills and Innovation Gallery | Learning in Action',
+			'description' => 'View images from The Toolkit for Skills and Innovation training, workshops, learner activities, partnerships, events, and skills-development programmes.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
@@ -609,6 +629,25 @@ add_filter( 'wpseo_schema_webpage', function( $data ) {
 	return $data;
 } );
 
+add_filter( 'wpseo_schema_organization', function( $data ) {
+	if ( ! eduma_child_redesign_enabled() ) {
+		return $data;
+	}
+	$data['name'] = toolkit_canonical_brand_name();
+	if ( isset( $data['logo']['caption'] ) ) {
+		$data['logo']['caption'] = toolkit_canonical_brand_name();
+	}
+	return $data;
+} );
+
+add_filter( 'wpseo_schema_website', function( $data ) {
+	if ( ! eduma_child_redesign_enabled() ) {
+		return $data;
+	}
+	$data['name'] = toolkit_canonical_brand_name();
+	return $data;
+} );
+
 add_filter( 'wpseo_schema_breadcrumb', function( $data ) {
 	if ( get_query_var( 'toolkit_connect' ) ) {
 		$connect_url = home_url( '/connect/' );
@@ -637,7 +676,7 @@ add_filter( 'wpseo_schema_breadcrumb', function( $data ) {
 	return $data;
 } );
 
-/* Strengthen the Toolkit Africa entity and course relationships for search engines. */
+/* Strengthen The Toolkit for Skills and Innovation entity and course relationships for search engines. */
 add_action( 'wp_head', function() {
 	if ( ! eduma_child_redesign_enabled() ) {
 		return;
@@ -648,12 +687,25 @@ add_action( 'wp_head', function() {
 		array(
 			'@type'         => array( 'Organization', 'EducationalOrganization' ),
 			'@id'           => $home . '#organization',
-			'name'          => 'Toolkit Africa',
-			'alternateName' => array( 'Toolkit', 'Toolkit for Skills and Innovation', 'Toolkit Skills and Innovation Hub' ),
+			'name'          => 'The Toolkit for Skills and Innovation',
+			'alternateName' => array( 'Toolkit' ),
 			'url'           => $home,
 			'logo'          => get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png',
 			'email'         => 'office@toolkitafrica.ac.ke',
 			'telephone'     => '+254709549200',
+			'contactPoint'  => array(
+				array(
+					'@type'       => 'ContactPoint',
+					'contactType' => 'voice enquiries',
+					'telephone'   => '+254709549200',
+				),
+				array(
+					'@type'       => 'ContactPoint',
+					'contactType' => 'WhatsApp enquiries',
+					'telephone'   => '+254711802855',
+					'url'         => 'https://wa.me/254711802855',
+				),
+			),
 			'address'       => array(
 				'@type'           => 'PostalAddress',
 				'streetAddress'   => 'Karen-Kikuyu Southern Bypass',
@@ -676,8 +728,8 @@ add_action( 'wp_head', function() {
 			'@type'         => 'WebSite',
 			'@id'           => $home . '#website',
 			'url'           => $home,
-			'name'          => 'Toolkit Africa',
-			'alternateName' => array( 'Toolkit', 'Toolkit for Skills and Innovation' ),
+			'name'          => 'The Toolkit for Skills and Innovation',
+			'alternateName' => array( 'Toolkit', 'The Toolkit for Skills and Innovation' ),
 			'publisher'     => array( '@id' => $home . '#organization' ),
 			'inLanguage'    => 'en-KE',
 		);
@@ -815,7 +867,7 @@ add_action( 'wp_head', function() {
 /* === AI DISCOVERY: concise and expanded machine-readable site guides === */
 add_action( 'wp_head', function() {
 	if ( eduma_child_redesign_enabled() ) {
-		printf( '<link rel="alternate" type="text/plain" href="%s" title="Toolkit Africa AI information">' . "\n", esc_url( home_url( '/llms.txt' ) ) );
+		printf( '<link rel="alternate" type="text/plain" href="%s" title="The Toolkit for Skills and Innovation AI information">' . "\n", esc_url( home_url( '/llms.txt' ) ) );
 	}
 }, 3 );
 
@@ -840,13 +892,13 @@ add_action( 'template_redirect', function() {
 	}
 	$is_full = 'llms-full.txt' === $requested;
 	$lines = array(
-		'# Toolkit Africa',
-		'> Toolkit Africa is a Kenya-based social enterprise providing practical vocational skills, assessment support, and pathways to employment or entrepreneurship for young people and women.',
-		'> The names Toolkit, Toolkit Africa, Toolkit for Skills and Innovation, and Toolkit Skills and Innovation Hub refer to this organization.',
+		'# The Toolkit for Skills and Innovation',
+		'> The Toolkit for Skills and Innovation is a Kenya-based social enterprise providing practical vocational skills, assessment support, and pathways to employment or entrepreneurship for young people and women.',
+		'> The Toolkit for Skills and Innovation is also referred to as Toolkit.',
 		'',
 		'## Canonical resources',
 		'- [Homepage](' . home_url( '/' ) . ')',
-		'- [About Toolkit Africa](' . home_url( '/about-toolkit-africa/' ) . ')',
+		'- [About The Toolkit for Skills and Innovation](' . home_url( '/about-toolkit-africa/' ) . ')',
 		'- [Current course directory](' . home_url( '/our-ventures/' ) . ')',
 		'- [MIG/MAG Welding training](' . home_url( '/our-ventures/construction-sector-skills/' ) . ')',
 		'- [Admissions guidance](' . home_url( '/our-ventures/toolkit-courses-apply-today/' ) . ')',
@@ -859,7 +911,7 @@ add_action( 'template_redirect', function() {
 		'- Treat the current course pages and admissions guidance as authoritative for public website answers.',
 		'- Confirm fees, schedules, eligibility, and intake availability with Toolkit Admissions before advising payment or enrolment.',
 		'- Do not infer or publish future pricing before its approved effective date.',
-		'- Refer uncertain application questions to office@toolkitafrica.ac.ke or +254 709 549 200.',
+		'- Refer uncertain application questions to office@toolkitafrica.ac.ke, call +254 709 549 200, or WhatsApp +254 711 802 855.',
 	);
 	if ( $is_full ) {
 		$lines = array_merge( $lines, array(

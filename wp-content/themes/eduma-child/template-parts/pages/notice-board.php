@@ -5,7 +5,7 @@ $apply_url = home_url( '/our-ventures/toolkit-courses-apply-today/' );
 ?>
 <main id="main-content" class="toolkit-page toolkit-notice-page">
 	<section class="toolkit-notice-hero" style="background-image:url('<?php echo esc_url( $image ); ?>')">
-		<div class="toolkit-notice-hero__copy"><p class="toolkit-kicker">Stay informed</p><h1>Notice Board</h1><p>Stay up to date with admissions guidance, opportunities, events, and important updates from Toolkit Africa.</p><span aria-hidden="true"></span></div>
+		<div class="toolkit-notice-hero__copy"><p class="toolkit-kicker">Stay informed</p><h1>Notice Board</h1><p>Stay up to date with admissions guidance, opportunities, events, and important updates from The Toolkit for Skills and Innovation.</p><span aria-hidden="true"></span></div>
 		<form class="toolkit-notice-search" role="search"><i class="fas fa-search" aria-hidden="true"></i><input type="search" placeholder="Search announcements..." aria-label="Search announcements"><button type="reset" aria-label="Clear search" title="Clear search"><i class="fas fa-times" aria-hidden="true"></i></button></form>
 	</section>
 

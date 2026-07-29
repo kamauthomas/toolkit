@@ -12,8 +12,8 @@ $logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 	<div class="toolkit-site-footer__main">
 		<div class="toolkit-site-footer__inner">
 			<div class="toolkit-site-footer__brand">
-				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="Toolkit Africa home">
-					<img src="<?php echo esc_url( $logo ); ?>" width="180" height="130" alt="Toolkit Africa">
+				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="The Toolkit for Skills and Innovation home">
+					<img src="<?php echo esc_url( $logo ); ?>" width="180" height="130" alt="The Toolkit for Skills and Innovation">
 				</a>
 				<p>Practical skills, innovation, and opportunity for Africa's young people.</p>
 			</div>
@@ -29,6 +29,7 @@ $logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 			<div class="toolkit-site-footer__contact">
 				<h2>Get in touch</h2>
 				<a href="tel:+254709549200"><i class="fas fa-phone-alt" aria-hidden="true"></i><span>+254 709 549 200</span></a>
+				<a href="https://wa.me/254711802855" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp" aria-hidden="true"></i><span>WhatsApp +254 711 802 855</span></a>
 				<a href="mailto:office@toolkitafrica.ac.ke"><i class="far fa-envelope" aria-hidden="true"></i><span>office@toolkitafrica.ac.ke</span></a>
 				<p><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span>Karen-Kikuyu Southern Bypass, Kikuyu, Kenya</span></p>
 				<div class="toolkit-site-footer__socials" aria-label="Toolkit social media">
@@ -50,7 +51,7 @@ $logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 		</div>
 	</div>
 	<div class="toolkit-site-footer__bottom">
-		<p>&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> Toolkit Africa. All rights reserved.</p>
+		<p>&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> The Toolkit for Skills and Innovation. All rights reserved.</p>
 	</div>
 </footer>
 <?php $support_settings = function_exists( 'toolkit_support_settings' ) ? toolkit_support_settings() : array( 'enabled' => 0 ); ?>

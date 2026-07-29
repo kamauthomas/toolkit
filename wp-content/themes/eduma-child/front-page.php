@@ -148,11 +148,11 @@ $slides = eduma_child_get_hero_slides();
 				<button class="home-who__video-card"
 						type="button"
 						data-youtube-id="LmZhEabXyUc"
-						aria-label="Play The Toolkit Skills and Innovation Hub video">
+						aria-label="Play The Toolkit for Skills and Innovation video">
 					<img
 						class="home-who__video-thumb"
 						src="https://img.youtube.com/vi/LmZhEabXyUc/hqdefault.jpg"
-						alt="Toolkit Skills and Innovation Hub video"
+						alt="The Toolkit for Skills and Innovation video"
 						loading="lazy"
 						width="480"
 						height="360">
@@ -160,7 +160,7 @@ $slides = eduma_child_get_hero_slides();
 						<span class="home-who__video-channel-icon">T</span>
 						<span class="home-who__video-channel-text">
 							<strong>The Toolkit iSkills TTI Ltd</strong>
-							<span>The Toolkit Skills &amp; Innovation Hub</span>
+							<span>The Toolkit for Skills and Innovation</span>
 						</span>
 					</span>
 					<span class="home-who__video-logo" aria-hidden="true">T</span>

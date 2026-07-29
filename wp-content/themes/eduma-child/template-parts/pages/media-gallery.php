@@ -14,7 +14,7 @@ $images = array(
 	array( '2025/08/20250801_154427-scaled.jpg', 'Skills look good on you', 'Workshop energy' ),
 	array( '2025/08/20250801_154911-2048x1536.jpg', 'Proof of progress', 'Community wins' ),
 	array( '2025/08/20250801_154307-1-scaled.jpg', 'The whole crew showed up', 'People of Toolkit' ),
-	array( '2025/08/20250815_130822-scaled.jpg', 'Ideas meet action', 'Inside the hub' ),
+	array( '2025/08/20250815_130822-scaled.jpg', 'Ideas meet action', 'At the Toolkit' ),
 	array( '2025/08/20250814_091404-1536x865.jpg', 'Built different. Built together.', 'Collaboration' ),
 	array( '2025/08/20250814_091329-scaled.jpg', 'Learning beyond the classroom', 'Field notes' ),
 );
@@ -30,7 +30,7 @@ $images = array(
 				<div class="video-watch-player__details" aria-live="polite"><span data-video-number>Episode 01</span><h2 data-video-title>From virtual reality to real-world welding</h2><p>Toolkit originals <i aria-hidden="true">•</i> Practical skills in action</p></div>
 			</div>
 			<div class="video-watch-playlist">
-				<header><div><p class="toolkit-kicker">Watch next</p><h2>Stories from the hub</h2></div><span><b data-video-current>1</b> / <?php echo esc_html( count( $items ) ); ?></span></header>
+				<header><div><p class="toolkit-kicker">Watch next</p><h2>Stories from the Toolkit</h2></div><span><b data-video-current>1</b> / <?php echo esc_html( count( $items ) ); ?></span></header>
 				<div class="video-watch-playlist__items" role="list">
 				<?php $episode = 1; foreach ( $items as $id => $title ) : ?>
 					<button type="button" role="listitem" class="video-watch-choice <?php echo 1 === $episode ? 'is-active' : ''; ?>" data-video-id="<?php echo esc_attr( $id ); ?>" data-video-title="<?php echo esc_attr( $title ); ?>" data-video-episode="<?php echo esc_attr( $episode ); ?>" aria-pressed="<?php echo 1 === $episode ? 'true' : 'false'; ?>">
@@ -44,7 +44,7 @@ $images = array(
 		<section class="video-watch-note"><div><strong>Accessible viewing</strong><p>Use the YouTube controls for captions, volume, playback speed and full screen.</p></div><a href="https://www.youtube.com/@toolkitafrica" target="_blank" rel="noopener">View the complete channel <span>↗</span></a></section>
 	<?php else : ?>
 		<section class="memory-wall-hero">
-			<div><p class="toolkit-kicker">Our journey in pictures</p><h1>Moments that<br><em>made the journey.</em></h1><p>Follow the thread through workshops, partnerships, learning and celebration at Toolkit Africa.</p></div>
+			<div><p class="toolkit-kicker">Our journey in pictures</p><h1>Moments that<br><em>made the journey.</em></h1><p>Follow the thread through workshops, partnerships, learning and celebration at The Toolkit for Skills and Innovation.</p></div>
 			<aside><span>FIELD NOTES</span><strong>Kikuyu, Kenya</strong><small>People • Practice • Progress</small></aside>
 		</section>
 		<section class="memory-wall" aria-label="Toolkit image gallery">

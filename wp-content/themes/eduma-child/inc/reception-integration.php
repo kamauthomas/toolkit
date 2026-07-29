@@ -44,7 +44,7 @@ function toolkit_reception_rate_limit_key() {
 
 function toolkit_reception_submit( WP_REST_Request $request ) {
 	if ( ! toolkit_reception_submission_enabled() ) {
-		return new WP_Error( 'reception_unavailable', 'Online reception is temporarily unavailable. Please call +254 709 549 200.', array( 'status' => 503 ) );
+		return new WP_Error( 'reception_unavailable', 'Online reception is temporarily unavailable. Call +254 709 549 200 or WhatsApp +254 711 802 855.', array( 'status' => 503 ) );
 	}
 	if ( ! toolkit_reception_request_origin_is_valid( $request ) ) {
 		return new WP_Error( 'invalid_origin', 'The request could not be verified.', array( 'status' => 403 ) );
@@ -59,7 +59,7 @@ function toolkit_reception_submit( WP_REST_Request $request ) {
 	$rate_key = toolkit_reception_rate_limit_key();
 	$attempts = (int) get_transient( $rate_key );
 	if ( $attempts >= 5 ) {
-		return new WP_Error( 'rate_limited', 'Too many attempts. Please wait before trying again or call +254 709 549 200.', array( 'status' => 429 ) );
+		return new WP_Error( 'rate_limited', 'Too many attempts. Please wait before trying again, call +254 709 549 200, or WhatsApp +254 711 802 855.', array( 'status' => 429 ) );
 	}
 	set_transient( $rate_key, $attempts + 1, HOUR_IN_SECONDS );
 
@@ -114,12 +114,12 @@ function toolkit_reception_submit( WP_REST_Request $request ) {
 	);
 
 	if ( is_wp_error( $response ) ) {
-		return new WP_Error( 'reception_unreachable', 'We could not reach reception. Please call +254 709 549 200.', array( 'status' => 503 ) );
+		return new WP_Error( 'reception_unreachable', 'We could not reach reception. Call +254 709 549 200 or WhatsApp +254 711 802 855.', array( 'status' => 503 ) );
 	}
 	$status = wp_remote_retrieve_response_code( $response );
 	$result = json_decode( wp_remote_retrieve_body( $response ), true );
 	if ( 201 !== $status || empty( $result['reference'] ) ) {
-		return new WP_Error( 'reception_rejected', 'Reception could not accept the request. Please check your details or call +254 709 549 200.', array( 'status' => 502 ) );
+		return new WP_Error( 'reception_rejected', 'Reception could not accept the request. Check your details, call +254 709 549 200, or WhatsApp +254 711 802 855.', array( 'status' => 502 ) );
 	}
 
 	delete_transient( $rate_key );

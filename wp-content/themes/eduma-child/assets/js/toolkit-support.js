@@ -89,7 +89,7 @@
       })
       .catch(function () {
         messages.innerHTML = '';
-        message('The website assistant is temporarily unavailable. Call +254 709 549 200 or email office@toolkitafrica.ac.ke.', 'assistant');
+        message('The website assistant is temporarily unavailable. Call +254 709 549 200, WhatsApp +254 711 802 855, or email office@toolkitafrica.ac.ke.', 'assistant');
       });
   }
 

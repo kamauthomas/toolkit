@@ -10,7 +10,7 @@ function toolkit_support_defaults() {
 		'courses_reply' => 'Explore the current Toolkit courses and choose a practical pathway that matches your goals.',
 		'fees_reply'    => 'Fees vary by course and intake. Check the course page, then confirm the current amount with Admissions before payment.',
 		'apply_reply'   => 'Use the guided application page to select your course and continue to the application form.',
-		'contact_reply' => 'Call +254 709 549 200 or email office@toolkitafrica.ac.ke.',
+		'contact_reply' => 'Call +254 709 549 200, WhatsApp +254 711 802 855, or email office@toolkitafrica.ac.ke.',
 		'poll_enabled'  => 1,
 		'poll_title'    => 'How would you rate the improved Toolkit website?',
 		'poll_prompt'   => 'Rate the clarity, design, speed, and ease of finding information.',

@@ -46,7 +46,7 @@
 			})
 			.catch(function (error) {
 				status.className = 'reception-form-status is-error';
-				status.textContent = error.message + ' You can also call +254 709 549 200.';
+				status.textContent = error.message + ' You can also call +254 709 549 200 or WhatsApp +254 711 802 855.';
 			})
 			.finally(function () {
 				submit.disabled = false;

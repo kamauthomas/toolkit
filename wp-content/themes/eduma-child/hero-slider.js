@@ -178,7 +178,7 @@
 	  if (modalVideo && !modalVideo.querySelector('iframe')) {
 		var iframe = document.createElement('iframe');
 		iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(videoBadge.getAttribute('data-video-id')) + '?autoplay=1&rel=0';
-		iframe.title = 'The Toolkit Skills and Innovation Hub video';
+		iframe.title = 'The Toolkit for Skills and Innovation video';
 		iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
 		iframe.allowFullscreen = true;
 		iframe.referrerPolicy = 'strict-origin-when-cross-origin';
@@ -230,7 +230,7 @@
 
       var iframe = document.createElement('iframe');
       iframe.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeId + '?autoplay=1&rel=0');
-      iframe.setAttribute('title', 'The Toolkit Skills and Innovation Hub video');
+      iframe.setAttribute('title', 'The Toolkit for Skills and Innovation video');
       iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
       iframe.setAttribute('allowfullscreen', '');
       iframe.setAttribute('loading', 'lazy');

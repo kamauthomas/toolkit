@@ -144,3 +144,42 @@ The forced-caption parameter was removed from:
 The YouTube player's native caption control remains available, so viewers can
 enable captions when required. The fix is packaged as release
 `2026.07.28.7`; production remains unchanged.
+
+## Main-domain identity and reception release
+
+**Updated:** 29 July 2026
+
+Release `2026.07.29.4` was deployed to the main domain after demo acceptance.
+It standardizes the canonical public name as **The Toolkit for Skills and
+Innovation**, removes public `Hub` wording, and presents both approved contact
+routes:
+
+- Voice call: `+254 709 549 200`
+- WhatsApp: `+254 711 802 855`
+
+Before deployment, cPanel created the full-account backup
+`backup-7.29.2026_09-43-03_bfyigiln.tar.gz`. Its final size was
+3,718,817,582 bytes and remained stable across the completion check. The 14
+existing files in the release delta were also captured under the ignored local
+rollback directory `rollbacks/main-pre-2026.07.29.4/`.
+
+The first partial-delta activation returned HTTP 500 because production lacked
+three dependencies already present on demo:
+
+- `inc/application-adapter.php`
+- `assets/js/application-form.js`
+- `assets/css/reception-form.css`
+
+The previous `functions.php` was immediately restored and the homepage returned
+HTTP 200. The remaining replaced files were then restored in small batches.
+After a production dependency inventory, the three missing dependencies were
+uploaded first, followed by all non-trigger delta files and `functions.php`
+last.
+
+The dependency-complete release passed cache-busted HTTP 200 checks on the
+homepage, Reception, Contact, Connect, Apply, Gallery, and Videos surfaces.
+Verified responses reported `X-Toolkit-Release: 2026.07.29.4`, zero old-brand
+hits, zero public `Hub` hits, and both voice and WhatsApp contact routes. The
+separate Courses and clean-URL cache verification was blocked by the managed
+command approval timeout; the successful cache-busted production checks remain
+the recorded acceptance evidence.

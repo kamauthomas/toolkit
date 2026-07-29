@@ -7,7 +7,7 @@ function eduma_child_get_hero_slides() {
 		array(
 			'image'         => $assets . 'hero-slide-1.webp',
 			'image_mobile'  => $assets . 'hero-slide-1-mobile.webp',
-			'eyebrow'       => 'TOOLKIT FOR SKILLS AND INNOVATION',
+			'eyebrow'       => 'THE TOOLKIT FOR SKILLS AND INNOVATION',
 			'heading'       => "Empowering Africa Through<br>Skills, Innovation & Leadership",
 			'description'   => 'Equipping young Africans with hands-on skills and entrepreneurial mindset to create sustainable communities and global impact.',
 			'primary_cta'   => array( 'label' => 'EXPLORE COURSES', 'url' => home_url( '/our-ventures/' ) ),
