@@ -8,15 +8,22 @@ get_header();
 while ( have_posts() ) :
 	the_post();
 	$post_id       = get_the_ID();
+	$preview       = toolkit_cultural_week_preview();
 	$blog_url      = home_url( '/toolkit-blog/' );
 	$fallback      = get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg';
 	$thumbnail_id  = get_post_thumbnail_id( $post_id );
 	$thumbnail_file = $thumbnail_id ? get_attached_file( $thumbnail_id ) : '';
 	$hero_image    = $thumbnail_file && file_exists( $thumbnail_file ) ? get_the_post_thumbnail_url( $post_id, 'full' ) : $fallback;
 	$categories    = get_the_category();
-	$category_name = $categories ? $categories[0]->name : 'Toolkit story';
-	$reading_words = str_word_count( wp_strip_all_tags( get_the_content() ) );
+	$category_name = $preview ? $preview['label'] : ( $categories ? $categories[0]->name : 'Toolkit story' );
+	$story_title   = $preview ? $preview['title'] : get_the_title();
+	$reading_words = str_word_count( $preview ? implode( ' ', $preview['content'] ) : wp_strip_all_tags( get_the_content() ) );
 	$reading_time  = max( 1, (int) ceil( $reading_words / 220 ) );
+	$story_number  = str_pad( (string) ( absint( $post_id ) % 100 ), 2, '0', STR_PAD_LEFT );
+	$standfirst    = $preview ? $preview['standfirst'] : get_the_excerpt();
+	if ( ! $standfirst ) {
+		$standfirst = wp_trim_words( wp_strip_all_tags( get_the_content() ), 30 );
+	}
 	$related       = new WP_Query(
 		array(
 			'post_type'           => 'post',
@@ -28,30 +35,44 @@ while ( have_posts() ) :
 		)
 	);
 	?>
-	<main id="main-content" class="toolkit-page toolkit-story-page">
+	<?php if ( $preview ) : $hero_image = $preview['images'][0]; endif; ?>
+	<main id="main-content" class="toolkit-page toolkit-story-page <?php echo $preview ? esc_attr( 'toolkit-story-theme--' . $preview['theme'] ) : ''; ?>">
 		<article <?php post_class( 'toolkit-story' ); ?>>
-			<header class="toolkit-story-hero">
+			<header class="toolkit-story-hero toolkit-story-cover">
 				<div class="toolkit-story-hero__copy">
-					<a class="toolkit-story-back" href="<?php echo esc_url( $blog_url ); ?>"><i class="fas fa-arrow-left" aria-hidden="true"></i> Toolkit Blog</a>
-					<p class="toolkit-kicker"><?php echo esc_html( $category_name ); ?></p>
-					<h1><?php the_title(); ?></h1>
+					<div class="toolkit-story-cover__topline">
+						<a class="toolkit-story-back" href="<?php echo esc_url( $blog_url ); ?>"><i class="fas fa-arrow-left" aria-hidden="true"></i> All stories</a>
+						<span><?php echo esc_html( $preview ? $preview['day'] : 'Field Notes / ' . $story_number ); ?></span>
+					</div>
+					<p class="toolkit-story-label"><i aria-hidden="true"></i><?php echo esc_html( $category_name ); ?></p>
+					<h1><?php echo esc_html( $story_title ); ?></h1>
+					<p class="toolkit-story-standfirst"><?php echo esc_html( $standfirst ); ?></p>
 					<div class="toolkit-story-meta">
-						<time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time>
-						<span><?php echo esc_html( $reading_time ); ?> min read</span>
+						<span><small>Published</small><time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date( 'j M Y' ) ); ?></time></span>
+						<span><small>Reading time</small><?php echo esc_html( $reading_time ); ?> minutes</span>
 					</div>
 				</div>
-				<figure><img src="<?php echo esc_url( $hero_image ); ?>" width="1400" height="900" alt="<?php echo esc_attr( get_the_title() ); ?>"></figure>
+				<figure>
+					<img src="<?php echo esc_url( $hero_image ); ?>" width="1400" height="900" alt="<?php echo esc_attr( $story_title ); ?>">
+					<figcaption><span>Toolkit Stories</span><b>Skills → Work → Opportunity</b></figcaption>
+				</figure>
 			</header>
 
 			<div class="toolkit-story-layout">
 				<aside class="toolkit-story-share" aria-label="Share this story">
-					<span>Share</span>
+					<span>Pass it on</span>
 					<a href="https://www.linkedin.com/sharing/share-offsite/?url=<?php echo rawurlencode( get_permalink() ); ?>" target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
 					<a href="https://wa.me/?text=<?php echo rawurlencode( get_the_title() . ' ' . get_permalink() ); ?>" target="_blank" rel="noopener noreferrer" aria-label="Share on WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
 					<a href="mailto:?subject=<?php echo rawurlencode( get_the_title() ); ?>&amp;body=<?php echo rawurlencode( get_permalink() ); ?>" aria-label="Share by email"><i class="far fa-envelope" aria-hidden="true"></i></a>
 				</aside>
 				<div class="toolkit-story-content">
-					<?php the_content(); ?>
+					<div class="toolkit-story-content__marker"><span>The brief</span><i></i></div>
+					<?php if ( $preview ) : ?>
+						<?php foreach ( $preview['content'] as $paragraph ) : ?><p><?php echo esc_html( $paragraph ); ?></p><?php endforeach; ?>
+						<div class="toolkit-story-day-gallery" aria-label="<?php echo esc_attr( $story_title . ' gallery' ); ?>">
+							<?php foreach ( $preview['images'] as $index => $image ) : ?><figure><img src="<?php echo esc_url( $image ); ?>" width="1200" height="900" alt="<?php echo esc_attr( $story_title . ' — image ' . ( $index + 1 ) ); ?>"><figcaption><?php echo esc_html( 'Cultural Week / ' . str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></figcaption></figure><?php endforeach; ?>
+						</div>
+					<?php else : the_content(); endif; ?>
 					<?php wp_link_pages( array( 'before' => '<nav class="toolkit-story-pages" aria-label="Story pages">', 'after' => '</nav>' ) ); ?>
 				</div>
 			</div>

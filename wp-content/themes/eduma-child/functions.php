@@ -3,13 +3,14 @@
 require_once get_stylesheet_directory() . '/inc/site-metrics.php';
 require_once get_stylesheet_directory() . '/inc/application-adapter.php';
 require_once get_stylesheet_directory() . '/inc/reception-integration.php';
+require_once get_stylesheet_directory() . '/inc/cultural-week-stories.php';
 
 /**
  * Increment for every public demo/production release. It is included in asset
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.07.29.4';
+	return '2026.07.29.5';
 }
 
 function toolkit_canonical_brand_name() {
