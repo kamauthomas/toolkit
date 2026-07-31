@@ -8,7 +8,7 @@ get_header();
 while ( have_posts() ) :
 	the_post();
 	$post_id       = get_the_ID();
-	$preview       = toolkit_cultural_week_preview();
+	$preview       = toolkit_editorial_story_preview();
 	$blog_url      = home_url( '/toolkit-blog/' );
 	$fallback      = get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg';
 	$thumbnail_id  = get_post_thumbnail_id( $post_id );

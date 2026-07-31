@@ -4,13 +4,19 @@ require_once get_stylesheet_directory() . '/inc/site-metrics.php';
 require_once get_stylesheet_directory() . '/inc/application-adapter.php';
 require_once get_stylesheet_directory() . '/inc/reception-integration.php';
 require_once get_stylesheet_directory() . '/inc/cultural-week-stories.php';
+require_once get_stylesheet_directory() . '/inc/mosiria-story.php';
+
+function toolkit_editorial_story_preview() {
+	$story = toolkit_cultural_week_preview();
+	return $story ? $story : toolkit_mosiria_story_preview();
+}
 
 /**
  * Increment for every public demo/production release. It is included in asset
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.07.31.3';
+	return '2026.07.31.4';
 }
 
 function toolkit_canonical_brand_name() {
