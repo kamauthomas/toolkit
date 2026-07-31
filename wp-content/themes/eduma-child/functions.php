@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.07.31.8';
+	return '2026.07.31.9';
 }
 
 function toolkit_canonical_brand_name() {
@@ -35,6 +35,8 @@ function toolkit_normalize_public_brand_copy( $text ) {
 	}
 	return str_ireplace(
 		array(
+			'The Toolkit for Skills and Innovation Hub',
+			'The Toolkit for Skills and Innovation hub',
 			'The Toolkit for Skills &amp; Innovation Hub',
 			'The Toolkit for Skills & Innovation Hub',
 			'The Toolkit Skills &amp; Innovation Hub',
@@ -42,10 +44,33 @@ function toolkit_normalize_public_brand_copy( $text ) {
 			'Toolkit Skills &amp; Innovation Hub',
 			'Toolkit Skills & Innovation Hub',
 			'The Toolkit For Skills and Innovation',
+			'the hub&#8217;s',
+			'the hub’s',
+			'at the hub',
 		),
-		toolkit_canonical_brand_name(),
+		array(
+			toolkit_canonical_brand_name(),
+			toolkit_canonical_brand_name(),
+			toolkit_canonical_brand_name(),
+			toolkit_canonical_brand_name(),
+			toolkit_canonical_brand_name(),
+			toolkit_canonical_brand_name(),
+			toolkit_canonical_brand_name(),
+			toolkit_canonical_brand_name(),
+			toolkit_canonical_brand_name(),
+			'the institution&#8217;s',
+			'the institution’s',
+			'at the institution',
+		),
 		$text
 	);
+}
+
+function toolkit_normalize_schema_brand_copy( $value ) {
+	if ( is_array( $value ) ) {
+		return array_map( 'toolkit_normalize_schema_brand_copy', $value );
+	}
+	return is_string( $value ) ? toolkit_normalize_public_brand_copy( $value ) : $value;
 }
 
 add_filter( 'the_title', 'toolkit_normalize_public_brand_copy', 20 );
@@ -55,6 +80,7 @@ add_filter( 'wpseo_title', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'wpseo_metadesc', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'wpseo_opengraph_title', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'wpseo_opengraph_desc', 'toolkit_normalize_public_brand_copy', 20 );
+add_filter( 'wpseo_schema_graph', 'toolkit_normalize_schema_brand_copy', 20 );
 
 /* Keep database-backed theme and plugin output aligned with the public brand. */
 add_filter( 'pre_option_blogname', function( $pre_option ) {
