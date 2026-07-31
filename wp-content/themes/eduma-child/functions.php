@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.07.31.7';
+	return '2026.07.31.8';
 }
 
 function toolkit_canonical_brand_name() {
