@@ -97,14 +97,26 @@ function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0
 		return $supplied['image'];
 	}
 
+	$legacy_images = array(
+		'youth-international-skills-day-12th-august-2025' => 'youth-skills-graduates.jpg',
+		'careers-in-mig-mag-welding-insights-from-our-webinar' => 'welding-vr-training.jpg',
+		'toolkit-shines-with-tujiajiri-mentorship-program-for-solar-energy-trainees' => 'solar-mentorship.jpg',
+		'igniting-her-future-innovateher-roll-out-at-the-toolkit-for-skills-and-innovation-hub' => 'innovateher-vr.jpg',
+	);
+	$slug = get_post_field( 'post_name', $post_id );
+	if ( isset( $legacy_images[ $slug ] ) ) {
+		return get_stylesheet_directory_uri() . '/assets/images/blogs/legacy-context/' . $legacy_images[ $slug ];
+	}
+
 	$thumbnail_id   = get_post_thumbnail_id( $post_id );
 	$thumbnail_file = $thumbnail_id ? get_attached_file( $thumbnail_id ) : '';
 	if ( $thumbnail_file && file_exists( $thumbnail_file ) ) {
 		return get_the_post_thumbnail_url( $post_id, $size );
 	}
 
-	$fallbacks = array( 'impact.jpg', 'about.jpg', 'foundation.jpg', 'notice-board.jpg' );
-	return get_stylesheet_directory_uri() . '/assets/images/pages/' . $fallbacks[ $fallback_index % count( $fallbacks ) ];
+	$fallbacks      = array( 'about.jpg', 'foundation.jpg', 'notice-board.jpg', 'welding.jpg' );
+	$stable_index   = absint( crc32( (string) $slug ) ) + absint( $fallback_index );
+	return get_stylesheet_directory_uri() . '/assets/images/pages/' . $fallbacks[ $stable_index % count( $fallbacks ) ];
 }
 
 function toolkit_cultural_week_preview() {

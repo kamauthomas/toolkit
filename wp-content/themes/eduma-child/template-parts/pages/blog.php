@@ -1,6 +1,6 @@
 <?php
 get_header();
-$assets = get_stylesheet_directory_uri() . '/assets/images/pages/';
+$assets = get_stylesheet_directory_uri() . '/assets/images/';
 $excluded_posts = array();
 foreach ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'posts_per_page' => -1 ) ) as $candidate ) {
 	if ( '__trashed' === $candidate->post_name || preg_match( '/\bcopy\b/i', $candidate->post_title ) ) {
@@ -18,7 +18,7 @@ $posts  = new WP_Query( array(
 <main id="main-content" class="toolkit-page toolkit-blog-page">
 	<section class="toolkit-blog-hero">
 		<div><p class="toolkit-kicker">Toolkit Blog</p><h1>Skills, ideas and stories from the field</h1><p>Read updates on practical learning, youth employment, industry partnerships and the people shaping new pathways to work.</p></div>
-		<img src="<?php echo esc_url( $assets . 'impact.jpg' ); ?>" width="900" height="620" alt="Toolkit learner taking part in practical technical training">
+		<img src="<?php echo esc_url( $assets . 'blogs/legacy-context/innovateher-vr.jpg' ); ?>" width="900" height="620" alt="Toolkit learner practising virtual-reality welding">
 	</section>
 	<?php if ( $posts->have_posts() ) : $posts->the_post(); ?>
 	<section class="toolkit-blog-feature toolkit-section">

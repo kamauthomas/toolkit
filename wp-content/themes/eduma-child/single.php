@@ -10,10 +10,7 @@ while ( have_posts() ) :
 	$post_id       = get_the_ID();
 	$preview       = toolkit_editorial_story_preview();
 	$blog_url      = home_url( '/toolkit-blog/' );
-	$fallback      = get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg';
-	$thumbnail_id  = get_post_thumbnail_id( $post_id );
-	$thumbnail_file = $thumbnail_id ? get_attached_file( $thumbnail_id ) : '';
-	$hero_image    = $thumbnail_file && file_exists( $thumbnail_file ) ? get_the_post_thumbnail_url( $post_id, 'full' ) : $fallback;
+	$hero_image    = toolkit_story_image_url( $post_id, 'full' );
 	$categories    = get_the_category();
 	$category_name = $preview ? $preview['label'] : ( $categories ? $categories[0]->name : 'Toolkit story' );
 	$story_title   = $preview ? $preview['title'] : get_the_title();

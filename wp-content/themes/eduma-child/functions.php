@@ -29,6 +29,33 @@ function toolkit_canonical_brand_name() {
 	return 'The Toolkit for Skills and Innovation';
 }
 
+function toolkit_normalize_public_brand_copy( $text ) {
+	if ( ! is_string( $text ) || '' === $text ) {
+		return $text;
+	}
+	return str_ireplace(
+		array(
+			'The Toolkit for Skills &amp; Innovation Hub',
+			'The Toolkit for Skills & Innovation Hub',
+			'The Toolkit Skills &amp; Innovation Hub',
+			'The Toolkit Skills & Innovation Hub',
+			'Toolkit Skills &amp; Innovation Hub',
+			'Toolkit Skills & Innovation Hub',
+			'The Toolkit For Skills and Innovation',
+		),
+		toolkit_canonical_brand_name(),
+		$text
+	);
+}
+
+add_filter( 'the_title', 'toolkit_normalize_public_brand_copy', 20 );
+add_filter( 'get_the_excerpt', 'toolkit_normalize_public_brand_copy', 20 );
+add_filter( 'the_content', 'toolkit_normalize_public_brand_copy', 20 );
+add_filter( 'wpseo_title', 'toolkit_normalize_public_brand_copy', 20 );
+add_filter( 'wpseo_metadesc', 'toolkit_normalize_public_brand_copy', 20 );
+add_filter( 'wpseo_opengraph_title', 'toolkit_normalize_public_brand_copy', 20 );
+add_filter( 'wpseo_opengraph_desc', 'toolkit_normalize_public_brand_copy', 20 );
+
 /* Keep database-backed theme and plugin output aligned with the public brand. */
 add_filter( 'pre_option_blogname', function( $pre_option ) {
 	return eduma_child_redesign_enabled() ? toolkit_canonical_brand_name() : $pre_option;
@@ -457,7 +484,7 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'Toolkit Blog | Skills, Innovation and Opportunity',
 			'description' => 'Read The Toolkit for Skills and Innovation news, learner stories, skills insights, programme updates, and perspectives on youth employment and innovation.',
-			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/blogs/legacy-context/innovateher-vr.jpg',
 		);
 	}
 	if ( is_page( 'construction-sector-skills' ) ) {
@@ -494,7 +521,7 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'Skills and Employment Research | The Toolkit for Skills and Innovation',
 			'description' => 'Explore The Toolkit for Skills and Innovation research and evidence on vocational skills, youth employment, industry needs, green jobs, and practical workforce development.',
-			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/foundation.jpg',
 		);
 	}
 	if ( is_page( 'building-young-female-farmers-of-tomorrow' ) ) {
@@ -515,7 +542,7 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'The Toolkit for Skills and Innovation Videos | Skills in Action',
 			'description' => 'Watch The Toolkit for Skills and Innovation learners, trainers, partners, workshops, and practical skills programmes in action.',
-			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/impact.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/blogs/legacy-context/welding-vr-training.jpg',
 		);
 	}
 	if ( is_page( 'gallery-2' ) ) {
