@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.07.31.9';
+	return '2026.07.31.10';
 }
 
 function toolkit_canonical_brand_name() {
@@ -510,7 +510,7 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'Toolkit Blog | Skills, Innovation and Opportunity',
 			'description' => 'Read The Toolkit for Skills and Innovation news, learner stories, skills insights, programme updates, and perspectives on youth employment and innovation.',
-			'image'       => get_stylesheet_directory_uri() . '/assets/images/blogs/legacy-context/innovateher-vr.jpg',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/blogs/legacy-context/blog-field-skills.jpg',
 		);
 	}
 	if ( is_page( 'construction-sector-skills' ) ) {

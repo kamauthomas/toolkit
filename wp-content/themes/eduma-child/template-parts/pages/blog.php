@@ -18,7 +18,7 @@ $posts  = new WP_Query( array(
 <main id="main-content" class="toolkit-page toolkit-blog-page">
 	<section class="toolkit-blog-hero">
 		<div><p class="toolkit-kicker">Toolkit Blog</p><h1>Skills, ideas and stories from the field</h1><p>Read updates on practical learning, youth employment, industry partnerships and the people shaping new pathways to work.</p></div>
-		<img src="<?php echo esc_url( $assets . 'blogs/legacy-context/innovateher-vr.jpg' ); ?>" width="900" height="620" alt="Toolkit learner practising virtual-reality welding">
+		<img src="<?php echo esc_url( $assets . 'blogs/legacy-context/blog-field-skills.jpg' ); ?>" width="900" height="620" alt="Toolkit learners applying practical solar and electrical skills outdoors">
 	</section>
 	<?php if ( $posts->have_posts() ) : $posts->the_post(); ?>
 	<section class="toolkit-blog-feature toolkit-section">

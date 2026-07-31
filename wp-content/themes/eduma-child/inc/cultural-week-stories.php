@@ -98,14 +98,16 @@ function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0
 	}
 
 	$legacy_images = array(
-		'youth-international-skills-day-12th-august-2025' => 'youth-skills-graduates.jpg',
-		'careers-in-mig-mag-welding-insights-from-our-webinar' => 'welding-vr-training.jpg',
-		'toolkit-shines-with-tujiajiri-mentorship-program-for-solar-energy-trainees' => 'solar-mentorship.jpg',
-		'igniting-her-future-innovateher-roll-out-at-the-toolkit-for-skills-and-innovation-hub' => 'innovateher-vr.jpg',
+		'youth-international-skills-day-12th-august-2025' => 'blogs/legacy-context/youth-skills-graduates.jpg',
+		'dont-miss-this-insightful-podcast-on-youth-skills-and-job-creation-in-africa-%f0%9f%a7%a0%f0%9f%92%bc' => 'team/jane-muigai-kamphuis.jpg',
+		'careers-in-mig-mag-welding-insights-from-our-webinar' => 'blogs/legacy-context/welding-vr-training.jpg',
+		'toolkit-shines-with-tujiajiri-mentorship-program-for-solar-energy-trainees' => 'blogs/legacy-context/solar-mentorship.jpg',
+		'ilo-youth-employment-training-workshop' => 'team/hosea-mugera.jpg',
+		'igniting-her-future-innovateher-roll-out-at-the-toolkit-for-skills-and-innovation-hub' => 'blogs/legacy-context/innovateher-vr.jpg',
 	);
 	$slug = get_post_field( 'post_name', $post_id );
 	if ( isset( $legacy_images[ $slug ] ) ) {
-		return get_stylesheet_directory_uri() . '/assets/images/blogs/legacy-context/' . $legacy_images[ $slug ];
+		return get_stylesheet_directory_uri() . '/assets/images/' . $legacy_images[ $slug ];
 	}
 
 	$thumbnail_id   = get_post_thumbnail_id( $post_id );
