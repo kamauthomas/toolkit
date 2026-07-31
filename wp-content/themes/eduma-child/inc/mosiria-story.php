@@ -1,6 +1,6 @@
 <?php
 /**
- * Editorial package for the official visit by Geofrey Omatoke Mosiria.
+ * Editorial package for the official visit by Geoffrey Omatoke Mosiria.
  */
 
 function toolkit_mosiria_story() {
@@ -11,10 +11,10 @@ function toolkit_mosiria_story() {
 		'theme'      => 'mosiria',
 		'day'        => 'Friday 17 July 2026 / Official visit',
 		'label'      => 'Leadership Visit',
-		'title'      => 'Geofrey Mosiria Visits The Toolkit',
+		'title'      => 'Geoffrey Mosiria Visits The Toolkit',
 		'standfirst' => 'The Nairobi City County Chief Officer for Citizen Engagement and Customer Service toured Toolkit training facilities and spoke with learners about practical skills and the future of work.',
 		'content'    => array(
-			'The Toolkit for Skills and Innovation welcomed Geofrey Omatoke Mosiria, Nairobi City County Chief Officer for Citizen Engagement and Customer Service, for an official visit on 17 July 2026.',
+			'The Toolkit for Skills and Innovation welcomed Geoffrey Omatoke Mosiria, Nairobi City County Chief Officer for Citizen Engagement and Customer Service, for an official visit on 17 July 2026.',
 			'Principal Sylvester Theophile and members of the management, admissions and training teams introduced Toolkit’s approach to accessible, industry-relevant skills development.',
 			'The visit included the Virtual Reality Welding Lab, welding workshop, solar technology department and organic farming demonstration facilities. The team also presented Toolkit’s relationship with the International Institute of Welding and its role within Kenya’s welding education network.',
 			'Speaking with learners, Mosiria encouraged young people to pursue practical skills that respond to changing industry needs and create pathways into employment and entrepreneurship.',
@@ -50,7 +50,7 @@ function toolkit_mosiria_story_preview() {
 }
 
 function toolkit_publish_mosiria_story() {
-	$content_version = '2026.07.31.2';
+	$content_version = '2026.07.31.3';
 	if ( $content_version === get_option( 'toolkit_mosiria_story_published' ) ) {
 		return;
 	}
