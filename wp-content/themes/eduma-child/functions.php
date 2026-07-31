@@ -425,6 +425,65 @@ add_filter( 'wpseo_robots_array', function( $robots ) {
 
 /* === SEO: curated metadata for child-theme page rebuilds === */
 
+function toolkit_story_seo_copy( $post_id ) {
+	$slug = get_post_field( 'post_name', $post_id );
+	$copy = array(
+		'geofrey-mosiria-visits-the-toolkit' => array(
+			'title'       => 'Geoffrey Mosiria Visits Toolkit | Official Visit',
+			'description' => 'Geoffrey Omatoke Mosiria toured Toolkit training facilities in Kikuyu and spoke with learners about practical skills, employment and entrepreneurship.',
+		),
+		'africa-forward-youth-innovation-day-career-fair-2026' => array(
+			'title'       => 'Africa Forward Youth & Innovation Day | Toolkit',
+			'description' => 'See how Toolkit presented welding, solar and language training at the Africa Forward Youth and Innovation Day career fair in Nairobi.',
+		),
+		'alumni-mentorship-success-stories-2026' => array(
+			'title'       => 'Toolkit Alumni Mentorship | Career Lessons',
+			'description' => 'Toolkit alumni returned to share practical career lessons, challenges and opportunities with current trainees during a mentorship event in Kikuyu.',
+		),
+		'cultural-week-official-wear-day' => array(
+			'title'       => 'Official Wear Day | Toolkit Cultural Week 2026',
+			'description' => 'Toolkit students and staff marked Official Wear Day with a celebration of professionalism, confidence and workplace readiness.',
+		),
+		'cultural-week-golden-oldies-day' => array(
+			'title'       => 'Golden Oldies Day | Toolkit Cultural Week 2026',
+			'description' => 'Golden Oldies Day brought classic style and shared memories to Toolkit Cultural Week in Kikuyu on 14 July 2026.',
+		),
+		'cultural-week-african-wear-day' => array(
+			'title'       => 'African Wear Day | Toolkit Cultural Week 2026',
+			'description' => 'African Wear Day celebrated heritage, unity and diversity through traditional dress during Toolkit Cultural Week in Kikuyu.',
+		),
+		'cultural-week-career-wear-day' => array(
+			'title'       => 'Career Wear Day | Toolkit Cultural Week 2026',
+			'description' => 'Career Wear Day helped Toolkit learners connect personal presentation with professional identity and future work pathways.',
+		),
+		'youth-international-skills-day-12th-august-2025' => array(
+			'title'       => 'World Youth Skills Day 2025 | Toolkit',
+			'description' => 'Explore Toolkit reflections on practical training, youth opportunity and skills that support pathways into employment and entrepreneurship.',
+		),
+		'careers-in-mig-mag-welding-insights-from-our-webinar' => array(
+			'title'       => 'MIG/MAG Welding Careers Webinar | Toolkit',
+			'description' => 'Explore career pathways, industry applications and practical insights discussed during Toolkit’s MIG/MAG welding careers webinar.',
+		),
+		'toolkit-shines-with-tujiajiri-mentorship-program-for-solar-energy-trainees' => array(
+			'title'       => 'Solar Energy Trainee Mentorship | Toolkit',
+			'description' => 'Toolkit solar trainees gained career guidance and industry insight through the Tujiajiri mentorship programme.',
+		),
+		'ilo-youth-employment-training-workshop' => array(
+			'title'       => 'ILO Youth Employment Workshop | Toolkit',
+			'description' => 'Toolkit staff explored youth employability, entrepreneurship and training practice during an ILO youth employment workshop.',
+		),
+		'igniting-her-future-innovateher-roll-out-at-the-toolkit-for-skills-and-innovation-hub' => array(
+			'title'       => 'InnovateHER STEM-TVET Programme | Toolkit',
+			'description' => 'InnovateHER introduced young women to STEM-TVET and vocational career pathways through practical technology and skills experiences at Toolkit.',
+		),
+		'dont-miss-this-insightful-podcast-on-youth-skills-and-job-creation-in-africa-%f0%9f%a7%a0%f0%9f%92%bc' => array(
+			'title'       => 'Youth Skills & Job Creation Podcast | Toolkit',
+			'description' => 'Jane Muigai Kamphuis and Caroline Njuki discussed ecosystem thinking, youth skills and scalable employment outcomes in Africa.',
+		),
+	);
+	return isset( $copy[ $slug ] ) ? $copy[ $slug ] : array();
+}
+
 function eduma_child_redesigned_page_metadata() {
 	if ( ! eduma_child_redesign_enabled() ) {
 		return false;
@@ -448,6 +507,24 @@ function eduma_child_redesigned_page_metadata() {
 			'title'       => 'Reception | The Toolkit for Skills and Innovation',
 			'description' => 'Send a reception request to The Toolkit for Skills and Innovation before your visit to our training centre in Kikuyu, Kenya.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
+		);
+	}
+	if ( is_singular( 'post' ) ) {
+		$post_id     = get_queried_object_id();
+		$seo_copy    = toolkit_story_seo_copy( $post_id );
+		$post_title  = $seo_copy ? $seo_copy['title'] : toolkit_normalize_public_brand_copy( get_the_title( $post_id ) ) . ' | Toolkit Blog';
+		$description = get_the_excerpt( $post_id );
+		if ( $seo_copy ) {
+			$description = $seo_copy['description'];
+		} elseif ( ! $description ) {
+			$description = wp_trim_words( wp_strip_all_tags( get_post_field( 'post_content', $post_id ) ), 28 );
+		} else {
+			$description = wp_trim_words( wp_strip_all_tags( $description ), 28 );
+		}
+		return array(
+			'title'       => $post_title,
+			'description' => toolkit_normalize_public_brand_copy( wp_strip_all_tags( $description ) ),
+			'image'       => toolkit_story_image_url( $post_id, 'full' ),
 		);
 	}
 	$course_slug = get_query_var( 'toolkit_course' );
@@ -607,6 +684,11 @@ add_filter( 'wpseo_twitter_title', function( $title ) {
 	return $metadata ? $metadata['title'] : $title;
 } );
 
+add_filter( 'wpseo_twitter_description', function( $description ) {
+	$metadata = eduma_child_redesigned_page_metadata();
+	return $metadata ? $metadata['description'] : $description;
+} );
+
 function eduma_child_course_canonical_url() {
 	$slug = sanitize_key( get_query_var( 'toolkit_course' ) );
 	if ( $slug ) {
@@ -742,27 +824,40 @@ add_filter( 'wpseo_schema_breadcrumb', function( $data ) {
 	return $data;
 } );
 
-/* Strengthen The Toolkit for Skills and Innovation entity and course relationships for search engines. */
-add_action( 'wp_head', function() {
-	if ( ! eduma_child_redesign_enabled() ) {
-		return;
+/*
+ * Extend Yoast's graph instead of printing a second, conflicting graph.
+ * Every relationship reuses Yoast's existing stable entity IDs.
+ */
+add_filter( 'wpseo_schema_graph', function( $graph ) {
+	if ( ! eduma_child_redesign_enabled() || ! is_array( $graph ) ) {
+		return $graph;
 	}
 
-	$home = home_url( '/' );
-	$graph = array(
-		array(
-			'@type'         => array( 'Organization', 'EducationalOrganization' ),
-			'@id'           => $home . '#organization',
-			'name'          => 'The Toolkit for Skills and Innovation',
-			'alternateName' => array( 'Toolkit' ),
-			'url'           => $home,
-			'logo'          => get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png',
-			'email'         => 'office@toolkitafrica.ac.ke',
-			'telephone'     => '+254709549200',
-			'contactPoint'  => array(
+	$home            = home_url( '/' );
+	$organization_id = $home . '#organization';
+	$metadata        = eduma_child_redesigned_page_metadata();
+	$image_id        = $metadata ? $metadata['image'] . '#primaryimage' : '';
+	$has_image       = false;
+	$has_course      = false;
+
+	foreach ( $graph as &$node ) {
+		if ( ! is_array( $node ) ) {
+			continue;
+		}
+		$types = isset( $node['@type'] ) ? (array) $node['@type'] : array();
+
+		if ( array_intersect( array( 'Organization', 'EducationalOrganization' ), $types ) ) {
+			$organization_id       = isset( $node['@id'] ) ? $node['@id'] : $organization_id;
+			$node['@type']         = array_values( array_unique( array_merge( $types, array( 'Organization', 'EducationalOrganization' ) ) ) );
+			$node['name']          = toolkit_canonical_brand_name();
+			$node['alternateName'] = array( 'Toolkit' );
+			$node['url']           = $home;
+			$node['email']         = 'office@toolkitafrica.ac.ke';
+			$node['telephone']     = '+254709549200';
+			$node['contactPoint']  = array(
 				array(
 					'@type'       => 'ContactPoint',
-					'contactType' => 'voice enquiries',
+					'contactType' => 'admissions and voice enquiries',
 					'telephone'   => '+254709549200',
 				),
 				array(
@@ -771,57 +866,81 @@ add_action( 'wp_head', function() {
 					'telephone'   => '+254711802855',
 					'url'         => 'https://wa.me/254711802855',
 				),
-			),
-			'address'       => array(
+			);
+			$node['address']       = array(
 				'@type'           => 'PostalAddress',
 				'streetAddress'   => 'Karen-Kikuyu Southern Bypass',
 				'addressLocality' => 'Kikuyu',
 				'addressCountry'  => 'KE',
-			),
-			'sameAs'        => array(
+			);
+			$node['sameAs']        = array(
 				'https://www.tiktok.com/@thetoolkitafrika',
 				'https://www.facebook.com/toolkitafrica',
 				'https://x.com/toolkitafrica',
 				'https://www.instagram.com/thetoolkitafrika',
 				'https://www.linkedin.com/company/the-toolkit-iskills-tti-ltd',
 				'https://www.youtube.com/@toolkitafrica',
-			),
-		),
-	);
+			);
+			if ( isset( $node['logo']['caption'] ) ) {
+				$node['logo']['caption'] = toolkit_canonical_brand_name();
+			}
+		}
 
-	if ( is_front_page() ) {
+		if ( array_intersect( array( 'WebSite', 'WebPage', 'Article', 'Course' ), $types ) ) {
+			$node['inLanguage'] = 'en-KE';
+		}
+		if ( in_array( 'Course', $types, true ) ) {
+			$has_course = true;
+		}
+		if ( in_array( 'ImageObject', $types, true ) && $image_id && isset( $node['@id'] ) && $image_id === $node['@id'] ) {
+			$has_image = true;
+		}
+		if ( $metadata && array_intersect( array( 'WebPage', 'Article' ), $types ) ) {
+			$node['image'] = array( '@id' => $image_id );
+			if ( in_array( 'WebPage', $types, true ) ) {
+				$node['primaryImageOfPage'] = array( '@id' => $image_id );
+			}
+		}
+		if ( is_singular( 'post' ) && in_array( 'Article', $types, true ) ) {
+			$author = isset( $node['author'] ) ? $node['author'] : array();
+			if ( empty( $author ) || ( is_array( $author ) && empty( array_filter( $author ) ) ) ) {
+				$node['author'] = array( '@id' => $organization_id );
+			}
+		}
+	}
+	unset( $node );
+
+	if ( $metadata && ! $has_image ) {
 		$graph[] = array(
-			'@type'         => 'WebSite',
-			'@id'           => $home . '#website',
-			'url'           => $home,
-			'name'          => 'The Toolkit for Skills and Innovation',
-			'alternateName' => array( 'Toolkit', 'The Toolkit for Skills and Innovation' ),
-			'publisher'     => array( '@id' => $home . '#organization' ),
-			'inLanguage'    => 'en-KE',
+			'@type'      => 'ImageObject',
+			'@id'        => $image_id,
+			'url'        => $metadata['image'],
+			'contentUrl' => $metadata['image'],
+			'caption'    => $metadata['title'],
+			'inLanguage' => 'en-KE',
 		);
 	}
 
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
 	$slug   = sanitize_key( get_query_var( 'toolkit_course' ) );
 	$course = $slug ? eduma_child_get_course( $slug ) : eduma_child_get_legacy_course_for_page();
-	if ( $course ) {
+	if ( $course && ! $has_course ) {
 		$course_url = $slug ? home_url( '/courses/' . $slug . '/' ) : $course['url'];
-		$graph[] = array(
-			'@type'            => 'Course',
-			'@id'              => $course_url . '#course',
-			'name'             => $course['title'],
-			'description'      => $course['short'],
-			'url'              => $course_url,
-			'image'            => $course['image'],
-			'provider'         => array( '@id' => $home . '#organization' ),
-			'inLanguage'       => 'en-KE',
-			'courseMode'       => 'Onsite',
-			'educationalLevel' => isset( $course['entry'] ) ? $course['entry'] : 'Contact admissions',
-			'teaches'          => $course['outcomes'],
+		$graph[]     = array(
+			'@type'      => 'Course',
+			'@id'        => $course_url . '#course',
+			'name'       => $course['title'],
+			'description' => $course['short'],
+			'url'        => $course_url,
+			'image'      => $course['image'],
+			'provider'   => array( '@id' => $organization_id ),
+			'inLanguage' => 'en-KE',
+			'courseMode' => 'Onsite',
+			'teaches'    => $course['outcomes'],
 		);
 	}
 
-	echo '<script type="application/ld+json">' . wp_json_encode( array( '@context' => 'https://schema.org', '@graph' => $graph ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	return $graph;
 }, 30 );
 
 /* === HEADER LOGO: avoid falling back to the parent Eduma logo === */
