@@ -24,8 +24,7 @@
 /wp-content/uploads/
 /rollbacks/
 /releases/
-/reports/deployment-evidence/
-/reports/logs/
+/reports/
 
 # Local agent/runtime metadata must never be committed or deployed.
 /.agents/
