@@ -284,11 +284,10 @@ $slides = eduma_child_get_hero_slides();
 <?php
 $home_stories = new WP_Query( array( 'post_type' => 'post', 'post_status' => 'publish', 'posts_per_page' => 3, 'ignore_sticky_posts' => true ) );
 if ( $home_stories->have_posts() ) :
-	$story_images = array( 'impact.jpg', 'about.jpg', 'foundation.jpg' );
-?>
+	?>
 <section class="home-stories" aria-labelledby="home-stories-title"><div class="home-modern__inner">
 	<div class="home-modern__heading"><div><p class="home-modern__kicker">From the field</p><h2 id="home-stories-title">Ideas, partnerships and progress</h2></div><a class="home-modern__text-link" href="<?php echo esc_url( home_url( '/toolkit-blog/' ) ); ?>">Visit Toolkit Blog <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
-		<div class="home-stories__grid"><?php $story_index = 0; while ( $home_stories->have_posts() ) : $home_stories->the_post(); ?><article><a class="home-story__image" href="<?php the_permalink(); ?>"><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/pages/' . $story_images[ $story_index % count( $story_images ) ] ); ?>" width="620" height="380" loading="lazy" alt="<?php echo esc_attr( get_the_title() ); ?>"></a><div><time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time><h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3><p><?php echo esc_html( wp_trim_words( get_the_excerpt(), 20 ) ); ?></p><a href="<?php the_permalink(); ?>">Read story <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div></article><?php $story_index++; endwhile; ?></div>
+		<div class="home-stories__grid"><?php $story_index = 0; while ( $home_stories->have_posts() ) : $home_stories->the_post(); ?><article><a class="home-story__image" href="<?php the_permalink(); ?>"><img src="<?php echo esc_url( toolkit_story_image_url( get_the_ID(), 'large', $story_index ) ); ?>" width="620" height="380" loading="lazy" alt="<?php echo esc_attr( get_the_title() ); ?>"></a><div><time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time><h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3><p><?php echo esc_html( wp_trim_words( get_the_excerpt(), 20 ) ); ?></p><a href="<?php the_permalink(); ?>">Read story <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div></article><?php $story_index++; endwhile; ?></div>
 </div></section>
 <?php wp_reset_postdata(); endif; ?>
 

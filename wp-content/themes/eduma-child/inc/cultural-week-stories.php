@@ -76,6 +76,25 @@ function toolkit_cultural_week_story_for_slug( $slug ) {
 	return array();
 }
 
+/**
+ * Resolve the most relevant image for a story wherever it is rendered.
+ */
+function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0 ) {
+	$cultural = toolkit_cultural_week_story_for_slug( get_post_field( 'post_name', $post_id ) );
+	if ( $cultural ) {
+		return $cultural['image'];
+	}
+
+	$thumbnail_id   = get_post_thumbnail_id( $post_id );
+	$thumbnail_file = $thumbnail_id ? get_attached_file( $thumbnail_id ) : '';
+	if ( $thumbnail_file && file_exists( $thumbnail_file ) ) {
+		return get_the_post_thumbnail_url( $post_id, $size );
+	}
+
+	$fallbacks = array( 'impact.jpg', 'about.jpg', 'foundation.jpg', 'notice-board.jpg' );
+	return get_stylesheet_directory_uri() . '/assets/images/pages/' . $fallbacks[ $fallback_index % count( $fallbacks ) ];
+}
+
 function toolkit_cultural_week_preview() {
 	$stories = toolkit_cultural_week_stories();
 	$host    = isset( $_SERVER['HTTP_HOST'] ) ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : '';

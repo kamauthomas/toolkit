@@ -89,9 +89,7 @@ while ( have_posts() ) :
 				<div class="toolkit-story-related__grid">
 					<?php while ( $related->have_posts() ) : $related->the_post(); ?>
 						<?php
-						$related_thumbnail = get_post_thumbnail_id();
-						$related_file      = $related_thumbnail ? get_attached_file( $related_thumbnail ) : '';
-						$related_image     = $related_file && file_exists( $related_file ) ? get_the_post_thumbnail_url( get_the_ID(), 'large' ) : $fallback;
+						$related_image = toolkit_story_image_url( get_the_ID(), 'large' );
 						?>
 						<article><a href="<?php the_permalink(); ?>"><img src="<?php echo esc_url( $related_image ); ?>" width="620" height="380" loading="lazy" alt="<?php echo esc_attr( get_the_title() ); ?>"></a><div><time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time><h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3></div></article>
 					<?php endwhile; ?>
