@@ -22,6 +22,7 @@ function toolkit_cultural_week_stories() {
 			'slug'       => 'cultural-week-golden-oldies-day',
 			'date'       => '2026-07-14 09:00:00',
 			'theme'      => 'oldies',
+			'image_order'=> array( '02.jpg', '03.jpg', '01.jpg' ),
 			'day'        => 'Tuesday 14 July 2026 / Golden Oldies',
 			'label'      => 'Cultural Week',
 			'title'      => 'Golden Oldies: A Trip Down Memory Lane',
@@ -67,7 +68,8 @@ function toolkit_cultural_week_story_for_slug( $slug ) {
 	foreach ( toolkit_cultural_week_stories() as $key => $story ) {
 		if ( $story['slug'] === $slug ) {
 			$story['key']   = $key;
-			$story['image'] = get_stylesheet_directory_uri() . '/assets/images/blogs/cultural-week/' . $key . '/01.jpg';
+			$first_image    = isset( $story['image_order'][0] ) ? $story['image_order'][0] : '01.jpg';
+			$story['image'] = get_stylesheet_directory_uri() . '/assets/images/blogs/cultural-week/' . $key . '/' . $first_image;
 			return $story;
 		}
 	}
@@ -95,7 +97,13 @@ function toolkit_cultural_week_preview() {
 		return array();
 	}
 	$base = get_stylesheet_directory_uri() . '/assets/images/blogs/cultural-week/' . $key . '/';
-	$stories[ $key ]['images'] = array( $base . '01.jpg', $base . '02.jpg', $base . '03.jpg' );
+	$order = isset( $stories[ $key ]['image_order'] ) ? $stories[ $key ]['image_order'] : array( '01.jpg', '02.jpg', '03.jpg' );
+	$stories[ $key ]['images'] = array_map(
+		static function ( $filename ) use ( $base ) {
+			return $base . $filename;
+		},
+		$order
+	);
 	return $stories[ $key ];
 }
 
