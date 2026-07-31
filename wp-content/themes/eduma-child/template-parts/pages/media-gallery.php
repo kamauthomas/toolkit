@@ -2,14 +2,8 @@
 get_header();
 $videos = is_page( 'tti-media' );
 $uploads = 'https://toolkitafrica.ac.ke/wp-content/uploads/';
-$items = array(
-	'0sjNPAXN8pw' => 'From virtual reality to real-world welding',
-	'ROArAgWDOTI' => 'Transforming the skills sector',
-	'ZP7NJxi8XnQ' => 'Future trainers and trainees in action',
-	'LJGs1t8T6Bc' => 'Virtual reality changing welding skills',
-	'v06Qf-nFozw' => 'Cutting-edge welding technology',
-	'6uvRqVpfT4E' => 'The next generation of young MIG welders',
-);
+$items = toolkit_youtube_videos();
+$first_video = $items ? $items[0] : array( 'id' => '0sjNPAXN8pw', 'title' => 'From virtual reality to real-world welding' );
 $images = array(
 	array( '2025/08/20250801_154427-scaled.jpg', 'Skills look good on you', 'Workshop energy' ),
 	array( '2025/08/20250801_154911-2048x1536.jpg', 'Proof of progress', 'Community wins' ),
@@ -26,16 +20,16 @@ $images = array(
 		</section>
 		<section class="video-watch-desk" aria-label="Toolkit video gallery">
 			<div class="video-watch-player">
-				<div class="video-watch-player__frame"><iframe data-video-player src="https://www.youtube-nocookie.com/embed/0sjNPAXN8pw?rel=0&amp;playsinline=1" title="From virtual reality to real-world welding" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
-				<div class="video-watch-player__details" aria-live="polite"><span data-video-number>Episode 01</span><h2 data-video-title>From virtual reality to real-world welding</h2><p>Toolkit originals <i aria-hidden="true">•</i> Practical skills in action</p></div>
+				<div class="video-watch-player__frame"><iframe data-video-player src="https://www.youtube-nocookie.com/embed/<?php echo esc_attr( $first_video['id'] ); ?>?rel=0&amp;playsinline=1" title="<?php echo esc_attr( $first_video['title'] ); ?>" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+				<div class="video-watch-player__details" aria-live="polite"><span data-video-number>Episode 01</span><h2 data-video-title><?php echo esc_html( $first_video['title'] ); ?></h2><p>Toolkit originals <i aria-hidden="true">•</i> Automatically updated from YouTube</p></div>
 			</div>
 			<div class="video-watch-playlist">
-				<header><div><p class="toolkit-kicker">Watch next</p><h2>Stories from the Toolkit</h2></div><span><b data-video-current>1</b> / <?php echo esc_html( count( $items ) ); ?></span></header>
+				<header><div><p class="toolkit-kicker">Watch next</p><h2>Latest from Toolkit</h2><small>Synced from YouTube every 6 hours</small></div><span><b data-video-current>1</b> / <?php echo esc_html( count( $items ) ); ?></span></header>
 				<div class="video-watch-playlist__items" role="list">
-				<?php $episode = 1; foreach ( $items as $id => $title ) : ?>
-					<button type="button" role="listitem" class="video-watch-choice <?php echo 1 === $episode ? 'is-active' : ''; ?>" data-video-id="<?php echo esc_attr( $id ); ?>" data-video-title="<?php echo esc_attr( $title ); ?>" data-video-episode="<?php echo esc_attr( $episode ); ?>" aria-pressed="<?php echo 1 === $episode ? 'true' : 'false'; ?>">
-						<span class="video-watch-choice__thumb"><img loading="lazy" src="https://i.ytimg.com/vi/<?php echo esc_attr( $id ); ?>/mqdefault.jpg" alt=""><i aria-hidden="true">▶</i></span>
-						<span class="video-watch-choice__copy"><small><?php echo esc_html( 'Episode ' . str_pad( (string) $episode, 2, '0', STR_PAD_LEFT ) ); ?></small><strong><?php echo esc_html( $title ); ?></strong></span>
+				<?php $episode = 1; foreach ( $items as $item ) : ?>
+					<button type="button" role="listitem" class="video-watch-choice <?php echo 1 === $episode ? 'is-active' : ''; ?>" data-video-id="<?php echo esc_attr( $item['id'] ); ?>" data-video-title="<?php echo esc_attr( $item['title'] ); ?>" data-video-episode="<?php echo esc_attr( $episode ); ?>" aria-pressed="<?php echo 1 === $episode ? 'true' : 'false'; ?>">
+						<span class="video-watch-choice__thumb"><img loading="lazy" src="https://i.ytimg.com/vi/<?php echo esc_attr( $item['id'] ); ?>/mqdefault.jpg" alt=""><i aria-hidden="true">▶</i></span>
+						<span class="video-watch-choice__copy"><small><?php echo esc_html( 'Video ' . str_pad( (string) $episode, 2, '0', STR_PAD_LEFT ) ); ?></small><strong><?php echo esc_html( $item['title'] ); ?></strong></span>
 					</button>
 				<?php $episode++; endforeach; ?>
 				</div>

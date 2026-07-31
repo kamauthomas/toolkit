@@ -5,6 +5,7 @@ require_once get_stylesheet_directory() . '/inc/application-adapter.php';
 require_once get_stylesheet_directory() . '/inc/reception-integration.php';
 require_once get_stylesheet_directory() . '/inc/cultural-week-stories.php';
 require_once get_stylesheet_directory() . '/inc/mosiria-story.php';
+require_once get_stylesheet_directory() . '/inc/youtube-feed.php';
 
 function toolkit_editorial_story_preview() {
 	$story = toolkit_cultural_week_preview();
