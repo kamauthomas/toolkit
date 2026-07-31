@@ -6,10 +6,15 @@ require_once get_stylesheet_directory() . '/inc/reception-integration.php';
 require_once get_stylesheet_directory() . '/inc/cultural-week-stories.php';
 require_once get_stylesheet_directory() . '/inc/mosiria-story.php';
 require_once get_stylesheet_directory() . '/inc/youtube-feed.php';
+require_once get_stylesheet_directory() . '/inc/supplied-stories.php';
 
 function toolkit_editorial_story_preview() {
 	$story = toolkit_cultural_week_preview();
-	return $story ? $story : toolkit_mosiria_story_preview();
+	if ( $story ) {
+		return $story;
+	}
+	$story = toolkit_mosiria_story_preview();
+	return $story ? $story : toolkit_supplied_story_preview();
 }
 
 /**

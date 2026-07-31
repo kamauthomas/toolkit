@@ -90,6 +90,12 @@ function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0
 	if ( $mosiria ) {
 		return $mosiria['image'];
 	}
+	$supplied = function_exists( 'toolkit_supplied_story_for_slug' )
+		? toolkit_supplied_story_for_slug( get_post_field( 'post_name', $post_id ) )
+		: array();
+	if ( $supplied ) {
+		return $supplied['image'];
+	}
 
 	$thumbnail_id   = get_post_thumbnail_id( $post_id );
 	$thumbnail_file = $thumbnail_id ? get_attached_file( $thumbnail_id ) : '';
