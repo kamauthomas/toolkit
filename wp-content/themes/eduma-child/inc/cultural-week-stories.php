@@ -13,9 +13,9 @@ function toolkit_cultural_week_stories() {
 			'title'      => 'Official Wear Day: Dressed for Success',
 			'standfirst' => 'Professionalism, confidence and workplace readiness took centre stage as students and staff stepped out in official wear.',
 			'content'    => array(
-				'Today, the Toolkit fraternity came together in official wear to celebrate professionalism, confidence, and workplace readiness.',
-				'It was inspiring to see both students and staff embrace the values that shape successful careers.',
-				'Here’s to building skills, developing character, and preparing for a professional future. Intake is ongoing. Enrol today.',
+				'The Toolkit community came together in official wear to celebrate professionalism, confidence and workplace readiness.',
+				'Students and staff embraced the values that shape successful careers and presented themselves with purpose.',
+				'The day reinforced the importance of building skills, developing character and preparing for a professional future.',
 			),
 		),
 		'oldies' => array(
@@ -27,9 +27,9 @@ function toolkit_cultural_week_stories() {
 			'title'      => 'Golden Oldies: A Trip Down Memory Lane',
 			'standfirst' => 'Timeless fashion, classic style and unforgettable smiles turned the day into a warm celebration of shared history.',
 			'content'    => array(
-				'Today, our students and staff took a beautiful trip down memory lane as they embraced the Golden Oldies theme with timeless fashion, classic style, and unforgettable smiles.',
-				'It was more than just dressing up—it was a celebration of history, culture, and the generations that have shaped who we are today.',
-				'Here’s to preserving our heritage while building the future, one skill at a time. Intake is ongoing. Enrol today.',
+				'Students and staff took a trip down memory lane as they embraced the Golden Oldies theme with timeless fashion, classic style and unforgettable smiles.',
+				'The occasion became more than a dress-up day: it celebrated history, culture and the generations that shaped the community.',
+				'The experience honoured shared heritage while looking ahead to a future built one skill at a time.',
 			),
 		),
 		'african' => array(
@@ -41,9 +41,9 @@ function toolkit_cultural_week_stories() {
 			'title'      => 'African Wear Day: Culture Worn with Pride',
 			'standfirst' => 'A celebration of heritage, unity and diversity through the colours, forms and confidence of traditional African wear.',
 			'content'    => array(
-				'Culture is our identity, and today we wore it with pride.',
-				'Today was all about celebrating the beauty of African culture through stunning traditional wear.',
-				'Our students and staff proudly embraced the spirit of unity, heritage, and diversity that makes Africa so extraordinary.',
+				'The Toolkit community wore its culture with pride.',
+				'The day celebrated the beauty of African culture through striking traditional wear and personal expression.',
+				'Students and staff embraced a shared spirit of unity, heritage and diversity.',
 			),
 		),
 		'career' => array(
@@ -56,11 +56,22 @@ function toolkit_cultural_week_stories() {
 			'standfirst' => 'Students and staff turned career ambition into a visible statement of confidence, character and workplace readiness.',
 			'content'    => array(
 				'Dressed for success.',
-				'The Toolkit fraternity came together to celebrate professionalism, confidence, and workplace readiness through career wear.',
-				'Here’s to building skills, character, and a professional future. Intake is ongoing. Enrol today.',
+				'The Toolkit community celebrated professionalism, confidence and workplace readiness through career wear.',
+				'The day connected practical skills and personal character with the professional futures students were preparing to pursue.',
 			),
 		),
 	);
+}
+
+function toolkit_cultural_week_story_for_slug( $slug ) {
+	foreach ( toolkit_cultural_week_stories() as $key => $story ) {
+		if ( $story['slug'] === $slug ) {
+			$story['key']   = $key;
+			$story['image'] = get_stylesheet_directory_uri() . '/assets/images/blogs/cultural-week/' . $key . '/01.jpg';
+			return $story;
+		}
+	}
+	return array();
 }
 
 function toolkit_cultural_week_preview() {
@@ -93,7 +104,8 @@ function toolkit_cultural_week_preview() {
  * are preserved, making the release safe to repeat.
  */
 function toolkit_publish_cultural_week_stories() {
-	if ( get_option( 'toolkit_cultural_week_2026_published' ) ) {
+	$content_version = '2026.07.31.1';
+	if ( $content_version === get_option( 'toolkit_cultural_week_2026_published' ) ) {
 		return;
 	}
 
@@ -104,9 +116,7 @@ function toolkit_publish_cultural_week_stories() {
 	$category_id = is_array( $category ) ? absint( $category['term_id'] ) : absint( $category );
 
 	foreach ( toolkit_cultural_week_stories() as $story ) {
-		if ( get_page_by_path( $story['slug'], OBJECT, 'post' ) ) {
-			continue;
-		}
+		$existing = get_page_by_path( $story['slug'], OBJECT, 'post' );
 		$content = '';
 		foreach ( $story['content'] as $paragraph ) {
 			$content .= '<p>' . esc_html( $paragraph ) . '</p>';
@@ -115,6 +125,7 @@ function toolkit_publish_cultural_week_stories() {
 			array(
 				'post_type'     => 'post',
 				'post_status'   => 'publish',
+				'ID'            => $existing ? $existing->ID : 0,
 				'post_name'     => $story['slug'],
 				'post_title'    => $story['title'],
 				'post_excerpt'  => $story['standfirst'],
@@ -125,6 +136,6 @@ function toolkit_publish_cultural_week_stories() {
 		);
 	}
 
-	update_option( 'toolkit_cultural_week_2026_published', gmdate( 'c' ), false );
+	update_option( 'toolkit_cultural_week_2026_published', $content_version, false );
 }
 add_action( 'init', 'toolkit_publish_cultural_week_stories', 30 );

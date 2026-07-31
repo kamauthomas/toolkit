@@ -10,7 +10,7 @@ require_once get_stylesheet_directory() . '/inc/cultural-week-stories.php';
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.07.29.5';
+	return '2026.07.31.1';
 }
 
 function toolkit_canonical_brand_name() {
