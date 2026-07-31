@@ -5,22 +5,48 @@
 
 function toolkit_supplied_stories() {
 	$alumni_images = get_stylesheet_directory_uri() . '/assets/images/blogs/alumni-mentorship/';
+	$africa_forward_images = get_stylesheet_directory_uri() . '/assets/images/blogs/africa-forward/';
 	return array(
+		'africa-forward' => array(
+			'slug'          => 'africa-forward-youth-innovation-day-career-fair-2026',
+			'date'          => '2026-07-15 18:00:00',
+			'theme'         => 'africa-forward',
+			'day'           => '14–15 July 2026 / University of Nairobi',
+			'label'         => 'Youth & Innovation',
+			'category_name' => 'Industry Engagement',
+			'category_slug' => 'industry-engagement',
+			'title'         => 'Toolkit at Africa Forward Youth and Innovation Day',
+			'standfirst'    => 'Toolkit demonstrated practical welding, solar and language pathways while connecting with students, partners and stakeholders at the University of Nairobi career fair.',
+			'content'       => array(
+				'Toolkit participated in the Africa Forward Youth and Innovation Day Career Fair, held at the University of Nairobi on 14 and 15 July 2026.',
+				'Across the two-day event, the Welding, Solar Installation and Language teams demonstrated hands-on training and the career pathways available through practical skills development.',
+				'Toolkit representatives spoke with students, partners and stakeholders about industry-focused programmes and the role of technical and vocational education in preparing young people for work.',
+				'Distinguished guests visited the exhibition area, while representatives from institutions including Alliance Française, TotalEnergies, the Royal Danish Embassy and Equity Group Foundation contributed to the wider exchange on youth opportunity and skills development.',
+				'Students from the University of Nairobi, Strathmore University, PC Kinyanjui Technical Training Institute and other institutions explored training options, future enrolment and potential partnerships with the Toolkit team.',
+			),
+			'images'        => array(
+				$africa_forward_images . '747744050_122198395526475633_8065643064745133731_n.jpg',
+				$africa_forward_images . '749232211_122198395256475633_8824732662711525514_n.jpg',
+				$africa_forward_images . '748573441_122198395400475633_1117624892553734563_n.jpg',
+			),
+		),
 		'alumni-mentorship' => array(
-			'slug'       => 'alumni-mentorship-success-stories-2026',
-			'date'       => '2026-06-27 09:00:00',
-			'theme'      => 'alumni',
-			'day'        => 'Saturday 27 June 2026 / Alumni mentorship',
-			'label'      => 'Alumni Voices',
-			'title'      => 'Alumni Returned to Inspire the Next Generation',
-			'standfirst' => 'Former Toolkit students returned to share honest career lessons, challenges and opportunities with current trainees.',
-			'content'    => array(
+			'slug'          => 'alumni-mentorship-success-stories-2026',
+			'date'          => '2026-06-27 09:00:00',
+			'theme'         => 'alumni',
+			'day'           => 'Saturday 27 June 2026 / Alumni mentorship',
+			'label'         => 'Alumni Voices',
+			'category_name' => 'Alumni Stories',
+			'category_slug' => 'alumni-stories',
+			'title'         => 'Alumni Returned to Inspire the Next Generation',
+			'standfirst'    => 'Former Toolkit students returned to share honest career lessons, challenges and opportunities with current trainees.',
+			'content'       => array(
 				'There was no greater testimony than seeing Toolkit alumni return, not simply to visit, but to inspire the next generation.',
 				'The Alumni Mentorship and Success Stories event, held on 27 June 2026, reflected how every journey begins with a decision to learn, grow and persevere.',
 				'Former students spoke to current trainees about their career journeys, the challenges they overcame, the opportunities they embraced and how their practical training continued to shape their progress.',
 				'Current trainees listened, asked questions and learned from real experiences that made future career possibilities feel tangible.',
 			),
-			'images'     => array(
+			'images'        => array(
 				$alumni_images . '735831791_1029417302786107_5332289813976630089_n.jpg',
 				$alumni_images . '735799434_1029416776119493_4509382025383934307_n.jpg',
 				$alumni_images . '735945567_1029416636119507_2625003696084195407_n.jpg',
@@ -51,16 +77,16 @@ function toolkit_supplied_story_preview() {
 }
 
 function toolkit_publish_supplied_stories() {
-	$content_version = '2026.07.31.1';
+	$content_version = '2026.07.31.2';
 	if ( $content_version === get_option( 'toolkit_supplied_stories_published' ) ) {
 		return;
 	}
-	$category = term_exists( 'Alumni Stories', 'category' );
-	if ( ! $category ) {
-		$category = wp_insert_term( 'Alumni Stories', 'category', array( 'slug' => 'alumni-stories' ) );
-	}
-	$category_id = is_array( $category ) ? absint( $category['term_id'] ) : absint( $category );
 	foreach ( toolkit_supplied_stories() as $story ) {
+		$category = term_exists( $story['category_slug'], 'category' );
+		if ( ! $category ) {
+			$category = wp_insert_term( $story['category_name'], 'category', array( 'slug' => $story['category_slug'] ) );
+		}
+		$category_id = is_array( $category ) ? absint( $category['term_id'] ) : absint( $category );
 		$content = '';
 		foreach ( $story['content'] as $paragraph ) {
 			$content .= '<p>' . esc_html( $paragraph ) . '</p>';
