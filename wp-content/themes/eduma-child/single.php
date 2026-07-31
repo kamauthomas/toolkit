@@ -70,7 +70,7 @@ while ( have_posts() ) :
 					<?php if ( $preview ) : ?>
 						<?php foreach ( $preview['content'] as $paragraph ) : ?><p><?php echo esc_html( $paragraph ); ?></p><?php endforeach; ?>
 						<div class="toolkit-story-day-gallery" aria-label="<?php echo esc_attr( $story_title . ' gallery' ); ?>">
-							<?php foreach ( $preview['images'] as $index => $image ) : ?><figure><img src="<?php echo esc_url( $image ); ?>" width="1200" height="900" alt="<?php echo esc_attr( $story_title . ' — image ' . ( $index + 1 ) ); ?>"><figcaption><?php echo esc_html( 'Cultural Week / ' . str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></figcaption></figure><?php endforeach; ?>
+							<?php foreach ( $preview['images'] as $index => $image ) : ?><figure><img src="<?php echo esc_url( $image ); ?>" width="1200" height="900" alt="<?php echo esc_attr( $story_title . ' — image ' . ( $index + 1 ) ); ?>"><figcaption><?php echo esc_html( $category_name . ' / ' . str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></figcaption></figure><?php endforeach; ?>
 						</div>
 					<?php else : the_content(); endif; ?>
 					<?php wp_link_pages( array( 'before' => '<nav class="toolkit-story-pages" aria-label="Story pages">', 'after' => '</nav>' ) ); ?>
