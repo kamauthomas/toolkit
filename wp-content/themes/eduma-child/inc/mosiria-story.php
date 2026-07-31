@@ -21,8 +21,8 @@ function toolkit_mosiria_story() {
 			'The engagement highlighted the contribution of quality technical and vocational education and training to economic opportunity, public service and community transformation.',
 		),
 		'images'     => array(
-			$base . '748573523_122198710352475633_1254292409236897295_n.jpg',
 			$base . '749270159_122198710652475633_7338792061693937381_n.jpg',
+			$base . '748573523_122198710352475633_1254292409236897295_n.jpg',
 			$base . '749270185_122198710346475633_1554920615259977771_n.jpg',
 			$base . '749286210_122198709962475633_1058401222683598158_n.jpg',
 			$base . '748481183_122198709170475633_5103971124779668125_n.jpg',
