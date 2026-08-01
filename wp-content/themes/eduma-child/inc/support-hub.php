@@ -36,6 +36,13 @@ add_action( 'init', function() {
 		'show_in_rest' => false,
 		'supports'     => array( 'title', 'editor' ),
 	) );
+	register_post_type( 'toolkit_whistleblower', array(
+		'labels'       => array( 'name' => 'Speak-up reports', 'singular_name' => 'Speak-up report' ),
+		'public'       => false,
+		'show_ui'      => false,
+		'show_in_rest' => false,
+		'supports'     => array( 'title', 'editor' ),
+	) );
 } );
 
 add_action( 'wp_enqueue_scripts', function() {
@@ -68,6 +75,11 @@ add_action( 'rest_api_init', function() {
 		'permission_callback' => '__return_true',
 		'callback'            => 'toolkit_support_submit_poll',
 	) );
+	register_rest_route( 'toolkit/v1', '/speak-up', array(
+		'methods'             => 'POST',
+		'permission_callback' => '__return_true',
+		'callback'            => 'toolkit_submit_speak_up',
+	) );
 } );
 
 function toolkit_support_config() {
@@ -80,6 +92,7 @@ function toolkit_support_config() {
 			'fees'    => array( 'label' => 'Fees', 'reply' => $settings['fees_reply'], 'url' => home_url( '/our-ventures/' ), 'linkLabel' => 'View course details' ),
 			'apply'   => array( 'label' => 'How to apply', 'reply' => $settings['apply_reply'], 'url' => home_url( '/our-ventures/toolkit-courses-apply-today/' ), 'linkLabel' => 'Start application' ),
 			'contact' => array( 'label' => 'Contact Toolkit', 'reply' => $settings['contact_reply'], 'url' => home_url( '/contact/' ), 'linkLabel' => 'Contact Toolkit' ),
+			'speak_up' => array( 'label' => 'Speak up safely', 'reply' => 'If you need to report a concern, use the dedicated speak-up page. Please do not share sensitive details in this chat.', 'url' => home_url( '/speak-up/' ), 'linkLabel' => 'Open speak-up page' ),
 		),
 		'poll'     => array(
 			'enabled' => (bool) $settings['poll_enabled'],
@@ -87,6 +100,28 @@ function toolkit_support_config() {
 			'prompt'  => $settings['poll_prompt'],
 		),
 	) );
+}
+
+function toolkit_submit_speak_up( WP_REST_Request $request ) {
+	$valid = toolkit_support_validate_request( $request, 2 );
+	if ( is_wp_error( $valid ) ) return $valid;
+	$category = sanitize_text_field( (string) $request->get_param( 'category' ) );
+	$report   = sanitize_textarea_field( (string) $request->get_param( 'report' ) );
+	$contact  = rest_sanitize_boolean( $request->get_param( 'contact_me' ) );
+	$name     = $contact ? sanitize_text_field( (string) $request->get_param( 'name' ) ) : '';
+	$email    = $contact ? sanitize_email( (string) $request->get_param( 'email' ) ) : '';
+	$phone    = $contact ? sanitize_text_field( (string) $request->get_param( 'phone' ) ) : '';
+	$consent  = rest_sanitize_boolean( $request->get_param( 'consent' ) );
+	$allowed  = array( 'safety', 'misconduct', 'fraud', 'harassment', 'other' );
+	if ( ! in_array( $category, $allowed, true ) || strlen( $report ) < 30 || strlen( $report ) > 5000 || ! $consent ) {
+		return new WP_Error( 'invalid_speak_up', 'Choose a concern type, provide at least 30 characters, and confirm the handling notice.', array( 'status' => 400 ) );
+	}
+	if ( $contact && ! $email && ! $phone ) return new WP_Error( 'missing_contact', 'Add an email or phone number, or leave follow-up switched off.', array( 'status' => 400 ) );
+	if ( $email && ! is_email( $email ) ) return new WP_Error( 'invalid_email', 'Enter a valid email address.', array( 'status' => 400 ) );
+	$post_id = wp_insert_post( array( 'post_type' => 'toolkit_whistleblower', 'post_status' => 'private', 'post_title' => 'Speak-up report: ' . $category, 'post_content' => $report ), true );
+	if ( is_wp_error( $post_id ) ) return new WP_Error( 'storage_failed', 'The report could not be saved. Please use the direct contact options on this page.', array( 'status' => 500 ) );
+	foreach ( array( '_toolkit_category' => $category, '_toolkit_name' => $name, '_toolkit_email' => $email, '_toolkit_phone' => $phone, '_toolkit_contact_requested' => $contact ? 'yes' : 'no', '_toolkit_status' => 'new', '_toolkit_page' => toolkit_support_clean_path( $request->get_param( 'page' ) ) ) as $key => $value ) update_post_meta( $post_id, $key, $value );
+	return new WP_REST_Response( array( 'message' => 'Thank you. Your report has been recorded for restricted review. Keep the reference below if you chose follow-up: SU-' . str_pad( (string) $post_id, 6, '0', STR_PAD_LEFT ) ), 201 );
 }
 
 function toolkit_support_validate_request( WP_REST_Request $request, $limit = 8 ) {
@@ -208,7 +243,17 @@ add_action( 'admin_menu', function() {
 	add_submenu_page( 'toolkit-control', 'Enquiries', 'Enquiries', 'manage_options', 'toolkit-enquiries', 'toolkit_support_render_enquiries' );
 	add_submenu_page( 'toolkit-control', 'Website poll', 'Website poll', 'manage_options', 'toolkit-poll', 'toolkit_support_render_poll' );
 	add_submenu_page( 'toolkit-control', 'Chatbot settings', 'Chatbot settings', 'manage_options', 'toolkit-chatbot', 'toolkit_support_render_settings' );
+	add_submenu_page( 'toolkit-control', 'Speak-up reports', 'Speak-up reports', 'manage_options', 'toolkit-speak-up', 'toolkit_support_render_speak_up' );
 }, 20 );
+
+function toolkit_support_render_speak_up() {
+	toolkit_support_admin_header( 'Speak-up reports', 'Restricted review queue. Do not forward reports outside the authorised safeguarding process.' );
+	$items = get_posts( array( 'post_type' => 'toolkit_whistleblower', 'post_status' => 'private', 'numberposts' => 100, 'orderby' => 'date', 'order' => 'DESC' ) );
+	echo '<table class="widefat striped" style="margin-top:18px"><thead><tr><th>Date</th><th>Type</th><th>Report</th><th>Follow-up</th><th>Status</th></tr></thead><tbody>';
+	foreach ( $items as $item ) { printf( '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>', esc_html( get_the_date( 'Y-m-d H:i', $item ) ), esc_html( get_post_meta( $item->ID, '_toolkit_category', true ) ), esc_html( wp_trim_words( $item->post_content, 24 ) ), esc_html( get_post_meta( $item->ID, '_toolkit_contact_requested', true ) === 'yes' ? 'Requested' : 'Anonymous' ), esc_html( get_post_meta( $item->ID, '_toolkit_status', true ) ?: 'new' ) ); }
+	if ( ! $items ) echo '<tr><td colspan="5">No reports have been submitted.</td></tr>';
+	echo '</tbody></table></div>';
+}
 
 add_action( 'admin_post_toolkit_support_settings', function() {
 	if ( ! current_user_can( 'manage_options' ) ) {

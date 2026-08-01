@@ -262,6 +262,9 @@ add_filter( 'template_include', function( $template ) {
 	if ( get_query_var( 'toolkit_reception' ) ) {
 		return get_stylesheet_directory() . '/template-parts/pages/reception.php';
 	}
+	if ( get_query_var( 'toolkit_speak_up' ) ) {
+		return get_stylesheet_directory() . '/template-parts/pages/speak-up.php';
+	}
 
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
 	if ( eduma_child_get_legacy_course_for_page() ) {
@@ -273,6 +276,7 @@ add_filter( 'template_include', function( $template ) {
 		'the-toolkit-foundation-copy'  => 'template-parts/pages/institutional.php',
 		'the-toolkit-foundation'       => 'template-parts/pages/institutional.php',
 		'contact'                      => 'template-parts/pages/contact.php',
+		'speak-up'                     => 'template-parts/pages/speak-up.php',
 		'toolkit-blog'                 => 'template-parts/pages/blog.php',
 		'gallery-2'                    => 'template-parts/pages/media-gallery.php',
 		'tti-media'                    => 'template-parts/pages/media-gallery.php',
@@ -305,6 +309,12 @@ add_action( 'init', function() {
 	}
 } );
 
+/* Database-independent restricted speak-up page. */
+add_action( 'init', function() {
+	if ( eduma_child_redesign_enabled() ) add_rewrite_rule( '^speak-up/?$', 'index.php?toolkit_speak_up=1', 'top' );
+	if ( get_option( 'eduma_child_speak_up_route_version' ) !== '2026-1-on' ) { flush_rewrite_rules( false ); update_option( 'eduma_child_speak_up_route_version', '2026-1-on', false ); }
+} );
+
 /* Database-independent public reception request page. */
 add_action( 'init', function() {
 	$route_version = eduma_child_redesign_enabled() ? '2026-1-on' : '2026-1-off';
@@ -333,10 +343,12 @@ add_filter( 'query_vars', function( $vars ) {
 	$vars[] = 'toolkit_course';
 	$vars[] = 'toolkit_connect';
 	$vars[] = 'toolkit_reception';
+	$vars[] = 'toolkit_speak_up';
 	return $vars;
 } );
 
 add_action( 'template_redirect', function() {
+	if ( get_query_var( 'toolkit_speak_up' ) ) { global $wp_query; $wp_query->is_404 = false; status_header( 200 ); }
 	if ( get_query_var( 'toolkit_connect' ) ) {
 		global $wp_query;
 		if ( ! eduma_child_redesign_enabled() ) {
@@ -542,9 +554,15 @@ function eduma_child_redesigned_page_metadata() {
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
 	$legacy_course = eduma_child_get_legacy_course_for_page();
 	if ( $legacy_course ) {
+		$legacy_title       = isset( $legacy_course['seo_title'] ) ? $legacy_course['seo_title'] : $legacy_course['title'] . ' | The Toolkit for Skills and Innovation';
+		$legacy_description = isset( $legacy_course['seo_description'] ) ? $legacy_course['seo_description'] : $legacy_course['short'] . ' Review the learning focus, delivery details, and application steps.';
+		if ( is_page( 'construction-sector-skills' ) ) {
+			$legacy_title       = 'MIG/MAG Welding Course in Kenya | Toolkit';
+			$legacy_description = 'Explore practical MIG/MAG welding training in Kikuyu with workshop practice, VR-supported learning and application guidance.';
+		}
 		return array(
-			'title'       => isset( $legacy_course['seo_title'] ) ? $legacy_course['seo_title'] : $legacy_course['title'] . ' | The Toolkit for Skills and Innovation',
-			'description' => isset( $legacy_course['seo_description'] ) ? $legacy_course['seo_description'] : $legacy_course['short'] . ' Review the learning focus, delivery details, and application steps.',
+			'title'       => $legacy_title,
+			'description' => $legacy_description,
 			'image'       => $legacy_course['image'],
 		);
 	}
@@ -839,6 +857,17 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 	$image_id        = $metadata ? $metadata['image'] . '#primaryimage' : '';
 	$has_image       = false;
 	$has_course      = false;
+	foreach ( $graph as $candidate ) {
+		if ( ! is_array( $candidate ) ) {
+			continue;
+		}
+		$candidate_types = isset( $candidate['@type'] ) ? (array) $candidate['@type'] : array();
+		if ( array_intersect( array( 'Organization', 'EducationalOrganization' ), $candidate_types ) && isset( $candidate['@id'] ) ) {
+			$organization_id = $candidate['@id'];
+			break;
+		}
+	}
+	$organization_url = preg_replace( '/#organization$/', '', $organization_id );
 
 	foreach ( $graph as &$node ) {
 		if ( ! is_array( $node ) ) {
@@ -847,11 +876,10 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 		$types = isset( $node['@type'] ) ? (array) $node['@type'] : array();
 
 		if ( array_intersect( array( 'Organization', 'EducationalOrganization' ), $types ) ) {
-			$organization_id       = isset( $node['@id'] ) ? $node['@id'] : $organization_id;
 			$node['@type']         = array_values( array_unique( array_merge( $types, array( 'Organization', 'EducationalOrganization' ) ) ) );
 			$node['name']          = toolkit_canonical_brand_name();
 			$node['alternateName'] = array( 'Toolkit' );
-			$node['url']           = $home;
+			$node['url']           = $organization_url;
 			$node['email']         = 'office@toolkitafrica.ac.ke';
 			$node['telephone']     = '+254709549200';
 			$node['contactPoint']  = array(
@@ -906,6 +934,30 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 			if ( empty( $author ) || ( is_array( $author ) && empty( array_filter( $author ) ) ) ) {
 				$node['author'] = array( '@id' => $organization_id );
 			}
+		}
+	}
+	unset( $node );
+	if ( $metadata ) {
+		$graph = array_values(
+			array_filter(
+				$graph,
+				static function ( $node ) use ( $image_id ) {
+					if ( ! is_array( $node ) || ! isset( $node['@id'] ) || $node['@id'] === $image_id ) {
+						return true;
+					}
+					$types = isset( $node['@type'] ) ? (array) $node['@type'] : array();
+					return ! ( in_array( 'ImageObject', $types, true ) && str_ends_with( $node['@id'], '#primaryimage' ) );
+				}
+			)
+		);
+	}
+	foreach ( $graph as &$node ) {
+		if ( ! is_array( $node ) ) {
+			continue;
+		}
+		$types = isset( $node['@type'] ) ? (array) $node['@type'] : array();
+		if ( is_singular( 'post' ) && in_array( 'Article', $types, true ) ) {
+			$node['author'] = array( '@id' => $organization_id );
 		}
 	}
 	unset( $node );
