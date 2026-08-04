@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.5';
+	return '2026.08.04.6';
 }
 
 function toolkit_is_demo_environment() {
@@ -840,6 +840,31 @@ add_filter( 'wpseo_canonical', function( $canonical ) {
 	$course_url = eduma_child_course_canonical_url();
 	return $course_url ? $course_url : $canonical;
 } );
+
+/*
+ * Yoast intentionally suppresses canonicals on noindex pages. The public demo
+ * remains noindex,follow, but still declares the matching production URL so
+ * audits and shared previews resolve to one authoritative public page.
+ */
+add_filter( 'wpseo_canonical', function( $canonical ) {
+	if ( ! toolkit_is_demo_environment() ) {
+		return $canonical;
+	}
+	if ( ! $canonical && is_singular() ) {
+		$canonical = get_permalink( get_queried_object_id() );
+	} elseif ( ! $canonical && is_home() ) {
+		$posts_page = (int) get_option( 'page_for_posts' );
+		$canonical  = $posts_page ? get_permalink( $posts_page ) : home_url( '/blog/' );
+	}
+	return $canonical
+		? preg_replace( '~^https?://demo\.toolkitafrica\.ac\.ke~i', 'https://toolkitafrica.ac.ke', $canonical )
+		: $canonical;
+}, 100 );
+
+/* Yoast owns BreadcrumbList schema; suppress Eduma's duplicate footer graph. */
+add_filter( 'thim/structured_data/types', function( $types ) {
+	return eduma_child_has_seo_plugin() ? array( 'toolkit-yoast-schema-owner' ) : $types;
+}, 100 );
 
 add_filter( 'wpseo_opengraph_url', function( $url ) {
 	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
