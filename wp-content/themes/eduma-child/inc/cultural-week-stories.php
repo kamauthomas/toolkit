@@ -159,13 +159,13 @@ function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0
 	if ( is_wp_error( $category_names ) ) $category_names = array();
 	$context = strtolower( get_the_title( $post_id ) . ' ' . get_post_field( 'post_excerpt', $post_id ) . ' ' . implode( ' ', $category_names ) );
 	$pools   = array(
-		'agriculture' => array( 'courses/agriculture.jpg', 'courses/experiences/organic-farm.jpg', 'blogs/legacy-context/blog-field-skills.jpg' ),
+		'agriculture' => array( 'courses/agriculture.jpg', 'courses/experiences/organic-farm.jpg', 'pages/about.jpg' ),
 		'construction'=> array( 'courses/welding.jpg', 'courses/experiences/vr-welding.jpg', 'blogs/legacy-context/welding-vr-training.jpg', 'pages/welding.jpg' ),
 		'green'       => array( 'courses/solar.jpg', 'courses/electrical.jpg', 'courses/experiences/solar-workshop.jpg', 'blogs/legacy-context/solar-mentorship.jpg' ),
-		'digital'     => array( 'courses/digital.jpg', 'blogs/legacy-context/innovateher-vr.jpg', 'blogs/legacy-context/blog-field-skills.jpg' ),
-		'inclusion'   => array( 'blogs/legacy-context/innovateher-vr.jpg', 'courses/experiences/learner-outcomes.jpg', 'blogs/legacy-context/blog-field-skills.jpg' ),
-		'employability'=> array( 'courses/entrepreneurship.jpg', 'courses/experiences/learner-outcomes.jpg', 'blogs/legacy-context/blog-field-skills.jpg', 'pages/impact.jpg' ),
-		'partnerships'=> array( 'pages/impact.jpg', 'pages/foundation.jpg', 'pages/contact.jpg', 'blogs/legacy-context/blog-field-skills.jpg' ),
+		'digital'     => array( 'courses/digital.jpg', 'blogs/legacy-context/innovateher-vr.jpg', 'hero-slide-3.jpg' ),
+		'inclusion'   => array( 'blogs/legacy-context/innovateher-vr.jpg', 'courses/experiences/learner-outcomes.jpg', 'hero-slide-2.jpg' ),
+		'employability'=> array( 'courses/entrepreneurship.jpg', 'courses/experiences/learner-outcomes.jpg', 'pages/impact.jpg', 'hero-slide-3.jpg' ),
+		'partnerships'=> array( 'pages/impact.jpg', 'pages/foundation.jpg', 'pages/contact.jpg', 'hero-slide-1.jpg', 'hero-slide-3.jpg' ),
 	);
 	$rules = array(
 		'agriculture' => '/\b(?:agri|agriculture|farm|farming|food|organic|crop|livestock)\b/',
