@@ -11,12 +11,18 @@ function toolkit_youtube_channel_id() {
 
 function toolkit_youtube_curated_videos() {
 	return array(
-		array( 'id' => '0sjNPAXN8pw', 'title' => 'From virtual reality to real-world welding' ),
-		array( 'id' => 'ROArAgWDOTI', 'title' => 'Transforming the skills sector' ),
-		array( 'id' => 'ZP7NJxi8XnQ', 'title' => 'Future trainers and trainees in action' ),
-		array( 'id' => 'LJGs1t8T6Bc', 'title' => 'Virtual reality changing welding skills' ),
-		array( 'id' => 'v06Qf-nFozw', 'title' => 'Cutting-edge welding technology' ),
-		array( 'id' => '6uvRqVpfT4E', 'title' => 'The next generation of young MIG welders' ),
+		array( 'id' => '3-Z-MOZURwY', 'title' => 'How well can you weld?' ),
+		array( 'id' => 'pI2V62-iXgg', 'title' => 'The Toolkit: Best Training Centre in Africa' ),
+		array( 'id' => 'AeIYFZwGSnE', 'title' => 'Young men and women in welding careers — The Toolkit' ),
+		array( 'id' => 'CBXTWbCUysY', 'title' => 'Solar Technology | Electrical Installation' ),
+		array( 'id' => 'VLSazLhZ01I', 'title' => 'Hon. Geoffrey Mosiria at The Toolkit' ),
+		array( 'id' => 'zX32gPIa-LY', 'title' => 'Welcome to The Toolkit for Skills & Innovation' ),
+		array( 'id' => 'XFhBkLo8xR4', 'title' => 'Alumni Success Story — Abigail Karani' ),
+		array( 'id' => 'YfavBEzlI0o', 'title' => 'Every class has that one phrase the teacher says' ),
+		array( 'id' => 'iyu3-u11B_E', 'title' => 'Arutwo a kothi cia moko kuongerereka, Kiambu' ),
+		array( 'id' => 'ltCK4Gt0hkM', 'title' => 'Every class has that one phrase the teacher says' ),
+		array( 'id' => 'tphrEgL7xAw', 'title' => 'French Course — The Toolkit for Skills & Innovation' ),
+		array( 'id' => 'ZxyLpCqC6wk', 'title' => 'Alumni Success Storytelling — Pauline Kieru' ),
 	);
 }
 
