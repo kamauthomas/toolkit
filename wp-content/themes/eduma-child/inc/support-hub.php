@@ -84,16 +84,19 @@ add_action( 'rest_api_init', function() {
 
 function toolkit_support_config() {
 	$settings = toolkit_support_settings();
+	$topics   = array(
+		'courses' => array( 'label' => 'Courses', 'reply' => $settings['courses_reply'], 'url' => home_url( '/our-ventures/' ), 'linkLabel' => 'Explore courses' ),
+		'fees'    => array( 'label' => 'Fees', 'reply' => $settings['fees_reply'], 'url' => home_url( '/our-ventures/' ), 'linkLabel' => 'View course details' ),
+		'apply'   => array( 'label' => 'How to apply', 'reply' => $settings['apply_reply'], 'url' => home_url( '/our-ventures/toolkit-courses-apply-today/' ), 'linkLabel' => 'Start application' ),
+		'contact' => array( 'label' => 'Contact Toolkit', 'reply' => $settings['contact_reply'], 'url' => home_url( '/contact/' ), 'linkLabel' => 'Contact Toolkit' ),
+	);
+	if ( function_exists( 'toolkit_speak_up_enabled' ) && toolkit_speak_up_enabled() ) {
+		$topics['speak_up'] = array( 'label' => 'Speak up safely', 'reply' => 'If you need to report a concern, use the dedicated speak-up page. Please do not share sensitive details in this chat.', 'url' => home_url( '/speak-up/' ), 'linkLabel' => 'Open speak-up page' );
+	}
 	return rest_ensure_response( array(
 		'enabled'  => (bool) $settings['enabled'],
 		'greeting' => $settings['greeting'],
-		'topics'   => array(
-			'courses' => array( 'label' => 'Courses', 'reply' => $settings['courses_reply'], 'url' => home_url( '/our-ventures/' ), 'linkLabel' => 'Explore courses' ),
-			'fees'    => array( 'label' => 'Fees', 'reply' => $settings['fees_reply'], 'url' => home_url( '/our-ventures/' ), 'linkLabel' => 'View course details' ),
-			'apply'   => array( 'label' => 'How to apply', 'reply' => $settings['apply_reply'], 'url' => home_url( '/our-ventures/toolkit-courses-apply-today/' ), 'linkLabel' => 'Start application' ),
-			'contact' => array( 'label' => 'Contact Toolkit', 'reply' => $settings['contact_reply'], 'url' => home_url( '/contact/' ), 'linkLabel' => 'Contact Toolkit' ),
-			'speak_up' => array( 'label' => 'Speak up safely', 'reply' => 'If you need to report a concern, use the dedicated speak-up page. Please do not share sensitive details in this chat.', 'url' => home_url( '/speak-up/' ), 'linkLabel' => 'Open speak-up page' ),
-		),
+		'topics'   => $topics,
 		'poll'     => array(
 			'enabled' => (bool) $settings['poll_enabled'],
 			'title'   => $settings['poll_title'],

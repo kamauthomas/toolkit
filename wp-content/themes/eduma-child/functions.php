@@ -143,11 +143,17 @@ function eduma_child_2026_pricing_enabled() {
 	return eduma_child_2026_catalog_enabled() && eduma_child_switch( 'TOOLKIT_2026_PRICING_ENABLED', 'toolkit_2026_pricing_enabled', false );
 }
 
+function toolkit_speak_up_enabled() {
+	$host          = isset( $_SERVER['HTTP_HOST'] ) ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : '';
+	$local_default = in_array( $host, array( '127.0.0.1:8001', 'localhost:8001' ), true );
+	return eduma_child_switch( 'TOOLKIT_SPEAK_UP_ENABLED', 'toolkit_speak_up_enabled', $local_default );
+}
+
 function eduma_child_is_custom_surface() {
 	if ( ! eduma_child_redesign_enabled() || is_admin() ) {
 		return false;
 	}
-	if ( get_query_var( 'toolkit_connect' ) || get_query_var( 'toolkit_reception' ) || get_query_var( 'toolkit_speak_up' ) || is_front_page() || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || get_query_var( 'toolkit_course' ) ) {
+	if ( get_query_var( 'toolkit_connect' ) || get_query_var( 'toolkit_reception' ) || ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) || is_front_page() || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || get_query_var( 'toolkit_course' ) ) {
 		return true;
 	}
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
@@ -173,7 +179,7 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_script( 'toolkit-home-experience', get_stylesheet_directory_uri() . '/assets/js/home-experience.js', array(), toolkit_asset_version( $experience_path ), true );
 	}
 
-	if ( eduma_child_redesign_enabled() && ( get_query_var( 'toolkit_speak_up' ) || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || $legacy_course || get_query_var( 'toolkit_course' ) ) ) {
+	if ( eduma_child_redesign_enabled() && ( ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || $legacy_course || get_query_var( 'toolkit_course' ) ) ) {
 		$page_css_ver = toolkit_asset_version( get_stylesheet_directory() . '/page-redesign.css' );
 		$page_js_ver  = toolkit_asset_version( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
@@ -268,7 +274,7 @@ add_filter( 'template_include', function( $template ) {
 	if ( get_query_var( 'toolkit_reception' ) ) {
 		return get_stylesheet_directory() . '/template-parts/pages/reception.php';
 	}
-	if ( get_query_var( 'toolkit_speak_up' ) ) {
+	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
 		return get_stylesheet_directory() . '/template-parts/pages/speak-up.php';
 	}
 
@@ -317,8 +323,9 @@ add_action( 'init', function() {
 
 /* Database-independent restricted speak-up page. */
 add_action( 'init', function() {
-	if ( eduma_child_redesign_enabled() ) add_rewrite_rule( '^speak-up/?$', 'index.php?toolkit_speak_up=1', 'top' );
-	if ( get_option( 'eduma_child_speak_up_route_version' ) !== '2026-1-on' ) { flush_rewrite_rules( false ); update_option( 'eduma_child_speak_up_route_version', '2026-1-on', false ); }
+	$route_version = toolkit_speak_up_enabled() ? '2026-2-on' : '2026-2-off';
+	if ( eduma_child_redesign_enabled() && toolkit_speak_up_enabled() ) add_rewrite_rule( '^speak-up/?$', 'index.php?toolkit_speak_up=1', 'top' );
+	if ( get_option( 'eduma_child_speak_up_route_version' ) !== $route_version ) { flush_rewrite_rules( false ); update_option( 'eduma_child_speak_up_route_version', $route_version, false ); }
 } );
 
 /* Database-independent public reception request page. */
@@ -356,6 +363,11 @@ add_filter( 'query_vars', function( $vars ) {
 add_action( 'template_redirect', function() {
 	if ( get_query_var( 'toolkit_speak_up' ) ) {
 		global $wp_query;
+		if ( ! toolkit_speak_up_enabled() ) {
+			$wp_query->set_404();
+			status_header( 404 );
+			return;
+		}
 		$wp_query->is_404     = false;
 		$wp_query->is_home    = false;
 		$wp_query->is_archive = false;
@@ -533,7 +545,7 @@ function eduma_child_redesigned_page_metadata() {
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
 		);
 	}
-	if ( get_query_var( 'toolkit_speak_up' ) ) {
+	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
 		return array(
 			'title'       => 'Speak Up Safely | The Toolkit for Skills and Innovation',
 			'description' => 'Use the dedicated Toolkit speak-up channel to report safety, misconduct, fraud, harassment, discrimination, or another serious concern for restricted review.',
@@ -737,7 +749,7 @@ function eduma_child_course_canonical_url() {
 }
 
 add_filter( 'wpseo_canonical', function( $canonical ) {
-	if ( get_query_var( 'toolkit_speak_up' ) ) {
+	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
 		return home_url( '/speak-up/' );
 	}
 	if ( get_query_var( 'toolkit_connect' ) ) {
@@ -751,7 +763,7 @@ add_filter( 'wpseo_canonical', function( $canonical ) {
 } );
 
 add_filter( 'wpseo_opengraph_url', function( $url ) {
-	if ( get_query_var( 'toolkit_speak_up' ) ) {
+	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
 		return home_url( '/speak-up/' );
 	}
 	if ( get_query_var( 'toolkit_connect' ) ) {
@@ -765,7 +777,7 @@ add_filter( 'wpseo_opengraph_url', function( $url ) {
 } );
 
 add_filter( 'wpseo_schema_webpage', function( $data ) {
-	if ( ! get_query_var( 'toolkit_speak_up' ) ) return $data;
+	if ( ! toolkit_speak_up_enabled() || ! get_query_var( 'toolkit_speak_up' ) ) return $data;
 	$metadata            = eduma_child_redesigned_page_metadata();
 	$data['@id']         = home_url( '/speak-up/#webpage' );
 	$data['url']         = home_url( '/speak-up/' );
@@ -979,7 +991,7 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 	}
 	unset( $node );
 
-	if ( get_query_var( 'toolkit_speak_up' ) && $metadata && ! $has_webpage ) {
+	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) && $metadata && ! $has_webpage ) {
 		$graph[] = array(
 			'@type'              => 'WebPage',
 			'@id'                => home_url( '/speak-up/#webpage' ),
