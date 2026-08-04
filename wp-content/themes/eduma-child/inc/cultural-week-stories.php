@@ -104,6 +104,8 @@ function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0
 		'toolkit-shines-with-tujiajiri-mentorship-program-for-solar-energy-trainees' => 'blogs/legacy-context/solar-mentorship.jpg',
 		'ilo-youth-employment-training-workshop' => 'team/hosea-mugera.jpg',
 		'igniting-her-future-innovateher-roll-out-at-the-toolkit-for-skills-and-innovation-hub' => 'blogs/legacy-context/innovateher-vr.jpg',
+		'toolkit-makes-history-monday-5-february-2024-statement-on-skills-in-advanced-welding-at-radisson-blu-presided-by-president-ruto-and-polish-president-duda' => 'blogs/legacy-context/welding-vr-training.jpg',
+		'toolkit-makes-history-monday-5-february-2024-statement-on-skills-in-advanced-welding-at-radisson-blu-presided-by-president-ruto-and-polish-president-duda-copy' => 'blogs/legacy-context/welding-vr-training.jpg',
 	);
 	$slug = get_post_field( 'post_name', $post_id );
 	if ( isset( $legacy_images[ $slug ] ) ) {
@@ -114,6 +116,18 @@ function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0
 	$thumbnail_file = $thumbnail_id ? get_attached_file( $thumbnail_id ) : '';
 	if ( $thumbnail_file && file_exists( $thumbnail_file ) ) {
 		return get_the_post_thumbnail_url( $post_id, $size );
+	}
+
+	/* Imported stories often retained relevant inline media but lost featured-image files. */
+	$content = (string) get_post_field( 'post_content', $post_id );
+	if ( preg_match( '/<img\b[^>]*\bsrc\s*=\s*(["\x27])(.*?)\1/i', $content, $match ) ) {
+		$content_image = esc_url_raw( html_entity_decode( $match[2] ) );
+		if ( str_starts_with( $content_image, '/' ) ) $content_image = home_url( $content_image );
+		$image_host = strtolower( (string) wp_parse_url( $content_image, PHP_URL_HOST ) );
+		$home_host  = strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
+		if ( $content_image && ( $home_host === $image_host || in_array( $image_host, array( 'toolkitafrica.ac.ke', 'www.toolkitafrica.ac.ke', 'demo.toolkitafrica.ac.ke' ), true ) ) ) {
+			return preg_replace( '~^https?://(?:www\.)?toolkitafrica\.ac\.ke~i', home_url(), $content_image );
+		}
 	}
 
 	$fallbacks      = array( 'about.jpg', 'foundation.jpg', 'notice-board.jpg', 'welding.jpg' );
