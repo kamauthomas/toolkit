@@ -162,10 +162,10 @@ function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0
 		'agriculture' => array( 'courses/agriculture.jpg', 'courses/experiences/organic-farm.jpg', 'pages/about.jpg' ),
 		'construction'=> array( 'courses/welding.jpg', 'courses/experiences/vr-welding.jpg', 'blogs/legacy-context/welding-vr-training.jpg', 'pages/welding.jpg' ),
 		'green'       => array( 'courses/solar.jpg', 'courses/electrical.jpg', 'courses/experiences/solar-workshop.jpg', 'blogs/legacy-context/solar-mentorship.jpg' ),
-		'digital'     => array( 'courses/digital.jpg', 'blogs/legacy-context/innovateher-vr.jpg', 'hero-slide-3.jpg' ),
+		'digital'     => array( 'courses/digital.jpg', 'blogs/legacy-context/innovateher-vr.jpg', 'team/ann-nyokabi.jpg' ),
 		'inclusion'   => array( 'blogs/legacy-context/innovateher-vr.jpg', 'courses/experiences/learner-outcomes.jpg', 'hero-slide-2.jpg' ),
-		'employability'=> array( 'courses/entrepreneurship.jpg', 'courses/experiences/learner-outcomes.jpg', 'pages/impact.jpg', 'hero-slide-3.jpg' ),
-		'partnerships'=> array( 'pages/impact.jpg', 'pages/foundation.jpg', 'pages/contact.jpg', 'hero-slide-1.jpg', 'hero-slide-3.jpg' ),
+		'employability'=> array( 'courses/entrepreneurship.jpg', 'courses/experiences/learner-outcomes.jpg', 'pages/impact.jpg', 'team/hosea-mugera.jpg' ),
+		'partnerships'=> array( 'pages/impact.jpg', 'pages/foundation.jpg', 'pages/contact.jpg', 'hero-slide-1.jpg', 'team/jane-muigai-kamphuis.jpg' ),
 	);
 	$rules = array(
 		'agriculture' => '/\b(?:agri|agriculture|farm|farming|food|organic|crop|livestock)\b/',
