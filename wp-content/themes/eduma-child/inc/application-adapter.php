@@ -284,6 +284,20 @@ function toolkit_application_counties() {
 	}, $names );
 }
 
+/**
+ * Prefer course mappings. Mzizi also publishes current-year intakes for the
+ * cases where a current course has not yet been mapped to an intake row.
+ */
+function toolkit_application_available_intakes( $course_id, $cookies ) {
+	$mapped = toolkit_mzizi_post( 'OrganizationProcesses.asmx/GetCourseIntakeMonths', array( 'CourseID' => $course_id ), $cookies );
+	if ( is_wp_error( $mapped ) ) return $mapped;
+	if ( toolkit_application_public_items( $mapped, 'LevelName' ) ) {
+		return array( 'items' => $mapped, 'source' => 'course' );
+	}
+	$current = toolkit_mzizi_post( 'OrganizationProcesses.asmx/GetCurrentYearIntakeMonths', array(), $cookies );
+	return is_wp_error( $current ) ? $current : array( 'items' => $current, 'source' => 'current_year' );
+}
+
 function toolkit_application_options( WP_REST_Request $request ) {
 	$guard = toolkit_application_request_guard( $request );
 	if ( is_wp_error( $guard ) ) {
@@ -339,8 +353,11 @@ function toolkit_application_intakes( WP_REST_Request $request ) {
 	if ( is_wp_error( $cookies ) ) {
 		return $cookies;
 	}
-	$intakes = toolkit_mzizi_post( 'OrganizationProcesses.asmx/GetCourseIntakeMonths', array( 'CourseID' => $course_id ), $cookies );
-	return is_wp_error( $intakes ) ? $intakes : rest_ensure_response( array( 'intakes' => toolkit_application_public_items( $intakes, 'LevelName' ) ) );
+	$intakes = toolkit_application_available_intakes( $course_id, $cookies );
+	return is_wp_error( $intakes ) ? $intakes : rest_ensure_response( array(
+		'intakes' => toolkit_application_public_items( $intakes['items'], 'LevelName' ),
+		'source'  => $intakes['source'],
+	) );
 }
 
 function toolkit_application_verify_turnstile( $token ) {
@@ -434,7 +451,7 @@ function toolkit_application_submit( WP_REST_Request $request ) {
 		return new WP_Error( 'invalid_school', 'The selected campus is no longer available. Your application was saved as ' . $reference . '.', array( 'status' => 422, 'reference' => $reference ) );
 	}
 	$courses = toolkit_mzizi_post( 'StudentInfo.asmx/GetApplicationCoursesNoAlumni', array(), $cookies );
-	$intakes = toolkit_mzizi_post( 'OrganizationProcesses.asmx/GetCourseIntakeMonths', array( 'CourseID' => $course_id ), $cookies );
+	$intakes = toolkit_application_available_intakes( $course_id, $cookies );
 	$sources = toolkit_mzizi_post( 'StudentInfo.asmx/GetCustomerSources', array(), $cookies );
 	if ( is_wp_error( $courses ) || is_wp_error( $intakes ) || is_wp_error( $sources ) ) {
 		toolkit_application_update_record( $record_id, array( 'status' => 'relay_failed', 'last_error' => 'Mzizi course availability could not be confirmed.' ) );
@@ -448,7 +465,7 @@ function toolkit_application_submit( WP_REST_Request $request ) {
 		}
 	}
 	$intake = null;
-	foreach ( $intakes as $item ) {
+	foreach ( $intakes['items'] as $item ) {
 		if ( isset( $item['ID'] ) && $intake_id === (string) $item['ID'] ) {
 			$intake = $item;
 			break;
