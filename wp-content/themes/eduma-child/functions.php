@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.14';
+	return '2026.08.04.15';
 }
 
 function toolkit_is_demo_environment() {
@@ -1017,10 +1017,13 @@ add_filter( 'wpseo_sitemap_page_content', function( $content ) {
 } );
 
 /* Yoast adds the WordPress posts index separately from normal page entries. */
-add_filter( 'wpseo_sitemap_post_content', function( $content ) {
-	$legacy_blog = preg_quote( home_url( '/blog/' ), '~' );
-	return preg_replace( '~<url>\s*<loc>' . $legacy_blog . '</loc>.*?</url>~s', '', $content, 1 );
-} );
+add_filter( 'wpseo_sitemap_post_type_first_links', function( $links, $post_type ) {
+	if ( 'post' !== $post_type ) return $links;
+	$legacy_blog = untrailingslashit( home_url( '/blog/' ) );
+	return array_values( array_filter( $links, static function( $link ) use ( $legacy_blog ) {
+		return ! isset( $link['loc'] ) || $legacy_blog !== untrailingslashit( $link['loc'] );
+	} ) );
+}, 20, 2 );
 
 add_filter( 'wpseo_opengraph_image', function( $image ) {
 	$metadata = eduma_child_redesigned_page_metadata();
