@@ -16,12 +16,12 @@ function toolkit_youtube_curated_videos() {
 		array( 'id' => 'AeIYFZwGSnE', 'title' => 'Young men and women in welding careers — The Toolkit' ),
 		array( 'id' => 'CBXTWbCUysY', 'title' => 'Solar Technology | Electrical Installation' ),
 		array( 'id' => 'VLSazLhZ01I', 'title' => 'Hon. Geoffrey Mosiria at The Toolkit' ),
-		array( 'id' => 'zX32gPIa-LY', 'title' => 'Welcome to The Toolkit for Skills & Innovation' ),
+		array( 'id' => 'zX32gPIa-LY', 'title' => 'Welcome to The Toolkit for Skills and Innovation' ),
 		array( 'id' => 'XFhBkLo8xR4', 'title' => 'Alumni Success Story — Abigail Karani' ),
 		array( 'id' => 'YfavBEzlI0o', 'title' => 'Every class has that one phrase the teacher says' ),
 		array( 'id' => 'iyu3-u11B_E', 'title' => 'Arutwo a kothi cia moko kuongerereka, Kiambu' ),
 		array( 'id' => 'ltCK4Gt0hkM', 'title' => 'Every class has that one phrase the teacher says' ),
-		array( 'id' => 'tphrEgL7xAw', 'title' => 'French Course — The Toolkit for Skills & Innovation' ),
+		array( 'id' => 'tphrEgL7xAw', 'title' => 'French Course — The Toolkit for Skills and Innovation' ),
 		array( 'id' => 'ZxyLpCqC6wk', 'title' => 'Alumni Success Storytelling — Pauline Kieru' ),
 	);
 }
@@ -49,6 +49,9 @@ function toolkit_youtube_parse_feed( $xml_body ) {
 		$date_node  = $xpath->query( './atom:published', $entry )->item( 0 );
 		$id         = $id_node ? sanitize_text_field( $id_node->textContent ) : '';
 		$title      = $title_node ? sanitize_text_field( $title_node->textContent ) : '';
+		if ( function_exists( 'toolkit_normalize_public_brand_copy' ) ) {
+			$title = toolkit_normalize_public_brand_copy( $title );
+		}
 		if ( ! preg_match( '/^[A-Za-z0-9_-]{11}$/', $id ) || ! $title ) {
 			continue;
 		}

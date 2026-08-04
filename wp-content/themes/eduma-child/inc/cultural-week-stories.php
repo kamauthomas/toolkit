@@ -126,7 +126,12 @@ function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0
 		$home_host  = strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
 		$owned_hosts = array( 'toolkitafrica.ac.ke', 'www.toolkitafrica.ac.ke', 'demo.toolkitafrica.ac.ke', 'toolkitiskills.com', 'www.toolkitiskills.com' );
 		if ( ! $candidate || ( $home_host !== $image_host && ! in_array( $image_host, $owned_hosts, true ) ) ) return '';
-		return preg_replace( '~^https?://(?:www\.)?(?:toolkitafrica\.ac\.ke|toolkitiskills\.com)~i', home_url(), $candidate );
+		$candidate = preg_replace( '~^https?://(?:www\.)?(?:toolkitafrica\.ac\.ke|toolkitiskills\.com)~i', home_url(), $candidate );
+		$path = rawurldecode( (string) wp_parse_url( $candidate, PHP_URL_PATH ) );
+		if ( str_starts_with( $path, '/wp-content/uploads/' ) ) {
+			if ( str_contains( $path, '..' ) || ! file_exists( ABSPATH . ltrim( $path, '/' ) ) ) return '';
+		}
+		return $candidate;
 	};
 	$content = (string) get_post_field( 'post_content', $post_id );
 	if ( preg_match( '/<img\b[^>]*\bsrc\s*=\s*(["\x27])(.*?)\1/i', $content, $match ) ) {

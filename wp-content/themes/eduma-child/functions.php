@@ -38,7 +38,7 @@ function toolkit_normalize_public_brand_copy( $text ) {
 	if ( ! is_string( $text ) || '' === $text ) {
 		return $text;
 	}
-	return str_ireplace(
+	$text = str_ireplace(
 		array(
 			'The Toolkit for Skills and Innovation Hub',
 			'The Toolkit for Skills and Innovation hub',
@@ -48,6 +48,8 @@ function toolkit_normalize_public_brand_copy( $text ) {
 			'The Toolkit Skills & Innovation Hub',
 			'Toolkit Skills &amp; Innovation Hub',
 			'Toolkit Skills & Innovation Hub',
+			'The Toolkit for Skills &amp; Innovation',
+			'The Toolkit for Skills & Innovation',
 			'The Toolkit For Skills and Innovation',
 			'the hub&#8217;s',
 			'the hub’s',
@@ -63,12 +65,22 @@ function toolkit_normalize_public_brand_copy( $text ) {
 			toolkit_canonical_brand_name(),
 			toolkit_canonical_brand_name(),
 			toolkit_canonical_brand_name(),
+			toolkit_canonical_brand_name(),
+			toolkit_canonical_brand_name(),
 			'the institution&#8217;s',
 			'the institution’s',
 			'at the institution',
 		),
 		$text
 	);
+	/* Legacy posts contain several spacing/"for" variants not covered above. */
+	$text = preg_replace(
+		'~\b(?:The\s+)?Toolkit(?:\s+for)?\s+Skills\s+(?:&(?:amp;)?\s*)?and\s+Innovation\s+Hub\b~iu',
+		toolkit_canonical_brand_name(),
+		$text
+	);
+	$text = preg_replace( '~\b(?:iShahit|Isahit)\s+hub\b~iu', 'iShahit centre', $text );
+	return $text;
 }
 
 function toolkit_normalize_schema_brand_copy( $value ) {
@@ -87,6 +99,10 @@ add_filter( 'the_title', function( $title, $post_id ) {
 }, 30, 2 );
 add_filter( 'get_the_excerpt', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'the_content', 'toolkit_normalize_public_brand_copy', 20 );
+/* Run again after builders/shortcodes that may restore raw imported copy. */
+add_filter( 'the_title', 'toolkit_normalize_public_brand_copy', PHP_INT_MAX );
+add_filter( 'get_the_excerpt', 'toolkit_normalize_public_brand_copy', PHP_INT_MAX );
+add_filter( 'the_content', 'toolkit_normalize_public_brand_copy', PHP_INT_MAX );
 add_filter( 'the_content', function( $content ) {
 	if ( ! is_singular( 'post' ) ) {
 		return $content;
