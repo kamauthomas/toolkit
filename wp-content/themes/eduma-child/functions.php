@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.13';
+	return '2026.08.04.14';
 }
 
 function toolkit_is_demo_environment() {
@@ -479,7 +479,7 @@ add_action( 'template_redirect', function() {
 		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
-	if ( is_home() || is_page( 'blog' ) ) {
+	if ( '/blog' === untrailingslashit( $request_path ) ) {
 		wp_safe_redirect( home_url( '/toolkit-blog/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
@@ -1014,6 +1014,12 @@ add_filter( 'wpseo_sitemap_page_content', function( $content ) {
 		return $content;
 	}
 	return $content . '<url><loc>' . esc_url( home_url( '/connect/' ) ) . '</loc><lastmod>' . esc_html( gmdate( DATE_W3C, filemtime( get_stylesheet_directory() . '/template-parts/pages/connect.php' ) ) ) . '</lastmod></url>';
+} );
+
+/* Yoast adds the WordPress posts index separately from normal page entries. */
+add_filter( 'wpseo_sitemap_post_content', function( $content ) {
+	$legacy_blog = preg_quote( home_url( '/blog/' ), '~' );
+	return preg_replace( '~<url>\s*<loc>' . $legacy_blog . '</loc>.*?</url>~s', '', $content, 1 );
 } );
 
 add_filter( 'wpseo_opengraph_image', function( $image ) {
