@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.7';
+	return '2026.08.04.8';
 }
 
 function toolkit_is_demo_environment() {
@@ -416,6 +416,11 @@ add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
 
 /* Retire unused public routes without deleting their WordPress records. */
 add_action( 'template_redirect', function() {
+	$request_path = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) : '';
+	if ( '/apply' === untrailingslashit( $request_path ) ) {
+		wp_safe_redirect( home_url( '/our-ventures/toolkit-courses-apply-today/' ), 301, 'The Toolkit for Skills and Innovation' );
+		exit;
+	}
 	if ( is_page( 'students-portal' ) ) {
 		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;

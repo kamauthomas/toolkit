@@ -28,6 +28,12 @@ $course_key = isset( $_GET['course'] ) ? sanitize_key( wp_unslash( $_GET['course
 		<form id="toolkit-application-form" class="application-form" novalidate>
 			<div class="application-form__heading"><i class="far fa-user" aria-hidden="true"></i><div><h2 data-step-title>1. Personal Details</h2><p data-step-help>Tell us who you are.</p></div><span><b>*</b> Required fields</span></div>
 			<div class="application-message" role="status" aria-live="polite" hidden></div>
+			<?php if ( ! toolkit_mzizi_submission_enabled() ) : ?>
+				<div class="application-handoff-notice" role="note">
+					<div><strong>Apply through the official admissions portal</strong><span>Direct submission from this page is not active. You may use these steps as a guide, but information entered here will not be transmitted.</span></div>
+					<a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( toolkit_mzizi_application_url() ); ?>" target="_blank" rel="noopener noreferrer">Open official portal <i class="fas fa-external-link-alt" aria-hidden="true"></i></a>
+				</div>
+			<?php endif; ?>
 			<input class="application-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
 
 			<fieldset data-step-panel="0"><legend class="screen-reader-text">Personal details</legend><div class="application-grid application-grid--3">
@@ -35,7 +41,6 @@ $course_key = isset( $_GET['course'] ) ? sanitize_key( wp_unslash( $_GET['course
 				<label>Middle name<input name="middle_name" autocomplete="additional-name"></label>
 				<label>Surname <b>*</b><input name="surname" autocomplete="family-name" required></label>
 				<label>Gender <b>*</b><select name="gender" required><option value="">Select gender</option><option value="F">Female</option><option value="M">Male</option><option value="I">Intersex</option></select></label>
-				<label>Date of birth<input type="date" name="date_of_birth" autocomplete="bday"></label>
 				<label>Nationality<input name="nationality" autocomplete="country-name" maxlength="80" value="Kenya"></label>
 			</div></fieldset>
 
