@@ -28,7 +28,7 @@ $images = array(
 				<div class="video-watch-playlist__items" role="list">
 				<?php $episode = 1; foreach ( $items as $item ) : ?>
 					<button type="button" role="listitem" class="video-watch-choice <?php echo 1 === $episode ? 'is-active' : ''; ?>" data-video-id="<?php echo esc_attr( $item['id'] ); ?>" data-video-title="<?php echo esc_attr( $item['title'] ); ?>" data-video-episode="<?php echo esc_attr( $episode ); ?>" aria-pressed="<?php echo 1 === $episode ? 'true' : 'false'; ?>">
-						<span class="video-watch-choice__thumb"><img loading="lazy" src="https://i.ytimg.com/vi/<?php echo esc_attr( $item['id'] ); ?>/mqdefault.jpg" alt=""><i aria-hidden="true">▶</i></span>
+						<span class="video-watch-choice__thumb"><img loading="lazy" src="https://i.ytimg.com/vi/<?php echo esc_attr( $item['id'] ); ?>/mqdefault.jpg" alt="<?php echo esc_attr( $item['title'] . ' video thumbnail' ); ?>"><i aria-hidden="true">▶</i></span>
 						<span class="video-watch-choice__copy"><small><?php echo esc_html( 'Video ' . str_pad( (string) $episode, 2, '0', STR_PAD_LEFT ) ); ?></small><strong><?php echo esc_html( $item['title'] ); ?></strong></span>
 					</button>
 				<?php $episode++; endforeach; ?>

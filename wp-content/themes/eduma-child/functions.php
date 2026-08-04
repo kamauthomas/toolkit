@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.11';
+	return '2026.08.04.12';
 }
 
 function toolkit_is_demo_environment() {
@@ -96,6 +96,32 @@ add_filter( 'the_content', function( $content ) {
 		return str_starts_with( strtolower( $match[0] ), '</' ) ? '</h2' : '<h2';
 	}, $content );
 }, 40 );
+
+/* Repair imported legacy content images that were published with blank alt text. */
+add_filter( 'the_content', function( $content ) {
+	if ( is_admin() || false === stripos( $content, '<img' ) ) return $content;
+	$post_id = get_the_ID();
+	$title   = $post_id ? wp_strip_all_tags( get_the_title( $post_id ) ) : toolkit_canonical_brand_name();
+	$index   = 0;
+	return preg_replace_callback( '/<img\b[^>]*>/i', static function( $match ) use ( $title, &$index ) {
+		$tag = $match[0];
+		if ( preg_match( '/\balt\s*=\s*(["\x27])(.*?)\1/i', $tag, $alt_match ) && '' !== trim( wp_strip_all_tags( html_entity_decode( $alt_match[2] ) ) ) ) {
+			return $tag;
+		}
+		$index++;
+		$alt = '';
+		if ( preg_match( '/\bsrc\s*=\s*(["\x27])(.*?)\1/i', $tag, $src_match ) && $src_match[2] ) {
+			$attachment_id = attachment_url_to_postid( html_entity_decode( $src_match[2] ) );
+			if ( $attachment_id ) {
+				$alt = trim( (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) );
+				if ( ! $alt ) $alt = trim( (string) get_the_title( $attachment_id ) );
+			}
+		}
+		if ( ! $alt ) $alt = sprintf( '%s — story image %d', $title, $index );
+		$tag = preg_replace( '/\s+alt\s*=\s*(["\x27]).*?\1/i', '', $tag );
+		return preg_replace( '/\s*\/?>$/', ' alt="' . esc_attr( $alt ) . '">', $tag );
+	}, $content );
+}, 50 );
 add_filter( 'wpseo_title', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'wpseo_metadesc', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'wpseo_opengraph_title', 'toolkit_normalize_public_brand_copy', 20 );
