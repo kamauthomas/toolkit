@@ -88,7 +88,7 @@ while ( have_posts() ) :
 					<p class="toolkit-story-standfirst"><?php echo esc_html( $standfirst ); ?></p>
 					<div class="toolkit-story-meta">
 						<span><small>Published</small><time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date( 'j M Y' ) ); ?></time></span>
-						<span><small>Reading time</small><?php echo esc_html( $reading_time ); ?> minutes</span>
+						<span><small>Reading time</small><?php echo esc_html( $reading_time . ' ' . ( 1 === $reading_time ? 'minute' : 'minutes' ) ); ?></span>
 					</div>
 				</div>
 				<figure>

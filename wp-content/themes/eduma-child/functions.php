@@ -74,6 +74,12 @@ function toolkit_normalize_schema_brand_copy( $value ) {
 }
 
 add_filter( 'the_title', 'toolkit_normalize_public_brand_copy', 20 );
+add_filter( 'the_title', function( $title, $post_id ) {
+	if ( $post_id && 'youth-international-skills-day-12th-august-2025' === get_post_field( 'post_name', $post_id ) ) {
+		return 'International Youth Day — 12 August 2025';
+	}
+	return $title;
+}, 30, 2 );
 add_filter( 'get_the_excerpt', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'the_content', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'wpseo_title', 'toolkit_normalize_public_brand_copy', 20 );
@@ -475,8 +481,8 @@ function toolkit_story_seo_copy( $post_id ) {
 			'description' => 'Career Wear Day helped Toolkit learners connect personal presentation with professional identity and future work pathways.',
 		),
 		'youth-international-skills-day-12th-august-2025' => array(
-			'title'       => 'World Youth Skills Day 2025 | Toolkit',
-			'description' => 'Explore Toolkit reflections on practical training, youth opportunity and skills that support pathways into employment and entrepreneurship.',
+			'title'       => 'International Youth Day 2025 | Toolkit',
+			'description' => 'Toolkit marked International Youth Day on 12 August 2025 with reflections on practical training, youth opportunity, employment and entrepreneurship.',
 		),
 		'careers-in-mig-mag-welding-insights-from-our-webinar' => array(
 			'title'       => 'MIG/MAG Welding Careers Webinar | Toolkit',

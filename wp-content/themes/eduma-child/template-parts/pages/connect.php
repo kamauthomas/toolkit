@@ -5,7 +5,7 @@ $apply  = home_url( '/our-ventures/toolkit-courses-apply-today/' );
 ?>
 <main id="main-content" class="toolkit-connect-page">
 	<section class="connect-hero">
-		<img class="connect-hero__image" src="<?php echo esc_url( $assets . 'courses/experiences/learner-outcomes.jpg' ); ?>" width="1400" height="900" alt="Toolkit learners celebrating practical skills and recognised outcomes">
+		<img class="connect-hero__image" src="<?php echo esc_url( $assets . 'courses/experiences/vr-welding.jpg' ); ?>" width="1400" height="900" alt="A Toolkit learner building practical welding skills with virtual-reality training">
 		<div class="connect-hero__shade" aria-hidden="true"></div>
 		<img class="connect-hero__logo" src="<?php echo esc_url( $assets . 'toolkit-logo.png' ); ?>" width="190" height="116" alt="The Toolkit for Skills and Innovation">
 		<div class="connect-hero__content">
