@@ -150,9 +150,33 @@ function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0
 		}
 	}
 
-	$fallbacks      = array( 'about.jpg', 'foundation.jpg', 'notice-board.jpg', 'welding.jpg' );
-	$stable_index   = absint( crc32( (string) $slug ) ) + absint( $fallback_index );
-	return get_stylesheet_directory_uri() . '/assets/images/pages/' . $fallbacks[ $stable_index % count( $fallbacks ) ];
+	$category_names = wp_get_post_terms( $post_id, 'category', array( 'fields' => 'names' ) );
+	if ( is_wp_error( $category_names ) ) $category_names = array();
+	$context = strtolower( get_the_title( $post_id ) . ' ' . get_post_field( 'post_excerpt', $post_id ) . ' ' . implode( ' ', $category_names ) );
+	$pools   = array(
+		'agriculture' => array( 'courses/agriculture.jpg', 'courses/experiences/organic-farm.jpg', 'blogs/legacy-context/blog-field-skills.jpg' ),
+		'construction'=> array( 'courses/welding.jpg', 'courses/experiences/vr-welding.jpg', 'blogs/legacy-context/welding-vr-training.jpg', 'pages/welding.jpg' ),
+		'green'       => array( 'courses/solar.jpg', 'courses/electrical.jpg', 'courses/experiences/solar-workshop.jpg', 'blogs/legacy-context/solar-mentorship.jpg' ),
+		'digital'     => array( 'courses/digital.jpg', 'blogs/legacy-context/innovateher-vr.jpg', 'blogs/legacy-context/blog-field-skills.jpg' ),
+		'inclusion'   => array( 'blogs/legacy-context/innovateher-vr.jpg', 'courses/experiences/learner-outcomes.jpg', 'blogs/legacy-context/blog-field-skills.jpg' ),
+		'employability'=> array( 'courses/entrepreneurship.jpg', 'courses/experiences/learner-outcomes.jpg', 'blogs/legacy-context/blog-field-skills.jpg', 'pages/impact.jpg' ),
+		'partnerships'=> array( 'pages/impact.jpg', 'pages/foundation.jpg', 'pages/contact.jpg', 'blogs/legacy-context/blog-field-skills.jpg' ),
+	);
+	$rules = array(
+		'agriculture' => '/\b(?:agri|agriculture|farm|farming|food|organic|crop|livestock)\b/',
+		'construction'=> '/\b(?:weld|welding|construction|scaffold|artisan|vr|virtual reality|tvet|vtc|mining|oil)\b/',
+		'green'       => '/\b(?:solar|renewable|energy|climate|environment|green|power)\b/',
+		'digital'     => '/\b(?:digital|ict|online|technology|innovation|future of work|facebook)\b/',
+		'inclusion'   => '/\b(?:women|woman|girl|female|inclusion|inclusive|wia54)\b/',
+		'employability'=> '/\b(?:entrepreneur|business|employment|employability|job|career|skills|training)\b/',
+		'partnerships'=> '/\b(?:partnership|visit|meeting|forum|workshop|conference|summit|delegation|award)\b/',
+	);
+	$selected_pool = $pools['partnerships'];
+	foreach ( $rules as $pool_key => $pattern ) {
+		if ( preg_match( $pattern, $context ) ) { $selected_pool = $pools[ $pool_key ]; break; }
+	}
+	$stable_index = absint( crc32( (string) $slug ) ) + absint( $fallback_index );
+	return get_stylesheet_directory_uri() . '/assets/images/' . $selected_pool[ $stable_index % count( $selected_pool ) ];
 }
 
 function toolkit_cultural_week_preview() {
