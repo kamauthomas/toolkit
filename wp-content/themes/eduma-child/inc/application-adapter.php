@@ -226,10 +226,10 @@ function toolkit_mzizi_session() {
 	return $cookies ? $cookies : new WP_Error( 'mzizi_session', 'The admissions session could not be initialized.', array( 'status' => 503 ) );
 }
 
-function toolkit_mzizi_post( $service, $payload, $cookies ) {
+function toolkit_mzizi_post( $service, $payload, $cookies, $timeout = 8 ) {
 	$url = 'https://toolkit.mzizi.co.ke/PortalWebServices/' . ltrim( $service, '/' );
 	$response = wp_safe_remote_post( $url, array(
-		'timeout'     => 8,
+		'timeout'     => max( 3, min( 30, (int) $timeout ) ),
 		'redirection' => 0,
 		'cookies'     => $cookies,
 		'headers'     => array( 'Content-Type' => 'application/json' ),
@@ -503,7 +503,8 @@ function toolkit_application_submit( WP_REST_Request $request ) {
 		'Gender'             => sanitize_key( $data['gender'] ),
 	);
 	toolkit_application_update_record( $record_id, array( 'status' => 'relaying', 'relay_attempts' => 1 ) );
-	$result = toolkit_mzizi_post( 'StudentInfo.asmx/SubmitOnlineApplication', $payload, $cookies );
+	/* Mzizi submission performs more work than its lookup endpoints. */
+	$result = toolkit_mzizi_post( 'StudentInfo.asmx/SubmitOnlineApplication', $payload, $cookies, 25 );
 	if ( is_wp_error( $result ) || empty( $result['Message'] ) ) {
 		$error = is_wp_error( $result ) ? $result->get_error_message() : 'Mzizi returned no confirmation message.';
 		toolkit_application_update_record( $record_id, array( 'status' => 'relay_failed', 'last_error' => $error ) );
