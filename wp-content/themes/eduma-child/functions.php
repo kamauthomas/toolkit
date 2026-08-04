@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.12';
+	return '2026.08.04.13';
 }
 
 function toolkit_is_demo_environment() {
@@ -122,6 +122,17 @@ add_filter( 'the_content', function( $content ) {
 		return preg_replace( '/\s*\/?>$/', ' alt="' . esc_attr( $alt ) . '">', $tag );
 	}, $content );
 }, 50 );
+
+/* Ensure legacy featured-image helpers describe meaningful thumbnails. */
+add_filter( 'wp_get_attachment_image_attributes', function( $attributes, $attachment ) {
+	if ( ! empty( $attributes['alt'] ) ) return $attributes;
+	$parent_id = $attachment instanceof WP_Post ? (int) $attachment->post_parent : 0;
+	if ( $parent_id ) $attributes['alt'] = wp_strip_all_tags( get_the_title( $parent_id ) );
+	if ( empty( $attributes['alt'] ) && $attachment instanceof WP_Post ) {
+		$attributes['alt'] = wp_strip_all_tags( get_the_title( $attachment ) );
+	}
+	return $attributes;
+}, 20, 2 );
 add_filter( 'wpseo_title', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'wpseo_metadesc', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'wpseo_opengraph_title', 'toolkit_normalize_public_brand_copy', 20 );
@@ -468,7 +479,7 @@ add_action( 'template_redirect', function() {
 		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
-	if ( is_page( 'blog' ) ) {
+	if ( is_home() || is_page( 'blog' ) ) {
 		wp_safe_redirect( home_url( '/toolkit-blog/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
@@ -989,6 +1000,9 @@ add_filter( 'wpseo_schema_breadcrumb', function( $data ) {
 }, 40 );
 
 add_filter( 'wpseo_sitemap_entry', function( $url, $type, $object ) {
+	if ( 'post' === $type && $object instanceof WP_Post && (int) get_option( 'page_for_posts' ) === (int) $object->ID ) {
+		return false;
+	}
 	if ( 'post' === $type && $object instanceof WP_Post && 'toolkit-courses-apply-today' === $object->post_name ) {
 		$url['loc'] = home_url( '/apply/' );
 	}
