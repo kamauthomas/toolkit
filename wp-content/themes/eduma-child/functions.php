@@ -22,7 +22,12 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.2';
+	return '2026.08.04.3';
+}
+
+function toolkit_is_demo_environment() {
+	$host = strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
+	return 'demo.toolkitafrica.ac.ke' === $host;
 }
 
 function toolkit_canonical_brand_name() {
@@ -452,9 +457,19 @@ add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function( $ids ) {
 add_filter( 'wpseo_sitemap_exclude_author', '__return_empty_array' );
 
 add_filter( 'wpseo_robots_array', function( $robots ) {
-	if ( is_author() || is_page( eduma_child_non_public_page_slugs() ) ) {
+	if ( toolkit_is_demo_environment() || is_author() || is_page( eduma_child_non_public_page_slugs() ) ) {
 		$robots['index']  = 'noindex';
 		$robots['follow'] = 'follow';
+	}
+	return $robots;
+} );
+
+/* Keep the public demo out of search indexes without weakening production. */
+add_filter( 'wp_robots', function( $robots ) {
+	if ( toolkit_is_demo_environment() ) {
+		$robots['noindex'] = true;
+		$robots['follow']  = true;
+		unset( $robots['index'], $robots['nofollow'] );
 	}
 	return $robots;
 } );
@@ -526,15 +541,15 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_front_page() ) {
 		return array(
-			'title'       => 'Practical Skills Training in Kenya | The Toolkit for Skills and Innovation',
-			'description' => 'The Toolkit for Skills and Innovation equips young people and women with practical vocational skills, recognised assessment, and pathways to employment or entrepreneurship.',
+			'title'       => 'Practical Skills Training in Kenya | The Toolkit',
+			'description' => 'The Toolkit equips young people and women in Kenya with practical vocational skills, recognised assessment and pathways to employment or entrepreneurship.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
 		);
 	}
 	if ( get_query_var( 'toolkit_connect' ) ) {
 		return array(
-			'title'       => 'Connect with The Toolkit for Skills and Innovation | Courses, Admissions and Updates',
-			'description' => 'Apply for practical skills training, explore The Toolkit for Skills and Innovation courses, read current notices, contact admissions, and follow our official social channels.',
+			'title'       => 'Connect with The Toolkit | Admissions and Courses',
+			'description' => 'Explore Toolkit courses, start an application, read current notices, contact admissions and follow our official channels for practical skills updates.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
 		);
 	}
@@ -606,8 +621,8 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_page( 'about-toolkit-africa' ) ) {
 		return array(
-			'title'       => 'About The Toolkit for Skills and Innovation | Skills, Innovation and Opportunity',
-			'description' => 'Learn how The Toolkit for Skills and Innovation connects practical skills, innovation, industry exposure, employment, and entrepreneurship pathways for young people and women.',
+			'title'       => 'About The Toolkit | Skills Training in Kenya',
+			'description' => 'Learn how The Toolkit connects practical training, innovation and industry exposure with employment and entrepreneurship pathways for young people and women.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
@@ -627,7 +642,7 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_page( 'contact' ) ) {
 		return array(
-			'title'       => 'Contact The Toolkit for Skills and Innovation | Courses, Admissions and Partnerships',
+			'title'       => 'Contact The Toolkit | Admissions and Partnerships',
 			'description' => 'Contact The Toolkit for Skills and Innovation about courses, admissions, partnerships, and visiting our training centre in Kikuyu, Kenya.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/contact.jpg',
 		);
@@ -692,14 +707,14 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_page( 'tti-media' ) ) {
 		return array(
-			'title'       => 'The Toolkit for Skills and Innovation Videos | Skills in Action',
+			'title'       => 'Toolkit Videos | Practical Skills in Action',
 			'description' => 'Watch The Toolkit for Skills and Innovation learners, trainers, partners, workshops, and practical skills programmes in action.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/blogs/legacy-context/welding-vr-training.jpg',
 		);
 	}
 	if ( is_page( 'gallery-2' ) ) {
 		return array(
-			'title'       => 'The Toolkit for Skills and Innovation Gallery | Learning in Action',
+			'title'       => 'Toolkit Training Gallery | Skills in Action',
 			'description' => 'View images from The Toolkit for Skills and Innovation training, workshops, learner activities, partnerships, events, and skills-development programmes.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
@@ -755,6 +770,9 @@ add_filter( 'wpseo_canonical', function( $canonical ) {
 	if ( get_query_var( 'toolkit_connect' ) ) {
 		return home_url( '/connect/' );
 	}
+	if ( get_query_var( 'toolkit_reception' ) ) {
+		return home_url( '/reception/' );
+	}
 	if ( is_front_page() && eduma_child_redesign_enabled() ) {
 		return home_url( '/' );
 	}
@@ -769,6 +787,9 @@ add_filter( 'wpseo_opengraph_url', function( $url ) {
 	if ( get_query_var( 'toolkit_connect' ) ) {
 		return home_url( '/connect/' );
 	}
+	if ( get_query_var( 'toolkit_reception' ) ) {
+		return home_url( '/reception/' );
+	}
 	if ( is_front_page() && eduma_child_redesign_enabled() ) {
 		return home_url( '/' );
 	}
@@ -777,10 +798,13 @@ add_filter( 'wpseo_opengraph_url', function( $url ) {
 } );
 
 add_filter( 'wpseo_schema_webpage', function( $data ) {
-	if ( ! toolkit_speak_up_enabled() || ! get_query_var( 'toolkit_speak_up' ) ) return $data;
+	$is_speak_up = toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' );
+	$is_reception = (bool) get_query_var( 'toolkit_reception' );
+	if ( ! $is_speak_up && ! $is_reception ) return $data;
 	$metadata            = eduma_child_redesigned_page_metadata();
-	$data['@id']         = home_url( '/speak-up/#webpage' );
-	$data['url']         = home_url( '/speak-up/' );
+	$route               = $is_speak_up ? 'speak-up' : 'reception';
+	$data['@id']         = home_url( '/' . $route . '/#webpage' );
+	$data['url']         = home_url( '/' . $route . '/' );
 	$data['name']        = $metadata['title'];
 	$data['description'] = $metadata['description'];
 	$data['@type']       = 'WebPage';
