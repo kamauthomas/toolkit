@@ -6,7 +6,37 @@
 function toolkit_supplied_stories() {
 	$alumni_images = get_stylesheet_directory_uri() . '/assets/images/blogs/alumni-mentorship/';
 	$africa_forward_images = get_stylesheet_directory_uri() . '/assets/images/blogs/africa-forward/';
+	$icm_images = get_stylesheet_directory_uri() . '/assets/images/blogs/icm-visit/';
 	return array(
+		'icm-visit' => array(
+			'slug'          => 'icm-tvet-uk-visits-the-toolkit',
+			'date'          => '2026-08-03 09:00:00',
+			'theme'         => 'icm',
+			'day'           => '3 August 2026 / ICM-TVET UK',
+			'label'         => 'Partnership Visit',
+			'category_name' => 'Partnerships',
+			'category_slug' => 'partnerships',
+			'title'         => 'ICM-TVET UK Delegation Visited The Toolkit',
+			'standfirst'    => 'The visit explored potential collaboration and internationally recognised programmes while introducing the ICM team to Toolkit’s practical, industry-led training model.',
+			'content'       => array(
+				'On 3 August 2026, The Toolkit for Skills and Innovation welcomed ICM Africa Regional Director Kevin Kanisio Osundwa and Bernice from the ICM team for a courtesy and partnership engagement.',
+				'The delegation toured the institution’s training facilities and learned about its practical, industry-led approach to skills development.',
+				'The visit included the institution’s modern training facilities, practical programmes and organic farm.',
+				'Discussions explored potential collaboration and the introduction of internationally recognised programmes.',
+			),
+			'images'        => array(
+				$icm_images . '01-main.jpeg',
+				$icm_images . '02.jpeg',
+				$icm_images . '03.jpeg',
+				$icm_images . '04.jpeg',
+				$icm_images . '05.jpeg',
+				$icm_images . '06.jpeg',
+				$icm_images . '07.jpeg',
+				$icm_images . '08.jpeg',
+				$icm_images . '09.jpeg',
+				$icm_images . '10.jpeg',
+			),
+		),
 		'africa-forward' => array(
 			'slug'          => 'africa-forward-youth-innovation-day-career-fair-2026',
 			'date'          => '2026-07-15 18:00:00',
@@ -77,7 +107,7 @@ function toolkit_supplied_story_preview() {
 }
 
 function toolkit_publish_supplied_stories() {
-	$content_version = '2026.07.31.2';
+	$content_version = '2026.08.04.1';
 	if ( $content_version === get_option( 'toolkit_supplied_stories_published' ) ) {
 		return;
 	}
