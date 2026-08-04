@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.6';
+	return '2026.08.04.7';
 }
 
 function toolkit_is_demo_environment() {
@@ -841,25 +841,45 @@ add_filter( 'wpseo_canonical', function( $canonical ) {
 	return $course_url ? $course_url : $canonical;
 } );
 
-/*
- * Yoast intentionally suppresses canonicals on noindex pages. The public demo
- * remains noindex,follow, but still declares the matching production URL so
- * audits and shared previews resolve to one authoritative public page.
- */
-add_filter( 'wpseo_canonical', function( $canonical ) {
-	if ( ! toolkit_is_demo_environment() ) {
-		return $canonical;
-	}
-	if ( ! $canonical && is_singular() ) {
+function toolkit_demo_production_canonical_url( $canonical = '' ) {
+	if ( get_query_var( 'toolkit_connect' ) ) {
+		$canonical = home_url( '/connect/' );
+	} elseif ( get_query_var( 'toolkit_reception' ) ) {
+		$canonical = home_url( '/reception/' );
+	} elseif ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
+		$canonical = home_url( '/speak-up/' );
+	} elseif ( is_front_page() ) {
+		$canonical = home_url( '/' );
+	} elseif ( is_singular() ) {
 		$canonical = get_permalink( get_queried_object_id() );
-	} elseif ( ! $canonical && is_home() ) {
+	} elseif ( is_home() ) {
 		$posts_page = (int) get_option( 'page_for_posts' );
 		$canonical  = $posts_page ? get_permalink( $posts_page ) : home_url( '/blog/' );
 	}
 	return $canonical
 		? preg_replace( '~^https?://demo\.toolkitafrica\.ac\.ke~i', 'https://toolkitafrica.ac.ke', $canonical )
-		: $canonical;
+		: '';
+}
+
+/*
+ * Yoast suppresses its complete canonical presenter on noindex pages. Keep
+ * demo noindex,follow while explicitly identifying the matching production
+ * URL. The filter covers presenters Yoast retains; wp_head covers those it
+ * omits entirely.
+ */
+add_filter( 'wpseo_canonical', function( $canonical ) {
+	return toolkit_is_demo_environment() ? toolkit_demo_production_canonical_url( $canonical ) : $canonical;
 }, 100 );
+
+add_action( 'wp_head', function() {
+	if ( ! toolkit_is_demo_environment() ) {
+		return;
+	}
+	$canonical = toolkit_demo_production_canonical_url();
+	if ( $canonical ) {
+		echo '<link rel="canonical" href="' . esc_url( $canonical ) . '">' . "\n";
+	}
+}, 2 );
 
 /* Yoast owns BreadcrumbList schema; suppress Eduma's duplicate footer graph. */
 add_filter( 'thim/structured_data/types', function( $types ) {
