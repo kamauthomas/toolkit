@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.4';
+	return '2026.08.04.5';
 }
 
 function toolkit_is_demo_environment() {
@@ -87,6 +87,15 @@ add_filter( 'the_title', function( $title, $post_id ) {
 }, 30, 2 );
 add_filter( 'get_the_excerpt', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'the_content', 'toolkit_normalize_public_brand_copy', 20 );
+add_filter( 'the_content', function( $content ) {
+	if ( ! is_singular( 'post' ) ) {
+		return $content;
+	}
+	/* The article template owns the page H1; legacy body headings start at H2. */
+	return preg_replace_callback( '/<\/?h1(?=\s|>)/i', static function( $match ) {
+		return str_starts_with( strtolower( $match[0] ), '</' ) ? '</h2' : '<h2';
+	}, $content );
+}, 40 );
 add_filter( 'wpseo_title', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'wpseo_metadesc', 'toolkit_normalize_public_brand_copy', 20 );
 add_filter( 'wpseo_opengraph_title', 'toolkit_normalize_public_brand_copy', 20 );
@@ -419,6 +428,10 @@ add_action( 'template_redirect', function() {
 		wp_safe_redirect( home_url( '/toolkit-blog/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
+	if ( is_page( 'research' ) ) {
+		wp_safe_redirect( home_url( '/our-ventures/tti-consultancy-and-research/' ), 301, 'The Toolkit for Skills and Innovation' );
+		exit;
+	}
 }, 1 );
 
 function eduma_child_non_public_page_slugs() {
@@ -427,6 +440,7 @@ function eduma_child_non_public_page_slugs() {
 		'eventer-shortcode-preview-page',
 		'courses',
 		'blog',
+		'research',
 		'account',
 		'user-register',
 		'user-login',
@@ -531,8 +545,48 @@ function toolkit_story_seo_copy( $post_id ) {
 			'title'       => 'Youth Skills & Job Creation Podcast | Toolkit',
 			'description' => 'Jane Muigai Kamphuis and Caroline Njuki discussed ecosystem thinking, youth skills and scalable employment outcomes in Africa.',
 		),
+		'in-the-news' => array(
+			'title'       => 'Toolkit in the News: NTV Coverage | Toolkit 2022',
+			'description' => 'Watch NTV coverage featuring The Toolkit and its work advancing practical skills, employability and opportunity for young people in Kenya.',
+		),
+		'in-the-news-2' => array(
+			'title'       => 'Toolkit in the News: The Star Coverage | Toolkit 2022',
+			'description' => 'Read The Star coverage of Kenya’s plans to recognise Jua Kali artisans and the role of skills assessment and certification.',
+		),
+		'toolkit-iskills-partnership-don-bosco-boys-town' => array(
+			'title'       => 'Toolkit iSkills and Don Bosco Boys’ Town | Toolkit 2019',
+			'description' => 'Toolkit iSkills partnered with Don Bosco Boys’ Town to strengthen electrical, refrigeration and air-conditioning training facilities.',
+		),
 	);
 	return isset( $copy[ $slug ] ) ? $copy[ $slug ] : array();
+}
+
+function toolkit_seo_trim_chars( $text, $maximum ) {
+	$text = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $text ) ) );
+	if ( mb_strlen( $text ) <= $maximum ) {
+		return $text;
+	}
+	$trimmed = mb_substr( $text, 0, max( 1, $maximum - 1 ) );
+	$space   = mb_strrpos( $trimmed, ' ' );
+	if ( false !== $space && $space > (int) floor( $maximum * 0.65 ) ) {
+		$trimmed = mb_substr( $trimmed, 0, $space );
+	}
+	return rtrim( $trimmed, " \t\n\r\0\x0B,.;:–—-" ) . '…';
+}
+
+function toolkit_prepare_seo_description( $text, $story_title = '' ) {
+	$text = html_entity_decode( (string) $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	$text = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( strip_shortcodes( $text ) ) ) );
+	if ( '' === $text ) {
+		$text = 'Read this Toolkit update about ' . rtrim( $story_title, '.!? ' ) . '.';
+	}
+	if ( mb_strlen( $text ) < 100 ) {
+		$text .= ' Discover more about practical skills, training and pathways to work and enterprise.';
+	}
+	if ( mb_strlen( $text ) < 100 ) {
+		$text .= ' Read the full update.';
+	}
+	return toolkit_seo_trim_chars( $text, 160 );
 }
 
 function eduma_child_redesigned_page_metadata() {
@@ -570,18 +624,18 @@ function eduma_child_redesigned_page_metadata() {
 	if ( is_singular( 'post' ) ) {
 		$post_id     = get_queried_object_id();
 		$seo_copy    = toolkit_story_seo_copy( $post_id );
-		$post_title  = $seo_copy ? $seo_copy['title'] : toolkit_normalize_public_brand_copy( get_the_title( $post_id ) ) . ' | Toolkit Blog';
+		$story_title = toolkit_normalize_public_brand_copy( get_the_title( $post_id ) );
+		$suffix      = ' | Toolkit ' . get_the_date( 'Y', $post_id );
+		$post_title  = $seo_copy ? $seo_copy['title'] : toolkit_seo_trim_chars( $story_title, 60 - mb_strlen( $suffix ) ) . $suffix;
 		$description = get_the_excerpt( $post_id );
 		if ( $seo_copy ) {
 			$description = $seo_copy['description'];
 		} elseif ( ! $description ) {
-			$description = wp_trim_words( wp_strip_all_tags( get_post_field( 'post_content', $post_id ) ), 28 );
-		} else {
-			$description = wp_trim_words( wp_strip_all_tags( $description ), 28 );
+			$description = get_post_field( 'post_content', $post_id );
 		}
 		return array(
 			'title'       => $post_title,
-			'description' => toolkit_normalize_public_brand_copy( wp_strip_all_tags( $description ) ),
+			'description' => toolkit_normalize_public_brand_copy( toolkit_prepare_seo_description( $description, $story_title ) ),
 			'image'       => toolkit_story_image_url( $post_id, 'full' ),
 		);
 	}
@@ -654,6 +708,13 @@ function eduma_child_redesigned_page_metadata() {
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/blogs/legacy-context/blog-field-skills.jpg',
 		);
 	}
+	if ( is_home() || is_page( 'blog' ) ) {
+		return array(
+			'title'       => 'Latest Toolkit News and Updates | Skills in Kenya',
+			'description' => 'Read current Toolkit news, learner stories, programme updates and practical insights about skills, employment, enterprise and innovation in Kenya.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/blogs/legacy-context/blog-field-skills.jpg',
+		);
+	}
 	if ( is_page( 'construction-sector-skills' ) ) {
 		return array(
 			'title'       => 'MIG/MAG Welding Training | The Toolkit for Skills and Innovation',
@@ -680,7 +741,7 @@ function eduma_child_redesigned_page_metadata() {
 	if ( is_page( 'privacy-policy' ) ) {
 		return array(
 			'title'       => 'Privacy Policy | The Toolkit for Skills and Innovation',
-			'description' => 'Read how The Toolkit for Skills and Innovation handles website, enquiry, application, and communications information, including your privacy choices and contact route.',
+			'description' => 'Read how The Toolkit handles website, enquiry, application and communications information, including your privacy choices and contact routes.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
 		);
 	}
@@ -693,7 +754,7 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_page( 'building-young-female-farmers-of-tomorrow' ) ) {
 		return array(
-			'title'       => 'Young Women in Agriculture | The Toolkit for Skills and Innovation',
+			'title'       => 'Young Women in Agriculture | Toolkit',
 			'description' => 'Learn about The Toolkit for Skills and Innovation initiatives supporting young women to build practical agriculture, enterprise, and livelihood skills.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/courses/experiences/organic-farm.jpg',
 		);
