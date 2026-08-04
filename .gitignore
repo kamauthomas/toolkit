@@ -25,6 +25,9 @@
 /rollbacks/
 /releases/
 /reports/
+/local-review/
+/docs/WELDING-SEO-COMPETITIVE-AUDIT-2026-07-31.md
+/docs/WELDING-SEO-IMPLEMENTATION-ROADMAP-2026-07-31.md
 
 # Local agent/runtime metadata must never be committed or deployed.
 /.agents/
