@@ -119,14 +119,33 @@ function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0
 	}
 
 	/* Imported stories often retained relevant inline media but lost featured-image files. */
+	$normalize_story_image = static function( $candidate ) {
+		$candidate = esc_url_raw( html_entity_decode( (string) $candidate ) );
+		if ( str_starts_with( $candidate, '/' ) ) $candidate = home_url( $candidate );
+		$image_host = strtolower( (string) wp_parse_url( $candidate, PHP_URL_HOST ) );
+		$home_host  = strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
+		if ( ! $candidate || ( $home_host !== $image_host && ! in_array( $image_host, array( 'toolkitafrica.ac.ke', 'www.toolkitafrica.ac.ke', 'demo.toolkitafrica.ac.ke' ), true ) ) ) return '';
+		return preg_replace( '~^https?://(?:www\.)?toolkitafrica\.ac\.ke~i', home_url(), $candidate );
+	};
 	$content = (string) get_post_field( 'post_content', $post_id );
 	if ( preg_match( '/<img\b[^>]*\bsrc\s*=\s*(["\x27])(.*?)\1/i', $content, $match ) ) {
-		$content_image = esc_url_raw( html_entity_decode( $match[2] ) );
-		if ( str_starts_with( $content_image, '/' ) ) $content_image = home_url( $content_image );
-		$image_host = strtolower( (string) wp_parse_url( $content_image, PHP_URL_HOST ) );
-		$home_host  = strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
-		if ( $content_image && ( $home_host === $image_host || in_array( $image_host, array( 'toolkitafrica.ac.ke', 'www.toolkitafrica.ac.ke', 'demo.toolkitafrica.ac.ke' ), true ) ) ) {
-			return preg_replace( '~^https?://(?:www\.)?toolkitafrica\.ac\.ke~i', home_url(), $content_image );
+		$content_image = $normalize_story_image( $match[2] );
+		if ( $content_image ) return $content_image;
+	}
+
+	$elementor_data = json_decode( (string) get_post_meta( $post_id, '_elementor_data', true ), true );
+	if ( is_array( $elementor_data ) ) {
+		$queue = array( $elementor_data );
+		while ( $queue ) {
+			$item = array_shift( $queue );
+			if ( ! is_array( $item ) ) continue;
+			foreach ( $item as $key => $value ) {
+				if ( 'url' === $key && is_string( $value ) && preg_match( '/\.(?:jpe?g|png|webp)(?:\?.*)?$/i', $value ) ) {
+					$elementor_image = $normalize_story_image( $value );
+					if ( $elementor_image ) return $elementor_image;
+				}
+				if ( is_array( $value ) ) $queue[] = $value;
+			}
 		}
 	}
 
