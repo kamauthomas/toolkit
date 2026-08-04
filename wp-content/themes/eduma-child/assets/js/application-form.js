@@ -58,10 +58,19 @@
     select.disabled = !(items && items.length);
   }
 
-  function showMessage(text, type) {
+  function showMessage(text, type, action) {
     message.hidden = false;
     message.className = 'application-message ' + (type || 'is-info');
     message.textContent = text;
+    if (action && action.url) {
+      var link = document.createElement('a');
+      link.className = 'application-message__action';
+      link.href = action.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = action.label || 'Continue';
+      message.appendChild(link);
+    }
   }
 
   function loadOptions() {
@@ -157,8 +166,8 @@
       if (row[1]) html += '<div><dt>' + escapeHtml(row[0]) + '</dt><dd>' + escapeHtml(String(row[1])) + '</dd></div>';
     });
     form.querySelector('#application-review').innerHTML = html + '</dl>';
-    form.querySelector('[data-submit-note]').textContent = config.integrationActive ? 'Your application will be sent securely to Mzizi.' : 'Direct Mzizi submission is awaiting final approval. Continue to the official portal to apply.';
-    submitButton.innerHTML = config.integrationActive ? 'Submit application <i class="fas fa-arrow-right" aria-hidden="true"></i>' : 'Continue to official portal <i class="fas fa-external-link-alt" aria-hidden="true"></i>';
+    form.querySelector('[data-submit-note]').textContent = config.integrationActive ? 'Your application will be stored securely before it is sent to Mzizi.' : 'Your application will be stored securely, then you can continue to the official Mzizi portal.';
+    submitButton.innerHTML = config.integrationActive ? 'Save & submit application <i class="fas fa-arrow-right" aria-hidden="true"></i>' : 'Save application <i class="fas fa-save" aria-hidden="true"></i>';
   }
 
   function escapeHtml(value) {
@@ -184,17 +193,12 @@
   form.addEventListener('submit', function (event) {
     event.preventDefault();
     if (!validateStep(currentStep)) return;
-    if (!config.integrationActive) {
-      window.open(config.mziziHandoff, '_blank', 'noopener');
-      showMessage('The official Mzizi application portal has opened in a new tab. Your Toolkit form data was not transmitted.', 'is-info');
-      return;
-    }
     var payload = {};
     new FormData(form).forEach(function (value, key) { payload[key] = value; });
     submitButton.disabled = true;
     showMessage('Submitting your application securely…', 'is-info');
     api(config.endpoint, payload).then(function (result) {
-      showMessage(result.message || 'Application submitted successfully.', 'is-success');
+      showMessage(result.message || 'Application saved successfully.', 'is-success', result.handoff_url ? { url: result.handoff_url, label: 'Continue to official Mzizi portal' } : null);
       form.reset();
       setStep(0);
       if (window.turnstile) window.turnstile.reset();

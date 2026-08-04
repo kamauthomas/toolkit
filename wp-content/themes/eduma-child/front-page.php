@@ -186,7 +186,7 @@ $slides = eduma_child_get_hero_slides();
 
 			<div class="home-who__quick">
 				<h3>Quick Links</h3>
-				<a class="home-who__pill" href="<?php echo esc_url( home_url( '/our-ventures/toolkit-courses-apply-today/' ) ); ?>">
+				<a class="home-who__pill" href="<?php echo esc_url( home_url( '/apply/' ) ); ?>">
 					<span class="home-who__pill-icon" aria-hidden="true"><i class="fas fa-graduation-cap"></i></span>
 					<span>Toolkit Courses: Apply Now</span>
 					<i class="fas fa-arrow-right" aria-hidden="true"></i>
@@ -291,7 +291,7 @@ if ( $home_stories->have_posts() ) :
 </div></section>
 <?php wp_reset_postdata(); endif; ?>
 
-<section class="home-apply-band"><div><p>Admissions</p><h2>Ready to build practical skills?</h2><span>Review the current courses and complete a guided application.</span></div><div><a class="home-modern__button home-modern__button--orange" href="<?php echo esc_url( home_url( '/our-ventures/toolkit-courses-apply-today/' ) ); ?>">Apply now <i class="fas fa-arrow-right" aria-hidden="true"></i></a><a class="home-modern__button home-modern__button--outline" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Talk to admissions</a></div></section>
+<section class="home-apply-band"><div><p>Admissions</p><h2>Ready to build practical skills?</h2><span>Review the current courses and complete a guided application.</span></div><div><a class="home-modern__button home-modern__button--orange" href="<?php echo esc_url( home_url( '/apply/' ) ); ?>">Apply now <i class="fas fa-arrow-right" aria-hidden="true"></i></a><a class="home-modern__button home-modern__button--outline" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Talk to admissions</a></div></section>
 <?php
 
 get_footer();

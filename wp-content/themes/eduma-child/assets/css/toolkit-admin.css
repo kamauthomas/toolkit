@@ -47,12 +47,13 @@
 
 .toolkit-admin__stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
   gap: 14px;
   margin-bottom: 18px;
 }
 
 .toolkit-admin__stats a,
+.toolkit-admin__stat,
 .toolkit-admin__panel {
   border: 1px solid var(--toolkit-line);
   background: #fff;
@@ -65,6 +66,12 @@
   padding: 18px;
   color: var(--toolkit-ink);
   text-decoration: none;
+}
+
+.toolkit-admin__stat {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
 }
 
 .toolkit-admin__stats a:hover {
@@ -81,6 +88,38 @@
   font-size: 28px;
 }
 
+.toolkit-admin__stats .toolkit-admin__path {
+  overflow: hidden;
+  font-size: 17px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolkit-admin__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 10px;
+  border: 1px solid var(--toolkit-line);
+  background: #fff;
+}
+
+.toolkit-admin__quick a {
+  padding: 9px 14px;
+  border-radius: 999px;
+  color: var(--toolkit-ink);
+  background: #f1f3e8;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.toolkit-admin__quick a:hover {
+  color: #fff;
+  background: var(--toolkit-teal);
+}
+
 .toolkit-admin__grid {
   display: grid;
   grid-template-columns: minmax(340px, .9fr) minmax(0, 1.1fr);
@@ -94,6 +133,107 @@
 .toolkit-admin__panel h2 {
   margin-top: 0;
 }
+
+.toolkit-admin__panel-heading,
+.toolkit-record__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+
+.toolkit-admin__panel-heading small,
+.toolkit-record__heading p {
+  display: block;
+  margin: 0 0 3px;
+  color: #737967;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.toolkit-admin__panel-heading h2,
+.toolkit-record__heading h2 {
+  margin: 0;
+}
+
+.toolkit-pill,
+.toolkit-health,
+.toolkit-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.toolkit-pill { color: #3d4517; background: #eef0ce; }
+.toolkit-health--good { color: #075953; background: #dff2ef; }
+.toolkit-status { color: #39402e; background: #edf0e7; }
+.toolkit-status--delivered { color: #075953; background: #dff2ef; }
+.toolkit-status--relay_failed,
+.toolkit-status--validation_failed { color: #8c2f19; background: #fde7df; }
+.toolkit-status--handoff_required { color: #6d4d00; background: #fff1c8; }
+
+.toolkit-admin__toolbar,
+.toolkit-admin__range {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 14px;
+  border: 1px solid var(--toolkit-line);
+  background: #fff;
+}
+
+.toolkit-admin__toolbar label {
+  display: grid;
+  gap: 5px;
+  color: #626858;
+  font-weight: 700;
+}
+
+.toolkit-admin__search { flex: 1 1 240px; }
+.toolkit-admin__search input { width: 100%; }
+
+.toolkit-admin__range { align-items: center; }
+.toolkit-admin__range span { margin-right: auto; font-weight: 800; }
+.toolkit-admin__range button {
+  padding: 7px 12px;
+  border: 1px solid var(--toolkit-line);
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+}
+.toolkit-admin__range button.is-active { color: #fff; border-color: var(--toolkit-teal); background: var(--toolkit-teal); }
+
+.toolkit-admin__table-wrap { overflow-x: auto; }
+.toolkit-admin__table td { vertical-align: middle; }
+.toolkit-admin__table td small { display: block; margin-top: 4px; color: #72776b; }
+
+.toolkit-application-record {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, .55fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.toolkit-record__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 24px;
+  margin: 0;
+}
+
+.toolkit-record__facts div { padding: 11px 0; border-bottom: 1px solid #edf0e7; }
+.toolkit-record__facts dt { color: #737967; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.toolkit-record__facts dd { margin: 4px 0 0; color: var(--toolkit-ink); font-weight: 650; overflow-wrap: anywhere; }
+.toolkit-record__actions { display: flex; flex-wrap: wrap; gap: 7px; }
 
 .toolkit-admin__status {
   margin: 0;
@@ -145,6 +285,8 @@
   .toolkit-admin__grid {
     grid-template-columns: 1fr;
   }
+
+  .toolkit-application-record { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
@@ -158,4 +300,6 @@
   .toolkit-admin__links {
     grid-template-columns: 1fr;
   }
+
+  .toolkit-record__facts { grid-template-columns: 1fr; }
 }

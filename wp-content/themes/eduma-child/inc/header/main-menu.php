@@ -131,7 +131,7 @@ if ( $menu_has_expected_labels( $primary_menu ) ) {
 
 		printf(
 			'<li class="menu-right menu-right--fallback"><a class="header-apply-btn" href="%s">%s</a></li>',
-			esc_url( home_url( '/our-ventures/toolkit-courses-apply-today/' ) ),
+			esc_url( home_url( '/apply/' ) ),
 			esc_html__( 'Apply Now', 'eduma-child' )
 		);
 	}

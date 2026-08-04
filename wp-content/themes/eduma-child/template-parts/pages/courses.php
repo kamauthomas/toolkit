@@ -3,7 +3,7 @@ require_once get_stylesheet_directory() . '/inc/course-catalog.php';
 get_header();
 $catalog   = eduma_child_course_catalog();
 $is_2026   = eduma_child_2026_catalog_enabled();
-$apply_url = home_url( '/our-ventures/toolkit-courses-apply-today/' );
+$apply_url = home_url( '/apply/' );
 $hero      = get_stylesheet_directory_uri() . '/assets/images/courses/electrical.jpg';
 ?>
 <main id="main-content" class="toolkit-page toolkit-courses-page">

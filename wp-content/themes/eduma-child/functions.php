@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.8';
+	return '2026.08.04.9';
 }
 
 function toolkit_is_demo_environment() {
@@ -159,7 +159,7 @@ function eduma_child_2026_pricing_enabled() {
 
 function toolkit_speak_up_enabled() {
 	$host          = isset( $_SERVER['HTTP_HOST'] ) ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : '';
-	$local_default = in_array( $host, array( '127.0.0.1:8001', 'localhost:8001' ), true );
+	$local_default = in_array( $host, array( 'demo.toolkitafrica.ac.ke', '127.0.0.1:8001', 'localhost:8001' ), true );
 	return eduma_child_switch( 'TOOLKIT_SPEAK_UP_ENABLED', 'toolkit_speak_up_enabled', $local_default );
 }
 
@@ -354,6 +354,19 @@ add_action( 'init', function() {
 	}
 } );
 
+/* Keep the database-backed application page on the concise public URL. */
+add_action( 'init', function() {
+	$page          = get_page_by_path( 'our-ventures/toolkit-courses-apply-today' );
+	$route_version = $page ? '2026-1-' . $page->ID : '2026-1-missing';
+	if ( $page ) {
+		add_rewrite_rule( '^apply/?$', 'index.php?page_id=' . (int) $page->ID, 'top' );
+	}
+	if ( $route_version !== get_option( 'eduma_child_apply_route_version' ) ) {
+		flush_rewrite_rules( false );
+		update_option( 'eduma_child_apply_route_version', $route_version, false );
+	}
+} );
+
 /* Database-independent profile landing page for social account bios. */
 add_action( 'init', function() {
 	$route_version = eduma_child_redesign_enabled() ? '2026-1-on' : '2026-1-off';
@@ -411,14 +424,14 @@ add_action( 'template_redirect', function() {
 
 add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
 	$path = wp_parse_url( $requested_url, PHP_URL_PATH );
-	return in_array( untrailingslashit( $path ), array( '/llms.txt', '/llms-full.txt' ), true ) ? false : $redirect_url;
+	return in_array( untrailingslashit( $path ), array( '/llms.txt', '/llms-full.txt', '/apply' ), true ) ? false : $redirect_url;
 }, 10, 2 );
 
 /* Retire unused public routes without deleting their WordPress records. */
 add_action( 'template_redirect', function() {
 	$request_path = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) : '';
-	if ( '/apply' === untrailingslashit( $request_path ) ) {
-		wp_safe_redirect( home_url( '/our-ventures/toolkit-courses-apply-today/' ), 301, 'The Toolkit for Skills and Innovation' );
+	if ( is_page( 'toolkit-courses-apply-today' ) && '/apply' !== untrailingslashit( $request_path ) ) {
+		wp_safe_redirect( home_url( '/apply/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
 	if ( is_page( 'students-portal' ) ) {
@@ -830,6 +843,9 @@ function eduma_child_course_canonical_url() {
 }
 
 add_filter( 'wpseo_canonical', function( $canonical ) {
+	if ( is_page( 'toolkit-courses-apply-today' ) ) {
+		return home_url( '/apply/' );
+	}
 	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
 		return home_url( '/speak-up/' );
 	}
@@ -847,7 +863,9 @@ add_filter( 'wpseo_canonical', function( $canonical ) {
 } );
 
 function toolkit_demo_production_canonical_url( $canonical = '' ) {
-	if ( get_query_var( 'toolkit_connect' ) ) {
+	if ( is_page( 'toolkit-courses-apply-today' ) ) {
+		$canonical = home_url( '/apply/' );
+	} elseif ( get_query_var( 'toolkit_connect' ) ) {
 		$canonical = home_url( '/connect/' );
 	} elseif ( get_query_var( 'toolkit_reception' ) ) {
 		$canonical = home_url( '/reception/' );
@@ -892,6 +910,9 @@ add_filter( 'thim/structured_data/types', function( $types ) {
 }, 100 );
 
 add_filter( 'wpseo_opengraph_url', function( $url ) {
+	if ( is_page( 'toolkit-courses-apply-today' ) ) {
+		return home_url( '/apply/' );
+	}
 	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
 		return home_url( '/speak-up/' );
 	}
@@ -922,6 +943,31 @@ add_filter( 'wpseo_schema_webpage', function( $data ) {
 	unset( $data['breadcrumb'] );
 	return $data;
 }, 30 );
+
+add_filter( 'wpseo_schema_webpage', function( $data ) {
+	if ( ! is_page( 'toolkit-courses-apply-today' ) ) {
+		return $data;
+	}
+	$url                = home_url( '/apply/' );
+	$data['url']        = $url;
+	$data['@id']        = $url . '#webpage';
+	$data['breadcrumb'] = array( '@id' => $url . '#breadcrumb' );
+	return $data;
+}, 40 );
+
+add_filter( 'wpseo_schema_breadcrumb', function( $data ) {
+	if ( is_page( 'toolkit-courses-apply-today' ) ) {
+		$data['@id'] = home_url( '/apply/#breadcrumb' );
+	}
+	return $data;
+}, 40 );
+
+add_filter( 'wpseo_sitemap_entry', function( $url, $type, $object ) {
+	if ( 'post' === $type && $object instanceof WP_Post && 'toolkit-courses-apply-today' === $object->post_name ) {
+		$url['loc'] = home_url( '/apply/' );
+	}
+	return $url;
+}, 20, 3 );
 
 add_filter( 'wpseo_sitemap_page_content', function( $content ) {
 	if ( ! eduma_child_redesign_enabled() ) {
@@ -1354,7 +1400,7 @@ add_action( 'template_redirect', function() {
 		'- [About The Toolkit for Skills and Innovation](' . home_url( '/about-toolkit-africa/' ) . ')',
 		'- [Current course directory](' . home_url( '/our-ventures/' ) . ')',
 		'- [MIG/MAG Welding training](' . home_url( '/our-ventures/construction-sector-skills/' ) . ')',
-		'- [Admissions guidance](' . home_url( '/our-ventures/toolkit-courses-apply-today/' ) . ')',
+		'- [Admissions guidance](' . home_url( '/apply/' ) . ')',
 		'- [Notice Board](' . home_url( '/notice-board/' ) . ')',
 		'- [Toolkit Blog](' . home_url( '/toolkit-blog/' ) . ')',
 		'- [Contact](' . home_url( '/contact/' ) . ')',

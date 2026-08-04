@@ -1,7 +1,7 @@
 <?php
 get_header();
 $image     = get_stylesheet_directory_uri() . '/assets/images/pages/notice-board.jpg';
-$apply_url = home_url( '/our-ventures/toolkit-courses-apply-today/' );
+$apply_url = home_url( '/apply/' );
 ?>
 <main id="main-content" class="toolkit-page toolkit-notice-page">
 	<section class="toolkit-notice-hero" style="background-image:url('<?php echo esc_url( $image ); ?>')">

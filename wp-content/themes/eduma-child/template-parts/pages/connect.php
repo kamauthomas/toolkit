@@ -1,7 +1,7 @@
 <?php
 get_header();
 $assets = get_stylesheet_directory_uri() . '/assets/images/';
-$apply  = home_url( '/our-ventures/toolkit-courses-apply-today/' );
+$apply  = home_url( '/apply/' );
 ?>
 <main id="main-content" class="toolkit-connect-page">
 	<section class="connect-hero">

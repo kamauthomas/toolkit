@@ -2,7 +2,7 @@
 
 function eduma_child_get_hero_slides() {
 	$assets = get_stylesheet_directory_uri() . '/assets/images/';
-	$apply_url = home_url( '/our-ventures/toolkit-courses-apply-today/' );
+	$apply_url = home_url( '/apply/' );
 	return array(
 		array(
 			'image'         => $assets . 'hero-slide-1.webp',

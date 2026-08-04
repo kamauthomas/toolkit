@@ -87,7 +87,7 @@ function toolkit_support_config() {
 	$topics   = array(
 		'courses' => array( 'label' => 'Courses', 'reply' => $settings['courses_reply'], 'url' => home_url( '/our-ventures/' ), 'linkLabel' => 'Explore courses' ),
 		'fees'    => array( 'label' => 'Fees', 'reply' => $settings['fees_reply'], 'url' => home_url( '/our-ventures/' ), 'linkLabel' => 'View course details' ),
-		'apply'   => array( 'label' => 'How to apply', 'reply' => $settings['apply_reply'], 'url' => home_url( '/our-ventures/toolkit-courses-apply-today/' ), 'linkLabel' => 'Start application' ),
+		'apply'   => array( 'label' => 'How to apply', 'reply' => $settings['apply_reply'], 'url' => home_url( '/apply/' ), 'linkLabel' => 'Start application' ),
 		'contact' => array( 'label' => 'Contact Toolkit', 'reply' => $settings['contact_reply'], 'url' => home_url( '/contact/' ), 'linkLabel' => 'Contact Toolkit' ),
 	);
 	if ( function_exists( 'toolkit_speak_up_enabled' ) && toolkit_speak_up_enabled() ) {

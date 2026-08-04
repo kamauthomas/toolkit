@@ -32,6 +32,6 @@ $posts  = new WP_Query( array(
 	<?php else : ?>
 	<section class="toolkit-blog-empty toolkit-section"><p class="toolkit-kicker">New stories coming soon</p><h2>Toolkit updates are being prepared</h2><p>For current programme and admissions information, visit the Notice Board or speak with the Toolkit team.</p><a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( home_url( '/notice-board/' ) ); ?>">Visit Notice Board</a></section>
 	<?php endif; wp_reset_postdata(); ?>
-	<section class="toolkit-institutional-cta"><div><h2>Looking for admissions information?</h2><p>See current notices and use the guided application route.</p></div><a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( home_url( '/our-ventures/toolkit-courses-apply-today/' ) ); ?>">Apply now <i class="fas fa-arrow-right" aria-hidden="true"></i></a></section>
+	<section class="toolkit-institutional-cta"><div><h2>Looking for admissions information?</h2><p>See current notices and use the guided application route.</p></div><a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( home_url( '/apply/' ) ); ?>">Apply now <i class="fas fa-arrow-right" aria-hidden="true"></i></a></section>
 </main>
 <?php get_footer();

@@ -10,7 +10,7 @@ if ( ! $course ) {
 	include get_404_template();
 	return;
 }
-$apply_url  = home_url( '/our-ventures/toolkit-courses-apply-today/?course=' . rawurlencode( $course['title'] ) );
+$apply_url  = home_url( '/apply/?course=' . rawurlencode( $course['title'] ) );
 $kicker     = $slug ? '2026 admissions prospectus' : 'Toolkit course pathway';
 $course_key = $slug ? $slug : eduma_child_get_legacy_course_key_for_page();
 $experience = eduma_child_course_experience( $course_key );

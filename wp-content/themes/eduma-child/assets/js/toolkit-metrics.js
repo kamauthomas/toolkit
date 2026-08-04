@@ -54,7 +54,7 @@
     try {
       var target = new URL(link.href, location.href);
       if (target.host !== location.host) send('outbound_click', 1);
-      if (target.pathname.indexOf('toolkit-courses-apply-today') !== -1) send('interaction', 1, 'application_start');
+      if (target.pathname === '/apply/' || target.pathname.indexOf('toolkit-courses-apply-today') !== -1) send('interaction', 1, 'application_start');
       else if (target.pathname.indexOf('our-ventures') !== -1) send('interaction', 1, 'course_navigation');
       else if (/youtu|youtube/.test(target.host)) send('interaction', 1, 'testimonial_video');
     } catch (ignore) {}

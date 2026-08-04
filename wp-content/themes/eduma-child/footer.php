@@ -46,7 +46,7 @@ $logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 			<div class="toolkit-site-footer__action">
 				<h2>Ready to learn?</h2>
 				<p>Explore practical training and choose the pathway that fits your goals.</p>
-				<a class="toolkit-site-footer__button" href="<?php echo esc_url( home_url( '/our-ventures/toolkit-courses-apply-today/' ) ); ?>">Apply now <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+				<a class="toolkit-site-footer__button" href="<?php echo esc_url( home_url( '/apply/' ) ); ?>">Apply now <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
 			</div>
 		</div>
 	</div>
