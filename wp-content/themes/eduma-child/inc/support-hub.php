@@ -36,7 +36,7 @@ add_action( 'init', function() {
 		'show_in_rest' => false,
 		'supports'     => array( 'title', 'editor' ),
 	) );
-	register_post_type( 'toolkit_whistleblower', array(
+	register_post_type( 'toolkit_speakup', array(
 		'labels'       => array( 'name' => 'Speak-up reports', 'singular_name' => 'Speak-up report' ),
 		'public'       => false,
 		'show_ui'      => false,
@@ -118,10 +118,10 @@ function toolkit_submit_speak_up( WP_REST_Request $request ) {
 	}
 	if ( $contact && ! $email && ! $phone ) return new WP_Error( 'missing_contact', 'Add an email or phone number, or leave follow-up switched off.', array( 'status' => 400 ) );
 	if ( $email && ! is_email( $email ) ) return new WP_Error( 'invalid_email', 'Enter a valid email address.', array( 'status' => 400 ) );
-	$post_id = wp_insert_post( array( 'post_type' => 'toolkit_whistleblower', 'post_status' => 'private', 'post_title' => 'Speak-up report: ' . $category, 'post_content' => $report ), true );
+	$post_id = wp_insert_post( array( 'post_type' => 'toolkit_speakup', 'post_status' => 'private', 'post_title' => 'Speak-up report: ' . $category, 'post_content' => $report ), true );
 	if ( is_wp_error( $post_id ) ) return new WP_Error( 'storage_failed', 'The report could not be saved. Please use the direct contact options on this page.', array( 'status' => 500 ) );
 	foreach ( array( '_toolkit_category' => $category, '_toolkit_name' => $name, '_toolkit_email' => $email, '_toolkit_phone' => $phone, '_toolkit_contact_requested' => $contact ? 'yes' : 'no', '_toolkit_status' => 'new', '_toolkit_page' => toolkit_support_clean_path( $request->get_param( 'page' ) ) ) as $key => $value ) update_post_meta( $post_id, $key, $value );
-	return new WP_REST_Response( array( 'message' => 'Thank you. Your report has been recorded for restricted review. Keep the reference below if you chose follow-up: SU-' . str_pad( (string) $post_id, 6, '0', STR_PAD_LEFT ) ), 201 );
+	return new WP_REST_Response( array( 'message' => 'Thank you. Your report has been recorded for restricted review. Keep this reference for your records: SU-' . str_pad( (string) $post_id, 6, '0', STR_PAD_LEFT ) ), 201 );
 }
 
 function toolkit_support_validate_request( WP_REST_Request $request, $limit = 8 ) {
@@ -248,7 +248,7 @@ add_action( 'admin_menu', function() {
 
 function toolkit_support_render_speak_up() {
 	toolkit_support_admin_header( 'Speak-up reports', 'Restricted review queue. Do not forward reports outside the authorised safeguarding process.' );
-	$items = get_posts( array( 'post_type' => 'toolkit_whistleblower', 'post_status' => 'private', 'numberposts' => 100, 'orderby' => 'date', 'order' => 'DESC' ) );
+	$items = get_posts( array( 'post_type' => 'toolkit_speakup', 'post_status' => 'private', 'numberposts' => 100, 'orderby' => 'date', 'order' => 'DESC' ) );
 	echo '<table class="widefat striped" style="margin-top:18px"><thead><tr><th>Date</th><th>Type</th><th>Report</th><th>Follow-up</th><th>Status</th></tr></thead><tbody>';
 	foreach ( $items as $item ) { printf( '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>', esc_html( get_the_date( 'Y-m-d H:i', $item ) ), esc_html( get_post_meta( $item->ID, '_toolkit_category', true ) ), esc_html( wp_trim_words( $item->post_content, 24 ) ), esc_html( get_post_meta( $item->ID, '_toolkit_contact_requested', true ) === 'yes' ? 'Requested' : 'Anonymous' ), esc_html( get_post_meta( $item->ID, '_toolkit_status', true ) ?: 'new' ) ); }
 	if ( ! $items ) echo '<tr><td colspan="5">No reports have been submitted.</td></tr>';

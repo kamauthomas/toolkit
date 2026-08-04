@@ -141,7 +141,7 @@ function eduma_child_is_custom_surface() {
 	if ( ! eduma_child_redesign_enabled() || is_admin() ) {
 		return false;
 	}
-	if ( get_query_var( 'toolkit_connect' ) || get_query_var( 'toolkit_reception' ) || is_front_page() || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || get_query_var( 'toolkit_course' ) ) {
+	if ( get_query_var( 'toolkit_connect' ) || get_query_var( 'toolkit_reception' ) || get_query_var( 'toolkit_speak_up' ) || is_front_page() || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || get_query_var( 'toolkit_course' ) ) {
 		return true;
 	}
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
@@ -167,7 +167,7 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_script( 'toolkit-home-experience', get_stylesheet_directory_uri() . '/assets/js/home-experience.js', array(), toolkit_asset_version( $experience_path ), true );
 	}
 
-	if ( eduma_child_redesign_enabled() && ( is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || $legacy_course || get_query_var( 'toolkit_course' ) ) ) {
+	if ( eduma_child_redesign_enabled() && ( get_query_var( 'toolkit_speak_up' ) || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || $legacy_course || get_query_var( 'toolkit_course' ) ) ) {
 		$page_css_ver = toolkit_asset_version( get_stylesheet_directory() . '/page-redesign.css' );
 		$page_js_ver  = toolkit_asset_version( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
@@ -348,7 +348,13 @@ add_filter( 'query_vars', function( $vars ) {
 } );
 
 add_action( 'template_redirect', function() {
-	if ( get_query_var( 'toolkit_speak_up' ) ) { global $wp_query; $wp_query->is_404 = false; status_header( 200 ); }
+	if ( get_query_var( 'toolkit_speak_up' ) ) {
+		global $wp_query;
+		$wp_query->is_404     = false;
+		$wp_query->is_home    = false;
+		$wp_query->is_archive = false;
+		status_header( 200 );
+	}
 	if ( get_query_var( 'toolkit_connect' ) ) {
 		global $wp_query;
 		if ( ! eduma_child_redesign_enabled() ) {
@@ -518,6 +524,13 @@ function eduma_child_redesigned_page_metadata() {
 		return array(
 			'title'       => 'Reception | The Toolkit for Skills and Innovation',
 			'description' => 'Send a reception request to The Toolkit for Skills and Innovation before your visit to our training centre in Kikuyu, Kenya.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
+		);
+	}
+	if ( get_query_var( 'toolkit_speak_up' ) ) {
+		return array(
+			'title'       => 'Speak Up Safely | The Toolkit for Skills and Innovation',
+			'description' => 'Use the dedicated Toolkit speak-up channel to report safety, misconduct, fraud, harassment, discrimination, or another serious concern for restricted review.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
 		);
 	}
@@ -718,6 +731,9 @@ function eduma_child_course_canonical_url() {
 }
 
 add_filter( 'wpseo_canonical', function( $canonical ) {
+	if ( get_query_var( 'toolkit_speak_up' ) ) {
+		return home_url( '/speak-up/' );
+	}
 	if ( get_query_var( 'toolkit_connect' ) ) {
 		return home_url( '/connect/' );
 	}
@@ -729,6 +745,9 @@ add_filter( 'wpseo_canonical', function( $canonical ) {
 } );
 
 add_filter( 'wpseo_opengraph_url', function( $url ) {
+	if ( get_query_var( 'toolkit_speak_up' ) ) {
+		return home_url( '/speak-up/' );
+	}
 	if ( get_query_var( 'toolkit_connect' ) ) {
 		return home_url( '/connect/' );
 	}
@@ -738,6 +757,18 @@ add_filter( 'wpseo_opengraph_url', function( $url ) {
 	$course_url = eduma_child_course_canonical_url();
 	return $course_url ? $course_url : $url;
 } );
+
+add_filter( 'wpseo_schema_webpage', function( $data ) {
+	if ( ! get_query_var( 'toolkit_speak_up' ) ) return $data;
+	$metadata            = eduma_child_redesigned_page_metadata();
+	$data['@id']         = home_url( '/speak-up/#webpage' );
+	$data['url']         = home_url( '/speak-up/' );
+	$data['name']        = $metadata['title'];
+	$data['description'] = $metadata['description'];
+	$data['@type']       = 'WebPage';
+	unset( $data['breadcrumb'] );
+	return $data;
+}, 30 );
 
 add_filter( 'wpseo_sitemap_page_content', function( $content ) {
 	if ( ! eduma_child_redesign_enabled() ) {
@@ -857,6 +888,7 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 	$image_id        = $metadata ? $metadata['image'] . '#primaryimage' : '';
 	$has_image       = false;
 	$has_course      = false;
+	$has_webpage     = false;
 	foreach ( $graph as $candidate ) {
 		if ( ! is_array( $candidate ) ) {
 			continue;
@@ -920,6 +952,9 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 		if ( in_array( 'Course', $types, true ) ) {
 			$has_course = true;
 		}
+		if ( in_array( 'WebPage', $types, true ) ) {
+			$has_webpage = true;
+		}
 		if ( in_array( 'ImageObject', $types, true ) && $image_id && isset( $node['@id'] ) && $image_id === $node['@id'] ) {
 			$has_image = true;
 		}
@@ -937,6 +972,21 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 		}
 	}
 	unset( $node );
+
+	if ( get_query_var( 'toolkit_speak_up' ) && $metadata && ! $has_webpage ) {
+		$graph[] = array(
+			'@type'              => 'WebPage',
+			'@id'                => home_url( '/speak-up/#webpage' ),
+			'url'                => home_url( '/speak-up/' ),
+			'name'               => $metadata['title'],
+			'description'        => $metadata['description'],
+			'isPartOf'           => array( '@id' => preg_replace( '/#organization$/', '#website', $organization_id ) ),
+			'about'              => array( '@id' => $organization_id ),
+			'primaryImageOfPage' => array( '@id' => $image_id ),
+			'image'              => array( '@id' => $image_id ),
+			'inLanguage'         => 'en-KE',
+		);
+	}
 	if ( $metadata ) {
 		$graph = array_values(
 			array_filter(
