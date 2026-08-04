@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.04.3';
+	return '2026.08.04.4';
 }
 
 function toolkit_is_demo_environment() {
@@ -1014,6 +1014,19 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 		}
 	}
 	unset( $node );
+
+	/* Virtual routes must not inherit the database-backed Blog breadcrumb. */
+	if ( get_query_var( 'toolkit_reception' ) || ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) ) {
+		$graph = array_values(
+			array_filter(
+				$graph,
+				static function ( $node ) {
+					$types = is_array( $node ) && isset( $node['@type'] ) ? (array) $node['@type'] : array();
+					return ! in_array( 'BreadcrumbList', $types, true );
+				}
+			)
+		);
+	}
 
 	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) && $metadata && ! $has_webpage ) {
 		$graph[] = array(
