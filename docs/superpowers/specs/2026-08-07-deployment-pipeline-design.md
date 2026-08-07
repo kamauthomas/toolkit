@@ -56,10 +56,14 @@ invoked as `python3 -m toolkit_deploy <command>`:
 ```
 scripts/toolkit_deploy/
   __main__.py      # CLI entry point, argument parsing, command dispatch
-  config.py        # loads config.yaml + secrets.env
+  config.py        # loads config.toml + secrets.env
   cpanel.py         # cPanel UAPI client: get_file_content, upload_files
-  release.py        # reads/bumps toolkit_theme_release() in functions.php
-  state.py           # reads/writes .toolkit-deploy/state.json
+  release.py        # given a version string (from state.py, never computed
+                     # by reading functions.php), rewrites the
+                     # toolkit_theme_release() return line in functions.php
+  state.py           # reads/writes .toolkit-deploy/state.json; owns the
+                     # next-version computation (state version + 1), the
+                     # only source of truth for "what version is live"
   verify.py          # post-deploy HTTP verification (cache-bust + bare recheck)
   deploy.py           # orchestrates backup -> upload -> release bump -> verify
   config.toml          # committed: environments, remote paths, smoke routes
@@ -77,36 +81,76 @@ library has no YAML parser.
 
 ### Commands
 
-- **`diff <env>`** — dry run. Computes `git diff --name-only <last-deployed-commit-for-env> HEAD -- wp-content/themes/eduma-child`, prints the file list. No network calls, no writes.
+- **`diff <env>`** — dry run. Computes `git diff --name-status
+  <state.<env>.commit> HEAD -- wp-content/themes/eduma-child`, prints
+  modified/added paths and, separately, any deleted paths flagged the same
+  way `deploy` would flag them (see step 1 below). No network calls, no
+  writes.
 - **`deploy demo`**:
-  1. Compute changed files via the same git diff as `diff`.
-  2. Fetch each changed file's *current remote* content via
-     `Fileman/get_file_content` and write it to
-     `rollbacks/demo-pre-<version>/<path>` (mirrors today's manual backup
-     step, but automatic and complete).
-  3. Compute the next release version (`YYYY.MM.DD.N`, auto-incrementing `N`
-     for additional deploys same day) and rewrite the `return '...';` line in
-     the local working copy of `functions.php` (staged for upload, not
-     committed automatically — see Error handling).
-  4. Upload changed files via `Fileman/upload_files`, non-`functions.php`
-     files first, `functions.php` last (matches existing convention: assets
-     and templates land before the file that activates them).
-  5. Verify (see below).
-  6. On success, record `{commit, version, verified: true, timestamp}` in
+  1. Compute changed paths via `git diff --name-status <state.demo.commit>
+     HEAD -- wp-content/themes/eduma-child`, split into `modified_or_added`
+     and `deleted` (from the `--name-status` letter). **Deletions are
+     explicitly out of scope for v1**: if `deleted` is non-empty, the command
+     prints the list and aborts before touching the network — no remote
+     delete is attempted. Removing a file from production/demo stays a
+     manual follow-up.
+  2. If `modified_or_added` is empty, print "nothing to deploy" and exit
+     0 without bumping the version, touching state, or making any network
+     call. (This also means: a deploy consisting only of an unrelated
+     `functions.php`-untouched change does not, by itself, force a
+     `functions.php` re-upload — see step 3.)
+  3. `functions.php` is unconditionally added to `modified_or_added` if not
+     already present — every non-empty deploy re-uploads it, because every
+     non-empty deploy bumps its release marker (step 5). This is the fix for
+     the backup gap below.
+  4. For every path in `modified_or_added` (including a
+     forced-in `functions.php`), fetch current remote content via
+     `Fileman/get_file_content`. A `file not found`-style response means the
+     path is new (no prior remote version) — record it in
+     `rollbacks/demo-pre-<version>/NEW_FILES.txt` instead of writing a
+     backup file for it (there is nothing to restore *to*). Every other path
+     writes its fetched content to `rollbacks/demo-pre-<version>/<path>`.
+     Because `functions.php` is now always in this set, it is always backed
+     up before every deploy that changes anything — closing the gap where it
+     could be silently overwritten with no prior copy saved.
+  5. Compute the next release version as `state.json`'s current
+     `demo.version` plus one, not by parsing the local `functions.php`
+     (which may hold an uncommitted bump from a prior run — `state.json` is
+     the only source updated exclusively on verified success, so it's the
+     one source of truth for "what version is actually live"): if
+     `state.demo.version` starts with today's date, increment the trailing
+     `N`; otherwise start a new `<today>.1`. Rewrite the `return '...';` line
+     in the local working copy of `functions.php` to this value (staged for
+     upload, not committed automatically — see Error handling).
+  6. Upload every path in `modified_or_added` via `Fileman/upload_files`,
+     non-`functions.php` files first, `functions.php` last (matches existing
+     convention: assets and templates land before the file that activates
+     them).
+  7. Verify (see below).
+  8. On success, record `{commit, version, verified: true, timestamp}` in
      `state.json` for `demo`.
 - **`deploy production`**:
-  - Same steps 1–5, but step 0 checks `state.json`: if `demo.commit !=
-    HEAD` or `demo.verified != true`, refuse with an explicit error naming
-    what's missing ("demo is on <x>, HEAD is <y> — run `deploy demo` first"
-    or "demo deploy exists but did not pass verification").
+  - Same steps as `deploy demo` (using `state.production.commit` as the diff
+    baseline and `production` as the `state.json` key throughout), but first
+    checks: if `demo.commit != HEAD` or `demo.verified != true`, refuse with
+    an explicit error naming what's missing ("demo is on <x>, HEAD is <y> —
+    run `deploy demo` first" or "demo deploy exists but did not pass
+    verification").
   - On success, records the same shape under `production` in `state.json`.
-- **`rollback <env> <version>`** — reads `rollbacks/<env>-pre-<version>/`,
-  re-uploads every file found there to its original relative path (functions.php
-  last, same ordering rule), then re-verifies.
+- **`rollback <env> <version>`** — reads `rollbacks/<env>-pre-<version>/`:
+  re-uploads every backed-up file found there to its original relative path
+  (`functions.php` last, same ordering rule), then re-verifies. If that
+  snapshot's `NEW_FILES.txt` is non-empty, the command prints those paths as
+  "these files were introduced by the deploy you just rolled back and were
+  NOT removed — remove them manually if they should no longer exist" rather
+  than deleting them itself. Consistent with deletions being manual
+  everywhere else in this tool (see step 1 of `deploy demo`): a single
+  automated-destructive-delete code path is one too many for a v1
+  single-operator tool with no undo for a wrong delete.
 
 ### Verification (`verify.py`)
 
-For each configured smoke route in `config.yaml` for the environment:
+For each configured smoke route in `config.toml` for the environment:
 
 1. Request with a cache-busting query parameter. Assert HTTP status is in the
    expected set (200 for normal routes; a route can declare `expect_status`
@@ -139,6 +183,14 @@ legitimately differ on this one while the flag rollout is in progress).
 - `rollback` re-verifies after restoring, so a rollback that doesn't
   actually fix things is visible immediately rather than assumed to have
   worked.
+- Concurrent/simultaneous runs of this tool (e.g. two people deploying at
+  once) are not guarded against — accepted as out of scope for a
+  single-operator internal tool, not silently unconsidered.
+- `state.json` is the single source of truth for both the diff baseline and
+  the demo-before-production gate. If it's lost or corrupted, recovery is
+  `toolkit_deploy bootstrap` (see Bootstrap) run again against whatever
+  commit/version is actually confirmed live — there is no automatic
+  reconciliation.
 
 ### Credentials
 
@@ -156,13 +208,20 @@ entries.
 No live-network CI here (shared cPanel hosting, no runner). Testable in
 isolation without touching the network:
 
-- `release.py`'s version-bump logic (given today's date + existing marker,
-  produce the correct next version) — pure function, unit-testable.
+- `state.py`'s next-version logic (given today's date and the current
+  `state.<env>.version`, produce the correct next version per the rule in
+  step 5 of `deploy demo`) — a pure function operating only on state data,
+  never on `functions.php` content, and unit-testable as such.
 - `config.py`'s TOML/env loading and validation (missing required fields
   raise a clear error).
 - `state.py`'s read/write round-trip and the demo-before-production gate
   logic in `deploy.py` (given a mocked state.json, does it correctly
   allow/refuse production deploys).
+- `deploy.py`'s partial-failure orchestration (which files it reports as
+  succeeded vs failed, and that it correctly skips the `state.json` write on
+  partial failure) against a mocked `cpanel.py` client that fails on a
+  chosen file — this doesn't need the real network, only a fake that returns
+  canned success/failure per call.
 
 `cpanel.py` and `verify.py` (the actual network-calling pieces) are exercised
 manually against demo before every real production deploy — which is exactly
