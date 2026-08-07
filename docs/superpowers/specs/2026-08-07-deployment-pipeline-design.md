@@ -65,7 +65,8 @@ scripts/toolkit_deploy/
                      # next-version computation (state version + 1), the
                      # only source of truth for "what version is live"
   verify.py          # post-deploy HTTP verification (cache-bust + bare recheck)
-  deploy.py           # orchestrates backup -> upload -> release bump -> verify
+  deploy.py           # orchestrates backup -> release bump (local edit) ->
+                     # upload -> verify
   config.toml          # committed: environments, remote paths, smoke routes
 ```
 
@@ -81,15 +82,21 @@ library has no YAML parser.
 
 ### Commands
 
-- **`diff <env>`** — dry run. Computes `git diff --name-status
+- **`diff <env>`** — dry run. Computes `git diff --no-renames --name-status
   <state.<env>.commit> HEAD -- wp-content/themes/eduma-child`, prints
   modified/added paths and, separately, any deleted paths flagged the same
   way `deploy` would flag them (see step 1 below). No network calls, no
-  writes.
+  writes. `--no-renames` is explicit and not left to `diff.renames` config:
+  without it, a renamed file reports as a single `R100\told\tnew` line that
+  a status/path parser would either break on or silently mis-bucket;
+  `--no-renames` collapses it into a plain delete + add pair that the
+  existing `deleted`/`modified_or_added` split already handles correctly.
 - **`deploy demo`**:
-  1. Compute changed paths via `git diff --name-status <state.demo.commit>
-     HEAD -- wp-content/themes/eduma-child`, split into `modified_or_added`
-     and `deleted` (from the `--name-status` letter). **Deletions are
+  1. Compute changed paths via `git diff --no-renames --name-status
+     <state.demo.commit> HEAD -- wp-content/themes/eduma-child`, split into
+     `modified_or_added` and `deleted` (from the `--name-status` letter; see
+     the `diff <env>` entry above for why `--no-renames` is required here).
+     **Deletions are
      explicitly out of scope for v1**: if `deleted` is non-empty, the command
      prints the list and aborts before touching the network — no remote
      delete is attempted. Removing a file from production/demo stays a
