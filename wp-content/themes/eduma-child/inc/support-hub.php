@@ -286,7 +286,13 @@ add_action( 'admin_post_toolkit_support_settings', function() {
 	}
 	update_option( 'toolkit_support_settings', $settings, false );
 	if ( ! defined( 'TOOLKIT_SPEAK_UP_ENABLED' ) ) {
-		update_option( 'toolkit_speak_up_enabled', isset( $_POST['speak_up_enabled'] ) ? 1 : 0 );
+		$was_enabled = (bool) get_option( 'toolkit_speak_up_enabled', false );
+		$now_enabled = isset( $_POST['speak_up_enabled'] );
+		update_option( 'toolkit_speak_up_enabled', $now_enabled ? 1 : 0 );
+		if ( $was_enabled !== $now_enabled ) {
+			flush_rewrite_rules( false );
+			do_action( 'litespeed_purge_all' );
+		}
 	}
 	wp_safe_redirect( admin_url( 'admin.php?page=toolkit-chatbot&updated=1' ) );
 	exit;
