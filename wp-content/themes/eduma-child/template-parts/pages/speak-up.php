@@ -22,7 +22,7 @@ get_header();
 			<button class="toolkit-button toolkit-button--primary" type="submit">Submit report</button><p class="toolkit-speak-up__status" role="status"></p>
 		</form>
 	</section>
-	<section class="toolkit-speak-up__direct"><h2>Prefer a direct channel?</h2><p>Call <a href="tel:+254709549200">+254 709 549 200</a> or WhatsApp <a href="https://wa.me/254711802855">+254 711 802 855</a>. Say that your message is a speak-up report.</p></section>
+	<section class="toolkit-speak-up__direct"><h2>Prefer a direct channel?</h2><p>Call or WhatsApp The Toolkit Director. Contact: <a href="tel:+254102802855">0102802855</a>. Email address: <a href="mailto:speakup@toolkitafrica.ac.ke">speakup@toolkitafrica.ac.ke</a>. Say that your message is a speak-up report.</p></section>
 </main>
 <script>
 (function(){var f=document.querySelector('[data-speak-up-form]');if(!f)return;var t=f.querySelector('[data-contact-toggle]'),c=f.querySelector('[data-contact-fields]'),s=f.querySelector('.toolkit-speak-up__status');t.addEventListener('change',function(){c.hidden=!t.checked;});f.addEventListener('submit',function(e){e.preventDefault();var b=f.querySelector('button'),d={};new FormData(f).forEach(function(v,k){d[k]=v;});d.contact_me=!!d.contact_me;d.consent=!!d.consent;b.disabled=true;s.textContent='Sending securely…';fetch('<?php echo esc_url( rest_url( 'toolkit/v1/speak-up' ) ); ?>',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json().then(function(x){if(!r.ok)throw Error(x.message||'The report could not be saved.');return x;});}).then(function(x){f.reset();c.hidden=true;s.textContent=x.message;}).catch(function(x){s.textContent=x.message;b.disabled=false;});});}());

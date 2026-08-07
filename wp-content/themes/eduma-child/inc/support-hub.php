@@ -124,8 +124,23 @@ function toolkit_submit_speak_up( WP_REST_Request $request ) {
 	$post_id = wp_insert_post( array( 'post_type' => 'toolkit_speakup', 'post_status' => 'private', 'post_title' => 'Speak-up report: ' . $category, 'post_content' => $report ), true );
 	if ( is_wp_error( $post_id ) ) return new WP_Error( 'storage_failed', 'The report could not be saved. Please use the direct contact options on this page.', array( 'status' => 500 ) );
 	foreach ( array( '_toolkit_category' => $category, '_toolkit_name' => $name, '_toolkit_email' => $email, '_toolkit_phone' => $phone, '_toolkit_contact_requested' => $contact ? 'yes' : 'no', '_toolkit_status' => 'new', '_toolkit_page' => toolkit_support_clean_path( $request->get_param( 'page' ) ) ) as $key => $value ) update_post_meta( $post_id, $key, $value );
+	wp_schedule_single_event( time(), 'toolkit_support_notify_speak_up', array( $post_id ) );
 	return new WP_REST_Response( array( 'message' => 'Thank you. Your report has been recorded for restricted review. Keep this reference for your records: SU-' . str_pad( (string) $post_id, 6, '0', STR_PAD_LEFT ) ), 201 );
 }
+
+add_action( 'toolkit_support_notify_speak_up', function( $post_id ) {
+	if ( 'toolkit_speakup' !== get_post_type( $post_id ) ) {
+		return;
+	}
+	$category = get_post_meta( $post_id, '_toolkit_category', true );
+	$reference = 'SU-' . str_pad( (string) $post_id, 6, '0', STR_PAD_LEFT );
+	$contact_requested = get_post_meta( $post_id, '_toolkit_contact_requested', true ) === 'yes';
+	wp_mail(
+		'speakup@toolkitafrica.ac.ke',
+		'New Toolkit speak-up report (restricted): ' . $reference,
+		"A new speak-up report has been submitted for restricted review.\n\nReference: {$reference}\nConcern type: {$category}\nFollow-up requested: " . ( $contact_requested ? 'Yes' : 'No, anonymous' ) . "\n\nThe report text and any contact details are stored in the restricted admin queue, not this email:\n" . admin_url( 'admin.php?page=toolkit-speak-up' )
+	);
+} );
 
 function toolkit_support_validate_request( WP_REST_Request $request, $limit = 8 ) {
 	$source = $request->get_header( 'origin' );
@@ -270,6 +285,9 @@ add_action( 'admin_post_toolkit_support_settings', function() {
 		$settings[ $field ] = sanitize_textarea_field( wp_unslash( $_POST[ $field ] ?? '' ) );
 	}
 	update_option( 'toolkit_support_settings', $settings, false );
+	if ( ! defined( 'TOOLKIT_SPEAK_UP_ENABLED' ) ) {
+		update_option( 'toolkit_speak_up_enabled', isset( $_POST['speak_up_enabled'] ) ? 1 : 0 );
+	}
 	wp_safe_redirect( admin_url( 'admin.php?page=toolkit-chatbot&updated=1' ) );
 	exit;
 } );
@@ -361,6 +379,11 @@ function toolkit_support_render_settings() {
 	toolkit_support_setting_checkbox( 'poll_enabled', 'Accept poll responses', $settings['poll_enabled'] );
 	toolkit_support_setting_textarea( 'poll_title', 'Poll question', $settings['poll_title'] );
 	toolkit_support_setting_textarea( 'poll_prompt', 'Poll guidance', $settings['poll_prompt'] );
+	if ( defined( 'TOOLKIT_SPEAK_UP_ENABLED' ) ) {
+		printf( '<tr><th scope="row">Enable Speak Up safely</th><td>Set by the server (<code>TOOLKIT_SPEAK_UP_ENABLED</code> is currently %s). Remove that constant to control this from here instead.</td></tr>', constant( 'TOOLKIT_SPEAK_UP_ENABLED' ) ? 'on' : 'off' );
+	} else {
+		toolkit_support_setting_checkbox( 'speak_up_enabled', 'Enable Speak Up safely (/speak-up/)', get_option( 'toolkit_speak_up_enabled', false ) );
+	}
 	echo '</tbody></table><p><button class="button button-primary" type="submit">Save chatbot settings</button></p></form></div>';
 }
 
