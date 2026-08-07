@@ -2517,3 +2517,22 @@ time
 5. Commit the scoped WordPress reception/gallery/report changes without absorbing unrelated working-tree files.
 6. Back up the demo child theme, deploy the reception form and both gallery templates to `demo.toolkitafrica.ac.ke`, configure the matching demo API URL/secret privately, purge LiteSpeed and provide those demo URLs for owner review.
 7. Update WMR-13 with actual demo evidence. Do not start production promotion before explicit demo acceptance.
+
+# Speak-up director contact + notification wiring — release 2026.08.07.1
+
+- Rollback point before this task: `e7d9021` (production/demo were on release `2026.08.04.21` at that hash).
+- Branch: `welding-seo-remediation`. Commit: `f530030` — "feat: publish speak-up director contact and report notifications".
+- Changed files: `wp-content/themes/eduma-child/template-parts/pages/speak-up.php`, `wp-content/themes/eduma-child/inc/support-hub.php`, `wp-content/themes/eduma-child/functions.php` (release marker bump only).
+- Deployed to demo then production via the cPanel Fileman UAPI (HTTP Basic auth), backup-first, templates/includes before `functions.php`. Rollback sets: `rollbacks/demo-pre-2026.08.07.1/`, `rollbacks/production-pre-2026.08.07.1/`.
+- Verified: `X-Toolkit-Release: 2026.08.07.1` on both environments; demo `/speak-up/` renders the new director contact copy; production homepage HTTP 200; production `/speak-up/` still 404 by design (feature flag off pending the one-click admin toggle).
+- Rollback: redeploy the files under `rollbacks/{demo,production}-pre-2026.08.07.1/` to their original paths, or `git revert f530030` and redeploy.
+- Outstanding: an authorised admin must check "Enable Speak Up safely" under Toolkit Control → Chatbot settings on production to make `/speak-up/` live there.
+
+# Speak-up cache-purge fix — release 2026.08.07.2
+
+- User reported that after toggling "Enable Speak Up safely" on in wp-admin (Toolkit Control -> Chatbot settings), production `/speak-up/` still returned HTTP 404 for real visitors.
+- Root cause: the option save handler updated `toolkit_speak_up_enabled` and WordPress itself served the page correctly on a cache-busted request, but nothing purged LiteSpeed's already-cached 404 for the bare `/speak-up/` URL. This is the same class of gap the release marker's `litespeed_purge_all` already solves for code releases, just missing for this specific option toggle.
+- Fix (commit `dec1b6e`): `admin_post_toolkit_support_settings` in `inc/support-hub.php` now flushes rewrite rules and fires `litespeed_purge_all` whenever the speak-up toggle actually changes state. Bumped `toolkit_theme_release()` to `2026.08.07.2` to force an immediate purge of the existing stale cache on deploy.
+- Rollback point before this fix: `f530030` (production/demo were on release `2026.08.07.1` at that hash, with `/speak-up/` toggled on in the DB but serving a stale cached 404).
+- Deployed `inc/support-hub.php` then `functions.php` to production first (where the stale cache actually was), verified bare `https://toolkitafrica.ac.ke/speak-up/` returns HTTP 200 with a fresh cache and the correct content, then deployed the same fix to demo. Rollback sets: `rollbacks/production-pre-2026.08.07.2/`, `rollbacks/demo-pre-2026.08.07.2/`.
+- Speak Up is now genuinely live end-to-end on both demo and production.
