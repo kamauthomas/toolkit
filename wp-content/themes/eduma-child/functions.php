@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.10.2';
+	return '2026.08.10.3';
 }
 
 function toolkit_is_demo_environment() {
@@ -80,6 +80,14 @@ function toolkit_normalize_public_brand_copy( $text ) {
 		$text
 	);
 	$text = preg_replace( '~\b(?:iShahit|Isahit)\s+hub\b~iu', 'iShahit centre', $text );
+	$text = str_replace(
+		array(
+			home_url( '/new/our-ventures/toolkit-courses-apply-today/' ),
+			'/new/our-ventures/toolkit-courses-apply-today/',
+		),
+		home_url( '/apply/' ),
+		$text
+	);
 	return $text;
 }
 
@@ -483,6 +491,10 @@ add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
 /* Retire unused public routes without deleting their WordPress records. */
 add_action( 'template_redirect', function() {
 	$request_path = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) : '';
+	if ( '/new/our-ventures/toolkit-courses-apply-today' === untrailingslashit( $request_path ) ) {
+		wp_safe_redirect( home_url( '/apply/' ), 301, 'The Toolkit for Skills and Innovation' );
+		exit;
+	}
 	if ( is_page( 'toolkit-courses-apply-today' ) && '/apply' !== untrailingslashit( $request_path ) ) {
 		wp_safe_redirect( home_url( '/apply/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
