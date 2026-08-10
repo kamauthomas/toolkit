@@ -13,6 +13,17 @@ organization’s pathway: identify labour-market demand, build technical and
 employability capability, connect learners to workplace exposure or enterprise,
 and use certification to make informal skills legible to employers.
 
+## Primary video anchor
+
+Toolkit’s official YouTube channel publishes **“TTI—Why We Exist: Director Jane
+Muigai Kamphuis”** (`HA2DXy271tc`). YouTube’s public oEmbed record confirms the
+title and publisher. The English transcript is not publicly available through
+the caption track, so the article must not present reconstructed dialogue as a
+direct quotation. Use the video as an embedded narrative companion and source
+specific quotations only after an editor manually verifies their timestamps.
+
+Video: https://www.youtube.com/watch?v=HA2DXy271tc
+
 ## Facts safe to use
 
 - The Toolkit for Skills and Innovation describes itself as a Kenya-based social

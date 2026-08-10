@@ -55,3 +55,17 @@ later commits are documentation-only. Do not bootstrap from the older
 The design is coherent and the rename-detection correction is sound. The major
 remaining gap is implementation plus isolated tests; no live deployment should
 be described as pipeline-driven until those files and the demo exercise exist.
+
+## Test and remote audit — 10 August 2026
+
+- `python3 -m pytest scripts/toolkit_deploy -q` could not collect tests because
+  `scripts/toolkit_deploy/` does not exist. This is a pipeline readiness failure,
+  not a passing empty suite.
+- No `.github/workflows/` pipeline exists in the repository.
+- After a fresh `git fetch --prune`, local `main` is 59 commits ahead of
+  `origin/wordpress-modernisation` and zero commits behind it. The WordPress
+  remote is therefore not up to date with the local consolidated source.
+- `origin/main` belongs to a separate daily-report application lineage. It is
+  eight commits ahead of its own merge base and must not be merged into or used
+  as the WordPress deployment target.
+- No push was performed during this audit.

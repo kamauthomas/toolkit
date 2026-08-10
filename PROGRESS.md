@@ -22,6 +22,23 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
   dated self-reported figures, project targets and claims requiring internal
   confirmation before publication.
 
+## 2026-08-10 Remote, pipeline-test and Toolkit story follow-up
+
+- Fetched `origin` and confirmed local WordPress `main` is zero commits behind
+  and 59 commits ahead of `origin/wordpress-modernisation`. The remote has not
+  received the consolidated source. `origin/main` is a separate daily-report
+  application lineage and is not a valid WordPress merge/deployment target.
+- Pipeline test discovery failed because `scripts/toolkit_deploy/` has not been
+  implemented. No tests were collected and no hosted workflow exists; this is
+  recorded as a readiness gap rather than a test pass.
+- Located Toolkit’s official Jane Muigai Kamphuis “Why We Exist” video and added
+  it to the research record without fabricating unavailable English transcript
+  quotations.
+- Prepared `docs/TOOLKIT-STORY-DRAFT-2026-08-10.md`, a sourced editorial draft
+  that distinguishes current institutional statements, historical programme
+  descriptions, partner-reported facts, project targets and figures requiring
+  dated internal confirmation.
+
 ## 2026-07-17 Mobile performance correction
 
 - Deployed homepage performance commit `68dce70` to the demo child theme. The release added responsive WebP hero assets, mobile-specific LCP preloading, and homepage removal of unused Elementor, Contact Form 7, Thim eKit, and Sina bundles.
