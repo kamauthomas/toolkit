@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.10.1';
+	return '2026.08.10.2';
 }
 
 function toolkit_is_demo_environment() {
@@ -550,6 +550,10 @@ add_filter( 'wpseo_sitemap_exclude_post_type', function( $excluded, $post_type )
 	return in_array( $post_type, toolkit_non_indexable_post_types(), true ) ? true : $excluded;
 }, 20, 2 );
 
+add_filter( 'wpseo_sitemap_exclude_taxonomy', function( $excluded, $taxonomy ) {
+	return 'category' === $taxonomy ? true : $excluded;
+}, 20, 2 );
+
 add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function( $ids ) {
 	foreach ( toolkit_non_indexable_post_slugs() as $slug ) {
 		$post = get_page_by_path( $slug, OBJECT, 'post' );
@@ -579,6 +583,7 @@ add_filter( 'wpseo_robots_array', function( $robots ) {
 	if (
 		toolkit_is_demo_environment()
 		|| is_author()
+		|| is_category()
 		|| is_page( eduma_child_non_public_page_slugs() )
 		|| in_array( $post_type, toolkit_non_indexable_post_types(), true )
 		|| in_array( $post_slug, toolkit_non_indexable_post_slugs(), true )
