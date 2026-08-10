@@ -236,11 +236,14 @@ what the tool itself enforces as a gate, so this mirrors production usage.
 
 ## Bootstrap
 
-Demo and production are already at commit `dec1b6e` / release `2026.08.07.2`
-as of this spec, deployed manually before this tool existed. `state.json`
+Demo and production are already at the verified child-theme commit `3635019`
+and release `2026.08.04.21` as of the 10 August 2026 documentation review,
+deployed manually before this tool existed. The later commits on the current
+branch are documentation-only and do not change the deployable theme delta.
+`state.json`
 does not start empty: the first thing the tool does on first run (or a
 one-off `toolkit_deploy bootstrap` command) is seed both environments'
-entries with `{commit: "dec1b6e", version: "2026.08.07.2", verified: true,
+entries with `{commit: "3635019", version: "2026.08.04.21", verified: true,
 timestamp: <now>}`, sourced from `PROGRESS.md`/`reports/MASTER-HANDOFF.md`'s
 existing manual records. Without this, the tool would compute a diff against
 the beginning of history on its first real run.
