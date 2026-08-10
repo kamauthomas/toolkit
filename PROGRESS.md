@@ -6,6 +6,31 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 ## Status
 **PHASE 4 — IN PROGRESS** (SEO/accessibility handoff, remaining-page refinement planning, deployment readiness)
 
+## 2026-08-10 SEO recovery — demo and production release 2026.08.10.4
+
+- Confirmed that current Toolkit pages are indexed, but the site has weak
+  visibility for non-branded commercial searches. This is a ranking/content
+  authority problem rather than a site-wide `noindex` failure.
+- Added accurate search-focused metadata for solar installation, organic
+  farming, RPL, consultancy, Jielimishe and VR welding pages.
+- Reduced the XML sitemap from low-value plugin/team/category collections to
+  the 176 canonical post and page URLs. Thin categories, test/trash content,
+  duplicate staff/plugin records and the duplicate Foundation page are now
+  excluded or redirected as appropriate.
+- Corrected stale breadcrumb URLs and normalized the obsolete long application
+  URL to `/apply/`, including absolute demo and production content links.
+- Deployed and fully audited demo first, then promoted the exact accepted files
+  to production. Both environments passed 176/176 sitemap routes with zero
+  measured title, description, canonical, H1, JSON-LD or duplicate-title
+  defects. Demo remains `noindex,follow`; production remains indexable.
+- Current verified deployment baseline is commit `91cf32b`, release
+  `2026.08.10.4`. Rollbacks: `rollbacks/demo-pre-2026.08.10.4` and
+  `rollbacks/production-pre-2026.08.10.4`.
+- Remaining external migration blocker: the legacy `toolkitiskills.com`
+  homepage redirects, but representative legacy subpages return HTTP 500 from
+  a separate old host. The current cPanel account cannot access that document
+  root; old-host or DNS access is required to install page-to-page 301s.
+
 ## 2026-08-10 Source consolidation and pipeline review
 
 - Consolidated the verified development line into the single local `main`
@@ -15,8 +40,9 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
   is documented, but the Python pipeline implementation, tests, configuration
   and state bootstrap have not started yet. See
   `docs/DEPLOYMENT-PIPELINE-STATUS-2026-08-10.md`.
-- Corrected the pipeline bootstrap baseline to child-theme commit `3635019`,
-  release `2026.08.04.21`, verified on demo and production.
+- Corrected the pipeline bootstrap baseline after live verification to
+  child-theme commit `91cf32b`, release `2026.08.10.4`. The previously recorded
+  `3635019` / `2026.08.04.21` baseline was inaccurate.
 - Added the fact-checked Toolkit story research brief at
   `docs/TOOLKIT-STORY-RESEARCH-2026-08-10.md`. It separates confirmed facts,
   dated self-reported figures, project targets and claims requiring internal

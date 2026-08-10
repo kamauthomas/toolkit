@@ -22,9 +22,11 @@
 - `rollback` never auto-deletes newly-introduced files; it lists them for manual removal.
 - Empty diff on `deploy <env>` is a no-op (exit 0, no version bump, no state write, no network call).
 - This repo's theme root is `wp-content/themes/eduma-child`; production/demo remote paths follow the pattern already used in this session (`public_html/wp-content/themes/eduma-child`, `demo.toolkitafrica.ac.ke/wp-content/themes/eduma-child`); the cPanel host is `wp46.host-ww.net:2083` (UAPI over HTTP Basic auth, `/execute/Fileman/get_file_content` and `/execute/Fileman/upload_files`).
-- Bootstrap values for this rollout: commit `3635019`, version
-  `2026.08.04.21` (both demo and production are already deployed there
-  manually, per the verified 4 August release evidence and current handoff).
+- Bootstrap values for this rollout: commit `91cf32b`, version
+  `2026.08.10.4` (both demo and production were manually deployed and fully
+  verified there on 10 August 2026). The implementation examples below retain
+  older fixture values where they are intentionally testing version handling;
+  the real bootstrap command must use this current baseline.
 
 ---
 

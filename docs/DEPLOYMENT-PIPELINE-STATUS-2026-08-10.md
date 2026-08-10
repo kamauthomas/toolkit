@@ -9,19 +9,21 @@ TOML configuration, local deployment state, or hosted CI workflow in this
 branch. The current branch is therefore a documented implementation starting
 point, not an operational CI/CD pipeline.
 
-## Correct baseline
+## Current verified deployment baseline
 
-The first pipeline bootstrap must seed both environments with:
+After the SEO recovery deployment on 10 August 2026, the first pipeline
+bootstrap must seed both environments with:
 
 ```text
-commit: 3635019
-version: 2026.08.04.21
+commit: 91cf32b
+version: 2026.08.10.4
 verified: true
 ```
 
-This is the last verified deployable child-theme commit. The current branch’s
-later commits are documentation-only. Do not bootstrap from the older
-`dec1b6e` / `2026.08.07.2` values previously written in the plan.
+This is the exact release verified on demo first and then production. The
+immediately preceding live baseline was `dec1b6e` / `2026.08.07.2`; the earlier
+`3635019` / `2026.08.04.21` documentation correction was inaccurate and must
+not be used to initialize deployment state.
 
 ## Required implementation order
 
@@ -62,10 +64,21 @@ be described as pipeline-driven until those files and the demo exercise exist.
   `scripts/toolkit_deploy/` does not exist. This is a pipeline readiness failure,
   not a passing empty suite.
 - No `.github/workflows/` pipeline exists in the repository.
-- After a fresh `git fetch --prune`, local `main` is 59 commits ahead of
+- At the time of the pre-deployment remote audit, local `main` was 59 commits ahead of
   `origin/wordpress-modernisation` and zero commits behind it. The WordPress
   remote is therefore not up to date with the local consolidated source.
 - `origin/main` belongs to a separate daily-report application lineage. It is
   eight commits ahead of its own merge base and must not be merged into or used
   as the WordPress deployment target.
 - No push was performed during this audit.
+
+## SEO recovery deployment — 10 August 2026
+
+- Demo release `2026.08.10.4` passed all 176 sitemap URLs with HTTP 200 and
+  zero measured title, description, canonical, H1, JSON-LD or duplicate-title
+  defects. Demo retained `noindex,follow` and production canonicals.
+- The identical accepted files were promoted to production only after the demo
+  pass. Production release `2026.08.10.4` passed the same 176/176 audit and
+  remained indexable.
+- This was a manual cPanel deployment with fresh rollback snapshots, not a run
+  of the proposed deployment CLI. The pipeline implementation remains pending.
