@@ -6,6 +6,22 @@ Rebuild the homepage hero section as a synced image+text slider matching `02-HER
 ## Status
 **PHASE 4 — IN PROGRESS** (SEO/accessibility handoff, remaining-page refinement planning, deployment readiness)
 
+## 2026-08-10 Source consolidation and pipeline review
+
+- Consolidated the verified development line into the single local `main`
+  branch at commit `e2fa656`; redundant local deployment branches and the only
+  extra worktree were removed. The working tree is clean.
+- Reviewed the deployment pipeline design and implementation plan. The design
+  is documented, but the Python pipeline implementation, tests, configuration
+  and state bootstrap have not started yet. See
+  `docs/DEPLOYMENT-PIPELINE-STATUS-2026-08-10.md`.
+- Corrected the pipeline bootstrap baseline to child-theme commit `3635019`,
+  release `2026.08.04.21`, verified on demo and production.
+- Added the fact-checked Toolkit story research brief at
+  `docs/TOOLKIT-STORY-RESEARCH-2026-08-10.md`. It separates confirmed facts,
+  dated self-reported figures, project targets and claims requiring internal
+  confirmation before publication.
+
 ## 2026-07-17 Mobile performance correction
 
 - Deployed homepage performance commit `68dce70` to the demo child theme. The release added responsive WebP hero assets, mobile-specific LCP preloading, and homepage removal of unused Elementor, Contact Form 7, Thim eKit, and Sina bundles.
