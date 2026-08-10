@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.10.3';
+	return '2026.08.10.4';
 }
 
 function toolkit_is_demo_environment() {
@@ -80,14 +80,12 @@ function toolkit_normalize_public_brand_copy( $text ) {
 		$text
 	);
 	$text = preg_replace( '~\b(?:iShahit|Isahit)\s+hub\b~iu', 'iShahit centre', $text );
-	$text = str_replace(
-		array(
-			home_url( '/new/our-ventures/toolkit-courses-apply-today/' ),
-			'/new/our-ventures/toolkit-courses-apply-today/',
-		),
+	$text = preg_replace(
+		'~https?://(?:demo\.)?toolkitafrica\.ac\.ke/new/our-ventures/toolkit-courses-apply-today/?~i',
 		home_url( '/apply/' ),
 		$text
 	);
+	$text = str_replace( '/new/our-ventures/toolkit-courses-apply-today/', home_url( '/apply/' ), $text );
 	return $text;
 }
 
