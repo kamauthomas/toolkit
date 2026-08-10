@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.07.2';
+	return '2026.08.10.1';
 }
 
 function toolkit_is_demo_environment() {
@@ -503,6 +503,10 @@ add_action( 'template_redirect', function() {
 		wp_safe_redirect( home_url( '/our-ventures/tti-consultancy-and-research/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
+	if ( is_page( 'the-toolkit-foundation-copy' ) ) {
+		wp_safe_redirect( home_url( '/the-toolkit-foundation/' ), 301, 'The Toolkit for Skills and Innovation' );
+		exit;
+	}
 }, 1 );
 
 function eduma_child_non_public_page_slugs() {
@@ -512,6 +516,7 @@ function eduma_child_non_public_page_slugs() {
 		'courses',
 		'blog',
 		'research',
+		'the-toolkit-foundation-copy',
 		'account',
 		'user-register',
 		'user-login',
@@ -528,6 +533,33 @@ function eduma_child_non_public_page_slugs() {
 	);
 }
 
+/**
+ * Imported staff plugins and builder kits duplicate the authoritative About
+ * page without adding standalone search value. Keep them available to
+ * WordPress administrators, but out of public search indexes and sitemaps.
+ */
+function toolkit_non_indexable_post_types() {
+	return array( 'wps-team-members', 'sptp_member', 'thim_elementor_kit' );
+}
+
+function toolkit_non_indexable_post_slugs() {
+	return array( 'test-blog-post-1', '__trashed', 'toolkit-makes-history-monday-5-february-2024-statement-on-skills-in-advanced-welding-at-radisson-blu-presided-by-president-ruto-and-polish-president-duda-copy' );
+}
+
+add_filter( 'wpseo_sitemap_exclude_post_type', function( $excluded, $post_type ) {
+	return in_array( $post_type, toolkit_non_indexable_post_types(), true ) ? true : $excluded;
+}, 20, 2 );
+
+add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function( $ids ) {
+	foreach ( toolkit_non_indexable_post_slugs() as $slug ) {
+		$post = get_page_by_path( $slug, OBJECT, 'post' );
+		if ( $post ) {
+			$ids[] = (int) $post->ID;
+		}
+	}
+	return array_values( array_unique( $ids ) );
+}, 20 );
+
 add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function( $ids ) {
 	foreach ( eduma_child_non_public_page_slugs() as $path ) {
 		$page = get_page_by_path( $path );
@@ -542,7 +574,15 @@ add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', function( $ids ) {
 add_filter( 'wpseo_sitemap_exclude_author', '__return_empty_array' );
 
 add_filter( 'wpseo_robots_array', function( $robots ) {
-	if ( toolkit_is_demo_environment() || is_author() || is_page( eduma_child_non_public_page_slugs() ) ) {
+	$post_type = get_post_type();
+	$post_slug = is_singular() ? get_post_field( 'post_name', get_queried_object_id() ) : '';
+	if (
+		toolkit_is_demo_environment()
+		|| is_author()
+		|| is_page( eduma_child_non_public_page_slugs() )
+		|| in_array( $post_type, toolkit_non_indexable_post_types(), true )
+		|| in_array( $post_slug, toolkit_non_indexable_post_slugs(), true )
+	) {
 		$robots['index']  = 'noindex';
 		$robots['follow'] = 'follow';
 	}
@@ -1012,6 +1052,15 @@ add_filter( 'wpseo_schema_breadcrumb', function( $data ) {
 	if ( is_page( 'toolkit-courses-apply-today' ) ) {
 		$data['@id'] = home_url( '/apply/#breadcrumb' );
 	}
+	if ( isset( $data['itemListElement'] ) && is_array( $data['itemListElement'] ) ) {
+		$legacy_blog = untrailingslashit( home_url( '/blog/' ) );
+		foreach ( $data['itemListElement'] as &$item ) {
+			if ( isset( $item['item'] ) && $legacy_blog === untrailingslashit( $item['item'] ) ) {
+				$item['item'] = home_url( '/toolkit-blog/' );
+			}
+		}
+		unset( $item );
+	}
 	return $data;
 }, 40 );
 
@@ -1021,6 +1070,11 @@ add_filter( 'wpseo_sitemap_entry', function( $url, $type, $object ) {
 	}
 	if ( 'post' === $type && $object instanceof WP_Post && 'toolkit-courses-apply-today' === $object->post_name ) {
 		$url['loc'] = home_url( '/apply/' );
+	}
+	if ( 'post' === $type && $object instanceof WP_Post && 'page' === $object->post_type && eduma_child_redesign_enabled() ) {
+		$theme_changed = filemtime( get_stylesheet_directory() . '/functions.php' );
+		$current_mod   = isset( $url['mod'] ) ? strtotime( $url['mod'] ) : 0;
+		$url['mod']    = gmdate( DATE_W3C, max( (int) $theme_changed, (int) $current_mod ) );
 	}
 	return $url;
 }, 20, 3 );
