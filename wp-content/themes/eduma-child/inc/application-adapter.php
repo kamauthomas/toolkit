@@ -17,21 +17,25 @@ function toolkit_mzizi_submission_enabled() {
 }
 
 function toolkit_mzizi_relay_enabled() {
+	if ( get_option( 'toolkit_application_settings_managed', false ) ) return '1' === (string) get_option( 'toolkit_mzizi_relay_enabled', '0' );
 	if ( defined( 'TOOLKIT_MZIZI_SUBMISSION_ENABLED' ) ) return true === TOOLKIT_MZIZI_SUBMISSION_ENABLED;
 	return '1' === (string) get_option( 'toolkit_mzizi_relay_enabled', '0' );
 }
 
 function toolkit_application_turnstile_site_key() {
+	if ( get_option( 'toolkit_application_settings_managed', false ) ) return toolkit_application_security_option( 'site_key' );
 	if ( defined( 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY' ) ) return (string) TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY;
 	return toolkit_application_security_option( 'site_key' );
 }
 
 function toolkit_application_turnstile_secret_key() {
+	if ( get_option( 'toolkit_application_settings_managed', false ) ) return toolkit_application_security_option( 'secret_key' );
 	if ( defined( 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY' ) ) return (string) TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY;
 	return toolkit_application_security_option( 'secret_key' );
 }
 
 function toolkit_application_security_enabled() {
+	if ( get_option( 'toolkit_application_settings_managed', false ) ) return '1' === (string) get_option( 'toolkit_application_turnstile_enabled', '0' );
 	if ( defined( 'TOOLKIT_APPLICATION_TURNSTILE_ENABLED' ) ) return true === TOOLKIT_APPLICATION_TURNSTILE_ENABLED;
 	return '1' === (string) get_option( 'toolkit_application_turnstile_enabled', '0' );
 }
@@ -44,6 +48,7 @@ function toolkit_application_security_option( $field ) {
 }
 
 function toolkit_application_security_source( $field ) {
+	if ( get_option( 'toolkit_application_settings_managed', false ) ) return toolkit_application_security_option( $field ) ? 'Encrypted dashboard setting' : 'Not configured';
 	$constant = 'site_key' === $field ? 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY' : 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY';
 	return defined( $constant ) ? 'Deployment override' : ( toolkit_application_security_option( $field ) ? 'Encrypted dashboard setting' : 'Not configured' );
 }
@@ -327,7 +332,7 @@ function toolkit_mzizi_post( $service, $payload, $cookies, $timeout = 8 ) {
 		'user-agent'  => 'ToolkitAfrica-Admissions/1.0',
 	) );
 	if ( is_wp_error( $response ) ) {
-		return new WP_Error( 'mzizi_unavailable', 'The admissions service is temporarily unavailable.', array( 'status' => 503 ) );
+		return new WP_Error( 'mzizi_unavailable', 'The admissions service is temporarily unavailable: ' . sanitize_text_field( $response->get_error_message() ), array( 'status' => 503, 'service' => sanitize_text_field( $service ) ) );
 	}
 	$status = wp_remote_retrieve_response_code( $response );
 	$body   = wp_remote_retrieve_body( $response );
@@ -337,7 +342,11 @@ function toolkit_mzizi_post( $service, $payload, $cookies, $timeout = 8 ) {
 		$data = json_decode( $matches[1], true );
 	}
 	if ( $status < 200 || $status >= 300 || null === $data ) {
-		return new WP_Error( 'mzizi_response', 'The admissions service returned an unexpected response.', array( 'status' => 502 ) );
+		$upstream_message = '';
+		if ( is_array( $data ) ) $upstream_message = sanitize_text_field( $data['Message'] ?? $data['message'] ?? '' );
+		if ( ! $upstream_message && is_string( $body ) && preg_match( '/"Message"\s*:\s*"([^"]{1,300})"/i', $body, $message_match ) ) $upstream_message = sanitize_text_field( $message_match[1] );
+		$message = 'Mzizi ' . sanitize_text_field( $service ) . ' returned HTTP ' . (int) $status . ( $upstream_message ? ': ' . $upstream_message : ' with an unreadable response.' );
+		return new WP_Error( 'mzizi_response', $message, array( 'status' => 502, 'upstream_status' => (int) $status, 'service' => sanitize_text_field( $service ) ) );
 	}
 	return $data;
 }
@@ -667,14 +676,12 @@ add_action( 'admin_menu', function() {
 add_action( 'admin_post_toolkit_application_save_settings', function() {
 	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'You do not have permission to update admissions security.' );
 	check_admin_referer( 'toolkit_application_save_settings' );
-	$site_locked   = defined( 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY' );
-	$secret_locked = defined( 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY' );
-	$current       = array( 'site_key' => toolkit_application_security_option( 'site_key' ), 'secret_key' => toolkit_application_security_option( 'secret_key' ) );
+	$current       = array( 'site_key' => toolkit_application_turnstile_site_key(), 'secret_key' => toolkit_application_turnstile_secret_key() );
 	$site_input    = trim( sanitize_text_field( wp_unslash( $_POST['turnstile_site_key'] ?? '' ) ) );
-	$site          = $site_locked || ( $current['site_key'] && toolkit_application_mask_key( $current['site_key'] ) === $site_input ) ? $current['site_key'] : $site_input;
+	$site          = $current['site_key'] && toolkit_application_mask_key( $current['site_key'] ) === $site_input ? $current['site_key'] : $site_input;
 	$secret_input  = trim( sanitize_text_field( wp_unslash( $_POST['turnstile_secret_key'] ?? '' ) ) );
-	$secret        = $secret_locked || '' === $secret_input ? $current['secret_key'] : $secret_input;
-	if ( isset( $_POST['clear_keys'] ) && ! $site_locked && ! $secret_locked ) $site = $secret = '';
+	$secret        = '' === $secret_input ? $current['secret_key'] : $secret_input;
+	if ( isset( $_POST['clear_keys'] ) ) $site = $secret = '';
 	if ( ( $site && ! $secret ) || ( $secret && ! $site ) ) wp_die( 'Both the Turnstile site key and secret key are required.' );
 	if ( $site || $secret ) {
 		$encrypted = toolkit_application_encrypt_payload( array( 'site_key' => $site, 'secret_key' => $secret ) );
@@ -684,7 +691,8 @@ add_action( 'admin_post_toolkit_application_save_settings', function() {
 		delete_option( 'toolkit_application_security_keys' );
 	}
 	update_option( 'toolkit_application_turnstile_enabled', isset( $_POST['turnstile_enabled'] ) ? '1' : '0', false );
-	if ( ! defined( 'TOOLKIT_MZIZI_SUBMISSION_ENABLED' ) ) update_option( 'toolkit_mzizi_relay_enabled', isset( $_POST['mzizi_relay_enabled'] ) ? '1' : '0', false );
+	update_option( 'toolkit_mzizi_relay_enabled', isset( $_POST['mzizi_relay_enabled'] ) ? '1' : '0', false );
+	update_option( 'toolkit_application_settings_managed', '1', false );
 	update_option( 'toolkit_application_security_audit', array(
 		'user_id' => get_current_user_id(), 'changed_at' => current_time( 'mysql', true ),
 		'action' => isset( $_POST['clear_keys'] ) ? 'Keys cleared' : 'Admissions security updated',
@@ -700,21 +708,20 @@ function toolkit_application_mask_key( $key ) {
 function toolkit_application_render_settings_page() {
 	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'You do not have permission to view admissions security.' );
 	$site = toolkit_application_turnstile_site_key(); $secret = toolkit_application_turnstile_secret_key();
-	$site_locked = defined( 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY' ); $secret_locked = defined( 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY' );
 	$audit = get_option( 'toolkit_application_security_audit', array() );
 	toolkit_application_admin_header( 'Admissions settings', 'Control application security and Mzizi delivery without exposing credentials.' );
 	if ( isset( $_GET['updated'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Admissions security settings were saved.</p></div>';
 	echo '<section class="toolkit-security-overview">';
 	printf( '<article><span>Public protection</span><strong>%s</strong><small>%s</small></article>', toolkit_application_security_enabled() && $site && $secret ? 'Active' : 'Not active', $site && $secret ? 'Key pair configured' : 'Production keys required' );
-	printf( '<article><span>Mzizi manual release</span><strong>%s</strong><small>%s</small></article>', toolkit_mzizi_relay_enabled() ? 'Enabled' : 'Disabled', defined( 'TOOLKIT_MZIZI_SUBMISSION_ENABLED' ) ? 'Deployment controlled' : 'Dashboard controlled' );
+	printf( '<article><span>Mzizi manual release</span><strong>%s</strong><small>Dashboard controlled</small></article>', toolkit_mzizi_relay_enabled() ? 'Enabled' : 'Disabled' );
 	printf( '<article><span>Public direct delivery</span><strong>%s</strong><small>Requires both controls and a valid key pair</small></article>', toolkit_mzizi_submission_enabled() ? 'Enabled' : 'Locally retained' );
 	echo '</section><section class="toolkit-security-layout"><form class="toolkit-admin__panel toolkit-security-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="toolkit_application_save_settings">';
 	wp_nonce_field( 'toolkit_application_save_settings' );
 	echo '<div class="toolkit-admin__panel-heading"><div><small>Cloudflare Turnstile</small><h2>Bot protection keys</h2></div><span class="toolkit-health toolkit-health--good">Encrypted storage</span></div><p>Enter the production widget keys from Cloudflare. Existing secrets are never returned to the browser.</p>';
-	echo '<label>Site key <span>' . esc_html( toolkit_application_security_source( 'site_key' ) ) . '</span><input type="text" name="turnstile_site_key" value="' . esc_attr( $site ? toolkit_application_mask_key( $site ) : '' ) . '" placeholder="Paste production site key" ' . disabled( $site_locked, true, false ) . '></label>';
-	echo '<label>Secret key <span>' . esc_html( toolkit_application_security_source( 'secret_key' ) ) . '</span><input type="password" name="turnstile_secret_key" value="" placeholder="' . esc_attr( $secret ? 'Stored securely — enter only to replace' : 'Paste production secret key' ) . '" autocomplete="new-password" ' . disabled( $secret_locked, true, false ) . '></label>';
-	echo '<div class="toolkit-security-switches"><label><input type="checkbox" name="turnstile_enabled" value="1" ' . checked( toolkit_application_security_enabled(), true, false ) . ' ' . disabled( defined( 'TOOLKIT_APPLICATION_TURNSTILE_ENABLED' ), true, false ) . '> <span><strong>Activate Turnstile</strong><small>Require a valid challenge before public direct delivery.' . ( defined( 'TOOLKIT_APPLICATION_TURNSTILE_ENABLED' ) ? ' Currently deployment controlled.' : '' ) . '</small></span></label><label><input type="checkbox" name="mzizi_relay_enabled" value="1" ' . checked( toolkit_mzizi_relay_enabled(), true, false ) . ' ' . disabled( defined( 'TOOLKIT_MZIZI_SUBMISSION_ENABLED' ), true, false ) . '> <span><strong>Allow Mzizi release</strong><small>Enables reviewed manual delivery; duplicate confirmation remains mandatory.</small></span></label></div>';
-	echo '<div class="toolkit-security-actions"><button class="button button-primary button-hero" type="submit">Save security settings</button>'; if ( ! $site_locked && ! $secret_locked && ( $site || $secret ) ) echo '<button class="button" type="submit" name="clear_keys" value="1" onclick="return confirm(\'Clear the stored Turnstile keys and disable public direct delivery?\');">Clear stored keys</button>'; echo '</div></form>';
+	echo '<label>Site key <span>' . esc_html( toolkit_application_security_source( 'site_key' ) ) . '</span><input type="text" name="turnstile_site_key" value="' . esc_attr( $site ? toolkit_application_mask_key( $site ) : '' ) . '" placeholder="Paste production site key"></label>';
+	echo '<label>Secret key <span>' . esc_html( toolkit_application_security_source( 'secret_key' ) ) . '</span><input type="password" name="turnstile_secret_key" value="" placeholder="' . esc_attr( $secret ? 'Stored securely — enter only to replace' : 'Paste production secret key' ) . '" autocomplete="new-password"></label>';
+	echo '<div class="toolkit-security-switches"><label><input type="checkbox" name="turnstile_enabled" value="1" ' . checked( toolkit_application_security_enabled(), true, false ) . '> <span><strong>Activate Turnstile</strong><small>Require a valid challenge before public direct delivery.</small></span></label><label><input type="checkbox" name="mzizi_relay_enabled" value="1" ' . checked( toolkit_mzizi_relay_enabled(), true, false ) . '> <span><strong>Allow Mzizi release</strong><small>Enables reviewed manual delivery; duplicate confirmation remains mandatory.</small></span></label></div>';
+	echo '<div class="toolkit-security-actions"><button class="button button-primary button-hero" type="submit">Save security settings</button>'; if ( $site || $secret ) echo '<button class="button" type="submit" name="clear_keys" value="1" onclick="return confirm(\'Clear the stored Turnstile keys and disable public direct delivery?\');">Clear stored keys</button>'; echo '</div></form>';
 	echo '<aside class="toolkit-admin__panel toolkit-security-guide"><h2>Activation gate</h2><ol><li>Create a Turnstile widget for <code>toolkitafrica.ac.ke</code> in Cloudflare.</li><li>Paste both production keys and save.</li><li>Open the public application in a private browser and complete the widget.</li><li>Only then activate Turnstile. Existing applications remain locally retained throughout.</li></ol><h3>Last configuration change</h3>';
 	if ( $audit ) { $user = get_userdata( (int) ( $audit['user_id'] ?? 0 ) ); printf( '<p><strong>%s</strong><br>%s by %s</p>', esc_html( $audit['action'] ?? 'Updated' ), esc_html( get_date_from_gmt( $audit['changed_at'] ?? '', 'd M Y H:i' ) ), esc_html( $user ? $user->display_name : 'Administrator' ) ); } else echo '<p>No dashboard changes recorded yet.</p>';
 	echo '<p class="description">Automatic historical release remains deployment-disabled. This prevents unreviewed duplicates from reaching Mzizi.</p></aside></section></div>';
@@ -820,7 +827,6 @@ function toolkit_application_render_admin_page() {
 	printf( '<span class="toolkit-admin__stat"><span>Queued</span><strong>%s</strong><small>Not yet confirmed by Mzizi</small></span>', number_format_i18n( ( isset( $counts['queued'] ) ? $counts['queued']->total : 0 ) + ( isset( $counts['handoff_required'] ) ? $counts['handoff_required']->total : 0 ) ) );
 	printf( '<span class="toolkit-admin__stat"><span>Failed</span><strong>%s</strong><small>Requires review or retry</small></span>', number_format_i18n( ( isset( $counts['relay_failed'] ) ? $counts['relay_failed']->total : 0 ) + ( isset( $counts['validation_failed'] ) ? $counts['validation_failed']->total : 0 ) ) );
 	echo '</section>';
-
 	$status = sanitize_key( $_GET['status'] ?? '' );
 	$search = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
 	$page   = max( 1, absint( $_GET['paged'] ?? 1 ) );
