@@ -635,9 +635,9 @@ function toolkit_application_relay_record( $record_id, $release_source = 'manual
 	$result = toolkit_mzizi_post( 'StudentInfo.asmx/SubmitOnlineApplication', $payload, $cookies, 25 );
 	if ( is_wp_error( $result ) || empty( $result['Message'] ) ) {
 		$error = is_wp_error( $result ) ? $result->get_error_message() : 'Mzizi returned no confirmation message.';
-		toolkit_application_update_record( $record_id, array( 'status' => 'relay_failed', 'last_error' => $error ) );
-		toolkit_application_log_event( $record_id, 'relay_failed', $error, get_current_user_id() ?: null );
-		return new WP_Error( 'submission_failed', 'Mzizi did not confirm delivery.', array( 'status' => 502, 'reference' => $reference ) );
+		toolkit_application_update_record( $record_id, array( 'status' => 'delivery_unconfirmed', 'last_error' => $error ) );
+		toolkit_application_log_event( $record_id, 'delivery_unconfirmed', 'Mzizi submission was sent, but its confirmation could not be verified. Do not retry before checking Mzizi. ' . $error, get_current_user_id() ?: null );
+		return new WP_Error( 'delivery_unconfirmed', 'Your application was received by Toolkit as ' . $reference . ' and is being confirmed by Admissions. Please do not submit it again.', array( 'status' => 202, 'reference' => $reference ) );
 	}
 	$message = sanitize_text_field( $result['Message'] );
 	toolkit_application_update_record( $record_id, array( 'status' => 'delivered', 'relayed_at' => current_time( 'mysql', true ), 'mzizi_message' => $message, 'last_error' => null ) );
@@ -763,6 +763,22 @@ add_action( 'admin_post_toolkit_application_release', function() {
 	exit;
 } );
 
+add_action( 'admin_post_toolkit_application_confirm_delivery', function() {
+	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'You do not have permission to reconcile delivery.' );
+	$record_id = absint( $_POST['application'] ?? 0 );
+	check_admin_referer( 'toolkit_application_confirm_delivery_' . $record_id );
+	if ( empty( $_POST['confirmed_in_mzizi'] ) ) wp_die( 'Confirm that the application is visible in Mzizi.' );
+	global $wpdb;
+	$record = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . toolkit_application_table_name() . ' WHERE id = %d', $record_id ) );
+	if ( ! $record ) wp_die( 'Application record not found.' );
+	if ( 'delivered' !== $record->status ) {
+		$message = 'Delivery confirmed manually against Mzizi by an authorized administrator.';
+		toolkit_application_update_record( $record_id, array( 'status' => 'delivered', 'relayed_at' => current_time( 'mysql', true ), 'mzizi_message' => $message, 'last_error' => null ) );
+		toolkit_application_log_event( $record_id, 'delivery_reconciled', $message, get_current_user_id() );
+	}
+	wp_safe_redirect( add_query_arg( array( 'page' => 'toolkit-applications', 'view' => $record_id, 'reconciled' => 1 ), admin_url( 'admin.php' ) ) ); exit;
+} );
+
 add_action( 'admin_post_toolkit_application_resolve_names', function() {
 	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'You do not have permission to reconcile applications.' );
 	$record_id = absint( $_POST['application'] ?? 0 );
@@ -781,6 +797,8 @@ function toolkit_application_status_label( $status ) {
 		'relaying'          => 'Relaying',
 		'delivered'         => 'Delivered to Mzizi',
 		'relay_failed'      => 'Relay failed',
+		'delivery_unconfirmed' => 'Delivery unconfirmed',
+		'delivery_reconciled'  => 'Delivery reconciled',
 		'validation_failed' => 'Validation review',
 	);
 	return $labels[ $status ] ?? ucwords( str_replace( '_', ' ', $status ) );
@@ -802,6 +820,7 @@ function toolkit_application_render_admin_page() {
 		echo '<div class="notice notice-success is-dismissible"><p>Application workflow updated.</p></div>';
 	}
 	if ( isset( $_GET['released'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Mzizi confirmed delivery. The confirmation is recorded below.</p></div>';
+	if ( isset( $_GET['reconciled'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Delivery was reconciled against Mzizi without resending the application.</p></div>';
 	if ( isset( $_GET['release_error'] ) ) echo '<div class="notice notice-error"><p><strong>Mzizi release was not confirmed:</strong> ' . esc_html( wp_unslash( $_GET['release_error'] ) ) . '</p></div>';
 	if ( isset( $_GET['resolved_names'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Course and intake names were reconciled from Mzizi.</p></div>';
 	if ( isset( $_GET['resolve_error'] ) ) echo '<div class="notice notice-error"><p><strong>Name reconciliation failed:</strong> ' . esc_html( wp_unslash( $_GET['resolve_error'] ) ) . '</p></div>';
@@ -825,7 +844,7 @@ function toolkit_application_render_admin_page() {
 	printf( '<span class="toolkit-admin__stat"><span>New review</span><strong>%s</strong><small>Awaiting admissions action</small></span>', number_format_i18n( $new ) );
 	printf( '<span class="toolkit-admin__stat"><span>Mzizi delivered</span><strong>%s</strong><small>Confirmed direct relay</small></span>', number_format_i18n( isset( $counts['delivered'] ) ? $counts['delivered']->total : 0 ) );
 	printf( '<span class="toolkit-admin__stat"><span>Queued</span><strong>%s</strong><small>Not yet confirmed by Mzizi</small></span>', number_format_i18n( ( isset( $counts['queued'] ) ? $counts['queued']->total : 0 ) + ( isset( $counts['handoff_required'] ) ? $counts['handoff_required']->total : 0 ) ) );
-	printf( '<span class="toolkit-admin__stat"><span>Failed</span><strong>%s</strong><small>Requires review or retry</small></span>', number_format_i18n( ( isset( $counts['relay_failed'] ) ? $counts['relay_failed']->total : 0 ) + ( isset( $counts['validation_failed'] ) ? $counts['validation_failed']->total : 0 ) ) );
+	printf( '<span class="toolkit-admin__stat"><span>Needs confirmation</span><strong>%s</strong><small>Check Mzizi before any retry</small></span>', number_format_i18n( ( isset( $counts['delivery_unconfirmed'] ) ? $counts['delivery_unconfirmed']->total : 0 ) + ( isset( $counts['relay_failed'] ) ? $counts['relay_failed']->total : 0 ) + ( isset( $counts['validation_failed'] ) ? $counts['validation_failed']->total : 0 ) ) );
 	echo '</section>';
 	$status = sanitize_key( $_GET['status'] ?? '' );
 	$search = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
@@ -847,7 +866,7 @@ function toolkit_application_render_admin_page() {
 	$items  = $wpdb->get_results( $wpdb->prepare( $sql, $args ) );
 
 	echo '<form class="toolkit-admin__toolbar" method="get"><input type="hidden" name="page" value="toolkit-applications"><label>Delivery <select name="status"><option value="">All statuses</option>';
-	foreach ( array( 'queued', 'delivered', 'relaying', 'handoff_required', 'relay_failed', 'validation_failed', 'received' ) as $choice ) {
+	foreach ( array( 'queued', 'delivered', 'delivery_unconfirmed', 'relaying', 'handoff_required', 'relay_failed', 'validation_failed', 'received' ) as $choice ) {
 		printf( '<option value="%s" %s>%s</option>', esc_attr( $choice ), selected( $status, $choice, false ), esc_html( toolkit_application_status_label( $choice ) ) );
 	}
 	echo '</select></label><label class="toolkit-admin__search">Reference <input name="s" value="' . esc_attr( $search ) . '" placeholder="TTI-YYYYMMDD"></label><button class="button button-primary">Filter</button></form>';
@@ -910,7 +929,12 @@ function toolkit_application_render_record( $record ) {
 		wp_nonce_field( 'toolkit_application_resolve_names_' . $record->id );
 		echo '<button class="button" type="submit">Resolve course names</button><p class="description">Looks up the stored IDs in Mzizi and appends verified labels without changing the applicant’s original choices.</p></form>';
 	}
-	if ( 'delivered' !== $record->status ) {
+	if ( in_array( $record->status, array( 'delivery_unconfirmed', 'relay_failed' ), true ) ) {
+		echo '<form class="toolkit-reconcile" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="toolkit_application_confirm_delivery"><input type="hidden" name="application" value="' . absint( $record->id ) . '">';
+		wp_nonce_field( 'toolkit_application_confirm_delivery_' . $record->id );
+		echo '<label class="toolkit-release__check"><input type="checkbox" name="confirmed_in_mzizi" value="1" required> I verified this exact applicant and course are present in Mzizi.</label><button class="button button-primary" type="submit">Confirm delivered in Mzizi</button><p class="description">Updates Toolkit status only. It does not resend the application.</p></form>';
+	}
+	if ( ! in_array( $record->status, array( 'delivered', 'delivery_unconfirmed', 'relay_failed' ), true ) ) {
 		echo '<form class="toolkit-release" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'Release this application to Mzizi now? Confirm first that it is not already present in Mzizi.\');"><input type="hidden" name="action" value="toolkit_application_release"><input type="hidden" name="application" value="' . absint( $record->id ) . '">';
 		wp_nonce_field( 'toolkit_application_release_' . $record->id );
 		echo '<label class="toolkit-release__check"><input type="checkbox" name="duplicate_checked" value="1" required> I checked Mzizi using this applicant’s email and phone and found no existing application.</label><button class="button button-primary button-hero" type="submit"' . disabled( ! toolkit_mzizi_relay_enabled(), true, false ) . '>Release to Mzizi</button><p class="description">Manual release is recorded as a new attempt. Mzizi does not publish a scoped duplicate-search API, so this confirmation is mandatory.</p></form>';

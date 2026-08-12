@@ -177,10 +177,12 @@
 .toolkit-status--delivered { color: #075953; background: #dff2ef; }
 .toolkit-status--relay_failed,
 .toolkit-status--validation_failed { color: #8c2f19; background: #fde7df; }
+.toolkit-status--delivery_unconfirmed { color: #6d4d00; background: #fff1c8; }
 .toolkit-status--handoff_required { color: #6d4d00; background: #fff1c8; }
 .toolkit-status--queued { color: #6d4d00; background: #fff1c8; }
 .toolkit-status--relaying { color: #075953; background: #dff2ef; }
 .toolkit-release { margin: 24px 0; padding: 18px; border: 1px solid #efbd7f; border-radius: 10px; background: #fff8ed; }
+.toolkit-reconcile { margin: 24px 0; padding: 18px; border: 1px solid #78aaa5; border-radius: 10px; background: #edf7f5; }
 .toolkit-release .description { margin-bottom: 0; }
 .toolkit-release__check { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 14px; font-weight: 700; line-height: 1.45; }
 .toolkit-delivery-history { display: grid; gap: 10px; margin: 0 0 24px; padding: 0; list-style: none; }
