@@ -330,6 +330,7 @@ function toolkit_mzizi_post( $service, $payload, $cookies, $timeout = 8 ) {
 		'headers'     => array( 'Content-Type' => 'application/json' ),
 		'body'        => wp_json_encode( (object) $payload ),
 		'user-agent'  => 'ToolkitAfrica-Admissions/1.0',
+		'limit_response_size' => 1024 * 1024,
 	) );
 	if ( is_wp_error( $response ) ) {
 		return new WP_Error( 'mzizi_unavailable', 'The admissions service is temporarily unavailable: ' . sanitize_text_field( $response->get_error_message() ), array( 'status' => 503, 'service' => sanitize_text_field( $service ) ) );
