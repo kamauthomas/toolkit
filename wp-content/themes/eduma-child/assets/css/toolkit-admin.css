@@ -178,6 +178,14 @@
 .toolkit-status--relay_failed,
 .toolkit-status--validation_failed { color: #8c2f19; background: #fde7df; }
 .toolkit-status--handoff_required { color: #6d4d00; background: #fff1c8; }
+.toolkit-status--queued { color: #6d4d00; background: #fff1c8; }
+.toolkit-status--relaying { color: #075953; background: #dff2ef; }
+.toolkit-release { margin: 24px 0; padding: 18px; border: 1px solid #efbd7f; border-radius: 10px; background: #fff8ed; }
+.toolkit-release .description { margin-bottom: 0; }
+.toolkit-release__check { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 14px; font-weight: 700; line-height: 1.45; }
+.toolkit-delivery-history { display: grid; gap: 10px; margin: 0 0 24px; padding: 0; list-style: none; }
+.toolkit-delivery-history li { display: grid; grid-template-columns: 120px 1fr auto; gap: 12px; padding: 12px; border-left: 4px solid var(--toolkit-teal); background: #f5f8f7; }
+.toolkit-delivery-history span { overflow-wrap: anywhere; }
 
 .toolkit-admin__toolbar,
 .toolkit-admin__range {
@@ -277,6 +285,39 @@
   margin-bottom: 18px;
 }
 
+.toolkit-security-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.toolkit-security-overview article {
+  display: grid;
+  gap: 6px;
+  padding: 20px;
+  border: 1px solid var(--toolkit-line);
+  border-top: 4px solid var(--toolkit-teal);
+  background: #fff;
+}
+
+.toolkit-security-overview span,
+.toolkit-security-overview small { color: #68705f; }
+.toolkit-security-overview strong { color: var(--toolkit-ink); font-size: 23px; }
+.toolkit-security-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(310px, .6fr); gap: 18px; align-items: start; }
+.toolkit-security-form > label { display: grid; gap: 7px; margin: 18px 0; color: var(--toolkit-ink); font-weight: 800; }
+.toolkit-security-form > label span { color: #747b69; font-size: 11px; font-weight: 600; }
+.toolkit-security-form input[type="text"], .toolkit-security-form input[type="password"] { width: 100%; min-height: 44px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.toolkit-security-switches { display: grid; gap: 10px; margin: 22px 0; }
+.toolkit-security-switches > label { display: flex; gap: 12px; padding: 14px; border: 1px solid var(--toolkit-line); border-radius: 8px; background: #f8f9f4; }
+.toolkit-security-switches input { margin-top: 3px; }
+.toolkit-security-switches span { display: grid; gap: 3px; }
+.toolkit-security-switches small { color: #697060; font-weight: 400; }
+.toolkit-security-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.toolkit-security-guide { border-top: 4px solid var(--toolkit-orange); }
+.toolkit-security-guide ol { margin-left: 20px; }
+.toolkit-security-guide li { margin-bottom: 12px; line-height: 1.5; }
+
 @media (max-width: 1000px) {
   .toolkit-admin__stats {
     grid-template-columns: 1fr 1fr;
@@ -286,7 +327,7 @@
     grid-template-columns: 1fr;
   }
 
-  .toolkit-application-record { grid-template-columns: 1fr; }
+  .toolkit-application-record, .toolkit-security-layout { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
@@ -297,6 +338,7 @@
   }
 
   .toolkit-admin__stats,
+  .toolkit-security-overview,
   .toolkit-admin__links {
     grid-template-columns: 1fr;
   }

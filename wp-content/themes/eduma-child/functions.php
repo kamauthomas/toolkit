@@ -22,7 +22,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.10.4';
+	return '2026.08.12.3';
 }
 
 function toolkit_is_demo_environment() {
@@ -261,7 +261,7 @@ function thim_child_enqueue_styles() {
 
 	if ( eduma_child_redesign_enabled() && is_page( 'toolkit-courses-apply-today' ) ) {
 		$application_path = get_stylesheet_directory() . '/assets/js/application-form.js';
-		$captcha_site_key = toolkit_application_turnstile_site_key();
+		$captcha_site_key = toolkit_mzizi_submission_enabled() ? toolkit_application_turnstile_site_key() : '';
 		if ( $captcha_site_key ) {
 			wp_enqueue_script( 'cloudflare-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', array(), null, true );
 		}
@@ -272,9 +272,7 @@ function thim_child_enqueue_styles() {
 			'coursesEndpoint'   => esc_url_raw( rest_url( 'toolkit/v1/application/courses' ) ),
 			'intakesEndpoint'   => esc_url_raw( rest_url( 'toolkit/v1/application/intakes' ) ),
 			'nonce'             => wp_create_nonce( 'wp_rest' ),
-			'integrationActive' => toolkit_mzizi_submission_enabled(),
 			'captchaSiteKey'    => $captcha_site_key,
-			'mziziHandoff'      => toolkit_mzizi_application_url(),
 			'admissionsEmail'   => 'office@toolkitafrica.ac.ke',
 			'admissionsPhone'   => '+254 709 549 200',
 			'admissionsWhatsApp'=> '+254 711 802 855',

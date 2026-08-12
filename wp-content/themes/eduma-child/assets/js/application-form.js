@@ -82,7 +82,7 @@
       fillSelect(schoolSelect, [], 'Campuses unavailable');
       fillSelect(countySelect, [], 'Counties unavailable');
       fillSelect(sourceSelect, [], 'Sources unavailable');
-      showMessage(error.message + ' You can still use the official Mzizi portal.', 'is-error');
+      showMessage(error.message + ' Please contact Toolkit Admissions if the issue continues.', 'is-error');
     });
   }
 
@@ -105,7 +105,7 @@
     if (!courseSelect.value) return Promise.resolve();
     return api(config.intakesEndpoint, { course_id: courseSelect.value }).then(function (data) {
       fillSelect(intakeSelect, data.intakes, data.intakes.length ? 'Select intake' : 'No open intake; contact Admissions');
-      document.getElementById('toolkit-course-duration').textContent = data.intakes.length ? 'Intake dates loaded from Mzizi' : 'Contact Admissions';
+      document.getElementById('toolkit-course-duration').textContent = data.intakes.length ? 'Available intake dates loaded' : 'Contact Admissions';
     }).catch(function (error) {
       fillSelect(intakeSelect, [], 'Intakes unavailable');
       showMessage(error.message, 'is-error');
@@ -166,8 +166,8 @@
       if (row[1]) html += '<div><dt>' + escapeHtml(row[0]) + '</dt><dd>' + escapeHtml(String(row[1])) + '</dd></div>';
     });
     form.querySelector('#application-review').innerHTML = html + '</dl>';
-    form.querySelector('[data-submit-note]').textContent = config.integrationActive ? 'Your application will be stored securely before it is sent to Mzizi.' : 'Your application will be stored securely, then you can continue to the official Mzizi portal.';
-    submitButton.innerHTML = config.integrationActive ? 'Save & submit application <i class="fas fa-arrow-right" aria-hidden="true"></i>' : 'Save application <i class="fas fa-save" aria-hidden="true"></i>';
+    form.querySelector('[data-submit-note]').textContent = 'Review the information above, then submit it to Toolkit Admissions.';
+    submitButton.innerHTML = 'Submit application <i class="fas fa-arrow-right" aria-hidden="true"></i>';
   }
 
   function escapeHtml(value) {
@@ -180,7 +180,7 @@
     var option = courseSelect.options[courseSelect.selectedIndex];
     var title = option && option.value ? option.textContent : 'Choose your course';
     document.getElementById('toolkit-course-title').textContent = title;
-    document.getElementById('toolkit-course-description').textContent = option && option.value ? 'This programme is currently available in the selected Mzizi campus catalogue. Admissions will confirm delivery details, fees and entry requirements.' : 'Select a programme to see its current learning focus and admissions guidance.';
+    document.getElementById('toolkit-course-description').textContent = option && option.value ? 'This programme is currently available at the selected campus. Admissions will confirm delivery details, fees and entry requirements.' : 'Select a programme to see its current learning focus and admissions guidance.';
     document.getElementById('toolkit-course-duration').textContent = 'Confirmed by Admissions';
   }
 
@@ -195,10 +195,13 @@
     if (!validateStep(currentStep)) return;
     var payload = {};
     new FormData(form).forEach(function (value, key) { payload[key] = value; });
+    payload.school_name = selectedText('school_id');
+    payload.course_name = selectedText('course_id');
+    payload.intake_name = selectedText('intake_id');
     submitButton.disabled = true;
     showMessage('Submitting your application securely…', 'is-info');
     api(config.endpoint, payload).then(function (result) {
-      showMessage(result.message || 'Application saved successfully.', 'is-success', result.handoff_url ? { url: result.handoff_url, label: 'Continue to official Mzizi portal' } : null);
+      showMessage(result.message || 'Application submitted successfully.', 'is-success');
       form.reset();
       setStep(0);
       if (window.turnstile) window.turnstile.reset();

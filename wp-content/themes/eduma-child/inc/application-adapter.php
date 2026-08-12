@@ -10,16 +10,41 @@ function toolkit_mzizi_application_url() {
 }
 
 function toolkit_mzizi_submission_enabled() {
-	return defined( 'TOOLKIT_MZIZI_SUBMISSION_ENABLED' )
-		&& true === TOOLKIT_MZIZI_SUBMISSION_ENABLED
-		&& defined( 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY' )
-		&& '' !== TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY
-		&& defined( 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY' )
-		&& '' !== TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY;
+	return toolkit_mzizi_relay_enabled()
+		&& toolkit_application_security_enabled()
+		&& '' !== toolkit_application_turnstile_site_key()
+		&& '' !== toolkit_application_turnstile_secret_key();
+}
+
+function toolkit_mzizi_relay_enabled() {
+	if ( defined( 'TOOLKIT_MZIZI_SUBMISSION_ENABLED' ) ) return true === TOOLKIT_MZIZI_SUBMISSION_ENABLED;
+	return '1' === (string) get_option( 'toolkit_mzizi_relay_enabled', '0' );
 }
 
 function toolkit_application_turnstile_site_key() {
-	return defined( 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY' ) ? (string) TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY : '';
+	if ( defined( 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY' ) ) return (string) TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY;
+	return toolkit_application_security_option( 'site_key' );
+}
+
+function toolkit_application_turnstile_secret_key() {
+	if ( defined( 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY' ) ) return (string) TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY;
+	return toolkit_application_security_option( 'secret_key' );
+}
+
+function toolkit_application_security_enabled() {
+	return '1' === (string) get_option( 'toolkit_application_turnstile_enabled', '0' );
+}
+
+function toolkit_application_security_option( $field ) {
+	$stored = get_option( 'toolkit_application_security_keys', '' );
+	if ( ! $stored ) return '';
+	$values = toolkit_application_decrypt_payload( $stored );
+	return is_wp_error( $values ) ? '' : (string) ( $values[ $field ] ?? '' );
+}
+
+function toolkit_application_security_source( $field ) {
+	$constant = 'site_key' === $field ? 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY' : 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY';
+	return defined( $constant ) ? 'Deployment override' : ( toolkit_application_security_option( $field ) ? 'Encrypted dashboard setting' : 'Not configured' );
 }
 
 function toolkit_application_table_name() {
@@ -29,7 +54,7 @@ function toolkit_application_table_name() {
 
 function toolkit_application_install_storage() {
 	global $wpdb;
-	$version = '1.1.0';
+	$version = '1.2.0';
 	if ( $version === get_option( 'toolkit_application_storage_version' ) ) {
 		return;
 	}
@@ -48,19 +73,61 @@ function toolkit_application_install_storage() {
 		relay_attempts smallint(5) unsigned NOT NULL DEFAULT 0,
 		last_error text DEFAULT NULL,
 		mzizi_message text DEFAULT NULL,
+		fingerprint char(64) DEFAULT NULL,
 		PRIMARY KEY  (id),
 		UNIQUE KEY reference (reference),
 		KEY status (status),
 		KEY workflow_status (workflow_status),
-		KEY created_at (created_at)
+		KEY created_at (created_at),
+		KEY fingerprint (fingerprint)
 	) {$charset};";
 	dbDelta( $sql );
+	$events = $table . '_events';
+	dbDelta( "CREATE TABLE {$events} (
+		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+		application_id bigint(20) unsigned NOT NULL,
+		event_type varchar(32) NOT NULL,
+		actor_id bigint(20) unsigned DEFAULT NULL,
+		message text DEFAULT NULL,
+		created_at datetime NOT NULL,
+		PRIMARY KEY (id),
+		KEY application_id (application_id),
+		KEY event_type (event_type),
+		KEY created_at (created_at)
+	) {$charset};" );
 	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
 		update_option( 'toolkit_application_storage_version', $version, false );
 	}
 }
+
+function toolkit_application_log_event( $application_id, $event_type, $message = '', $actor_id = null ) {
+	global $wpdb;
+	return $wpdb->insert( toolkit_application_table_name() . '_events', array(
+		'application_id' => (int) $application_id,
+		'event_type'     => sanitize_key( $event_type ),
+		'actor_id'      => null === $actor_id ? null : (int) $actor_id,
+		'message'       => sanitize_textarea_field( $message ),
+		'created_at'    => current_time( 'mysql', true ),
+	), array( '%d', '%s', '%d', '%s', '%s' ) );
+}
 add_action( 'after_switch_theme', 'toolkit_application_install_storage' );
 add_action( 'init', 'toolkit_application_install_storage', 3 );
+
+add_filter( 'cron_schedules', function( $schedules ) {
+	$schedules['toolkit_five_minutes'] = array( 'interval' => 5 * MINUTE_IN_SECONDS, 'display' => 'Every five minutes' );
+	return $schedules;
+} );
+add_action( 'init', function() {
+	if ( ! wp_next_scheduled( 'toolkit_application_process_queue' ) ) {
+		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'toolkit_five_minutes', 'toolkit_application_process_queue' );
+	}
+}, 20 );
+add_action( 'toolkit_application_process_queue', function() {
+	if ( ! toolkit_mzizi_relay_enabled() || ! defined( 'TOOLKIT_MZIZI_AUTOMATIC_RELEASE_ENABLED' ) || true !== TOOLKIT_MZIZI_AUTOMATIC_RELEASE_ENABLED ) return;
+	global $wpdb;
+	$ids = $wpdb->get_col( 'SELECT id FROM ' . toolkit_application_table_name() . " WHERE status = 'queued' AND relay_attempts = 0 ORDER BY created_at ASC LIMIT 5" );
+	foreach ( $ids as $id ) toolkit_application_relay_record( (int) $id, 'automatic' );
+} );
 
 function toolkit_application_encrypt_payload( array $payload ) {
 	if ( ! function_exists( 'openssl_encrypt' ) ) {
@@ -118,8 +185,11 @@ function toolkit_application_sanitized_storage_payload( array $data ) {
 		'primary_phone'    => preg_replace( '/[^0-9+]/', '', (string) ( $data['primary_phone'] ?? '' ) ),
 		'secondary_phone'  => preg_replace( '/[^0-9+]/', '', (string) ( $data['secondary_phone'] ?? '' ) ),
 		'school_id'        => preg_replace( '/\D/', '', (string) ( $data['school_id'] ?? '' ) ),
+		'school_name'      => sanitize_text_field( $data['school_name'] ?? '' ),
 		'course_id'        => preg_replace( '/\D/', '', (string) ( $data['course_id'] ?? '' ) ),
+		'course_name'      => sanitize_text_field( $data['course_name'] ?? '' ),
 		'intake_id'        => preg_replace( '/\D/', '', (string) ( $data['intake_id'] ?? '' ) ),
+		'intake_name'      => sanitize_text_field( $data['intake_name'] ?? '' ),
 		'study_mode'       => sanitize_text_field( $data['study_mode'] ?? '' ),
 		'sponsorship_type' => sanitize_text_field( $data['sponsorship_type'] ?? '' ),
 		'referral_source'  => sanitize_text_field( $data['referral_source'] ?? '' ),
@@ -140,6 +210,11 @@ function toolkit_application_store( array $data ) {
 	}
 	$table = toolkit_application_table_name();
 	$now   = current_time( 'mysql', true );
+	$fingerprint = hash_hmac( 'sha256', strtolower( sanitize_email( $data['email'] ?? '' ) ) . '|' . preg_replace( '/\D/', '', (string) ( $data['primary_phone'] ?? '' ) ) . '|' . preg_replace( '/\D/', '', (string) ( $data['course_id'] ?? '' ) ), wp_salt( 'nonce' ) );
+	$existing = $wpdb->get_row( $wpdb->prepare( "SELECT id, reference, status, created_at FROM {$table} WHERE fingerprint = %s ORDER BY id DESC LIMIT 1", $fingerprint ) );
+	if ( $existing && strtotime( current_time( 'mysql', true ) ) - strtotime( $existing->created_at ?? $now ) < 30 * DAY_IN_SECONDS ) {
+		return new WP_Error( 'duplicate_application', 'An application with these contact and course details already exists as ' . $existing->reference . '.', array( 'status' => 409, 'reference' => $existing->reference ) );
+	}
 	for ( $attempt = 0; $attempt < 3; $attempt++ ) {
 		$reference = 'TTI-' . gmdate( 'Ymd' ) . '-' . strtoupper( wp_generate_password( 6, false, false ) );
 		$inserted  = $wpdb->insert( $table, array(
@@ -148,7 +223,8 @@ function toolkit_application_store( array $data ) {
 			'payload'    => $encrypted,
 			'created_at' => $now,
 			'updated_at' => $now,
-		), array( '%s', '%s', '%s', '%s', '%s' ) );
+			'fingerprint'=> $fingerprint,
+		), array( '%s', '%s', '%s', '%s', '%s', '%s' ) );
 		if ( false !== $inserted ) {
 			return array( 'id' => (int) $wpdb->insert_id, 'reference' => $reference );
 		}
@@ -166,6 +242,19 @@ function toolkit_application_update_record( $id, array $values ) {
 		}
 	}
 	return $wpdb->update( toolkit_application_table_name(), $update, array( 'id' => (int) $id ) );
+}
+
+function toolkit_application_update_payload_names( $record, array $names ) {
+	global $wpdb;
+	$payload = toolkit_application_decrypt_payload( $record->payload );
+	if ( is_wp_error( $payload ) ) return $payload;
+	foreach ( array( 'school_name', 'course_name', 'intake_name' ) as $key ) {
+		if ( isset( $names[ $key ] ) && '' !== $names[ $key ] ) $payload[ $key ] = sanitize_text_field( $names[ $key ] );
+	}
+	$encrypted = toolkit_application_encrypt_payload( $payload );
+	if ( is_wp_error( $encrypted ) ) return $encrypted;
+	$wpdb->update( toolkit_application_table_name(), array( 'payload' => $encrypted, 'updated_at' => current_time( 'mysql', true ) ), array( 'id' => (int) $record->id ), array( '%s', '%s' ), array( '%d' ) );
+	return true;
 }
 
 add_action( 'rest_api_init', function() {
@@ -361,13 +450,14 @@ function toolkit_application_intakes( WP_REST_Request $request ) {
 }
 
 function toolkit_application_verify_turnstile( $token ) {
-	if ( ! defined( 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY' ) || ! $token ) {
+	$secret = toolkit_application_turnstile_secret_key();
+	if ( ! $secret || ! $token ) {
 		return false;
 	}
 	$response = wp_safe_remote_post( 'https://challenges.cloudflare.com/turnstile/v0/siteverify', array(
 		'timeout' => 8,
 		'body'    => array(
-			'secret'   => TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY,
+			'secret'   => $secret,
 			'response' => $token,
 			'remoteip' => isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '',
 		),
@@ -428,22 +518,44 @@ function toolkit_application_submit( WP_REST_Request $request ) {
 	$record_id = $stored['id'];
 	$reference = $stored['reference'];
 	if ( ! $direct_enabled ) {
-		toolkit_application_update_record( $record_id, array( 'status' => 'handoff_required' ) );
+		toolkit_application_update_record( $record_id, array( 'status' => 'queued' ) );
+		toolkit_application_log_event( $record_id, 'queued', 'Stored locally and queued for Mzizi release.' );
 		return new WP_REST_Response( array(
-			'code'        => 'handoff_required',
-			'message'     => 'Application ' . $reference . ' was saved securely. Continue to the official Mzizi portal to complete the admissions handoff.',
+			'code'        => 'queued',
+			'message'     => 'Application ' . $reference . ' was submitted successfully. Toolkit Admissions will review it and contact you about the next step.',
 			'reference'   => $reference,
-			'handoff_url' => toolkit_mzizi_application_url(),
+			'delivery'    => 'queued',
 		), 201 );
 	}
+	return toolkit_application_relay_record( $record_id, 'public' );
+}
+
+function toolkit_application_relay_record( $record_id, $release_source = 'manual' ) {
+	global $wpdb;
+	$record = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . toolkit_application_table_name() . ' WHERE id = %d', (int) $record_id ) );
+	if ( ! $record ) return new WP_Error( 'application_missing', 'Application record not found.' );
+	if ( 'delivered' === $record->status ) return new WP_Error( 'already_delivered', 'This application is already marked as delivered to Mzizi.' );
+	if ( 'relaying' === $record->status && strtotime( $record->updated_at . ' UTC' ) > time() - 10 * MINUTE_IN_SECONDS ) {
+		return new WP_Error( 'relay_in_progress', 'This application is already being released to Mzizi.' );
+	}
+	if ( ! toolkit_mzizi_relay_enabled() ) {
+		return new WP_Error( 'relay_disabled', 'Mzizi relay is disabled in this environment.' );
+	}
+	if ( 'manual' === $release_source && empty( $_POST['duplicate_checked'] ) ) {
+		return new WP_Error( 'duplicate_check_required', 'Confirm that this applicant is not already present in Mzizi before manual release.' );
+	}
+	$data = toolkit_application_decrypt_payload( $record->payload );
+	if ( is_wp_error( $data ) ) return $data;
+	$reference = $record->reference;
 
 	$school_id = preg_replace( '/\D/', '', (string) $data['school_id'] );
 	$course_id = preg_replace( '/\D/', '', (string) $data['course_id'] );
 	$intake_id = preg_replace( '/\D/', '', (string) $data['intake_id'] );
 	$cookies   = toolkit_mzizi_session();
 	if ( is_wp_error( $cookies ) ) {
-		toolkit_application_update_record( $record_id, array( 'status' => 'relay_failed', 'last_error' => $cookies->get_error_message() ) );
-		return new WP_Error( $cookies->get_error_code(), $cookies->get_error_message() . ' Your application was saved as ' . $reference . '.', array( 'status' => 503, 'reference' => $reference ) );
+		toolkit_application_update_record( $record_id, array( 'status' => 'relay_failed', 'last_error' => $cookies->get_error_message(), 'relay_attempts' => (int) $record->relay_attempts + 1 ) );
+		toolkit_application_log_event( $record_id, 'relay_failed', $cookies->get_error_message(), get_current_user_id() ?: null );
+		return new WP_Error( $cookies->get_error_code(), $cookies->get_error_message(), array( 'status' => 503, 'reference' => $reference ) );
 	}
 	$set = toolkit_mzizi_post( 'StudentInfo.asmx/SetApplicationSchoolIDParam', array( 'SchoolID' => $school_id ), $cookies );
 	if ( is_wp_error( $set ) || empty( $set['Success'] ) ) {
@@ -475,9 +587,13 @@ function toolkit_application_submit( WP_REST_Request $request ) {
 		toolkit_application_update_record( $record_id, array( 'status' => 'validation_failed', 'last_error' => 'Selected course or intake unavailable.' ) );
 		return new WP_Error( 'stale_selection', 'The selected course or intake is no longer available. Your application was saved as ' . $reference . '.', array( 'status' => 422, 'reference' => $reference ) );
 	}
-	$source_names = array_column( toolkit_application_source_items( $sources ), 'id' );
-	$source       = isset( $data['referral_source'] ) ? sanitize_text_field( $data['referral_source'] ) : '';
-	if ( $source && ! in_array( $source, $source_names, true ) ) {
+	toolkit_application_update_payload_names( $record, array(
+		'course_name' => $course['Name'] ?? $course['Description'] ?? '',
+		'intake_name' => $intake['LevelName'] ?? '',
+	) );
+	$source_names    = array_column( toolkit_application_source_items( $sources ), 'id' );
+	$referral_source = isset( $data['referral_source'] ) ? sanitize_text_field( $data['referral_source'] ) : '';
+	if ( $referral_source && ! in_array( $referral_source, $source_names, true ) ) {
 		toolkit_application_update_record( $record_id, array( 'status' => 'validation_failed', 'last_error' => 'Referral source unavailable.' ) );
 		return new WP_Error( 'invalid_source', 'The selected referral source is no longer available. Your application was saved as ' . $reference . '.', array( 'status' => 422, 'reference' => $reference ) );
 	}
@@ -498,26 +614,110 @@ function toolkit_application_submit( WP_REST_Request $request ) {
 		'IntakeMonth'        => sanitize_text_field( $intake['LevelName'] ),
 		'ModeOfStudy'        => $study_mode,
 		'SponsorshipType'    => $sponsorship_type,
-		'Channel'            => $source,
+		'Channel'            => $referral_source,
 		'ClassApplied'       => sanitize_text_field( $course['Name'] ?? $course['Description'] ?? '' ),
 		'Gender'             => sanitize_key( $data['gender'] ),
 	);
-	toolkit_application_update_record( $record_id, array( 'status' => 'relaying', 'relay_attempts' => 1 ) );
+	$attempt = (int) $record->relay_attempts + 1;
+	toolkit_application_update_record( $record_id, array( 'status' => 'relaying', 'relay_attempts' => $attempt, 'last_error' => null ) );
+	toolkit_application_log_event( $record_id, 'relay_started', ucfirst( $release_source ) . ' Mzizi release attempt ' . $attempt . '.', get_current_user_id() ?: null );
 	/* Mzizi submission performs more work than its lookup endpoints. */
 	$result = toolkit_mzizi_post( 'StudentInfo.asmx/SubmitOnlineApplication', $payload, $cookies, 25 );
 	if ( is_wp_error( $result ) || empty( $result['Message'] ) ) {
 		$error = is_wp_error( $result ) ? $result->get_error_message() : 'Mzizi returned no confirmation message.';
 		toolkit_application_update_record( $record_id, array( 'status' => 'relay_failed', 'last_error' => $error ) );
-		return new WP_Error( 'submission_failed', 'Your application was saved as ' . $reference . ', but Mzizi did not confirm delivery. Admissions can follow it up without an automatic duplicate retry.', array( 'status' => 502, 'reference' => $reference ) );
+		toolkit_application_log_event( $record_id, 'relay_failed', $error, get_current_user_id() ?: null );
+		return new WP_Error( 'submission_failed', 'Mzizi did not confirm delivery.', array( 'status' => 502, 'reference' => $reference ) );
 	}
 	$message = sanitize_text_field( $result['Message'] );
 	toolkit_application_update_record( $record_id, array( 'status' => 'delivered', 'relayed_at' => current_time( 'mysql', true ), 'mzizi_message' => $message, 'last_error' => null ) );
+	toolkit_application_log_event( $record_id, 'delivered', $message, get_current_user_id() ?: null );
 	return new WP_REST_Response( array( 'message' => $message, 'reference' => $reference, 'delivery' => 'delivered' ), 201 );
+}
+
+function toolkit_application_resolve_names( $record_id ) {
+	global $wpdb;
+	$record = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . toolkit_application_table_name() . ' WHERE id = %d', (int) $record_id ) );
+	if ( ! $record ) return new WP_Error( 'application_missing', 'Application record not found.' );
+	$data = toolkit_application_decrypt_payload( $record->payload );
+	if ( is_wp_error( $data ) ) return $data;
+	$cookies = toolkit_mzizi_session();
+	if ( is_wp_error( $cookies ) ) return $cookies;
+	$set = toolkit_mzizi_post( 'StudentInfo.asmx/SetApplicationSchoolIDParam', array( 'SchoolID' => $data['school_id'] ), $cookies );
+	if ( is_wp_error( $set ) || empty( $set['Success'] ) ) return new WP_Error( 'school_lookup', 'Mzizi could not resolve the stored campus.' );
+	$courses = toolkit_mzizi_post( 'StudentInfo.asmx/GetApplicationCoursesNoAlumni', array(), $cookies );
+	$intakes = toolkit_application_available_intakes( $data['course_id'], $cookies );
+	if ( is_wp_error( $courses ) || is_wp_error( $intakes ) ) return new WP_Error( 'name_lookup', 'Mzizi could not resolve the stored course and intake.' );
+	$course_name = '';
+	foreach ( $courses as $course ) if ( (string) ( $course['ID'] ?? '' ) === (string) $data['course_id'] ) $course_name = $course['Name'] ?? $course['Description'] ?? '';
+	$intake_name = '';
+	foreach ( $intakes['items'] as $intake ) if ( (string) ( $intake['ID'] ?? '' ) === (string) $data['intake_id'] ) $intake_name = $intake['LevelName'] ?? '';
+	if ( ! $course_name ) return new WP_Error( 'course_lookup', 'The stored course ID is no longer present in the selected Mzizi campus catalogue.' );
+	$result = toolkit_application_update_payload_names( $record, array( 'course_name' => $course_name, 'intake_name' => $intake_name ) );
+	if ( ! is_wp_error( $result ) ) toolkit_application_log_event( $record_id, 'names_resolved', 'Course and intake labels reconciled from Mzizi.', get_current_user_id() ?: null );
+	return $result;
 }
 
 add_action( 'admin_menu', function() {
 	add_submenu_page( 'toolkit-control', 'Applications', 'Applications', 'manage_options', 'toolkit-applications', 'toolkit_application_render_admin_page' );
+	add_submenu_page( 'toolkit-control', 'Admissions settings', 'Admissions settings', 'manage_options', 'toolkit-admissions-settings', 'toolkit_application_render_settings_page' );
 }, 20 );
+
+add_action( 'admin_post_toolkit_application_save_settings', function() {
+	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'You do not have permission to update admissions security.' );
+	check_admin_referer( 'toolkit_application_save_settings' );
+	$site_locked   = defined( 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY' );
+	$secret_locked = defined( 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY' );
+	$current       = array( 'site_key' => toolkit_application_security_option( 'site_key' ), 'secret_key' => toolkit_application_security_option( 'secret_key' ) );
+	$site_input    = trim( sanitize_text_field( wp_unslash( $_POST['turnstile_site_key'] ?? '' ) ) );
+	$site          = $site_locked || ( $current['site_key'] && toolkit_application_mask_key( $current['site_key'] ) === $site_input ) ? $current['site_key'] : $site_input;
+	$secret_input  = trim( sanitize_text_field( wp_unslash( $_POST['turnstile_secret_key'] ?? '' ) ) );
+	$secret        = $secret_locked || '' === $secret_input ? $current['secret_key'] : $secret_input;
+	if ( isset( $_POST['clear_keys'] ) && ! $site_locked && ! $secret_locked ) $site = $secret = '';
+	if ( ( $site && ! $secret ) || ( $secret && ! $site ) ) wp_die( 'Both the Turnstile site key and secret key are required.' );
+	if ( $site || $secret ) {
+		$encrypted = toolkit_application_encrypt_payload( array( 'site_key' => $site, 'secret_key' => $secret ) );
+		if ( is_wp_error( $encrypted ) ) wp_die( esc_html( $encrypted->get_error_message() ) );
+		update_option( 'toolkit_application_security_keys', $encrypted, false );
+	} else {
+		delete_option( 'toolkit_application_security_keys' );
+	}
+	update_option( 'toolkit_application_turnstile_enabled', isset( $_POST['turnstile_enabled'] ) ? '1' : '0', false );
+	if ( ! defined( 'TOOLKIT_MZIZI_SUBMISSION_ENABLED' ) ) update_option( 'toolkit_mzizi_relay_enabled', isset( $_POST['mzizi_relay_enabled'] ) ? '1' : '0', false );
+	update_option( 'toolkit_application_security_audit', array(
+		'user_id' => get_current_user_id(), 'changed_at' => current_time( 'mysql', true ),
+		'action' => isset( $_POST['clear_keys'] ) ? 'Keys cleared' : 'Admissions security updated',
+	), false );
+	wp_safe_redirect( add_query_arg( array( 'page' => 'toolkit-admissions-settings', 'updated' => 1 ), admin_url( 'admin.php' ) ) ); exit;
+} );
+
+function toolkit_application_mask_key( $key ) {
+	$length = strlen( $key );
+	return $length < 9 ? str_repeat( '•', $length ) : substr( $key, 0, 4 ) . str_repeat( '•', max( 8, $length - 8 ) ) . substr( $key, -4 );
+}
+
+function toolkit_application_render_settings_page() {
+	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'You do not have permission to view admissions security.' );
+	$site = toolkit_application_turnstile_site_key(); $secret = toolkit_application_turnstile_secret_key();
+	$site_locked = defined( 'TOOLKIT_APPLICATION_TURNSTILE_SITE_KEY' ); $secret_locked = defined( 'TOOLKIT_APPLICATION_TURNSTILE_SECRET_KEY' );
+	$audit = get_option( 'toolkit_application_security_audit', array() );
+	toolkit_application_admin_header( 'Admissions settings', 'Control application security and Mzizi delivery without exposing credentials.' );
+	if ( isset( $_GET['updated'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Admissions security settings were saved.</p></div>';
+	echo '<section class="toolkit-security-overview">';
+	printf( '<article><span>Public protection</span><strong>%s</strong><small>%s</small></article>', toolkit_application_security_enabled() && $site && $secret ? 'Ready' : 'Not active', $site && $secret ? 'Key pair configured' : 'Production keys required' );
+	printf( '<article><span>Mzizi manual release</span><strong>%s</strong><small>%s</small></article>', toolkit_mzizi_relay_enabled() ? 'Enabled' : 'Disabled', defined( 'TOOLKIT_MZIZI_SUBMISSION_ENABLED' ) ? 'Deployment controlled' : 'Dashboard controlled' );
+	printf( '<article><span>Public direct delivery</span><strong>%s</strong><small>Requires both controls and a valid key pair</small></article>', toolkit_mzizi_submission_enabled() ? 'Enabled' : 'Locally retained' );
+	echo '</section><section class="toolkit-security-layout"><form class="toolkit-admin__panel toolkit-security-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="toolkit_application_save_settings">';
+	wp_nonce_field( 'toolkit_application_save_settings' );
+	echo '<div class="toolkit-admin__panel-heading"><div><small>Cloudflare Turnstile</small><h2>Bot protection keys</h2></div><span class="toolkit-health toolkit-health--good">Encrypted storage</span></div><p>Enter the production widget keys from Cloudflare. Existing secrets are never returned to the browser.</p>';
+	echo '<label>Site key <span>' . esc_html( toolkit_application_security_source( 'site_key' ) ) . '</span><input type="text" name="turnstile_site_key" value="' . esc_attr( $site ? toolkit_application_mask_key( $site ) : '' ) . '" placeholder="Paste production site key" ' . disabled( $site_locked, true, false ) . '></label>';
+	echo '<label>Secret key <span>' . esc_html( toolkit_application_security_source( 'secret_key' ) ) . '</span><input type="password" name="turnstile_secret_key" value="" placeholder="' . esc_attr( $secret ? 'Stored securely — enter only to replace' : 'Paste production secret key' ) . '" autocomplete="new-password" ' . disabled( $secret_locked, true, false ) . '></label>';
+	echo '<div class="toolkit-security-switches"><label><input type="checkbox" name="turnstile_enabled" value="1" ' . checked( toolkit_application_security_enabled(), true, false ) . '> <span><strong>Activate Turnstile</strong><small>Require a valid challenge before public direct delivery.</small></span></label><label><input type="checkbox" name="mzizi_relay_enabled" value="1" ' . checked( toolkit_mzizi_relay_enabled(), true, false ) . ' ' . disabled( defined( 'TOOLKIT_MZIZI_SUBMISSION_ENABLED' ), true, false ) . '> <span><strong>Allow Mzizi release</strong><small>Enables reviewed manual delivery; duplicate confirmation remains mandatory.</small></span></label></div>';
+	echo '<div class="toolkit-security-actions"><button class="button button-primary button-hero" type="submit">Save security settings</button>'; if ( ! $site_locked && ! $secret_locked && ( $site || $secret ) ) echo '<button class="button" type="submit" name="clear_keys" value="1" onclick="return confirm(\'Clear the stored Turnstile keys and disable public direct delivery?\');">Clear stored keys</button>'; echo '</div></form>';
+	echo '<aside class="toolkit-admin__panel toolkit-security-guide"><h2>Activation gate</h2><ol><li>Create a Turnstile widget for <code>toolkitafrica.ac.ke</code> in Cloudflare.</li><li>Paste both production keys and save.</li><li>Open the public application in a private browser and complete the widget.</li><li>Only then activate Turnstile. Existing applications remain locally retained throughout.</li></ol><h3>Last configuration change</h3>';
+	if ( $audit ) { $user = get_userdata( (int) ( $audit['user_id'] ?? 0 ) ); printf( '<p><strong>%s</strong><br>%s by %s</p>', esc_html( $audit['action'] ?? 'Updated' ), esc_html( get_date_from_gmt( $audit['changed_at'] ?? '', 'd M Y H:i' ) ), esc_html( $user ? $user->display_name : 'Administrator' ) ); } else echo '<p>No dashboard changes recorded yet.</p>';
+	echo '<p class="description">Automatic historical release remains deployment-disabled. This prevents unreviewed duplicates from reaching Mzizi.</p></aside></section></div>';
+}
 
 add_action( 'admin_post_toolkit_application_workflow', function() {
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -540,10 +740,36 @@ add_action( 'admin_post_toolkit_application_workflow', function() {
 	exit;
 } );
 
+add_action( 'admin_post_toolkit_application_release', function() {
+	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'You do not have permission to release applications.' );
+	$record_id = absint( $_POST['application'] ?? 0 );
+	check_admin_referer( 'toolkit_application_release_' . $record_id );
+	$result = toolkit_application_relay_record( $record_id, 'manual' );
+	$args = array( 'page' => 'toolkit-applications', 'view' => $record_id );
+	if ( is_wp_error( $result ) ) {
+		$args['release_error'] = rawurlencode( $result->get_error_message() );
+	} else {
+		$args['released'] = 1;
+	}
+	wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
+	exit;
+} );
+
+add_action( 'admin_post_toolkit_application_resolve_names', function() {
+	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'You do not have permission to reconcile applications.' );
+	$record_id = absint( $_POST['application'] ?? 0 );
+	check_admin_referer( 'toolkit_application_resolve_names_' . $record_id );
+	$result = toolkit_application_resolve_names( $record_id );
+	$args = array( 'page' => 'toolkit-applications', 'view' => $record_id );
+	$args[ is_wp_error( $result ) ? 'resolve_error' : 'resolved_names' ] = is_wp_error( $result ) ? rawurlencode( $result->get_error_message() ) : 1;
+	wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) ); exit;
+} );
+
 function toolkit_application_status_label( $status ) {
 	$labels = array(
 		'received'          => 'Received',
 		'handoff_required'  => 'Portal handoff',
+		'queued'            => 'Queued for Mzizi',
 		'relaying'          => 'Relaying',
 		'delivered'         => 'Delivered to Mzizi',
 		'relay_failed'      => 'Relay failed',
@@ -567,6 +793,10 @@ function toolkit_application_render_admin_page() {
 	if ( isset( $_GET['updated'] ) ) {
 		echo '<div class="notice notice-success is-dismissible"><p>Application workflow updated.</p></div>';
 	}
+	if ( isset( $_GET['released'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Mzizi confirmed delivery. The confirmation is recorded below.</p></div>';
+	if ( isset( $_GET['release_error'] ) ) echo '<div class="notice notice-error"><p><strong>Mzizi release was not confirmed:</strong> ' . esc_html( wp_unslash( $_GET['release_error'] ) ) . '</p></div>';
+	if ( isset( $_GET['resolved_names'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Course and intake names were reconciled from Mzizi.</p></div>';
+	if ( isset( $_GET['resolve_error'] ) ) echo '<div class="notice notice-error"><p><strong>Name reconciliation failed:</strong> ' . esc_html( wp_unslash( $_GET['resolve_error'] ) ) . '</p></div>';
 	$view_id = absint( $_GET['view'] ?? 0 );
 	if ( $view_id ) {
 		$record = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $view_id ) );
@@ -586,7 +816,8 @@ function toolkit_application_render_admin_page() {
 	printf( '<span class="toolkit-admin__stat"><span>All applications</span><strong>%s</strong><small>Retained local records</small></span>', number_format_i18n( $total ) );
 	printf( '<span class="toolkit-admin__stat"><span>New review</span><strong>%s</strong><small>Awaiting admissions action</small></span>', number_format_i18n( $new ) );
 	printf( '<span class="toolkit-admin__stat"><span>Mzizi delivered</span><strong>%s</strong><small>Confirmed direct relay</small></span>', number_format_i18n( isset( $counts['delivered'] ) ? $counts['delivered']->total : 0 ) );
-	printf( '<span class="toolkit-admin__stat"><span>Needs follow-up</span><strong>%s</strong><small>Handoff or failed relay</small></span>', number_format_i18n( ( isset( $counts['handoff_required'] ) ? $counts['handoff_required']->total : 0 ) + ( isset( $counts['relay_failed'] ) ? $counts['relay_failed']->total : 0 ) ) );
+	printf( '<span class="toolkit-admin__stat"><span>Queued</span><strong>%s</strong><small>Not yet confirmed by Mzizi</small></span>', number_format_i18n( ( isset( $counts['queued'] ) ? $counts['queued']->total : 0 ) + ( isset( $counts['handoff_required'] ) ? $counts['handoff_required']->total : 0 ) ) );
+	printf( '<span class="toolkit-admin__stat"><span>Failed</span><strong>%s</strong><small>Requires review or retry</small></span>', number_format_i18n( ( isset( $counts['relay_failed'] ) ? $counts['relay_failed']->total : 0 ) + ( isset( $counts['validation_failed'] ) ? $counts['validation_failed']->total : 0 ) ) );
 	echo '</section>';
 
 	$status = sanitize_key( $_GET['status'] ?? '' );
@@ -609,7 +840,7 @@ function toolkit_application_render_admin_page() {
 	$items  = $wpdb->get_results( $wpdb->prepare( $sql, $args ) );
 
 	echo '<form class="toolkit-admin__toolbar" method="get"><input type="hidden" name="page" value="toolkit-applications"><label>Delivery <select name="status"><option value="">All statuses</option>';
-	foreach ( array( 'delivered', 'handoff_required', 'relay_failed', 'validation_failed', 'received' ) as $choice ) {
+	foreach ( array( 'queued', 'delivered', 'relaying', 'handoff_required', 'relay_failed', 'validation_failed', 'received' ) as $choice ) {
 		printf( '<option value="%s" %s>%s</option>', esc_attr( $choice ), selected( $status, $choice, false ), esc_html( toolkit_application_status_label( $choice ) ) );
 	}
 	echo '</select></label><label class="toolkit-admin__search">Reference <input name="s" value="' . esc_attr( $search ) . '" placeholder="TTI-YYYYMMDD"></label><button class="button button-primary">Filter</button></form>';
@@ -618,7 +849,7 @@ function toolkit_application_render_admin_page() {
 		$payload = toolkit_application_decrypt_payload( $record->payload );
 		$name    = is_wp_error( $payload ) ? 'Encrypted record' : trim( $payload['first_name'] . ' ' . $payload['surname'] );
 		$email   = is_wp_error( $payload ) ? '' : $payload['email'];
-		$course  = is_wp_error( $payload ) ? '—' : 'Campus ' . $payload['school_id'] . ' / Course ' . $payload['course_id'];
+		$course  = is_wp_error( $payload ) ? '—' : ( ! empty( $payload['course_name'] ) ? $payload['course_name'] : 'Course ID ' . $payload['course_id'] );
 		printf( '<tr><td>%s</td><td><code>%s</code></td><td><strong>%s</strong><small>%s</small></td><td>%s</td><td><span class="toolkit-status toolkit-status--%s">%s</span></td><td>%s</td><td><a class="button button-small" href="%s">Open</a></td></tr>', esc_html( get_date_from_gmt( $record->created_at, 'd M Y H:i' ) ), esc_html( $record->reference ), esc_html( $name ), esc_html( $email ), esc_html( $course ), esc_attr( $record->status ), esc_html( toolkit_application_status_label( $record->status ) ), esc_html( ucwords( str_replace( '_', ' ', $record->workflow_status ) ) ), esc_url( admin_url( 'admin.php?page=toolkit-applications&view=' . $record->id ) ) );
 	}
 	if ( ! $items ) {
@@ -644,8 +875,11 @@ function toolkit_application_render_record( $record ) {
 		'Nationality'         => $payload['nationality'],
 		'County'              => $payload['county'],
 		'Campus ID'           => $payload['school_id'],
+		'Campus'              => $payload['school_name'] ?? '',
 		'Course ID'           => $payload['course_id'],
+		'Course'              => $payload['course_name'] ?? '',
 		'Intake ID'           => $payload['intake_id'],
+		'Intake'              => $payload['intake_name'] ?? '',
 		'Study mode'          => $payload['study_mode'],
 		'Fee payment'         => $payload['sponsorship_type'],
 		'Referral source'     => $payload['referral_source'],
@@ -663,10 +897,27 @@ function toolkit_application_render_record( $record ) {
 	printf( '<div><dt>Relay attempts</dt><dd>%s</dd></div>', number_format_i18n( $record->relay_attempts ) );
 	printf( '<div><dt>Mzizi confirmation</dt><dd>%s</dd></div>', esc_html( $record->mzizi_message ?: '—' ) );
 	printf( '<div><dt>Last error</dt><dd>%s</dd></div>', esc_html( $record->last_error ?: '—' ) );
-	echo '</dl><h3>Review status</h3><div class="toolkit-record__actions">';
+	echo '</dl>';
+	if ( empty( $payload['course_name'] ) || empty( $payload['intake_name'] ) ) {
+		echo '<form class="toolkit-resolve" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="toolkit_application_resolve_names"><input type="hidden" name="application" value="' . absint( $record->id ) . '">';
+		wp_nonce_field( 'toolkit_application_resolve_names_' . $record->id );
+		echo '<button class="button" type="submit">Resolve course names</button><p class="description">Looks up the stored IDs in Mzizi and appends verified labels without changing the applicant’s original choices.</p></form>';
+	}
+	if ( 'delivered' !== $record->status ) {
+		echo '<form class="toolkit-release" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'Release this application to Mzizi now? Confirm first that it is not already present in Mzizi.\');"><input type="hidden" name="action" value="toolkit_application_release"><input type="hidden" name="application" value="' . absint( $record->id ) . '">';
+		wp_nonce_field( 'toolkit_application_release_' . $record->id );
+		echo '<label class="toolkit-release__check"><input type="checkbox" name="duplicate_checked" value="1" required> I checked Mzizi using this applicant’s email and phone and found no existing application.</label><button class="button button-primary button-hero" type="submit"' . disabled( ! toolkit_mzizi_relay_enabled(), true, false ) . '>Release to Mzizi</button><p class="description">Manual release is recorded as a new attempt. Mzizi does not publish a scoped duplicate-search API, so this confirmation is mandatory.</p></form>';
+	}
+	$events = $GLOBALS['wpdb']->get_results( $GLOBALS['wpdb']->prepare( 'SELECT * FROM ' . toolkit_application_table_name() . '_events WHERE application_id = %d ORDER BY created_at DESC LIMIT 50', $record->id ) );
+	if ( $events ) {
+		echo '<h3>Delivery history</h3><ol class="toolkit-delivery-history">';
+		foreach ( $events as $event ) printf( '<li><strong>%s</strong><span>%s</span><small>%s</small></li>', esc_html( toolkit_application_status_label( $event->event_type ) ), esc_html( $event->message ), esc_html( get_date_from_gmt( $event->created_at, 'd M Y H:i' ) ) );
+		echo '</ol>';
+	}
+	echo '<h3>Review status</h3><div class="toolkit-record__actions">';
 	foreach ( array( 'in_review' => 'Start review', 'resolved' => 'Mark resolved', 'new' => 'Reopen' ) as $workflow => $label ) {
 		$url = wp_nonce_url( admin_url( 'admin-post.php?action=toolkit_application_workflow&application=' . $record->id . '&workflow=' . $workflow ), 'toolkit_application_workflow_' . $record->id );
 		echo '<a class="button" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a> ';
 	}
-	echo '</div><p class="description">Applications are retained locally. Relay failures are not retried automatically because Mzizi has no confirmed idempotency key.</p></aside></section>';
+	echo '</div><p class="description">Applications remain retained locally. Only confirmed Mzizi responses are marked delivered.</p></aside></section>';
 }
