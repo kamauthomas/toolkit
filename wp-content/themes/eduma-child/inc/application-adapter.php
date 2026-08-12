@@ -127,12 +127,29 @@ add_action( 'init', function() {
 	if ( ! wp_next_scheduled( 'toolkit_application_process_queue' ) ) {
 		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'toolkit_five_minutes', 'toolkit_application_process_queue' );
 	}
+	if ( ! wp_next_scheduled( 'toolkit_application_resolve_course_names' ) ) {
+		wp_schedule_event( time() + 5 * MINUTE_IN_SECONDS, 'hourly', 'toolkit_application_resolve_course_names' );
+	}
 }, 20 );
 add_action( 'toolkit_application_process_queue', function() {
 	if ( ! toolkit_mzizi_relay_enabled() || ! defined( 'TOOLKIT_MZIZI_AUTOMATIC_RELEASE_ENABLED' ) || true !== TOOLKIT_MZIZI_AUTOMATIC_RELEASE_ENABLED ) return;
 	global $wpdb;
 	$ids = $wpdb->get_col( 'SELECT id FROM ' . toolkit_application_table_name() . " WHERE status = 'queued' AND relay_attempts = 0 ORDER BY created_at ASC LIMIT 5" );
 	foreach ( $ids as $id ) toolkit_application_relay_record( (int) $id, 'automatic' );
+} );
+
+add_action( 'toolkit_application_resolve_course_names', function() {
+	global $wpdb;
+	$records = $wpdb->get_results( 'SELECT id, payload FROM ' . toolkit_application_table_name() . ' ORDER BY created_at DESC LIMIT 100' );
+	$resolved = 0; $failed = 0;
+	foreach ( $records as $record ) {
+		$data = toolkit_application_decrypt_payload( $record->payload );
+		if ( is_wp_error( $data ) || ( ! empty( $data['course_name'] ) && ! empty( $data['intake_name'] ) ) ) continue;
+		$result = toolkit_application_resolve_names( (int) $record->id );
+		is_wp_error( $result ) ? $failed++ : $resolved++;
+		if ( $resolved + $failed >= 3 ) break;
+	}
+	update_option( 'toolkit_application_resolver_last_run', array( 'at' => current_time( 'mysql', true ), 'resolved' => $resolved, 'failed' => $failed ), false );
 } );
 
 function toolkit_application_encrypt_payload( array $payload ) {
@@ -790,6 +807,39 @@ add_action( 'admin_post_toolkit_application_resolve_names', function() {
 	wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) ); exit;
 } );
 
+function toolkit_application_csv_cell( $value ) {
+	$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F]/u', '', (string) $value );
+	return preg_match( '/^[=+\-@\t\r]/', $value ) ? "'" . $value : $value;
+}
+
+add_action( 'admin_post_toolkit_application_export', function() {
+	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'You do not have permission to export applications.' );
+	check_admin_referer( 'toolkit_application_export' );
+	global $wpdb;
+	$status = sanitize_key( wp_unslash( $_GET['status'] ?? '' ) );
+	$search = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
+	$where = array( '1=1' ); $args = array();
+	if ( $status ) { $where[] = 'status = %s'; $args[] = $status; }
+	if ( $search ) { $where[] = 'reference LIKE %s'; $args[] = '%' . $wpdb->esc_like( $search ) . '%'; }
+	$sql = 'SELECT * FROM ' . toolkit_application_table_name() . ' WHERE ' . implode( ' AND ', $where ) . ' ORDER BY created_at DESC LIMIT 5000';
+	$records = $args ? $wpdb->get_results( $wpdb->prepare( $sql, $args ) ) : $wpdb->get_results( $sql );
+	toolkit_application_log_event( 0, 'applications_exported', sprintf( 'CSV export by user %d: %d rows; delivery=%s; reference filter=%s.', get_current_user_id(), count( $records ), $status ?: 'all', $search ?: 'none' ), get_current_user_id() );
+	nocache_headers();
+	header( 'Content-Type: text/csv; charset=utf-8' );
+	header( 'Content-Disposition: attachment; filename="toolkit-applications-' . gmdate( 'Y-m-d-His' ) . '.csv"' );
+	header( 'X-Content-Type-Options: nosniff' );
+	$output = fopen( 'php://output', 'w' );
+	fwrite( $output, "\xEF\xBB\xBF" );
+	fputcsv( $output, array( 'Reference', 'Received', 'Applicant', 'Email', 'Primary phone', 'Secondary phone', 'County', 'Campus', 'Campus ID', 'Course', 'Course ID', 'Intake', 'Intake ID', 'Study mode', 'Fee payment', 'Referral source', 'KCSE mean grade', 'High school', 'Other qualifications', 'Delivery status', 'Workflow status', 'Relay attempts', 'Relayed at', 'Mzizi confirmation', 'Last error' ) );
+	foreach ( $records as $record ) {
+		$data = toolkit_application_decrypt_payload( $record->payload );
+		if ( is_wp_error( $data ) ) continue;
+		$row = array( $record->reference, get_date_from_gmt( $record->created_at, 'Y-m-d H:i:s' ), trim( ( $data['first_name'] ?? '' ) . ' ' . ( $data['middle_name'] ?? '' ) . ' ' . ( $data['surname'] ?? '' ) ), $data['email'] ?? '', $data['primary_phone'] ?? '', $data['secondary_phone'] ?? '', $data['county'] ?? '', $data['school_name'] ?? '', $data['school_id'] ?? '', $data['course_name'] ?? '', $data['course_id'] ?? '', $data['intake_name'] ?? '', $data['intake_id'] ?? '', $data['study_mode'] ?? '', $data['sponsorship_type'] ?? '', $data['referral_source'] ?? '', $data['mean_grade'] ?? '', $data['high_school'] ?? '', $data['qualifications'] ?? '', toolkit_application_status_label( $record->status ), ucwords( str_replace( '_', ' ', $record->workflow_status ) ), $record->relay_attempts, $record->relayed_at ? get_date_from_gmt( $record->relayed_at, 'Y-m-d H:i:s' ) : '', $record->mzizi_message, $record->last_error );
+		fputcsv( $output, array_map( 'toolkit_application_csv_cell', $row ) );
+	}
+	fclose( $output ); exit;
+} );
+
 function toolkit_application_status_label( $status ) {
 	$labels = array(
 		'received'          => 'Received',
@@ -865,6 +915,11 @@ function toolkit_application_render_admin_page() {
 	$args[] = $limit;
 	$args[] = ( $page - 1 ) * $limit;
 	$items  = $wpdb->get_results( $wpdb->prepare( $sql, $args ) );
+
+	$resolver = get_option( 'toolkit_application_resolver_last_run', array() );
+	echo '<div class="toolkit-application-tools"><div><strong>Automatic course resolver</strong><span>Runs hourly, enriches up to three missing labels per run, and never sends applications.</span>';
+	if ( $resolver ) printf( '<small>Last run: %s · %s resolved · %s need review</small>', esc_html( get_date_from_gmt( $resolver['at'] ?? '', 'd M Y H:i' ) ), number_format_i18n( $resolver['resolved'] ?? 0 ), number_format_i18n( $resolver['failed'] ?? 0 ) );
+	echo '</div><a class="button button-primary" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'action' => 'toolkit_application_export', 'status' => $status, 's' => $search ), admin_url( 'admin-post.php' ) ), 'toolkit_application_export' ) ) . '">Export filtered CSV</a></div>';
 
 	echo '<form class="toolkit-admin__toolbar" method="get"><input type="hidden" name="page" value="toolkit-applications"><label>Delivery <select name="status"><option value="">All statuses</option>';
 	foreach ( array( 'queued', 'delivered', 'delivery_unconfirmed', 'relaying', 'handoff_required', 'relay_failed', 'validation_failed', 'received' ) as $choice ) {
