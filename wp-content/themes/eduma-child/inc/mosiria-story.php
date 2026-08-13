@@ -13,6 +13,8 @@ function toolkit_mosiria_story() {
 		'label'      => 'Leadership Visit',
 		'title'      => 'Geoffrey Mosiria Visits The Toolkit',
 		'standfirst' => 'The Nairobi City County Chief Officer for Citizen Engagement and Customer Service toured Toolkit training facilities and spoke with learners about practical skills and the future of work.',
+		'focus_keyphrase' => 'Geoffrey Mosiria',
+		'seo_description' => 'Geoffrey Mosiria visited Toolkit in Kikuyu to tour practical training facilities and speak with learners about skills, work and entrepreneurship.',
 		'content'    => array(
 			'The Toolkit for Skills and Innovation welcomed Geoffrey Omatoke Mosiria, Nairobi City County Chief Officer for Citizen Engagement and Customer Service, for an official visit on 17 July 2026.',
 			'Principal Sylvester Theophile and members of the management, admissions and training teams introduced Toolkit’s approach to accessible, industry-relevant skills development.',
@@ -50,7 +52,7 @@ function toolkit_mosiria_story_preview() {
 }
 
 function toolkit_publish_mosiria_story() {
-	$content_version = '2026.07.31.3';
+	$content_version = '2026.08.13.4';
 	if ( $content_version === get_option( 'toolkit_mosiria_story_published' ) ) {
 		return;
 	}
@@ -74,6 +76,8 @@ function toolkit_publish_mosiria_story() {
 		true
 	);
 	if ( ! is_wp_error( $post_id ) ) {
+		update_post_meta( $post_id, '_yoast_wpseo_focuskw', sanitize_text_field( $story['focus_keyphrase'] ) );
+		update_post_meta( $post_id, '_yoast_wpseo_metadesc', sanitize_text_field( $story['seo_description'] ) );
 		update_option( 'toolkit_mosiria_story_published', $content_version, false );
 	}
 }

@@ -52,6 +52,8 @@ function toolkit_supplied_stories() {
 			'category_slug' => 'industry-engagement',
 			'title'         => 'Toolkit at Africa Forward Youth and Innovation Day',
 			'standfirst'    => 'Toolkit demonstrated practical welding, solar and language pathways while connecting with students, partners and stakeholders at the University of Nairobi career fair.',
+			'focus_keyphrase' => 'Africa Forward Youth and Innovation Day',
+			'seo_description' => 'See how Toolkit presented welding, solar and language training at the Africa Forward Youth and Innovation Day career fair in Nairobi.',
 			'content'       => array(
 				'Toolkit participated in the Africa Forward Youth and Innovation Day Career Fair, held at the University of Nairobi on 14 and 15 July 2026.',
 				'Across the two-day event, the Welding, Solar Installation and Language teams demonstrated hands-on training and the career pathways available through practical skills development.',
@@ -75,6 +77,8 @@ function toolkit_supplied_stories() {
 			'category_slug' => 'alumni-stories',
 			'title'         => 'Alumni Returned to Inspire the Next Generation',
 			'standfirst'    => 'Former Toolkit students returned to share honest career lessons, challenges and opportunities with current trainees.',
+			'focus_keyphrase' => 'Toolkit alumni mentorship',
+			'seo_description' => 'Toolkit alumni returned to share practical career lessons, challenges and opportunities with current trainees during a mentorship event in Kikuyu.',
 			'content'       => array(
 				'There was no greater testimony than seeing Toolkit alumni return, not simply to visit, but to inspire the next generation.',
 				'The Alumni Mentorship and Success Stories event, held on 27 June 2026, reflected how every journey begins with a decision to learn, grow and persevere.',
@@ -112,7 +116,7 @@ function toolkit_supplied_story_preview() {
 }
 
 function toolkit_publish_supplied_stories() {
-	$content_version = '2026.08.13.2';
+	$content_version = '2026.08.13.3';
 	if ( $content_version === get_option( 'toolkit_supplied_stories_published' ) ) {
 		return;
 	}

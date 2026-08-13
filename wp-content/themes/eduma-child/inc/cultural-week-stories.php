@@ -12,6 +12,8 @@ function toolkit_cultural_week_stories() {
 			'label'      => 'Cultural Week',
 			'title'      => 'Official Wear Day: Dressed for Success',
 			'standfirst' => 'Professionalism, confidence and workplace readiness took centre stage as students and staff stepped out in official wear.',
+			'focus_keyphrase' => 'Official Wear Day',
+			'seo_description' => 'Toolkit students and staff marked Official Wear Day with a celebration of professionalism, confidence and workplace readiness.',
 			'content'    => array(
 				'The Toolkit community came together in official wear to celebrate professionalism, confidence and workplace readiness.',
 				'Students and staff embraced the values that shape successful careers and presented themselves with purpose.',
@@ -27,6 +29,8 @@ function toolkit_cultural_week_stories() {
 			'label'      => 'Cultural Week',
 			'title'      => 'Golden Oldies: A Trip Down Memory Lane',
 			'standfirst' => 'Timeless fashion, classic style and unforgettable smiles turned the day into a warm celebration of shared history.',
+			'focus_keyphrase' => 'Golden Oldies',
+			'seo_description' => 'Golden Oldies brought classic style and shared memories to Toolkit Cultural Week in Kikuyu on 14 July 2026.',
 			'content'    => array(
 				'Students and staff took a trip down memory lane as they embraced the Golden Oldies theme with timeless fashion, classic style and unforgettable smiles.',
 				'The occasion became more than a dress-up day: it celebrated history, culture and the generations that shaped the community.',
@@ -41,6 +45,8 @@ function toolkit_cultural_week_stories() {
 			'label'      => 'Cultural Week',
 			'title'      => 'African Wear Day: Culture Worn with Pride',
 			'standfirst' => 'A celebration of heritage, unity and diversity through the colours, forms and confidence of traditional African wear.',
+			'focus_keyphrase' => 'African Wear Day',
+			'seo_description' => 'African Wear Day celebrated heritage, unity and diversity through traditional dress during Toolkit Cultural Week in Kikuyu.',
 			'content'    => array(
 				'The Toolkit community wore its culture with pride.',
 				'The day celebrated the beauty of African culture through striking traditional wear and personal expression.',
@@ -55,6 +61,8 @@ function toolkit_cultural_week_stories() {
 			'label'      => 'Cultural Week',
 			'title'      => 'Career Wear Day: Dressing for the Future',
 			'standfirst' => 'Students and staff turned career ambition into a visible statement of confidence, character and workplace readiness.',
+			'focus_keyphrase' => 'Career Wear Day',
+			'seo_description' => 'Career Wear Day helped Toolkit learners connect personal presentation with professional identity and future work pathways.',
 			'content'    => array(
 				'Dressed for success.',
 				'The Toolkit community celebrated professionalism, confidence and workplace readiness through career wear.',
@@ -220,7 +228,7 @@ function toolkit_cultural_week_preview() {
  * are preserved, making the release safe to repeat.
  */
 function toolkit_publish_cultural_week_stories() {
-	$content_version = '2026.07.31.1';
+	$content_version = '2026.08.13.2';
 	if ( $content_version === get_option( 'toolkit_cultural_week_2026_published' ) ) {
 		return;
 	}
@@ -237,7 +245,7 @@ function toolkit_publish_cultural_week_stories() {
 		foreach ( $story['content'] as $paragraph ) {
 			$content .= '<p>' . esc_html( $paragraph ) . '</p>';
 		}
-		wp_insert_post(
+		$post_id = wp_insert_post(
 			array(
 				'post_type'     => 'post',
 				'post_status'   => 'publish',
@@ -250,6 +258,10 @@ function toolkit_publish_cultural_week_stories() {
 				'post_category' => $category_id ? array( $category_id ) : array(),
 			)
 		);
+		if ( ! is_wp_error( $post_id ) ) {
+			update_post_meta( $post_id, '_yoast_wpseo_focuskw', sanitize_text_field( $story['focus_keyphrase'] ) );
+			update_post_meta( $post_id, '_yoast_wpseo_metadesc', sanitize_text_field( $story['seo_description'] ) );
+		}
 	}
 
 	update_option( 'toolkit_cultural_week_2026_published', $content_version, false );
