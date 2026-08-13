@@ -356,6 +356,7 @@ add_filter( 'template_include', function( $template ) {
 
 	$page_templates = array(
 		'about-toolkit-africa'          => 'template-parts/pages/institutional.php',
+		'toolkit-in-brief'              => 'template-parts/pages/institutional.php',
 		'the-toolkit-foundation-copy'  => 'template-parts/pages/institutional.php',
 		'the-toolkit-foundation'       => 'template-parts/pages/institutional.php',
 		'contact'                      => 'template-parts/pages/contact.php',
@@ -495,24 +496,16 @@ add_action( 'template_redirect', function() {
 		wp_safe_redirect( home_url( '/apply/' ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
-	if ( is_page( 'students-portal' ) ) {
-		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'The Toolkit for Skills and Innovation' );
-		exit;
-	}
-	if ( is_page( 'courses' ) ) {
-		wp_safe_redirect( home_url( '/our-ventures/' ), 301, 'The Toolkit for Skills and Innovation' );
-		exit;
-	}
-	if ( '/blog' === untrailingslashit( $request_path ) ) {
-		wp_safe_redirect( home_url( '/toolkit-blog/' ), 301, 'The Toolkit for Skills and Innovation' );
-		exit;
-	}
-	if ( is_page( 'research' ) ) {
-		wp_safe_redirect( home_url( '/our-ventures/tti-consultancy-and-research/' ), 301, 'The Toolkit for Skills and Innovation' );
-		exit;
-	}
-	if ( is_page( 'the-toolkit-foundation-copy' ) ) {
-		wp_safe_redirect( home_url( '/the-toolkit-foundation/' ), 301, 'The Toolkit for Skills and Innovation' );
+	$retired_routes = array(
+		'/students-portal'             => '/our-ventures/',
+		'/courses'                     => '/our-ventures/',
+		'/blog'                        => '/toolkit-blog/',
+		'/research'                    => '/our-ventures/tti-consultancy-and-research/',
+		'/the-toolkit-foundation-copy' => '/the-toolkit-foundation/',
+	);
+	$retired_path   = untrailingslashit( $request_path );
+	if ( isset( $retired_routes[ $retired_path ] ) ) {
+		wp_safe_redirect( home_url( $retired_routes[ $retired_path ] ), 301, 'The Toolkit for Skills and Innovation' );
 		exit;
 	}
 }, 1 );
@@ -799,8 +792,8 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_page( 'about-toolkit-africa' ) ) {
 		return array(
-			'title'       => 'About The Toolkit | Skills Training in Kenya',
-			'description' => 'Learn how The Toolkit connects practical training, innovation and industry exposure with employment and entrepreneurship pathways for young people and women.',
+			'title'       => 'Skills Training in Kenya | About The Toolkit',
+			'description' => 'Skills training in Kenya from The Toolkit combines practical learning, recognised assessment, industry exposure and clear pathways to work.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
@@ -813,15 +806,15 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_page( 'the-toolkit-foundation' ) ) {
 		return array(
-			'title'       => 'The Toolkit Foundation | Inclusive Skills Development',
-			'description' => 'Discover Toolkit Foundation programmes supporting inclusive technical, digital, green, and enterprise skills for underserved communities.',
+			'title'       => 'Toolkit Foundation | Inclusive Skills Development',
+			'description' => 'Toolkit Foundation supports inclusive technical, digital, green and enterprise skills development for underserved communities in Kenya.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/foundation.jpg',
 		);
 	}
 	if ( is_page( 'contact' ) ) {
 		return array(
-			'title'       => 'Contact The Toolkit | Admissions and Partnerships',
-			'description' => 'Contact The Toolkit for Skills and Innovation about courses, admissions, partnerships, and visiting our training centre in Kikuyu, Kenya.',
+			'title'       => 'Contact Toolkit | Admissions and Partnerships',
+			'description' => 'Contact Toolkit about courses, admissions, partnerships or visits to our practical training centre on the Karen-Kikuyu Southern Bypass.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/contact.jpg',
 		);
 	}
@@ -885,22 +878,22 @@ function eduma_child_redesigned_page_metadata() {
 	}
 	if ( is_page( 'toolkit-in-brief' ) ) {
 		return array(
-			'title'       => 'Toolkit in Brief | Skills and Youth Opportunity',
-			'description' => 'Review The Toolkit for Skills and Innovation’s mission, vision, values, skills-development model, and commitment to employment and entrepreneurship pathways.',
+			'title'       => 'Toolkit in Brief | Skills Training Model',
+			'description' => 'Toolkit in Brief explains our mission, values and skills training model for practical learning, recognised assessment, employment and enterprise.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
 	if ( is_page( 'tti-media' ) ) {
 		return array(
 			'title'       => 'Toolkit Videos | Practical Skills in Action',
-			'description' => 'Watch The Toolkit for Skills and Innovation learners, trainers, partners, workshops, and practical skills programmes in action.',
+			'description' => 'Toolkit videos show learners, trainers, workshops, partnerships and practical vocational skills programmes in action.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/blogs/legacy-context/welding-vr-training.jpg',
 		);
 	}
 	if ( is_page( 'gallery-2' ) ) {
 		return array(
 			'title'       => 'Toolkit Training Gallery | Skills in Action',
-			'description' => 'View images from The Toolkit for Skills and Innovation training, workshops, learner activities, partnerships, events, and skills-development programmes.',
+			'description' => 'Browse Toolkit training gallery images from workshops, learner activities, practical courses, partnerships and community programmes.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
@@ -936,6 +929,71 @@ add_filter( 'wpseo_twitter_title', function( $title ) {
 add_filter( 'wpseo_twitter_description', function( $description ) {
 	$metadata = eduma_child_redesigned_page_metadata();
 	return $metadata ? $metadata['description'] : $description;
+} );
+
+/*
+ * The redesigned institutional pages are rendered by the child theme rather
+ * than stored in the block editor. Give Yoast the same visible <main> content
+ * that search engines receive, otherwise its editor analysis incorrectly
+ * reports thin copy, no links, and no images.
+ */
+add_action( 'admin_enqueue_scripts', function( $hook ) {
+	if ( ! in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
+		return;
+	}
+
+	$post_id = isset( $_GET['post'] ) ? absint( wp_unslash( $_GET['post'] ) ) : 0;
+	if ( ! $post_id || 'page' !== get_post_type( $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
+		return;
+	}
+
+	wp_enqueue_script( 'jquery' );
+	wp_localize_script( 'jquery', 'toolkitYoastRenderedContent', array(
+		'url'      => get_permalink( $post_id ),
+		'selector' => 'main.toolkit-page',
+	) );
+	wp_add_inline_script( 'jquery', <<<'JS'
+( function( $ ) {
+	'use strict';
+	var config = window.toolkitYoastRenderedContent || {};
+	var renderedContent = '';
+	var registered = false;
+
+	function prepareContent( html ) {
+		var documentCopy = new DOMParser().parseFromString( html, 'text/html' );
+		var content = documentCopy.querySelector( config.selector || 'main.toolkit-page' );
+		if ( ! content ) return '';
+		content.querySelectorAll( 'script, style, noscript, template' ).forEach( function( element ) {
+			element.remove();
+		} );
+		return content.innerHTML;
+	}
+
+	function registerAnalysisContent() {
+		if ( registered || ! renderedContent || typeof window.YoastSEO === 'undefined' || ! window.YoastSEO.app || typeof window.YoastSEO.app.registerPlugin !== 'function' || typeof window.YoastSEO.app.registerModification !== 'function' ) return;
+		window.YoastSEO.app.registerPlugin( 'ToolkitRenderedContent', { status: 'ready' } );
+		window.YoastSEO.app.registerModification( 'content', function() { return renderedContent; }, 'ToolkitRenderedContent', 10 );
+		registered = true;
+		if ( typeof window.YoastSEO.app.refresh === 'function' ) window.YoastSEO.app.refresh();
+	}
+
+	if ( ! config.url ) return;
+	fetch( config.url, { credentials: 'same-origin' } )
+		.then( function( response ) {
+			if ( ! response.ok ) throw new Error( 'Rendered page request returned HTTP ' + response.status );
+			return response.text();
+		} )
+		.then( function( html ) {
+			renderedContent = prepareContent( html );
+			registerAnalysisContent();
+		} )
+		.catch( function( error ) {
+			if ( window.console && typeof window.console.warn === 'function' ) window.console.warn( 'Toolkit Yoast rendered-content analysis was unavailable.', error );
+		} );
+	$( window ).on( 'YoastSEO:ready', registerAnalysisContent );
+} )( jQuery );
+JS
+	);
 } );
 
 function eduma_child_course_canonical_url() {
@@ -1111,6 +1169,15 @@ add_filter( 'wpseo_sitemap_post_type_first_links', function( $links, $post_type 
 add_filter( 'wpseo_opengraph_image', function( $image ) {
 	$metadata = eduma_child_redesigned_page_metadata();
 	return $metadata ? $metadata['image'] : $image;
+} );
+
+/* The string filter only replaces an existing image. Theme-rendered pages do
+ * not always have an indexable image, so seed Yoast's image container too. */
+add_filter( 'wpseo_add_opengraph_images', function( $image_container ) {
+	$metadata = eduma_child_redesigned_page_metadata();
+	if ( $metadata && ! empty( $metadata['image'] ) && method_exists( $image_container, 'add_image_by_url' ) ) {
+		$image_container->add_image_by_url( $metadata['image'] );
+	}
 } );
 
 add_filter( 'wpseo_opengraph_image_width', function( $width ) {
