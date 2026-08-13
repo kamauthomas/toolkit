@@ -226,7 +226,7 @@ function eduma_child_is_custom_surface() {
 	if ( ! eduma_child_redesign_enabled() || is_admin() ) {
 		return false;
 	}
-	if ( get_query_var( 'toolkit_connect' ) || get_query_var( 'toolkit_reception' ) || ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) || is_front_page() || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || get_query_var( 'toolkit_course' ) ) {
+	if ( get_query_var( 'toolkit_showcase' ) || get_query_var( 'toolkit_connect' ) || get_query_var( 'toolkit_reception' ) || ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) || is_front_page() || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || get_query_var( 'toolkit_course' ) ) {
 		return true;
 	}
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
@@ -252,7 +252,7 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_script( 'toolkit-home-experience', get_stylesheet_directory_uri() . '/assets/js/home-experience.js', array(), toolkit_asset_version( $experience_path ), true );
 	}
 
-	if ( eduma_child_redesign_enabled() && ( ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || $legacy_course || get_query_var( 'toolkit_course' ) ) ) {
+	if ( eduma_child_redesign_enabled() && ( get_query_var( 'toolkit_showcase' ) || ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) || is_singular( 'post' ) || is_page( array( 'our-ventures', 'notice-board', 'toolkit-courses-apply-today', 'about-toolkit-africa', 'the-toolkit-foundation-copy', 'the-toolkit-foundation', 'contact', 'toolkit-blog', 'gallery-2', 'tti-media' ) ) || $legacy_course || get_query_var( 'toolkit_course' ) ) ) {
 		$page_css_ver = toolkit_asset_version( get_stylesheet_directory() . '/page-redesign.css' );
 		$page_js_ver  = toolkit_asset_version( get_stylesheet_directory() . '/page-redesign.js' );
 		wp_enqueue_style( 'eduma-child-page-redesign', get_stylesheet_directory_uri() . '/page-redesign.css', array( 'eduma-child-brand-tokens' ), $page_css_ver );
@@ -348,6 +348,12 @@ add_filter( 'template_include', function( $template ) {
 	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
 		return get_stylesheet_directory() . '/template-parts/pages/speak-up.php';
 	}
+	if ( 'graduation' === get_query_var( 'toolkit_showcase' ) ) {
+		return get_stylesheet_directory() . '/template-parts/pages/graduation.php';
+	}
+	if ( 'testimonials' === get_query_var( 'toolkit_showcase' ) ) {
+		return get_stylesheet_directory() . '/template-parts/pages/testimonials.php';
+	}
 
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
 	if ( eduma_child_get_legacy_course_for_page() ) {
@@ -390,6 +396,20 @@ add_action( 'init', function() {
 	if ( get_option( 'eduma_child_course_routes_version' ) !== $routes_version ) {
 		flush_rewrite_rules( false );
 		update_option( 'eduma_child_course_routes_version', $routes_version, false );
+	}
+} );
+
+/* Outcome and trust pages remain theme-owned so their evidence-led layouts do
+ * not depend on legacy builders or placeholder database records. */
+add_action( 'init', function() {
+	$route_version = eduma_child_redesign_enabled() ? '2026-1-on' : '2026-1-off';
+	if ( eduma_child_redesign_enabled() ) {
+		add_rewrite_rule( '^graduation/?$', 'index.php?toolkit_showcase=graduation', 'top' );
+		add_rewrite_rule( '^testimonials/?$', 'index.php?toolkit_showcase=testimonials', 'top' );
+	}
+	if ( $route_version !== get_option( 'eduma_child_showcase_route_version' ) ) {
+		flush_rewrite_rules( false );
+		update_option( 'eduma_child_showcase_route_version', $route_version, false );
 	}
 } );
 
@@ -442,10 +462,18 @@ add_filter( 'query_vars', function( $vars ) {
 	$vars[] = 'toolkit_connect';
 	$vars[] = 'toolkit_reception';
 	$vars[] = 'toolkit_speak_up';
+	$vars[] = 'toolkit_showcase';
 	return $vars;
 } );
 
 add_action( 'template_redirect', function() {
+	if ( in_array( get_query_var( 'toolkit_showcase' ), array( 'graduation', 'testimonials' ), true ) ) {
+		global $wp_query;
+		$wp_query->is_404 = false;
+		$wp_query->is_home = false;
+		$wp_query->is_archive = false;
+		status_header( 200 );
+	}
 	if ( get_query_var( 'toolkit_speak_up' ) ) {
 		global $wp_query;
 		if ( ! toolkit_speak_up_enabled() ) {
@@ -482,7 +510,7 @@ add_action( 'template_redirect', function() {
 
 add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
 	$path = wp_parse_url( $requested_url, PHP_URL_PATH );
-	return in_array( untrailingslashit( $path ), array( '/llms.txt', '/llms-full.txt', '/apply' ), true ) ? false : $redirect_url;
+	return in_array( untrailingslashit( $path ), array( '/llms.txt', '/llms-full.txt', '/apply', '/graduation', '/testimonials' ), true ) ? false : $redirect_url;
 }, 10, 2 );
 
 /* Retire unused public routes without deleting their WordPress records. */
@@ -610,6 +638,10 @@ add_filter( 'wp_robots', function( $robots ) {
 function toolkit_story_seo_copy( $post_id ) {
 	$slug = get_post_field( 'post_name', $post_id );
 	$copy = array(
+		'icm-tvet-uk-visits-the-toolkit' => array(
+			'title'       => 'ICM-TVET UK Visit | Toolkit Partnership Story',
+			'description' => 'The ICM-TVET UK visit explored collaboration, recognised programmes and Toolkit’s practical skills-training facilities in Kikuyu, Kenya.',
+		),
 		'geofrey-mosiria-visits-the-toolkit' => array(
 			'title'       => 'Geoffrey Mosiria Visits Toolkit | Official Visit',
 			'description' => 'Geoffrey Omatoke Mosiria toured Toolkit training facilities in Kikuyu and spoke with learners about practical skills, employment and entrepreneurship.',
@@ -729,6 +761,20 @@ function eduma_child_redesigned_page_metadata() {
 			'title'       => 'Reception | The Toolkit for Skills and Innovation',
 			'description' => 'Send a reception request to The Toolkit for Skills and Innovation before your visit to our training centre in Kikuyu, Kenya.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
+		);
+	}
+	if ( 'graduation' === get_query_var( 'toolkit_showcase' ) ) {
+		return array(
+			'title'       => 'Toolkit Graduation | Skills, Achievement and Progress',
+			'description' => 'Explore Toolkit graduation moments, learner achievements and the practical training journeys celebrated by our institution in Kikuyu, Kenya.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/graduation/kmm-2071-jpg.webp',
+		);
+	}
+	if ( 'testimonials' === get_query_var( 'toolkit_showcase' ) ) {
+		return array(
+			'title'       => 'Toolkit Testimonials | Graduate and Learner Voices',
+			'description' => 'Hear attributable Toolkit testimonials from graduates and learners about practical training, confidence, careers and progression into opportunity.',
+			'image'       => 'https://i.ytimg.com/vi/VOIpU5tRRvo/maxresdefault.jpg',
 		);
 	}
 	if ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
@@ -932,10 +978,10 @@ add_filter( 'wpseo_twitter_description', function( $description ) {
 } );
 
 /*
- * The redesigned institutional pages are rendered by the child theme rather
- * than stored in the block editor. Give Yoast the same visible <main> content
- * that search engines receive, otherwise its editor analysis incorrectly
- * reports thin copy, no links, and no images.
+ * Redesigned pages and editorial stories are partly rendered by the child
+ * theme rather than stored in the block editor. Give Yoast the same visible
+ * <main> content that search engines receive, otherwise its editor analysis
+ * incorrectly reports thin copy, no links, and no images.
  */
 add_action( 'admin_enqueue_scripts', function( $hook ) {
 	if ( ! in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
@@ -943,7 +989,7 @@ add_action( 'admin_enqueue_scripts', function( $hook ) {
 	}
 
 	$post_id = isset( $_GET['post'] ) ? absint( wp_unslash( $_GET['post'] ) ) : 0;
-	if ( ! $post_id || 'page' !== get_post_type( $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
+	if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'page', 'post' ), true ) || 'publish' !== get_post_status( $post_id ) ) {
 		return;
 	}
 
@@ -1035,6 +1081,8 @@ function toolkit_demo_production_canonical_url( $canonical = '' ) {
 		$canonical = home_url( '/reception/' );
 	} elseif ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
 		$canonical = home_url( '/speak-up/' );
+	} elseif ( in_array( get_query_var( 'toolkit_showcase' ), array( 'graduation', 'testimonials' ), true ) ) {
+		$canonical = home_url( '/' . get_query_var( 'toolkit_showcase' ) . '/' );
 	} elseif ( is_front_page() ) {
 		$canonical = home_url( '/' );
 	} elseif ( is_singular() ) {
@@ -1074,6 +1122,9 @@ add_filter( 'thim/structured_data/types', function( $types ) {
 }, 100 );
 
 add_filter( 'wpseo_opengraph_url', function( $url ) {
+	if ( in_array( get_query_var( 'toolkit_showcase' ), array( 'graduation', 'testimonials' ), true ) ) {
+		return home_url( '/' . get_query_var( 'toolkit_showcase' ) . '/' );
+	}
 	if ( is_page( 'toolkit-courses-apply-today' ) ) {
 		return home_url( '/apply/' );
 	}
@@ -1094,6 +1145,18 @@ add_filter( 'wpseo_opengraph_url', function( $url ) {
 } );
 
 add_filter( 'wpseo_schema_webpage', function( $data ) {
+	$showcase = get_query_var( 'toolkit_showcase' );
+	if ( in_array( $showcase, array( 'graduation', 'testimonials' ), true ) ) {
+		$url                 = home_url( '/' . $showcase . '/' );
+		$metadata            = eduma_child_redesigned_page_metadata();
+		$data['@id']         = $url . '#webpage';
+		$data['url']         = $url;
+		$data['name']        = $metadata['title'];
+		$data['description'] = $metadata['description'];
+		$data['@type']       = 'CollectionPage';
+		unset( $data['breadcrumb'] );
+		return $data;
+	}
 	$is_speak_up = toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' );
 	$is_reception = (bool) get_query_var( 'toolkit_reception' );
 	if ( ! $is_speak_up && ! $is_reception ) return $data;
@@ -1154,7 +1217,15 @@ add_filter( 'wpseo_sitemap_page_content', function( $content ) {
 	if ( ! eduma_child_redesign_enabled() ) {
 		return $content;
 	}
-	return $content . '<url><loc>' . esc_url( home_url( '/connect/' ) ) . '</loc><lastmod>' . esc_html( gmdate( DATE_W3C, filemtime( get_stylesheet_directory() . '/template-parts/pages/connect.php' ) ) ) . '</lastmod></url>';
+	$entries = array(
+		'/connect/'     => 'template-parts/pages/connect.php',
+		'/graduation/'  => 'template-parts/pages/graduation.php',
+		'/testimonials/'=> 'template-parts/pages/testimonials.php',
+	);
+	foreach ( $entries as $route => $relative ) {
+		$content .= '<url><loc>' . esc_url( home_url( $route ) ) . '</loc><lastmod>' . esc_html( gmdate( DATE_W3C, filemtime( get_stylesheet_directory() . '/' . $relative ) ) ) . '</lastmod></url>';
+	}
+	return $content;
 } );
 
 /* Yoast adds the WordPress posts index separately from normal page entries. */
@@ -1372,7 +1443,7 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 	unset( $node );
 
 	/* Virtual routes must not inherit the database-backed Blog breadcrumb. */
-	if ( get_query_var( 'toolkit_reception' ) || ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) ) {
+	if ( get_query_var( 'toolkit_showcase' ) || get_query_var( 'toolkit_reception' ) || ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) ) {
 		$graph = array_values(
 			array_filter(
 				$graph,
@@ -1389,6 +1460,22 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 			'@type'              => 'WebPage',
 			'@id'                => home_url( '/speak-up/#webpage' ),
 			'url'                => home_url( '/speak-up/' ),
+			'name'               => $metadata['title'],
+			'description'        => $metadata['description'],
+			'isPartOf'           => array( '@id' => preg_replace( '/#organization$/', '#website', $organization_id ) ),
+			'about'              => array( '@id' => $organization_id ),
+			'primaryImageOfPage' => array( '@id' => $image_id ),
+			'image'              => array( '@id' => $image_id ),
+			'inLanguage'         => 'en-KE',
+		);
+	}
+	$showcase = sanitize_key( get_query_var( 'toolkit_showcase' ) );
+	if ( in_array( $showcase, array( 'graduation', 'testimonials' ), true ) && $metadata && ! $has_webpage ) {
+		$showcase_url = home_url( '/' . $showcase . '/' );
+		$graph[]      = array(
+			'@type'              => 'CollectionPage',
+			'@id'                => $showcase_url . '#webpage',
+			'url'                => $showcase_url,
 			'name'               => $metadata['title'],
 			'description'        => $metadata['description'],
 			'isPartOf'           => array( '@id' => preg_replace( '/#organization$/', '#website', $organization_id ) ),

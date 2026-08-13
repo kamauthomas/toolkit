@@ -21,6 +21,8 @@ $logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 			<nav class="toolkit-site-footer__nav" aria-label="Footer navigation">
 				<h2>Explore</h2>
 				<a href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Our courses</a>
+				<a href="<?php echo esc_url( home_url( '/graduation/' ) ); ?>">Graduation</a>
+				<a href="<?php echo esc_url( home_url( '/testimonials/' ) ); ?>">Testimonials</a>
 				<a href="<?php echo esc_url( home_url( '/notice-board/' ) ); ?>">Notice board</a>
 				<a href="<?php echo esc_url( home_url( '/the-toolkit-foundation-copy/' ) ); ?>">Toolkit Foundation</a>
 				<a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact us</a>

@@ -107,6 +107,7 @@ while ( have_posts() ) :
 				<div class="toolkit-story-content">
 					<div class="toolkit-story-content__marker"><span><?php echo esc_html( $content_marker ); ?></span><i></i></div>
 					<?php if ( $preview ) : ?>
+						<?php if ( ! empty( $preview['section_title'] ) ) : ?><h2><?php echo esc_html( $preview['section_title'] ); ?></h2><?php endif; ?>
 						<?php foreach ( $preview['content'] as $paragraph ) : ?><p><?php echo esc_html( $paragraph ); ?></p><?php endforeach; ?>
 						<div class="toolkit-story-day-gallery" aria-label="<?php echo esc_attr( $story_title . ' gallery' ); ?>">
 							<?php foreach ( $preview['images'] as $index => $image ) : ?><figure><img src="<?php echo esc_url( $image ); ?>" width="1200" height="900" alt="<?php echo esc_attr( $story_title . ' — image ' . ( $index + 1 ) ); ?>"><figcaption><?php echo esc_html( $category_name . ' / ' . str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></figcaption></figure><?php endforeach; ?>

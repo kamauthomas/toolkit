@@ -1,0 +1,27 @@
+<?php
+/** Attributable graduate and learner testimony page. */
+get_header();
+$voices = array(
+	array( 'VOIpU5tRRvo', 'Caroline Kieru', 'International 6G Welder', 'Toolkit transformed my passion into a profession. MIG welding and Virtual Reality training built the skills that took me from a humble background into the welding industry and now to work in France.' ),
+	array( '0sjNPAXN8pw', 'Clifford Leisi', 'Toolkit MIG Welder', 'The hands-on, immersive experience sharpened my skills, built my confidence and prepared me for real-world challenges. Today I am working as a professional welder.' ),
+	array( 'LJGs1t8T6Bc', 'Carol Njoki', 'Toolkit MIG Welder', 'Through hands-on training, mentorship and support from passionate instructors, I gained skills and confidence I never thought possible. Toolkit helped me discover my potential.' ),
+);
+$more = array(
+	array( 'XFhBkLo8xR4', 'Abigail Karani', 'Alumni success story' ),
+	array( 'ZxyLpCqC6wk', 'Pauline Kieru', 'Alumni success story' ),
+);
+?>
+<main id="main-content" class="toolkit-page toolkit-testimonials-page">
+	<section class="testimonials-hero"><div><p class="toolkit-kicker">Learner and graduate voices</p><h1>Toolkit testimonials</h1><p>Real people explain how practical training, mentorship and persistence shaped their confidence, craft and next steps.</p><a class="toolkit-btn toolkit-btn--primary" href="#featured-voices">Hear their stories</a></div><aside><span>Evidence over slogans</span><strong>Every featured voice is named and linked to its published video.</strong><p>Individual experiences are personal and do not guarantee the same employment or income outcome for every learner.</p></aside></section>
+
+	<section id="featured-voices" class="testimonial-stories toolkit-section" aria-labelledby="testimonial-stories-title"><header><div><p class="toolkit-kicker">Featured voices</p><h2 id="testimonial-stories-title">From training to confidence</h2></div><p>Watch each account in the speaker’s own voice, then explore the learning pathways behind the story.</p></header>
+		<div class="testimonial-stories__grid"><?php foreach ( $voices as $index => $voice ) : ?><article class="testimonial-story <?php echo 0 === $index ? 'testimonial-story--lead' : ''; ?>"><div class="testimonial-story__media"><button class="toolkit-video-facade" type="button" data-video-id="<?php echo esc_attr( $voice[0] ); ?>" aria-label="Play <?php echo esc_attr( $voice[1] ); ?> testimonial"><img src="https://i.ytimg.com/vi/<?php echo esc_attr( $voice[0] ); ?>/hqdefault.jpg" width="480" height="360" loading="<?php echo 0 === $index ? 'eager' : 'lazy'; ?>" alt="<?php echo esc_attr( $voice[1] . ' sharing a Toolkit training experience' ); ?>"><span aria-hidden="true">▶</span></button></div><div class="testimonial-story__copy"><span aria-hidden="true">“</span><blockquote><?php echo esc_html( $voice[3] ); ?></blockquote><footer><strong><?php echo esc_html( $voice[1] ); ?></strong><small><?php echo esc_html( $voice[2] ); ?></small></footer></div></article><?php endforeach; ?></div>
+	</section>
+
+	<section class="testimonial-principles toolkit-section"><div><p class="toolkit-kicker">What the voices reveal</p><h2>Progress has more than one measure</h2><p>Graduate stories can show changes in technical ability, confidence, professional identity and readiness to navigate opportunity. They are strongest when the speaker, source and context remain visible.</p></div><ul><li><i class="fas fa-tools" aria-hidden="true"></i><strong>Practical competence</strong><span>Skills strengthened through hands-on learning and repeated practice.</span></li><li><i class="fas fa-user-check" aria-hidden="true"></i><strong>Confidence</strong><span>The ability to explain, demonstrate and keep developing a craft.</span></li><li><i class="fas fa-route" aria-hidden="true"></i><strong>Progression</strong><span>Personal next steps into work, enterprise or continued learning.</span></li></ul></section>
+
+	<section class="testimonial-more toolkit-section" aria-labelledby="testimonial-more-title"><header><div><p class="toolkit-kicker">More alumni stories</p><h2 id="testimonial-more-title">Continue listening</h2></div><a href="https://www.youtube.com/@toolkitafrica" target="_blank" rel="noopener">Visit the official channel <i class="fas fa-external-link-alt" aria-hidden="true"></i></a></header><div><?php foreach ( $more as $voice ) : ?><article><a href="https://www.youtube.com/watch?v=<?php echo esc_attr( $voice[0] ); ?>" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/<?php echo esc_attr( $voice[0] ); ?>/hqdefault.jpg" width="480" height="360" loading="lazy" alt="<?php echo esc_attr( $voice[1] . ' alumni success story video' ); ?>"><span><small><?php echo esc_html( $voice[2] ); ?></small><strong><?php echo esc_html( $voice[1] ); ?></strong><em>Watch story <i class="fas fa-arrow-right" aria-hidden="true"></i></em></span></a></article><?php endforeach; ?></div></section>
+
+	<section class="testimonial-cta"><div><p class="toolkit-kicker">Your next step</p><h2>Build a story grounded in skill</h2><p>Explore Toolkit’s practical pathways and ask admissions for current entry, schedule and fee information.</p></div><div><a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Explore courses</a><a class="toolkit-btn toolkit-btn--secondary" href="<?php echo esc_url( home_url( '/graduation/' ) ); ?>">See graduation achievements</a></div></section>
+</main>
+<?php get_footer(); ?>

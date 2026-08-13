@@ -18,11 +18,16 @@ function toolkit_supplied_stories() {
 			'category_slug' => 'partnerships',
 			'title'         => 'ICM-TVET UK Delegation Visited The Toolkit',
 			'standfirst'    => 'The visit explored potential collaboration and internationally recognised programmes while introducing the ICM team to Toolkit’s practical, industry-led training model.',
+			'section_title' => 'Inside the ICM-TVET UK visit',
+			'focus_keyphrase' => 'ICM-TVET UK visit',
+			'seo_description' => 'The ICM-TVET UK visit explored collaboration, recognised programmes and Toolkit’s practical skills-training facilities in Kikuyu, Kenya.',
 			'content'       => array(
-				'On 3 August 2026, The Toolkit for Skills and Innovation welcomed ICM Africa Regional Director Kevin Kanisio Osundwa and Bernice from the ICM team for a courtesy and partnership engagement.',
-				'The delegation toured the institution’s training facilities and learned about its practical, industry-led approach to skills development.',
-				'The visit included the institution’s modern training facilities, practical programmes and organic farm.',
-				'Discussions explored potential collaboration and the introduction of internationally recognised programmes.',
+				'The ICM-TVET UK visit took place on 3 August 2026, when The Toolkit for Skills and Innovation welcomed ICM Africa Regional Director Kevin Kanisio Osundwa and Bernice from the ICM team for a courtesy and partnership engagement.',
+				'The delegation toured Toolkit’s training facilities in Kikuyu and received an introduction to the institution’s practical, industry-led approach to skills development. The engagement placed the learning environment, available programmes and learner experience at the centre of the conversation.',
+				'During the facility tour, the visitors saw spaces used for practical training as well as Toolkit’s organic farm. These stops helped the team discuss how applied learning can connect technical knowledge with the settings in which learners practise and build confidence.',
+				'The ICM-TVET UK visit also created room to explore potential collaboration and the introduction of internationally recognised programmes. The discussion was exploratory: any future programme, intake or certification arrangement would require formal confirmation before being presented to prospective learners.',
+				'For Toolkit, partnership conversations are most useful when they support accurate course guidance, credible learning pathways and stronger progression opportunities. The visit therefore focused on understanding each institution’s role and where further discussion could add value for learners.',
+				'Toolkit will publish confirmed programme information through its official course, notice and admissions channels. Prospective learners should use those current sources, or contact admissions directly, rather than treating an exploratory visit as an announcement of a new qualification.',
 			),
 			'images'        => array(
 				$icm_images . '01-main.jpeg',
@@ -107,7 +112,7 @@ function toolkit_supplied_story_preview() {
 }
 
 function toolkit_publish_supplied_stories() {
-	$content_version = '2026.08.04.1';
+	$content_version = '2026.08.13.2';
 	if ( $content_version === get_option( 'toolkit_supplied_stories_published' ) ) {
 		return;
 	}
@@ -138,6 +143,12 @@ function toolkit_publish_supplied_stories() {
 		);
 		if ( is_wp_error( $result ) ) {
 			return;
+		}
+		if ( ! empty( $story['focus_keyphrase'] ) ) {
+			update_post_meta( $result, '_yoast_wpseo_focuskw', sanitize_text_field( $story['focus_keyphrase'] ) );
+		}
+		if ( ! empty( $story['seo_description'] ) ) {
+			update_post_meta( $result, '_yoast_wpseo_metadesc', sanitize_text_field( $story['seo_description'] ) );
 		}
 	}
 	update_option( 'toolkit_supplied_stories_published', $content_version, false );
