@@ -16,9 +16,9 @@ $images = array(
 <main id="main-content" class="toolkit-page toolkit-media-page <?php echo $videos ? 'toolkit-video-journey' : 'toolkit-memory-wall'; ?>">
 	<?php if ( $videos ) : ?>
 		<section class="video-journey-hero">
-			<div class="video-journey-hero__copy"><p class="toolkit-kicker">Toolkit videos</p><h1>See practical skills<br><em>come to life.</em></h1><p>Toolkit videos introduce the people turning practical knowledge into opportunity. Choose a story and press play.</p></div>
+			<div class="video-journey-hero__copy"><p class="toolkit-kicker">Official video library</p><h1>See practical skills<br><em>come to life.</em></h1><p>These stories introduce the people turning practical knowledge into opportunity. Choose a topic and press play.</p></div>
 		</section>
-		<section class="video-watch-desk" aria-label="Toolkit video gallery">
+		<section class="video-watch-desk" aria-label="Official video gallery">
 			<div class="video-watch-player">
 				<div class="video-watch-player__frame"><iframe data-video-player src="https://www.youtube-nocookie.com/embed/<?php echo esc_attr( $first_video['id'] ); ?>?rel=0&amp;playsinline=1" title="<?php echo esc_attr( $first_video['title'] ); ?>" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
 				<div class="video-watch-player__details" aria-live="polite"><span data-video-number>Episode 01</span><h2 data-video-title><?php echo esc_html( $first_video['title'] ); ?></h2><p>Toolkit originals <i aria-hidden="true">•</i> Automatically updated from YouTube</p></div>
@@ -28,7 +28,7 @@ $images = array(
 				<div class="video-watch-playlist__items" role="list">
 				<?php $episode = 1; foreach ( $items as $item ) : ?>
 					<button type="button" role="listitem" class="video-watch-choice <?php echo 1 === $episode ? 'is-active' : ''; ?>" data-video-id="<?php echo esc_attr( $item['id'] ); ?>" data-video-title="<?php echo esc_attr( $item['title'] ); ?>" data-video-episode="<?php echo esc_attr( $episode ); ?>" aria-pressed="<?php echo 1 === $episode ? 'true' : 'false'; ?>">
-						<span class="video-watch-choice__thumb"><img loading="lazy" src="https://i.ytimg.com/vi/<?php echo esc_attr( $item['id'] ); ?>/mqdefault.jpg" alt="<?php echo esc_attr( $item['title'] . ' video thumbnail' ); ?>"><i aria-hidden="true">▶</i></span>
+						<span class="video-watch-choice__thumb"><img loading="lazy" src="https://i.ytimg.com/vi/<?php echo esc_attr( $item['id'] ); ?>/mqdefault.jpg" alt="<?php echo esc_attr( $item['title'] . ' thumbnail' ); ?>"><i aria-hidden="true">▶</i></span>
 						<span class="video-watch-choice__copy"><small><?php echo esc_html( 'Video ' . str_pad( (string) $episode, 2, '0', STR_PAD_LEFT ) ); ?></small><strong><?php echo esc_html( $item['title'] ); ?></strong></span>
 					</button>
 				<?php $episode++; endforeach; ?>
@@ -36,7 +36,7 @@ $images = array(
 			</div>
 		</section>
 		<section class="video-watch-note"><div><strong>Accessible viewing</strong><p>Use the YouTube controls for captions, volume, playback speed and full screen.</p></div><a href="https://www.youtube.com/@toolkitafrica" target="_blank" rel="noopener">View the complete channel <span>↗</span></a></section>
-		<section class="toolkit-section toolkit-institutional-intro"><div><p class="toolkit-kicker">Learning in motion</p><h2>What you will find in Toolkit videos</h2><p>Toolkit videos document practical training, learner experiences, workshop activity, partnerships and pathways towards work or enterprise. The collection helps prospective learners see how technical and employability skills connect in real settings.</p><p>Start with a topic that matches your interests, then explore the relevant <a href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Toolkit course pathway</a>. Video titles and thumbnails come from the official Toolkit YouTube channel, and the playlist refreshes automatically as new public videos are released.</p><p>Captions and playback controls are provided by YouTube. If you need current admissions information after watching, use the <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Toolkit contact page</a> or begin a <a href="<?php echo esc_url( home_url( '/apply/' ) ); ?>">course application</a>.</p></div></section>
+		<section class="toolkit-section toolkit-institutional-intro"><div><p class="toolkit-kicker">Learning in motion</p><h2>What you will find in the collection</h2><p>Toolkit videos document practical training, learner experiences, workshop activity, partnerships and pathways towards work or enterprise. The collection helps prospective learners see how technical and employability skills connect in real settings.</p><p>Start with a topic that matches your interests, then explore the relevant <a href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Toolkit course pathway</a>. Titles and thumbnails come from the official Toolkit YouTube channel, and the playlist refreshes automatically as new public releases become available.</p><p>Each feature provides useful context before a learner contacts admissions: workshop demonstrations show applied practice, interviews explain programme purpose, and partnership stories show how training connects with institutions and employers.</p><p>Captions and playback controls are provided by YouTube. If you need current admissions information after watching, use the <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Toolkit contact page</a> or begin a <a href="<?php echo esc_url( home_url( '/apply/' ) ); ?>">course application</a>.</p></div></section>
 	<?php else : ?>
 		<section class="memory-wall-hero">
 			<div><p class="toolkit-kicker">Our journey in pictures</p><h1>Toolkit training gallery</h1><p>Toolkit training gallery images follow workshops, partnerships, practical learning and celebration at The Toolkit for Skills and Innovation.</p></div>
