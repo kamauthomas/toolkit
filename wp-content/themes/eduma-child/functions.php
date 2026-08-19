@@ -2,6 +2,8 @@
 
 require_once get_stylesheet_directory() . '/inc/site-metrics.php';
 require_once get_stylesheet_directory() . '/inc/application-adapter.php';
+require_once get_stylesheet_directory() . '/inc/calling-letter-pdf.php';
+require_once get_stylesheet_directory() . '/inc/calling-letters.php';
 require_once get_stylesheet_directory() . '/inc/reception-integration.php';
 require_once get_stylesheet_directory() . '/inc/cultural-week-stories.php';
 require_once get_stylesheet_directory() . '/inc/mosiria-story.php';
@@ -22,7 +24,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.12.8';
+	return '2026.08.12.9';
 }
 
 function toolkit_is_demo_environment() {
@@ -271,7 +273,8 @@ function thim_child_enqueue_styles() {
 			'optionsEndpoint'   => esc_url_raw( rest_url( 'toolkit/v1/application/options' ) ),
 			'coursesEndpoint'   => esc_url_raw( rest_url( 'toolkit/v1/application/courses' ) ),
 			'intakesEndpoint'   => esc_url_raw( rest_url( 'toolkit/v1/application/intakes' ) ),
-			'nonce'             => wp_create_nonce( 'wp_rest' ),
+			/* Cache-safe, not user-bound — see toolkit_application_form_token(). */
+			'formToken'         => toolkit_application_form_token(),
 			'captchaSiteKey'    => $captcha_site_key,
 			'admissionsEmail'   => 'office@toolkitafrica.ac.ke',
 			'admissionsPhone'   => '+254 709 549 200',
@@ -294,8 +297,9 @@ function thim_child_enqueue_styles() {
 		wp_enqueue_style( 'toolkit-reception-form', get_stylesheet_directory_uri() . '/assets/css/reception-form.css', array( 'eduma-child-page-redesign' ), toolkit_asset_version( $form_css ) );
 		wp_enqueue_script( 'toolkit-reception-form', get_stylesheet_directory_uri() . '/assets/js/reception-form.js', array(), toolkit_asset_version( $form_js ), true );
 		wp_localize_script( 'toolkit-reception-form', 'toolkitReception', array(
-			'endpoint' => esc_url_raw( rest_url( 'toolkit/v1/reception/submit' ) ),
-			'nonce'    => wp_create_nonce( 'wp_rest' ),
+			'endpoint'  => esc_url_raw( rest_url( 'toolkit/v1/reception/submit' ) ),
+			/* Cache-safe, not user-bound — see toolkit_application_form_token(). */
+			'formToken' => toolkit_application_form_token(),
 		) );
 	}
 }

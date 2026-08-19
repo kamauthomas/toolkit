@@ -249,7 +249,15 @@ function toolkit_application_store( array $data ) {
 			'fingerprint'=> $fingerprint,
 		), array( '%s', '%s', '%s', '%s', '%s', '%s' ) );
 		if ( false !== $inserted ) {
-			return array( 'id' => (int) $wpdb->insert_id, 'reference' => $reference );
+			$new_id = (int) $wpdb->insert_id;
+			/*
+			 * Fires once, right after the row durably exists — this is the
+			 * "as soon as an applicant submits" trigger for anything that
+			 * should run regardless of the Mzizi relay/queue branch below
+			 * (e.g. calling-letter generation in inc/calling-letters.php).
+			 */
+			do_action( 'toolkit_application_stored', $new_id, $reference, $data );
+			return array( 'id' => $new_id, 'reference' => $reference );
 		}
 	}
 	return new WP_Error( 'application_storage', 'The application could not be stored safely.', array( 'status' => 500 ) );
@@ -303,15 +311,69 @@ add_action( 'rest_api_init', function() {
 	) );
 } );
 
+/**
+ * Cache-safe request token for the PUBLIC application endpoints.
+ *
+ * These endpoints are used by anonymous applicants, and the token is
+ * embedded in a full page that the host caches. A `wp_rest` nonce cannot be
+ * used here: it is bound to user ID + session token, so a cached page hands
+ * every later visitor someone else's token and WordPress core rejects the
+ * request with `rest_cookie_invalid_nonce` ("Cookie check failed") — which
+ * is exactly what happened on demo, where a page rendered for user 0 was
+ * served to a logged-in administrator.
+ *
+ * This token is deliberately NOT user-bound, so a cached page stays valid
+ * for everyone. It is derived from the site's own salt over a rotating
+ * 12-hour window, so it cannot be forged off-site and it expires.
+ *
+ * It is not per-user CSRF protection, and does not need to be: these routes
+ * perform no privileged action on behalf of a logged-in user, so there is no
+ * CSRF target. (The previous nonce did not provide that either — for
+ * anonymous visitors `wp_create_nonce` is deterministic and publicly
+ * scrapeable from the page.) Abuse control is carried by the origin check,
+ * honeypot, rate limiting, Turnstile and the duplicate fingerprint below.
+ */
+function toolkit_application_form_token( $window_offset = 0 ) {
+	$window = (int) floor( time() / ( 12 * HOUR_IN_SECONDS ) ) + (int) $window_offset;
+	return hash_hmac( 'sha256', 'toolkit_application_form|' . $window, wp_salt( 'nonce' ) );
+}
+
+/* Accepts the previous window too, so a form opened just before a rollover
+ * still submits instead of failing under the applicant. */
+function toolkit_application_verify_form_token( $token ) {
+	if ( ! is_string( $token ) || '' === $token ) {
+		return false;
+	}
+	foreach ( array( 0, -1 ) as $offset ) {
+		if ( hash_equals( toolkit_application_form_token( $offset ), $token ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
 function toolkit_application_request_guard( WP_REST_Request $request, $limit = 30 ) {
+	/*
+	 * These responses must never be cached. LiteSpeed was observed serving
+	 * `X-LiteSpeed-Cache: hit` for the options endpoint, which returned a
+	 * stored body without running this guard at all — so an invalid or
+	 * absent token appeared to succeed, and rate limiting was skipped with
+	 * it. Cache keys ignore request headers, so header-based auth is
+	 * meaningless on a cacheable response. nocache_headers() covers standard
+	 * proxies; the LiteSpeed header is what this host actually obeys.
+	 */
+	nocache_headers();
+	if ( ! headers_sent() ) {
+		header( 'X-LiteSpeed-Cache-Control: no-cache' );
+	}
+
 	$origin = $request->get_header( 'origin' );
 	if ( $origin && untrailingslashit( $origin ) !== untrailingslashit( home_url() ) ) {
 		return new WP_Error( 'invalid_origin', 'The application request could not be verified.', array( 'status' => 403 ) );
 	}
 
-	$nonce = $request->get_header( 'x_wp_nonce' );
-	if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-		return new WP_Error( 'invalid_nonce', 'Please refresh the application and try again.', array( 'status' => 403 ) );
+	if ( ! toolkit_application_verify_form_token( $request->get_header( 'x_toolkit_form_token' ) ) ) {
+		return new WP_Error( 'invalid_token', 'Please refresh the application and try again.', array( 'status' => 403 ) );
 	}
 
 	$ip       = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
@@ -682,7 +744,12 @@ function toolkit_application_resolve_names( $record_id ) {
 	foreach ( $intakes['items'] as $intake ) if ( (string) ( $intake['ID'] ?? '' ) === (string) $data['intake_id'] ) $intake_name = $intake['LevelName'] ?? '';
 	if ( ! $course_name ) return new WP_Error( 'course_lookup', 'The stored course ID is no longer present in the selected Mzizi campus catalogue.' );
 	$result = toolkit_application_update_payload_names( $record, array( 'course_name' => $course_name, 'intake_name' => $intake_name ) );
-	if ( ! is_wp_error( $result ) ) toolkit_application_log_event( $record_id, 'names_resolved', 'Course and intake labels reconciled from Mzizi.', get_current_user_id() ?: null );
+	if ( ! is_wp_error( $result ) ) {
+		toolkit_application_log_event( $record_id, 'names_resolved', 'Course and intake labels reconciled from Mzizi.', get_current_user_id() ?: null );
+		/* Retries calling-letter generation for records that were deferred
+		 * because course_name wasn't available at submission time. */
+		do_action( 'toolkit_application_names_resolved', (int) $record_id );
+	}
 	return $result;
 }
 

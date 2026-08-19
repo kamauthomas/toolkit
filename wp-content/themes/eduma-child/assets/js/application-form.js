@@ -29,7 +29,12 @@
   ];
 
   function api(url, payload) {
-    var options = { credentials: 'same-origin', headers: { 'X-WP-Nonce': config.nonce } };
+    /* Deliberately no X-WP-Nonce: these are public endpoints, and sending a
+     * session-bound nonce from a cacheable page is what caused WordPress to
+     * reject requests with "Cookie check failed". Omitting it also makes
+     * core treat every call as anonymous, which is consistent for cached
+     * and uncached pages alike. */
+    var options = { credentials: 'same-origin', headers: { 'X-Toolkit-Form-Token': config.formToken } };
     if (payload) {
       options.method = 'POST';
       options.headers['Content-Type'] = 'application/json';

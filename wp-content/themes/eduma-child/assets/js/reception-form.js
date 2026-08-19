@@ -27,7 +27,9 @@
 			credentials: 'same-origin',
 			headers: {
 				'Content-Type': 'application/json',
-				'X-WP-Nonce': window.toolkitReception.nonce
+				/* Not X-WP-Nonce: a session-bound nonce from a cacheable page
+				 * is rejected by core as "Cookie check failed". */
+				'X-Toolkit-Form-Token': window.toolkitReception.formToken
 			},
 			body: JSON.stringify(payload)
 		})

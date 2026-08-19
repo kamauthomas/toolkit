@@ -49,8 +49,12 @@ function toolkit_reception_submit( WP_REST_Request $request ) {
 	if ( ! toolkit_reception_request_origin_is_valid( $request ) ) {
 		return new WP_Error( 'invalid_origin', 'The request could not be verified.', array( 'status' => 403 ) );
 	}
-	if ( ! wp_verify_nonce( $request->get_header( 'x-wp-nonce' ), 'wp_rest' ) ) {
-		return new WP_Error( 'invalid_nonce', 'The form session has expired. Refresh the page and try again.', array( 'status' => 403 ) );
+	/* Same cache-safe token as the admissions form: a `wp_rest` nonce is
+	 * bound to user ID + session token, so once this page is cached it hands
+	 * every later visitor a token that cannot verify. See
+	 * toolkit_application_form_token() for the full reasoning. */
+	if ( ! toolkit_application_verify_form_token( $request->get_header( 'x_toolkit_form_token' ) ) ) {
+		return new WP_Error( 'invalid_token', 'The form session has expired. Refresh the page and try again.', array( 'status' => 403 ) );
 	}
 	if ( trim( (string) $request->get_param( 'website' ) ) ) {
 		return new WP_Error( 'invalid_submission', 'The submission could not be accepted.', array( 'status' => 400 ) );
