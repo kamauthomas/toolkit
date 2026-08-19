@@ -19,6 +19,7 @@
   var countySelect = form.elements.county;
   var sourceSelect = form.elements.referral_source;
   var currentStep = 0;
+  var messageTimer = null;
   var stepCopy = [
     ['1. Personal Details', 'Tell us who you are.'],
     ['2. Contact Details', 'How Admissions can reach you.'],
@@ -64,7 +65,11 @@
   }
 
   function showMessage(text, type, action) {
+    /* A pending auto-dismiss from a previous message must not hide this one. */
+    if (messageTimer) { clearTimeout(messageTimer); messageTimer = null; }
     message.hidden = false;
+    message.style.opacity = '';
+    message.style.transition = '';
     message.className = 'application-message ' + (type || 'is-info');
     message.textContent = text;
     if (action && action.url) {
@@ -76,6 +81,23 @@
       link.textContent = action.label || 'Continue';
       message.appendChild(link);
     }
+  }
+
+  /* Fade the message out and clear it after `delay` ms. Used for the success
+   * confirmation so it does not linger once the applicant has read it. */
+  function autoDismissMessage(delay) {
+    if (messageTimer) clearTimeout(messageTimer);
+    messageTimer = setTimeout(function () {
+      messageTimer = null;
+      message.style.transition = 'opacity .5s ease';
+      message.style.opacity = '0';
+      setTimeout(function () {
+        message.hidden = true;
+        message.textContent = '';
+        message.style.opacity = '';
+        message.style.transition = '';
+      }, 500);
+    }, delay);
   }
 
   function loadOptions() {
@@ -208,8 +230,11 @@
     api(config.endpoint, payload).then(function (result) {
       showMessage(result.message || 'Application submitted successfully.', 'is-success');
       form.reset();
-      setStep(0);
+      setStep(0, false);
       if (window.turnstile) window.turnstile.reset();
+      /* Keep the confirmation (with its reference) in view, then clear it. */
+      message.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      autoDismissMessage(12000);
     }).catch(function (error) {
       showMessage(error.message + ' Contact Admissions if the problem continues.', 'is-error');
     }).finally(function () { submitButton.disabled = false; });

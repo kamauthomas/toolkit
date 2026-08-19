@@ -482,6 +482,17 @@ function toolkit_application_options( WP_REST_Request $request ) {
 	if ( is_wp_error( $guard ) ) {
 		return $guard;
 	}
+	/*
+	 * Admissions catalog data (schools, courses, intakes) changes rarely but
+	 * each lookup opens a fresh Mzizi session + SOAP call, which is slow. Cache
+	 * the shaped, public responses in short-lived transients so the first
+	 * visitor warms the cache and everyone after gets an instant load. TTL
+	 * bounds staleness; see toolkit_application_catalog_cache_ttl().
+	 */
+	$cached = get_transient( 'toolkit_mzizi_options' );
+	if ( is_array( $cached ) ) {
+		return rest_ensure_response( $cached );
+	}
 	$cookies = toolkit_mzizi_session();
 	if ( is_wp_error( $cookies ) ) {
 		return $cookies;
@@ -491,11 +502,24 @@ function toolkit_application_options( WP_REST_Request $request ) {
 	if ( is_wp_error( $schools ) || is_wp_error( $sources ) ) {
 		return new WP_Error( 'mzizi_options', 'Admissions options are temporarily unavailable.', array( 'status' => 503 ) );
 	}
-	return rest_ensure_response( array(
+	$response = array(
 		'schools'  => toolkit_application_public_items( $schools ),
 		'counties' => toolkit_application_counties(),
 		'sources'  => toolkit_application_source_items( $sources ),
-	) );
+	);
+	if ( ! empty( $response['schools'] ) ) {
+		set_transient( 'toolkit_mzizi_options', $response, toolkit_application_catalog_cache_ttl() );
+	}
+	return rest_ensure_response( $response );
+}
+
+/*
+ * How long cached admissions catalog data (schools/courses/intakes) stays
+ * fresh. Filterable so it can be tuned without a code change if Mzizi's
+ * catalog starts changing more often.
+ */
+function toolkit_application_catalog_cache_ttl() {
+	return (int) apply_filters( 'toolkit_application_catalog_cache_ttl', 15 * MINUTE_IN_SECONDS );
 }
 
 function toolkit_application_courses( WP_REST_Request $request ) {
@@ -507,6 +531,11 @@ function toolkit_application_courses( WP_REST_Request $request ) {
 	if ( ! $school_id ) {
 		return new WP_Error( 'invalid_school', 'Select a valid campus.', array( 'status' => 422 ) );
 	}
+	$cache_key = 'toolkit_mzizi_courses_' . $school_id;
+	$cached    = get_transient( $cache_key );
+	if ( is_array( $cached ) ) {
+		return rest_ensure_response( array( 'courses' => $cached ) );
+	}
 	$cookies = toolkit_mzizi_session();
 	if ( is_wp_error( $cookies ) ) {
 		return $cookies;
@@ -516,7 +545,14 @@ function toolkit_application_courses( WP_REST_Request $request ) {
 		return new WP_Error( 'invalid_school', 'Courses could not be loaded for that campus.', array( 'status' => 502 ) );
 	}
 	$courses = toolkit_mzizi_post( 'StudentInfo.asmx/GetApplicationCoursesNoAlumni', array(), $cookies );
-	return is_wp_error( $courses ) ? $courses : rest_ensure_response( array( 'courses' => toolkit_application_public_items( $courses, 'Description' ) ) );
+	if ( is_wp_error( $courses ) ) {
+		return $courses;
+	}
+	$public = toolkit_application_public_items( $courses, 'Description' );
+	if ( ! empty( $public ) ) {
+		set_transient( $cache_key, $public, toolkit_application_catalog_cache_ttl() );
+	}
+	return rest_ensure_response( array( 'courses' => $public ) );
 }
 
 function toolkit_application_intakes( WP_REST_Request $request ) {
@@ -528,15 +564,27 @@ function toolkit_application_intakes( WP_REST_Request $request ) {
 	if ( ! $course_id ) {
 		return new WP_Error( 'invalid_course', 'Select a valid course.', array( 'status' => 422 ) );
 	}
+	$cache_key = 'toolkit_mzizi_intakes_' . $course_id;
+	$cached    = get_transient( $cache_key );
+	if ( is_array( $cached ) ) {
+		return rest_ensure_response( $cached );
+	}
 	$cookies = toolkit_mzizi_session();
 	if ( is_wp_error( $cookies ) ) {
 		return $cookies;
 	}
 	$intakes = toolkit_application_available_intakes( $course_id, $cookies );
-	return is_wp_error( $intakes ) ? $intakes : rest_ensure_response( array(
+	if ( is_wp_error( $intakes ) ) {
+		return $intakes;
+	}
+	$response = array(
 		'intakes' => toolkit_application_public_items( $intakes['items'], 'LevelName' ),
 		'source'  => $intakes['source'],
-	) );
+	);
+	if ( ! empty( $response['intakes'] ) ) {
+		set_transient( $cache_key, $response, toolkit_application_catalog_cache_ttl() );
+	}
+	return rest_ensure_response( $response );
 }
 
 function toolkit_application_verify_turnstile( $token ) {
@@ -617,7 +665,42 @@ function toolkit_application_submit( WP_REST_Request $request ) {
 			'delivery'    => 'queued',
 		), 201 );
 	}
-	return toolkit_application_relay_record( $record_id, 'public' );
+	/*
+	 * Production relays to Mzizi immediately — but the applicant's record is
+	 * already stored safely, so their submission has succeeded regardless of
+	 * what the (slow, multi-call) relay does next. Run the relay AFTER this
+	 * response is flushed so a slow or failing relay can never turn a saved
+	 * application into an applicant-facing error. The relay outcome is recorded
+	 * on the record (status/last_error) and surfaced in the admin, not here.
+	 */
+	toolkit_application_log_event( $record_id, 'received', 'Stored locally; relaying to Mzizi.' );
+	toolkit_application_relay_after_response( $record_id );
+	return new WP_REST_Response( array(
+		'code'      => 'received',
+		'message'   => 'Application ' . $reference . ' was submitted successfully. Toolkit Admissions will review it and contact you about the next step.',
+		'reference' => $reference,
+		'delivery'  => 'relaying',
+	), 201 );
+}
+
+/*
+ * Relay to Mzizi after the current response has been sent to the client. This
+ * preserves production's "relay immediately on submission" behaviour while
+ * making sure the applicant is never kept waiting on — nor shown an error from
+ * — the upstream relay. When the SAPI can finish the request early we flush
+ * first, so the browser receives its success response without waiting for the
+ * relay at all; otherwise the relay still runs during shutdown.
+ */
+function toolkit_application_relay_after_response( $record_id ) {
+	$record_id = (int) $record_id;
+	add_action( 'shutdown', function () use ( $record_id ) {
+		if ( function_exists( 'fastcgi_finish_request' ) ) {
+			fastcgi_finish_request();
+		} elseif ( function_exists( 'litespeed_finish_request' ) ) {
+			litespeed_finish_request();
+		}
+		toolkit_application_relay_record( $record_id, 'public' );
+	}, 1 );
 }
 
 function toolkit_application_relay_record( $record_id, $release_source = 'manual' ) {
