@@ -5,9 +5,30 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-20 — Remove confirmed rogue access and quarantine attack surface
+**Area:** security incident cleanup
+**Environments:** production ✅
+**Commit(s):** this commit
+
+Took a fresh full production database backup (135 tables; compressed SHA-256
+recorded privately), then verified and deleted only the nine malicious
+Administrator accounts IDs 7–15. Preserved legitimate users IDs 1, 3, 4, 5
+and 6, revoked legitimate administrators' sessions/application passwords,
+rotated all eight WordPress keys/salts atomically, kept registration disabled,
+and removed the abandoned install's cron entry. Moved Eventer 3.9.6, the
+abandoned `Old Sites` install, `local.tar`, `uploads/addon.zip`, and the
+one-time maintenance endpoint outside every webroot into private quarantine.
+
+**Verified by:** authenticated post-cleanup query returned only the five
+legitimate users; all eight salts differ from the backed-up configuration;
+Eventer is inactive and absent from production; private quarantine contains all
+five moved targets; production home, Apply and admin-login routes remain live.
+**Follow-ups:** legitimate administrators should choose new personal passwords
+at their next login; retrieve/review the hosting provider's cPGuard scan log.
+
 ## 2026-08-20 — Make admissions retries and calling-letter writes safe
 **Area:** admissions reliability
-**Environments:** local verified; deployment follows this commit
+**Environments:** demo ✅ · production ✅
 **Commit(s):** this commit
 
 Removed the unsupported assumption that every Mzizi HTTP 4xx proves no record
@@ -17,9 +38,10 @@ after the existing mandatory duplicate check. Replaced calling letters'
 select-then-insert race with one atomic `INSERT ... ON DUPLICATE KEY UPDATE`.
 
 **Verified by:** PHP lint, focused source assertions and full child-theme
-whitespace checks.
-**Follow-ups:** deploy demo first, exercise only non-submitting route/admin
-smokes, then promote the identical payload to production.
+whitespace checks; demo then production release `2026.08.20.1` returned 200 on
+cache-busted Apply routes and all three deployed files fetched back
+byte-identical. No production application was submitted.
+**Follow-ups:** none.
 
 ## 2026-08-20 — Contain confirmed WordPress compromise exposure
 **Area:** security operations
@@ -41,10 +63,8 @@ artifacts and Eventer's main PHP file return 403; production home and Apply
 remain 200. Known `wp-smart-thumbnails/emer-run.php` and `/w2.js` indicators
 remain 404, while the previously protected `local.tar` and `uploads/addon.zip`
 remain 403.
-**Follow-ups:** confirm/remove rogue administrator IDs 7–15, rotate every
-legitimate administrator password and WordPress salts/sessions, remove Eventer
-and the abandoned install after a retained backup, and retrieve the completed
-cPGuard full-account scan result.
+**Follow-ups:** completed by the cleanup entry above, except for staff-selected
+password changes and retrieval of the completed cPGuard full-account scan.
 
 ## 2026-08-20 — Publish the institutional programme footprint
 **Area:** website content

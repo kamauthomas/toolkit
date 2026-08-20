@@ -19,6 +19,12 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-admissions-safety-2026.08.20.1.sh` preserves the demo-first
+release that removed unsafe Mzizi HTTP-status assumptions and made calling
+letter upserts atomic. It backs up and patches the three live files, uploads
+both included modules before `functions.php`, verifies byte identity, and
+checks the cache-busted Apply route and release marker.
+
 `releases/deploy-footprint-2026.08.12.12.sh` is the preserved release procedure
 for the `/footprint/` page. It:
 
