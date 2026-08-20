@@ -5,6 +5,31 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-20 — Contain confirmed WordPress compromise exposure
+**Area:** security operations
+**Environments:** production ✅
+**Commit(s):** this commit
+
+Reviewed the 14 August Element Pack supply-chain incident evidence and current
+server state without attaching to an operator's browser. Eventer 3.9.6 and the
+abandoned `Old Sites` WordPress tree remained present; the latter's
+`readme.html` and 180 MB `toolkitiskills.zip` were publicly downloadable.
+Added a retained, browser-free cPanel containment script, backed up the original
+production root `.htaccess`, blocked both abandoned-site artifacts, and placed a
+deny-all quarantine rule in Eventer's directory. This is reversible containment
+only: no users or files were deleted, and credential/session rotation is still
+required.
+
+**Verified by:** remote rules fetched back byte-identical; the two abandoned
+artifacts and Eventer's main PHP file return 403; production home and Apply
+remain 200. Known `wp-smart-thumbnails/emer-run.php` and `/w2.js` indicators
+remain 404, while the previously protected `local.tar` and `uploads/addon.zip`
+remain 403.
+**Follow-ups:** confirm/remove rogue administrator IDs 7–15, rotate every
+legitimate administrator password and WordPress salts/sessions, remove Eventer
+and the abandoned install after a retained backup, and retrieve the completed
+cPGuard full-account scan result.
+
 ## 2026-08-20 — Publish the institutional programme footprint
 **Area:** website content
 **Environments:** demo ✅ · prod ✅
