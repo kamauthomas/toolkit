@@ -5,6 +5,65 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-20 — Close the post-containment full-account scan
+**Area:** security incident cleanup
+**Environments:** production hosting account ✅
+**Commit(s):** operational result recorded in this commit
+
+Retrieved and classified the historical cPGuard log, then ran a new HOME scan
+after account cleanup and webroot quarantine. The historical report's “3” was
+three outdated CMS installations, not malware. Post-containment scan #79
+completed successfully after 30 minutes 59 seconds with 99,101 files tested,
+zero infected files, and zero malware-detail rows.
+
+**Verified by:** cPGuard scan #79 terminal report and its server-side detailed
+log (`iTotalRecords: 0`); production public smoke routes remained available.
+**Follow-ups:** patch the active Eduma 5.3.0 parent theme with a licensed 5.7.7+
+package, demo first.
+
+## 2026-08-20 — Deactivate unused vulnerable Livemesh add-on
+**Area:** security operations
+**Environments:** production ✅
+**Commit(s):** server-side containment recorded in this commit
+
+cPGuard's historical CMS report identified Livemesh Addons for WPBakery 3.9.4
+as active with four no-patch stored-XSS findings. A read-only database check
+found zero references in post content, post metadata, or relevant options, so
+the exact active-plugin list was backed up to private storage and only that
+plugin was deactivated. Its files remain available for rollback; nothing was
+deleted.
+
+**Verified by:** the mutation returned active-before and inactive-after with a
+private rollback record; its endpoint self-deleted to 404. Home, Apply, About,
+Graduation, Testimonials, and Footprint remained HTTP 200 with no fatal-error
+markers.
+**Follow-ups:** obtain Eduma 5.7.7 or newer from the licensed source and test
+the parent-theme upgrade on demo before production; the local 5.3.0 archive is
+not a fix.
+
+## 2026-08-20 — Correct calling-letter delivery claims and finish story metadata
+**Area:** admissions reliability · SEO
+**Environments:** demo ✅ · production ✅
+**Commit(s):** this commit
+
+Disabled calling-letter email by default because this host's unauthenticated
+mail transport is not authorised by Toolkit's Microsoft 365 SPF policy. Prior
+"sent" rows are now labelled delivery-unverified, future `wp_mail()` success is
+recorded only as mail-server submission, and secure PDF/Word generation remains
+automatic. Reviewed the pending story Yoast publisher change, made its Cultural
+Week migration stop cleanly on a WordPress write error, and retained a guarded,
+browser-free deployment script for the release.
+
+**Verified by:** all 33 child-theme PHP files linted; guarded release
+`2026.08.20.2` fetched all five deployed files back byte-identical and returned
+200 across Apply and seven affected story routes on demo then production. A
+self-deleting aggregate verifier confirmed schema 1.2.0, email off, zero legacy
+"sent" rows (four prior attempts relabelled on demo, eight on production), and
+all seven Yoast metadata records exact on both environments. No application or
+email was submitted.
+**Follow-ups:** configure and test authenticated SMTP or a transactional mail
+transport before staff enable the Email channel.
+
 ## 2026-08-20 — Remove confirmed rogue access and quarantine attack surface
 **Area:** security incident cleanup
 **Environments:** production ✅
@@ -24,7 +83,7 @@ legitimate users; all eight salts differ from the backed-up configuration;
 Eventer is inactive and absent from production; private quarantine contains all
 five moved targets; production home, Apply and admin-login routes remain live.
 **Follow-ups:** legitimate administrators should choose new personal passwords
-at their next login; retrieve/review the hosting provider's cPGuard scan log.
+at their next login; obtain and demo-test a licensed Eduma 5.7.7+ package.
 
 ## 2026-08-20 — Make admissions retries and calling-letter writes safe
 **Area:** admissions reliability

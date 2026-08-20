@@ -15,7 +15,7 @@ function toolkit_calling_letter_table_name() {
 
 function toolkit_calling_letter_install_storage() {
 	global $wpdb;
-	$version = '1.1.0';
+	$version = '1.2.0';
 	if ( $version === get_option( 'toolkit_calling_letter_storage_version' ) ) {
 		return;
 	}
@@ -24,7 +24,7 @@ function toolkit_calling_letter_install_storage() {
 	$charset = $wpdb->get_charset_collate();
 	/*
 	 * application_id is UNIQUE: one letter row per application, upserted via
-	 * REPLACE-style logic in toolkit_calling_letter_generate(). This is what
+	 * INSERT ... ON DUPLICATE KEY UPDATE. This is what
 	 * keeps concurrent/duplicate submissions from racing each other into two
 	 * rows for the same applicant.
 	 */
@@ -46,6 +46,15 @@ function toolkit_calling_letter_install_storage() {
 	) {$charset};";
 	dbDelta( $sql );
 	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
+		/*
+		 * cPanel's unauthenticated PHP mail transport is not authorised by the
+		 * domain's Microsoft 365 SPF policy. wp_mail() returning true only means
+		 * that the local transport accepted a message; it does not prove inbox
+		 * delivery. Disable automatic mail during this migration and relabel old
+		 * "sent" rows so staff are not shown a false delivery guarantee.
+		 */
+		update_option( 'toolkit_calling_letter_email_enabled', '0', false );
+		$wpdb->query( "UPDATE {$table} SET email_status = 'unverified' WHERE email_status = 'sent'" );
 		update_option( 'toolkit_calling_letter_storage_version', $version, false );
 	}
 }
@@ -564,7 +573,7 @@ function toolkit_calling_letter_render_docx( $template_path, $destination_path, 
 /* ---- Channel toggles (admin-controlled, same on/off pattern as Mzizi relay) ---- */
 
 function toolkit_calling_letter_channel_enabled( $channel ) {
-	return '1' === (string) get_option( "toolkit_calling_letter_{$channel}_enabled", 'email' === $channel ? '1' : '0' );
+	return '1' === (string) get_option( "toolkit_calling_letter_{$channel}_enabled", '0' );
 }
 
 /* ---- Delivery channels ---- */
@@ -587,8 +596,8 @@ function toolkit_calling_letter_send_email( $letter_row, $payload ) {
 		"Dear %s,\n\nCongratulations on your successful application to The Toolkit for Skills & Innovation. Your official calling letter is attached to this email.\n\nWe look forward to welcoming you.\n\nThe Toolkit for Skills & Innovation",
 		$payload['first_name'] ?? 'Applicant'
 	);
-	$sent = wp_mail( $payload['email'], $subject, $body, array(), array( $attachment ) );
-	return $sent ? 'sent' : 'failed';
+	$accepted = wp_mail( $payload['email'], $subject, $body, array(), array( $attachment ) );
+	return $accepted ? 'submitted' : 'failed';
 }
 
 /* SMS and print are intentionally not wired to a real gateway/workflow yet —
@@ -610,10 +619,11 @@ function toolkit_calling_letter_send_print( $letter_row, $payload ) {
  * (an admin rebuilding the file to pick up a corrected course label, say)
  * must never re-email the applicant, and clicking Regenerate three times must
  * not send three copies. So generation writes the files and this function —
- * called explicitly — is the only thing that ever contacts the applicant.
- *
- * $force controls resend: the automatic on-submission send passes false so a
- * letter already emailed is never sent twice; the admin "Resend" action
+	 * called explicitly — is the only thing that ever contacts the applicant.
+	 *
+	 * $force controls resend: the automatic on-submission send passes false so a
+	 * letter already submitted to the mail transport is never sent twice; the
+	 * admin "Resend" action
  * passes true because a human has deliberately chosen to send it again.
  */
 function toolkit_calling_letter_deliver( $application_id, $force = false ) {
@@ -625,7 +635,7 @@ function toolkit_calling_letter_deliver( $application_id, $force = false ) {
 	}
 	/* Already delivered and not a deliberate resend: do nothing, so the
 	 * on-submit path and a later course-name-resolver retry cannot double-send. */
-	if ( ! $force && 'sent' === $letter_row->email_status ) {
+	if ( ! $force && in_array( $letter_row->email_status, array( 'sent', 'submitted', 'unverified' ), true ) ) {
 		return true;
 	}
 	$record = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . toolkit_application_table_name() . ' WHERE id = %d', $application_id ) );
@@ -644,8 +654,8 @@ function toolkit_calling_letter_deliver( $application_id, $force = false ) {
 		'sms_status'   => $sms_status,
 		'print_status' => $print_status,
 	) );
-	if ( 'sent' === $email_status ) {
-		toolkit_application_log_event( $application_id, 'calling_letter_emailed', 'Calling letter emailed to the applicant.' );
+	if ( 'submitted' === $email_status ) {
+		toolkit_application_log_event( $application_id, 'calling_letter_email_submitted', 'Calling letter accepted by the site mail transport; inbox delivery is unverified.' );
 	} elseif ( 'failed' === $email_status ) {
 		toolkit_application_log_event( $application_id, 'calling_letter_email_failed', 'Calling letter email could not be sent.' );
 	}
@@ -901,7 +911,8 @@ add_action( 'admin_post_toolkit_calling_letter_send', function() {
 		$args['send_error'] = rawurlencode( $result->get_error_message() );
 	} else {
 		$row = $GLOBALS['wpdb']->get_row( $GLOBALS['wpdb']->prepare( 'SELECT email_status FROM ' . toolkit_calling_letter_table_name() . ' WHERE application_id = %d', $application_id ) );
-		$args[ ( $row && 'sent' === $row->email_status ) ? 'sent' : 'send_error' ] = ( $row && 'sent' === $row->email_status ) ? 1 : rawurlencode( 'The letter could not be emailed. Check the applicant email and mail delivery.' );
+		$submitted = $row && in_array( $row->email_status, array( 'sent', 'submitted', 'unverified' ), true );
+		$args[ $submitted ? 'submitted' : 'send_error' ] = $submitted ? 1 : rawurlencode( 'The letter was not accepted by the site mail transport. Check the applicant email and mail configuration.' );
 	}
 	wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
 	exit;
@@ -939,10 +950,12 @@ function toolkit_calling_letter_status_label( $status ) {
 
 function toolkit_calling_letter_channel_label( $status ) {
 	$labels = array(
-		'sent'     => 'Sent',
-		'queued'   => 'Queued',
-		'failed'   => 'Failed',
-		'disabled' => 'Disabled',
+		'sent'       => 'Delivery unverified',
+		'submitted'  => 'Delivery unverified',
+		'unverified' => 'Delivery unverified',
+		'queued'     => 'Queued',
+		'failed'     => 'Failed',
+		'disabled'   => 'Disabled',
 	);
 	return $labels[ $status ] ?? ucfirst( (string) $status );
 }
@@ -956,7 +969,7 @@ function toolkit_calling_letter_render_admin_page() {
 	$table = toolkit_calling_letter_table_name();
 	$app_table = toolkit_application_table_name();
 
-	toolkit_application_admin_header( 'Calling Letters', 'Automatic admission calling letters, generated on submission and emailed to applicants.' );
+	toolkit_application_admin_header( 'Calling Letters', 'Automatic admission calling letters with secure PDF and Word downloads. Email delivery remains off until an authenticated mail transport is configured.' );
 
 	if ( ! toolkit_calling_letter_renderer_available() ) {
 		echo '<div class="notice notice-error"><p><strong>Letter generation is unavailable on this server.</strong> No ZIP support could be loaded, so DOCX files cannot be written. Applications are still received and stored normally — only letter generation is affected.</p></div>';
@@ -964,26 +977,26 @@ function toolkit_calling_letter_render_admin_page() {
 	if ( isset( $_GET['regenerated'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Calling letter regenerated.</p></div>';
 	if ( isset( $_GET['regenerate_error'] ) ) echo '<div class="notice notice-error"><p><strong>Could not regenerate:</strong> ' . esc_html( wp_unslash( $_GET['regenerate_error'] ) ) . '</p></div>';
 	if ( isset( $_GET['settings_updated'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Delivery channel settings saved.</p></div>';
-	if ( isset( $_GET['sent'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Calling letter sent to the applicant.</p></div>';
+	if ( isset( $_GET['submitted'] ) ) echo '<div class="notice notice-warning is-dismissible"><p>The site mail transport accepted the calling letter, but inbox delivery is not verified.</p></div>';
 	if ( isset( $_GET['send_error'] ) ) echo '<div class="notice notice-error"><p><strong>Could not send:</strong> ' . esc_html( wp_unslash( $_GET['send_error'] ) ) . '</p></div>';
 
 	$total     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 	$generated = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'generated'" );
 	$failed    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'failed'" );
-	$emailed   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE email_status = 'sent'" );
+	$submitted = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE email_status IN ('sent', 'submitted', 'unverified')" );
 
 	echo '<section class="toolkit-admin__stats">';
 	printf( '<span class="toolkit-admin__stat"><span>Total letters</span><strong>%s</strong><small>One per application</small></span>', number_format_i18n( $total ) );
 	printf( '<span class="toolkit-admin__stat"><span>Generated</span><strong>%s</strong><small>Ready to view/email</small></span>', number_format_i18n( $generated ) );
-	printf( '<span class="toolkit-admin__stat"><span>Emailed</span><strong>%s</strong><small>Delivered to applicant inbox</small></span>', number_format_i18n( $emailed ) );
+	printf( '<span class="toolkit-admin__stat"><span>Mail attempts</span><strong>%s</strong><small>Inbox delivery unverified</small></span>', number_format_i18n( $submitted ) );
 	printf( '<span class="toolkit-admin__stat"><span>Needs attention</span><strong>%s</strong><small>Failed or awaiting course name</small></span>', number_format_i18n( $failed ) );
 	echo '</section>';
 
 	echo '<section class="toolkit-security-layout"><form class="toolkit-admin__panel toolkit-security-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="toolkit_calling_letter_save_settings">';
 	wp_nonce_field( 'toolkit_calling_letter_save_settings' );
-	echo '<div class="toolkit-admin__panel-heading"><div><small>Delivery</small><h2>Channels</h2></div></div><p>Generation always runs automatically on submission. Delivery channels are independent switches — email can send today; SMS and print are recorded as queued only until a real gateway/workflow is connected.</p>';
+	echo '<div class="toolkit-admin__panel-heading"><div><small>Delivery</small><h2>Channels</h2></div></div><p>Generation always runs automatically on submission. Email is intentionally disabled because this server is not authorised by the domain\'s Microsoft 365 mail policy; enable it only after an authenticated SMTP or transactional transport is configured and tested. SMS and print remain queued-only placeholders.</p>';
 	echo '<div class="toolkit-security-switches">';
-	echo '<label><input type="checkbox" name="email_enabled" value="1" ' . checked( toolkit_calling_letter_channel_enabled( 'email' ), true, false ) . '> <span><strong>Email</strong><small>Sends the letter as an attachment via the site\'s normal outgoing mail.</small></span></label>';
+	echo '<label><input type="checkbox" name="email_enabled" value="1" ' . checked( toolkit_calling_letter_channel_enabled( 'email' ), true, false ) . '> <span><strong>Email</strong><small>Requires authenticated SMTP or another SPF-aligned transport; wp_mail acceptance alone does not verify delivery.</small></span></label>';
 	echo '<label><input type="checkbox" name="sms_enabled" value="1" ' . checked( toolkit_calling_letter_channel_enabled( 'sms' ), true, false ) . '> <span><strong>Bulk SMS</strong><small>No gateway connected yet — marks records queued only.</small></span></label>';
 	echo '<label><input type="checkbox" name="print_enabled" value="1" ' . checked( toolkit_calling_letter_channel_enabled( 'print' ), true, false ) . '> <span><strong>Print</strong><small>No automated workflow yet — marks records queued for manual handling.</small></span></label>';
 	echo '</div><div class="toolkit-security-actions"><button class="button button-primary button-hero" type="submit">Save channel settings</button></div></form></section>';
@@ -1035,7 +1048,7 @@ function toolkit_calling_letter_render_admin_page() {
 		wp_nonce_field( 'toolkit_calling_letter_regenerate_' . $row->application_id );
 		echo '<button class="button button-small" type="submit">Regenerate</button></form>';
 		if ( 'generated' === $row->status ) {
-			$send_label = ( 'sent' === $row->email_status ) ? 'Resend' : 'Send';
+			$send_label = in_array( $row->email_status, array( 'sent', 'submitted', 'unverified' ), true ) ? 'Resubmit' : 'Submit to mail';
 			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline">';
 			echo '<input type="hidden" name="action" value="toolkit_calling_letter_send">';
 			echo '<input type="hidden" name="application" value="' . esc_attr( $row->application_id ) . '">';

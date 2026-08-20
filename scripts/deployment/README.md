@@ -19,6 +19,19 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-claude-review-fixes-2026.08.20.2.sh` preserves the review
+release that disables misleading calling-letter email delivery, relabels old
+mail attempts as unverified, and promotes the pending story Yoast metadata.
+It uses each live file's actual Git baseline, patches with zero fuzz, uploads
+all included modules before `functions.php`, verifies byte identity, and
+checks Apply plus all seven affected story routes. The storage migration keeps
+letter generation and secure downloads live while forcing email off until an
+authenticated SPF-aligned transport is installed and tested.
+If a run stops before upload, `TOOLKIT_DEPLOY_RESUME=1` first requires every
+remote file to remain identical to the saved rollback. After upload,
+`TOOLKIT_DEPLOY_VERIFY_ONLY=1` rebuilds the expected payload from that rollback
+and performs byte-identity plus route verification without uploading again.
+
 `releases/deploy-admissions-safety-2026.08.20.1.sh` preserves the demo-first
 release that removed unsafe Mzizi HTTP-status assumptions and made calling
 letter upserts atomic. It backs up and patches the three live files, uploads

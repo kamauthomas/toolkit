@@ -256,12 +256,14 @@ function toolkit_publish_cultural_week_stories() {
 				'post_content'  => $content,
 				'post_date'     => $story['date'],
 				'post_category' => $category_id ? array( $category_id ) : array(),
-			)
+			),
+			true
 		);
-		if ( ! is_wp_error( $post_id ) ) {
-			update_post_meta( $post_id, '_yoast_wpseo_focuskw', sanitize_text_field( $story['focus_keyphrase'] ) );
-			update_post_meta( $post_id, '_yoast_wpseo_metadesc', sanitize_text_field( $story['seo_description'] ) );
+		if ( is_wp_error( $post_id ) ) {
+			return;
 		}
+		update_post_meta( $post_id, '_yoast_wpseo_focuskw', sanitize_text_field( $story['focus_keyphrase'] ) );
+		update_post_meta( $post_id, '_yoast_wpseo_metadesc', sanitize_text_field( $story['seo_description'] ) );
 	}
 
 	update_option( 'toolkit_cultural_week_2026_published', $content_version, false );
