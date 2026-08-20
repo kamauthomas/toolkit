@@ -43,3 +43,9 @@ python3 scripts/generate-production-readiness-report.py
 The report records verified demo fixes separately from unresolved main-domain
 release gates. Its responsive screenshots are captured audit evidence and are
 not used as deployable site assets.
+
+## Browser-free deployments
+
+Guarded cPanel deployment scripts and their manual-review notes live in
+[`scripts/deployment/`](deployment/README.md). They do not connect to an
+interactive browser or store credentials in Git.

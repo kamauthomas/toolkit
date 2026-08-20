@@ -24,7 +24,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.08.12.11';
+	return '2026.08.12.12';
 }
 
 function toolkit_is_demo_environment() {
@@ -358,6 +358,9 @@ add_filter( 'template_include', function( $template ) {
 	if ( 'testimonials' === get_query_var( 'toolkit_showcase' ) ) {
 		return get_stylesheet_directory() . '/template-parts/pages/testimonials.php';
 	}
+	if ( 'footprint' === get_query_var( 'toolkit_showcase' ) ) {
+		return get_stylesheet_directory() . '/template-parts/pages/footprint.php';
+	}
 
 	require_once get_stylesheet_directory() . '/inc/course-catalog.php';
 	if ( eduma_child_get_legacy_course_for_page() ) {
@@ -406,10 +409,11 @@ add_action( 'init', function() {
 /* Outcome and trust pages remain theme-owned so their evidence-led layouts do
  * not depend on legacy builders or placeholder database records. */
 add_action( 'init', function() {
-	$route_version = eduma_child_redesign_enabled() ? '2026-1-on' : '2026-1-off';
+	$route_version = eduma_child_redesign_enabled() ? '2026-2-on' : '2026-2-off';
 	if ( eduma_child_redesign_enabled() ) {
 		add_rewrite_rule( '^graduation/?$', 'index.php?toolkit_showcase=graduation', 'top' );
 		add_rewrite_rule( '^testimonials/?$', 'index.php?toolkit_showcase=testimonials', 'top' );
+		add_rewrite_rule( '^footprint/?$', 'index.php?toolkit_showcase=footprint', 'top' );
 	}
 	if ( $route_version !== get_option( 'eduma_child_showcase_route_version' ) ) {
 		flush_rewrite_rules( false );
@@ -471,7 +475,7 @@ add_filter( 'query_vars', function( $vars ) {
 } );
 
 add_action( 'template_redirect', function() {
-	if ( in_array( get_query_var( 'toolkit_showcase' ), array( 'graduation', 'testimonials' ), true ) ) {
+	if ( in_array( get_query_var( 'toolkit_showcase' ), array( 'graduation', 'testimonials', 'footprint' ), true ) ) {
 		global $wp_query;
 		$wp_query->is_404 = false;
 		$wp_query->is_home = false;
@@ -514,7 +518,7 @@ add_action( 'template_redirect', function() {
 
 add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
 	$path = wp_parse_url( $requested_url, PHP_URL_PATH );
-	return in_array( untrailingslashit( $path ), array( '/llms.txt', '/llms-full.txt', '/apply', '/graduation', '/testimonials' ), true ) ? false : $redirect_url;
+	return in_array( untrailingslashit( $path ), array( '/llms.txt', '/llms-full.txt', '/apply', '/graduation', '/testimonials', '/footprint' ), true ) ? false : $redirect_url;
 }, 10, 2 );
 
 /* Retire unused public routes without deleting their WordPress records. */
@@ -765,6 +769,13 @@ function eduma_child_redesigned_page_metadata() {
 			'title'       => 'Reception | The Toolkit for Skills and Innovation',
 			'description' => 'Send a reception request to The Toolkit for Skills and Innovation before your visit to our training centre in Kikuyu, Kenya.',
 			'image'       => get_stylesheet_directory_uri() . '/assets/images/toolkit-social-home.webp',
+		);
+	}
+	if ( 'footprint' === get_query_var( 'toolkit_showcase' ) ) {
+		return array(
+			'title'       => 'Toolkit Footprint | A Decade in Youth Skills and Employability',
+			'description' => 'A dated record of Toolkit programmes in youth skills and employability from 2014, delivered with partners including NITA, UK aid, World Vision, ILO, UNESCO and GIZ.',
+			'image'       => get_stylesheet_directory_uri() . '/assets/images/pages/about.jpg',
 		);
 	}
 	if ( 'graduation' === get_query_var( 'toolkit_showcase' ) ) {
@@ -1085,7 +1096,7 @@ function toolkit_demo_production_canonical_url( $canonical = '' ) {
 		$canonical = home_url( '/reception/' );
 	} elseif ( toolkit_speak_up_enabled() && get_query_var( 'toolkit_speak_up' ) ) {
 		$canonical = home_url( '/speak-up/' );
-	} elseif ( in_array( get_query_var( 'toolkit_showcase' ), array( 'graduation', 'testimonials' ), true ) ) {
+	} elseif ( in_array( get_query_var( 'toolkit_showcase' ), array( 'graduation', 'testimonials', 'footprint' ), true ) ) {
 		$canonical = home_url( '/' . get_query_var( 'toolkit_showcase' ) . '/' );
 	} elseif ( is_front_page() ) {
 		$canonical = home_url( '/' );
@@ -1126,7 +1137,7 @@ add_filter( 'thim/structured_data/types', function( $types ) {
 }, 100 );
 
 add_filter( 'wpseo_opengraph_url', function( $url ) {
-	if ( in_array( get_query_var( 'toolkit_showcase' ), array( 'graduation', 'testimonials' ), true ) ) {
+	if ( in_array( get_query_var( 'toolkit_showcase' ), array( 'graduation', 'testimonials', 'footprint' ), true ) ) {
 		return home_url( '/' . get_query_var( 'toolkit_showcase' ) . '/' );
 	}
 	if ( is_page( 'toolkit-courses-apply-today' ) ) {
@@ -1150,7 +1161,7 @@ add_filter( 'wpseo_opengraph_url', function( $url ) {
 
 add_filter( 'wpseo_schema_webpage', function( $data ) {
 	$showcase = get_query_var( 'toolkit_showcase' );
-	if ( in_array( $showcase, array( 'graduation', 'testimonials' ), true ) ) {
+	if ( in_array( $showcase, array( 'graduation', 'testimonials', 'footprint' ), true ) ) {
 		$url                 = home_url( '/' . $showcase . '/' );
 		$metadata            = eduma_child_redesigned_page_metadata();
 		$data['@id']         = $url . '#webpage';
@@ -1225,6 +1236,7 @@ add_filter( 'wpseo_sitemap_page_content', function( $content ) {
 		'/connect/'     => 'template-parts/pages/connect.php',
 		'/graduation/'  => 'template-parts/pages/graduation.php',
 		'/testimonials/'=> 'template-parts/pages/testimonials.php',
+		'/footprint/'   => 'template-parts/pages/footprint.php',
 	);
 	foreach ( $entries as $route => $relative ) {
 		$content .= '<url><loc>' . esc_url( home_url( $route ) ) . '</loc><lastmod>' . esc_html( gmdate( DATE_W3C, filemtime( get_stylesheet_directory() . '/' . $relative ) ) ) . '</lastmod></url>';
@@ -1474,7 +1486,7 @@ add_filter( 'wpseo_schema_graph', function( $graph ) {
 		);
 	}
 	$showcase = sanitize_key( get_query_var( 'toolkit_showcase' ) );
-	if ( in_array( $showcase, array( 'graduation', 'testimonials' ), true ) && $metadata && ! $has_webpage ) {
+	if ( in_array( $showcase, array( 'graduation', 'testimonials', 'footprint' ), true ) && $metadata && ! $has_webpage ) {
 		$showcase_url = home_url( '/' . $showcase . '/' );
 		$graph[]      = array(
 			'@type'              => 'CollectionPage',

@@ -407,3 +407,51 @@
 .toolkit-speak-up{max-width:1180px;margin:0 auto;padding:clamp(48px,8vw,104px) 24px;color:#24352c}.toolkit-speak-up__intro{max-width:760px}.toolkit-speak-up h1{font-size:clamp(48px,7vw,92px);line-height:.95;margin:10px 0 24px;color:#243b2f}.toolkit-speak-up h2{color:#31451a}.toolkit-eyebrow{color:#f26b21;text-transform:uppercase;letter-spacing:.14em;font-weight:700;font-size:12px}.toolkit-speak-up__lede{font-size:20px;line-height:1.6;color:#526158}.toolkit-speak-up__notice{display:grid;gap:6px;margin:28px 0;padding:18px 20px;border-left:4px solid #f26b21;background:#f5f3e8}.toolkit-speak-up__notice span{line-height:1.55}.toolkit-speak-up__card{max-width:760px;margin:36px 0;padding:clamp(24px,5vw,48px);border-radius:24px;background:#edf1e8;box-shadow:0 20px 60px rgba(36,53,44,.12)}.toolkit-speak-up__form{display:grid;gap:18px}.toolkit-speak-up label{display:grid;gap:7px;font-weight:600}.toolkit-speak-up input,.toolkit-speak-up select,.toolkit-speak-up textarea{width:100%;border:1px solid #bcc8ba;border-radius:10px;padding:13px 14px;background:#fff;font:inherit}.toolkit-speak-up textarea{resize:vertical}.toolkit-speak-up__contact{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.toolkit-speak-up__check{display:flex!important;grid-template-columns:none!important;align-items:flex-start;gap:10px!important;font-weight:500!important;line-height:1.45}.toolkit-speak-up__check input{width:auto;margin-top:4px}.toolkit-speak-up__trap{position:absolute!important;left:-9999px!important}.toolkit-speak-up .toolkit-button{border:0;border-radius:999px;padding:14px 24px;cursor:pointer}.toolkit-speak-up__status{min-height:1.4em;color:#31451a}.toolkit-speak-up__direct{border-top:1px solid #d7ddd3;padding-top:28px;max-width:760px}.toolkit-speak-up__direct a{color:#d95c18;font-weight:700}@media(max-width:700px){.toolkit-speak-up__contact{grid-template-columns:1fr}.toolkit-speak-up{padding-inline:18px}}
 .toolkit-speak-up__check input{appearance:auto;width:18px;height:18px;margin-top:3px;padding:0;accent-color:#31451a;border-radius:2px}
 .toolkit-speak-up__contact[hidden]{display:none!important}
+
+/* Footprint: a dated trail of programmes delivered with named partners. The
+   alternating footprints down the spine echo the printed institutional banner
+   this page is derived from. */
+.toolkit-footprint-page { padding-top:26px; }
+.toolkit-footprint-hero { width:min(1180px,calc(100% - 40px)); margin:0 auto 20px; padding:10px 0 34px; text-align:center; border-bottom:1px solid var(--toolkit-line); }
+.toolkit-footprint-hero h1 { margin:0 auto 18px; max-width:16ch; color:var(--toolkit-green); font-size:clamp(34px,5vw,54px); line-height:1.06; letter-spacing:0; }
+.toolkit-footprint-hero p:not(.toolkit-kicker) { max-width:62ch; margin:0 auto; color:#506059; font-size:17px; line-height:1.7; }
+.toolkit-footprint-stats { display:flex; flex-wrap:wrap; justify-content:center; gap:20px 54px; margin:30px 0 0; padding:0; list-style:none; }
+.toolkit-footprint-stats strong { display:block; color:var(--toolkit-orange); font-size:34px; line-height:1; }
+.toolkit-footprint-stats span { display:block; margin-top:6px; color:#6c7871; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+
+.toolkit-footprint-trail { position:relative; width:min(1180px,calc(100% - 40px)); margin:0 auto; padding:44px 0 10px; }
+.toolkit-footprint-trail::before { content:""; position:absolute; top:0; bottom:38px; left:50%; width:2px; transform:translateX(-50%); background:repeating-linear-gradient(#d5d9c4 0 8px,transparent 8px 16px); }
+.toolkit-footprint-trail ol { margin:0; padding:0; list-style:none; }
+.toolkit-footprint-era { position:relative; display:grid; grid-template-columns:1fr 92px 1fr; align-items:start; margin-bottom:34px; }
+.toolkit-footprint-era:last-child { margin-bottom:0; }
+.toolkit-footprint-era article { grid-column:1; padding:24px 26px; border:1px solid var(--toolkit-line); border-top:3px solid #c0392b; border-radius:10px; background:#fff; box-shadow:0 5px 18px rgba(12,42,26,.05); }
+.toolkit-footprint-era.is-alt article { grid-column:3; border-top-color:var(--toolkit-green); }
+.toolkit-footprint-step { grid-column:2; display:grid; place-items:center; padding-top:6px; }
+.toolkit-footprint-step svg { width:38px; height:52px; fill:#c0392b; transform:rotate(-8deg); }
+.toolkit-footprint-era.is-alt .toolkit-footprint-step svg { fill:var(--toolkit-green); transform:rotate(8deg); }
+.toolkit-footprint-era h2 { margin:0 0 14px; color:#c0392b; font-size:22px; letter-spacing:0; }
+.toolkit-footprint-era.is-alt h2 { color:var(--toolkit-green); }
+.toolkit-footprint-era dl { margin:0; }
+.toolkit-footprint-era dl>div { display:flex; gap:12px; padding:9px 0; border-top:1px solid #eef0e6; }
+.toolkit-footprint-era dl>div:first-child { border-top:0; padding-top:0; }
+.toolkit-footprint-era dt { flex:0 0 auto; max-width:140px; color:#6c7871; font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; line-height:1.35; }
+.toolkit-footprint-era dd { margin:0; color:#506059; font-size:15px; line-height:1.65; }
+
+.toolkit-footprint-partners { width:min(1180px,calc(100% - 40px)); margin:56px auto 0; padding-top:40px; border-top:1px solid var(--toolkit-line); text-align:center; }
+.toolkit-footprint-partners h2 { margin:0 0 22px; color:var(--toolkit-green); font-size:30px; letter-spacing:0; }
+.toolkit-footprint-partners ul { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:0; padding:0; list-style:none; }
+.toolkit-footprint-partners li { padding:9px 16px; border:1px solid var(--toolkit-line); border-radius:999px; background:#fff; color:#4a5647; font-size:14px; font-weight:600; }
+.toolkit-footprint-page .toolkit-institutional-cta { margin-top:56px; }
+
+@media (max-width:900px) {
+  .toolkit-footprint-trail::before { left:26px; }
+  .toolkit-footprint-era { grid-template-columns:56px 1fr; }
+  .toolkit-footprint-step { grid-column:1; }
+  .toolkit-footprint-era article, .toolkit-footprint-era.is-alt article { grid-column:2; }
+  .toolkit-footprint-step svg { width:30px; height:42px; }
+}
+@media (max-width:600px) {
+  .toolkit-footprint-era dl>div { display:block; }
+  .toolkit-footprint-era dt { max-width:none; margin-bottom:4px; }
+  .toolkit-footprint-stats { gap:18px 28px; }
+}

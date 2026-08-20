@@ -5,6 +5,25 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-20 — Publish the institutional programme footprint
+**Area:** website content
+**Environments:** demo ✅ · prod ✅
+**Commit(s):** this commit
+
+Added a theme-owned `/footprint/` page that presents 28 dated programme
+milestones and their named partners from 2014 through current work extending to
+2026. The route includes canonical metadata, schema and sitemap integration,
+with a responsive timeline that does not depend on a database page builder. The
+browser-free, drift-preserving release script and operating notes are retained
+under `scripts/deployment/` for manual inspection and future reuse.
+
+**Verified by:** full child-theme PHP lint, JavaScript syntax and whitespace
+checks; demo desktop/mobile headless renders; demo then production returned 200
+uncached and from LiteSpeed cache on release `2026.08.12.12`, with one H1, 13
+eras, 28 milestones, canonical/robots/schema signals and sitemap inclusion.
+Home, Apply, Graduation and Testimonials remained 200 on production.
+**Follow-ups:** none.
+
 ## 2026-08-20 — Make a rejected Mzizi submission re-sendable
 **Area:** admissions relay
 **Environments:** demo ✅ · prod ✅
