@@ -1,23 +1,67 @@
+/*
+ * Toolkit Control — admin design system.
+ * A branded operations console for a technical-skills institute: an instrument
+ * header band, warm institutional surfaces, and one accessible status-chip
+ * language shared across every Toolkit admin screen. All class names match the
+ * existing render markup so no PHP changes are required.
+ */
+
 .toolkit-admin {
   --toolkit-olive: #969e2a;
   --toolkit-orange: #ff6600;
   --toolkit-teal: #006a68;
-  --toolkit-ink: #22261c;
-  --toolkit-line: #dde1d2;
+  --toolkit-ink: #20241a;
+
+  --tk-olive-deep: #6f761f;
+  --tk-teal-deep: #00504e;
+  --tk-ink-2: #2c3121;
+
+  --toolkit-line: #e2e5d6;
+  --tk-line-soft: #eef0e6;
+  --tk-surface: #ffffff;
+  --tk-canvas: #f6f7f0;
+  --tk-text: #282d20;
+  --tk-muted: #5f6653;
+
+  --tk-radius: 12px;
+  --tk-radius-sm: 8px;
+  --tk-shadow: 0 1px 2px rgba(30, 40, 20, .05), 0 10px 26px rgba(30, 40, 20, .06);
+  --tk-shadow-hover: 0 2px 6px rgba(30, 40, 20, .07), 0 16px 38px rgba(30, 40, 20, .11);
+
   max-width: 1280px;
+  color: var(--tk-text);
 }
 
+/* ------------------------------------------------------------------ *
+ * Instrument header band — the signature element
+ * ------------------------------------------------------------------ */
 .toolkit-admin__hero {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin: 20px 0 18px;
-  padding: 26px 30px;
-  border-left: 5px solid var(--toolkit-orange);
+  margin: 18px 0 20px;
+  padding: 30px 34px;
+  overflow: hidden;
+  border-radius: var(--tk-radius);
   color: #fff;
-  background: var(--toolkit-ink);
+  background:
+    radial-gradient(circle at 1px 1px, rgba(150, 158, 42, .16) 1px, transparent 0) 0 0 / 22px 22px,
+    linear-gradient(135deg, #1b1f15 0%, var(--tk-ink-2) 58%, #191d13 100%);
+  box-shadow: var(--tk-shadow);
 }
+
+/* Brand "spark rule": olive → orange edge along the top of the band. */
+.toolkit-admin__hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--toolkit-olive), var(--toolkit-orange) 78%, #ffb066);
+}
+
+.toolkit-admin__hero > div { position: relative; z-index: 1; }
 
 .toolkit-admin__hero p,
 .toolkit-admin__hero h1,
@@ -26,25 +70,138 @@
   color: inherit;
 }
 
+/* Eyebrow: near-white, spaced, with an orange leading tick (was low-contrast). */
 .toolkit-admin__hero p {
-  color: #d7dc93;
-  font-size: 11px;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #edefd6;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .14em;
   text-transform: uppercase;
 }
 
+.toolkit-admin__hero p::before {
+  content: "";
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--toolkit-orange);
+}
+
 .toolkit-admin__hero h1 {
-  margin: 4px 0;
-  font-size: 30px;
+  margin: 8px 0 6px;
+  font-size: 31px;
+  font-weight: 800;
+  letter-spacing: -.015em;
+  line-height: 1.08;
 }
 
+.toolkit-admin__hero > div span {
+  display: block;
+  max-width: 62ch;
+  color: #cfd4c2;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* State badge: a solid, legible instrument readout (was a faint border only). */
 .toolkit-admin__state {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   flex: 0 0 auto;
-  padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, .25);
-  font-weight: 700;
+  align-self: flex-start;
+  padding: 9px 15px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 255, 255, .10);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-decoration: none;
 }
 
+.toolkit-admin__state::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #7fe3a6;
+  box-shadow: 0 0 0 3px rgba(127, 227, 166, .22);
+}
+
+a.toolkit-admin__state:hover {
+  border-color: rgba(255, 255, 255, .5);
+  background: rgba(255, 255, 255, .18);
+}
+a.toolkit-admin__state:focus-visible {
+  outline: 2px solid #ffb066;
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Admin notices — branded and legible (the "header notifications")
+ * ------------------------------------------------------------------ */
+.toolkit-admin .notice,
+.toolkit-admin .notice-success,
+.toolkit-admin .notice-error,
+.toolkit-admin .notice-warning,
+.toolkit-admin .notice-info {
+  margin: 0 0 18px;
+  padding: 14px 18px;
+  border: 1px solid var(--toolkit-line);
+  border-left-width: 5px;
+  border-radius: var(--tk-radius-sm);
+  background: var(--tk-surface);
+  box-shadow: var(--tk-shadow);
+}
+
+.toolkit-admin .notice p { color: var(--tk-text); font-weight: 600; }
+.toolkit-admin .notice-success { border-left-color: var(--toolkit-teal); background: #f0f8f6; }
+.toolkit-admin .notice-error   { border-left-color: #c8371b; background: #fdf1ed; }
+.toolkit-admin .notice-warning { border-left-color: #d08700; background: #fff8e9; }
+.toolkit-admin .notice-info    { border-left-color: var(--toolkit-olive); background: #f8f9ec; }
+
+/* ------------------------------------------------------------------ *
+ * Quick nav
+ * ------------------------------------------------------------------ */
+.toolkit-admin__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 12px;
+  border: 1px solid var(--toolkit-line);
+  border-radius: var(--tk-radius);
+  background: var(--tk-surface);
+  box-shadow: var(--tk-shadow);
+}
+
+.toolkit-admin__quick a {
+  padding: 9px 15px;
+  border-radius: 999px;
+  color: var(--tk-text);
+  background: var(--tk-line-soft);
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color .15s ease, color .15s ease, transform .15s ease;
+}
+
+.toolkit-admin__quick a:hover {
+  color: #fff;
+  background: var(--toolkit-teal);
+  transform: translateY(-1px);
+}
+.toolkit-admin__quick a:focus-visible { outline: 2px solid var(--toolkit-teal); outline-offset: 2px; }
+
+/* ------------------------------------------------------------------ *
+ * Stat cards
+ * ------------------------------------------------------------------ */
 .toolkit-admin__stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(180px, 1fr));
@@ -56,36 +213,61 @@
 .toolkit-admin__stat,
 .toolkit-admin__panel {
   border: 1px solid var(--toolkit-line);
-  background: #fff;
-  box-shadow: 0 3px 14px rgba(30, 40, 20, .05);
+  border-radius: var(--tk-radius);
+  background: var(--tk-surface);
+  box-shadow: var(--tk-shadow);
 }
 
-.toolkit-admin__stats a {
+.toolkit-admin__stats a,
+.toolkit-admin__stat {
   display: grid;
-  gap: 5px;
-  padding: 18px;
-  color: var(--toolkit-ink);
+  gap: 6px;
+  padding: 18px 20px;
+  color: var(--tk-text);
   text-decoration: none;
 }
 
-.toolkit-admin__stat {
-  display: grid;
-  gap: 5px;
-  padding: 18px;
+/* Colour edge so the stat cards read as an instrument row, not plain boxes. */
+.toolkit-admin__stats a {
+  position: relative;
+  overflow: hidden;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+.toolkit-admin__stats a::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--toolkit-olive);
+  opacity: .55;
+  transition: opacity .15s ease, width .15s ease;
 }
 
 .toolkit-admin__stats a:hover {
   border-color: var(--toolkit-olive);
+  box-shadow: var(--tk-shadow-hover);
+  transform: translateY(-2px);
 }
+.toolkit-admin__stats a:hover::before { opacity: 1; width: 5px; }
+.toolkit-admin__stats a:focus-visible { outline: 2px solid var(--toolkit-olive); outline-offset: 2px; }
 
 .toolkit-admin__stats span,
 .toolkit-admin__stats small {
-  color: #626858;
+  color: var(--tk-muted);
+}
+.toolkit-admin__stats span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
 }
 
 .toolkit-admin__stats strong {
   color: var(--toolkit-teal);
-  font-size: 28px;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -.02em;
 }
 
 .toolkit-admin__stats .toolkit-admin__path {
@@ -96,30 +278,9 @@
   white-space: nowrap;
 }
 
-.toolkit-admin__quick {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0 0 18px;
-  padding: 10px;
-  border: 1px solid var(--toolkit-line);
-  background: #fff;
-}
-
-.toolkit-admin__quick a {
-  padding: 9px 14px;
-  border-radius: 999px;
-  color: var(--toolkit-ink);
-  background: #f1f3e8;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.toolkit-admin__quick a:hover {
-  color: #fff;
-  background: var(--toolkit-teal);
-}
-
+/* ------------------------------------------------------------------ *
+ * Two-column grid + panels
+ * ------------------------------------------------------------------ */
 .toolkit-admin__grid {
   display: grid;
   grid-template-columns: minmax(340px, .9fr) minmax(0, 1.1fr);
@@ -127,11 +288,13 @@
 }
 
 .toolkit-admin__panel {
-  padding: 22px;
+  padding: 24px;
 }
 
 .toolkit-admin__panel h2 {
   margin-top: 0;
+  font-weight: 800;
+  letter-spacing: -.01em;
 }
 
 .toolkit-admin__panel-heading,
@@ -140,17 +303,19 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--tk-line-soft);
 }
 
 .toolkit-admin__panel-heading small,
 .toolkit-record__heading p {
   display: block;
-  margin: 0 0 3px;
-  color: #737967;
+  margin: 0 0 4px;
+  color: var(--toolkit-olive);
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: .1em;
+  letter-spacing: .12em;
   text-transform: uppercase;
 }
 
@@ -159,36 +324,56 @@
   margin: 0;
 }
 
+/* ------------------------------------------------------------------ *
+ * Status-chip language — the shared, accessible signature
+ * ------------------------------------------------------------------ */
 .toolkit-pill,
 .toolkit-health,
 .toolkit-status {
   display: inline-flex;
   align-items: center;
-  padding: 6px 10px;
+  gap: 7px;
+  padding: 6px 12px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 800;
+  letter-spacing: .02em;
   white-space: nowrap;
 }
 
+/* Leading status dot: same shape everywhere, colour inherits the text tone. */
+.toolkit-health::before,
+.toolkit-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+
 .toolkit-pill { color: #3d4517; background: #eef0ce; }
-.toolkit-health--good { color: #075953; background: #dff2ef; }
+.toolkit-health--good { color: #075953; background: #dbf1ee; }
 .toolkit-status { color: #39402e; background: #edf0e7; }
-.toolkit-status--delivered { color: #075953; background: #dff2ef; }
+.toolkit-status--delivered { color: #075953; background: #dbf1ee; }
 .toolkit-status--relay_failed,
-.toolkit-status--validation_failed { color: #8c2f19; background: #fde7df; }
+.toolkit-status--validation_failed { color: #a12f16; background: #fde4da; }
 .toolkit-status--delivery_unconfirmed { color: #6d4d00; background: #fff1c8; }
 .toolkit-status--handoff_required { color: #6d4d00; background: #fff1c8; }
 .toolkit-status--queued { color: #6d4d00; background: #fff1c8; }
-.toolkit-status--relaying { color: #075953; background: #dff2ef; }
-.toolkit-release { margin: 24px 0; padding: 18px; border: 1px solid #efbd7f; border-radius: 10px; background: #fff8ed; }
-.toolkit-reconcile { margin: 24px 0; padding: 18px; border: 1px solid #78aaa5; border-radius: 10px; background: #edf7f5; }
+.toolkit-status--relaying { color: #075953; background: #dbf1ee; }
+
+.toolkit-release { margin: 24px 0; padding: 18px 20px; border: 1px solid #efbd7f; border-radius: var(--tk-radius); background: #fff8ed; }
+.toolkit-reconcile { margin: 24px 0; padding: 18px 20px; border: 1px solid #78aaa5; border-radius: var(--tk-radius); background: #edf7f5; }
 .toolkit-release .description { margin-bottom: 0; }
 .toolkit-release__check { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 14px; font-weight: 700; line-height: 1.45; }
 .toolkit-delivery-history { display: grid; gap: 10px; margin: 0 0 24px; padding: 0; list-style: none; }
-.toolkit-delivery-history li { display: grid; grid-template-columns: 120px 1fr auto; gap: 12px; padding: 12px; border-left: 4px solid var(--toolkit-teal); background: #f5f8f7; }
+.toolkit-delivery-history li { display: grid; grid-template-columns: 120px 1fr auto; gap: 12px; padding: 13px 14px; border-left: 4px solid var(--toolkit-teal); border-radius: var(--tk-radius-sm); background: #f4f8f6; }
 .toolkit-delivery-history span { overflow-wrap: anywhere; }
 
+/* ------------------------------------------------------------------ *
+ * Toolbars, ranges, search
+ * ------------------------------------------------------------------ */
 .toolkit-admin__toolbar,
 .toolkit-admin__range {
   display: flex;
@@ -196,18 +381,20 @@
   flex-wrap: wrap;
   gap: 12px;
   margin: 18px 0;
-  padding: 14px;
+  padding: 16px;
   border: 1px solid var(--toolkit-line);
-  background: #fff;
+  border-radius: var(--tk-radius);
+  background: var(--tk-surface);
+  box-shadow: var(--tk-shadow);
 }
-.toolkit-application-tools { display:flex; align-items:center; justify-content:space-between; gap:18px; margin:0 0 16px; padding:16px 18px; border:1px solid var(--toolkit-line); border-left:4px solid var(--toolkit-teal); border-radius:8px; background:#fff; }
-.toolkit-application-tools>div { display:grid; gap:3px; }
-.toolkit-application-tools span,.toolkit-application-tools small { color:#626858; }
+.toolkit-application-tools { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 0 0 16px; padding: 16px 18px; border: 1px solid var(--toolkit-line); border-left: 4px solid var(--toolkit-teal); border-radius: var(--tk-radius); background: var(--tk-surface); box-shadow: var(--tk-shadow); }
+.toolkit-application-tools > div { display: grid; gap: 3px; }
+.toolkit-application-tools span, .toolkit-application-tools small { color: var(--tk-muted); }
 
 .toolkit-admin__toolbar label {
   display: grid;
   gap: 5px;
-  color: #626858;
+  color: var(--tk-muted);
   font-weight: 700;
 }
 
@@ -217,18 +404,27 @@
 .toolkit-admin__range { align-items: center; }
 .toolkit-admin__range span { margin-right: auto; font-weight: 800; }
 .toolkit-admin__range button {
-  padding: 7px 12px;
+  padding: 8px 14px;
   border: 1px solid var(--toolkit-line);
   border-radius: 999px;
-  background: #fff;
+  background: var(--tk-surface);
+  font-weight: 700;
   cursor: pointer;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
 }
+.toolkit-admin__range button:hover { border-color: var(--toolkit-teal); }
 .toolkit-admin__range button.is-active { color: #fff; border-color: var(--toolkit-teal); background: var(--toolkit-teal); }
 
-.toolkit-admin__table-wrap { overflow-x: auto; }
+/* ------------------------------------------------------------------ *
+ * Tables
+ * ------------------------------------------------------------------ */
+.toolkit-admin__table-wrap { overflow-x: auto; border-radius: var(--tk-radius); }
 .toolkit-admin__table td { vertical-align: middle; }
-.toolkit-admin__table td small { display: block; margin-top: 4px; color: #72776b; }
+.toolkit-admin__table td small { display: block; margin-top: 4px; color: var(--tk-muted); }
 
+/* ------------------------------------------------------------------ *
+ * Application record
+ * ------------------------------------------------------------------ */
 .toolkit-application-record {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(300px, .55fr);
@@ -243,9 +439,9 @@
   margin: 0;
 }
 
-.toolkit-record__facts div { padding: 11px 0; border-bottom: 1px solid #edf0e7; }
-.toolkit-record__facts dt { color: #737967; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-.toolkit-record__facts dd { margin: 4px 0 0; color: var(--toolkit-ink); font-weight: 650; overflow-wrap: anywhere; }
+.toolkit-record__facts div { padding: 11px 0; border-bottom: 1px solid var(--tk-line-soft); }
+.toolkit-record__facts dt { color: var(--tk-muted); font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.toolkit-record__facts dd { margin: 4px 0 0; color: var(--tk-text); font-weight: 650; overflow-wrap: anywhere; }
 .toolkit-record__actions { display: flex; flex-wrap: wrap; gap: 7px; }
 
 .toolkit-admin__status {
@@ -254,20 +450,21 @@
 
 .toolkit-admin__status div {
   display: grid;
-  grid-template-columns: 140px 1fr;
+  grid-template-columns: 150px 1fr;
   gap: 15px;
-  padding: 11px 0;
-  border-bottom: 1px solid #edf0e7;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--tk-line-soft);
 }
+.toolkit-admin__status div:last-child { border-bottom: 0; }
 
 .toolkit-admin__status dt {
-  color: #626858;
-  font-weight: 600;
+  color: var(--tk-muted);
+  font-weight: 700;
 }
 
 .toolkit-admin__status dd {
   margin: 0;
-  color: var(--toolkit-ink);
+  color: var(--tk-text);
   font-weight: 700;
   overflow-wrap: anywhere;
 }
@@ -279,13 +476,22 @@
 }
 
 .toolkit-admin__links a {
-  padding: 10px 12px;
+  padding: 11px 13px;
+  border: 1px solid var(--tk-line-soft);
   border-left: 3px solid var(--toolkit-olive);
+  border-radius: var(--tk-radius-sm);
   color: #424831;
-  background: #f6f7f1;
+  background: var(--tk-canvas);
+  font-weight: 650;
   text-decoration: none;
+  transition: background-color .15s ease, border-color .15s ease;
 }
+.toolkit-admin__links a:hover { border-left-color: var(--toolkit-orange); background: #f1f3e8; }
+.toolkit-admin__links a:focus-visible { outline: 2px solid var(--toolkit-olive); outline-offset: 2px; }
 
+/* ------------------------------------------------------------------ *
+ * Support tabs + security screens
+ * ------------------------------------------------------------------ */
 .toolkit-support-admin .nav-tab-wrapper {
   margin-bottom: 18px;
 }
@@ -302,32 +508,36 @@
   gap: 6px;
   padding: 20px;
   border: 1px solid var(--toolkit-line);
-  border-radius: 10px;
+  border-radius: var(--tk-radius);
   border-top: 4px solid var(--toolkit-teal);
-  background: #fff;
+  background: var(--tk-surface);
+  box-shadow: var(--tk-shadow);
 }
 
 .toolkit-security-overview span,
-.toolkit-security-overview small { color: #68705f; }
-.toolkit-security-overview strong { color: var(--toolkit-ink); font-size: 23px; line-height: 1.1; }
+.toolkit-security-overview small { color: var(--tk-muted); }
+.toolkit-security-overview strong { color: var(--tk-text); font-size: 23px; line-height: 1.1; font-weight: 800; }
 .toolkit-security-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(310px, .6fr); gap: 18px; align-items: start; }
-.toolkit-security-layout .toolkit-admin__panel { border-radius: 10px; }
-.toolkit-security-form > label { display: grid; gap: 7px; margin: 18px 0; color: var(--toolkit-ink); font-weight: 800; }
-.toolkit-security-form > label span { color: #747b69; font-size: 11px; font-weight: 600; }
+.toolkit-security-layout .toolkit-admin__panel { border-radius: var(--tk-radius); }
+.toolkit-security-form > label { display: grid; gap: 7px; margin: 18px 0; color: var(--tk-text); font-weight: 800; }
+.toolkit-security-form > label span { color: var(--tk-muted); font-size: 11px; font-weight: 600; }
 .toolkit-security-form input[type="text"], .toolkit-security-form input[type="password"] { width: 100%; min-height: 44px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .toolkit-security-switches { display: grid; gap: 10px; margin: 22px 0; }
-.toolkit-security-switches > label { display: flex; gap: 12px; padding: 16px; border: 1px solid var(--toolkit-line); border-radius: 8px; background: #f8f9f4; cursor: pointer; }
+.toolkit-security-switches > label { display: flex; gap: 12px; padding: 16px; border: 1px solid var(--toolkit-line); border-radius: var(--tk-radius-sm); background: var(--tk-canvas); cursor: pointer; transition: border-color .15s ease, background-color .15s ease; }
 .toolkit-security-switches > label:has(input:checked) { border-color: #79aaa5; background: #edf7f5; box-shadow: inset 4px 0 var(--toolkit-teal); }
 .toolkit-security-switches > label:has(input:disabled) { cursor: not-allowed; opacity: .76; }
 .toolkit-security-switches input { margin-top: 3px; }
 .toolkit-security-switches span { display: grid; gap: 3px; }
-.toolkit-security-switches small { color: #697060; font-weight: 400; }
+.toolkit-security-switches small { color: var(--tk-muted); font-weight: 400; }
 .toolkit-security-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .toolkit-security-guide { border-top: 4px solid var(--toolkit-orange); }
 .toolkit-security-guide code { overflow-wrap: anywhere; }
 .toolkit-security-guide ol { margin-left: 20px; }
 .toolkit-security-guide li { margin-bottom: 12px; line-height: 1.5; }
 
+/* ------------------------------------------------------------------ *
+ * Responsive
+ * ------------------------------------------------------------------ */
 @media (max-width: 1000px) {
   .toolkit-admin__stats {
     grid-template-columns: 1fr 1fr;
@@ -344,7 +554,7 @@
   .toolkit-admin__hero {
     align-items: flex-start;
     flex-direction: column;
-    padding: 22px;
+    padding: 24px;
   }
 
   .toolkit-admin__stats,
@@ -354,5 +564,9 @@
   }
 
   .toolkit-record__facts { grid-template-columns: 1fr; }
-  .toolkit-application-tools { align-items:stretch; flex-direction:column; }
+  .toolkit-application-tools { align-items: stretch; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolkit-admin * { transition: none !important; }
 }
