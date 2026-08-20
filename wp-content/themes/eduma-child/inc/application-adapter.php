@@ -798,24 +798,9 @@ function toolkit_application_relay_record( $record_id, $release_source = 'manual
 	$result = toolkit_mzizi_post( 'StudentInfo.asmx/SubmitOnlineApplication', $payload, $cookies, 25 );
 	if ( is_wp_error( $result ) || empty( $result['Message'] ) ) {
 		$error = is_wp_error( $result ) ? $result->get_error_message() : 'Mzizi returned no confirmation message.';
-		/*
-		 * Distinguish a definite upstream rejection from an ambiguous outcome.
-		 * When Mzizi answers with a 4xx (e.g. the 409 it returns for "we have
-		 * encountered an error ... please try again later"), it has told us it
-		 * did NOT accept the application, so no Mzizi record can exist and a
-		 * re-send cannot duplicate the applicant — mark it retryable. Anything
-		 * else (timeout, network failure, 5xx, unreadable body) leaves delivery
-		 * genuinely unknown, so it stays delivery_unconfirmed and must be
-		 * checked in Mzizi before any retry.
-		 */
 		$upstream = is_wp_error( $result ) ? (int) ( $result->get_error_data()['upstream_status'] ?? 0 ) : 0;
-		if ( $upstream >= 400 && $upstream < 500 ) {
-			toolkit_application_update_record( $record_id, array( 'status' => 'relay_failed', 'last_error' => $error ) );
-			toolkit_application_log_event( $record_id, 'relay_failed', 'Mzizi rejected the submission (HTTP ' . $upstream . ') and did not store it, so it can be re-sent. ' . $error, get_current_user_id() ?: null );
-			return new WP_Error( 'relay_failed', 'Your application was saved by Toolkit as ' . $reference . '. Admissions will complete its delivery shortly.', array( 'status' => 503, 'reference' => $reference, 'upstream_status' => $upstream, 'retryable' => true ) );
-		}
 		toolkit_application_update_record( $record_id, array( 'status' => 'delivery_unconfirmed', 'last_error' => $error ) );
-		toolkit_application_log_event( $record_id, 'delivery_unconfirmed', 'Mzizi submission was sent, but its confirmation could not be verified. Do not retry before checking Mzizi. ' . $error, get_current_user_id() ?: null );
+		toolkit_application_log_event( $record_id, 'delivery_unconfirmed', 'Mzizi submission outcome could not be verified' . ( $upstream ? ' (HTTP ' . $upstream . ')' : '' ) . '. Check Mzizi before choosing either confirmation or re-send. ' . $error, get_current_user_id() ?: null );
 		return new WP_Error( 'delivery_unconfirmed', 'Your application was received by Toolkit as ' . $reference . ' and is being confirmed by Admissions. Please do not submit it again.', array( 'status' => 202, 'reference' => $reference ) );
 	}
 	$message = sanitize_text_field( $result['Message'] );
@@ -1156,11 +1141,10 @@ function toolkit_application_render_record( $record ) {
 		wp_nonce_field( 'toolkit_application_confirm_delivery_' . $record->id );
 		echo '<label class="toolkit-release__check"><input type="checkbox" name="confirmed_in_mzizi" value="1" required> I verified this exact applicant and course are present in Mzizi.</label><button class="button button-primary" type="submit">Confirm delivered in Mzizi</button><p class="description">Updates Toolkit status only. It does not resend the application.</p></form>';
 	}
-	/* A failed relay is re-sendable: Mzizi rejected or never accepted it, so no
-	 * upstream record exists. Only a delivered application, or one whose delivery
-	 * is genuinely unconfirmed, is withheld from re-release here. */
-	if ( ! in_array( $record->status, array( 'delivered', 'delivery_unconfirmed' ), true ) ) {
-		$is_retry = in_array( $record->status, array( 'relay_failed', 'validation_failed' ), true );
+	/* An HTTP status alone cannot prove whether Mzizi committed a record. Staff
+	 * may retry an uncertain result only after the mandatory duplicate check. */
+	if ( 'delivered' !== $record->status ) {
+		$is_retry = in_array( $record->status, array( 'relay_failed', 'validation_failed', 'delivery_unconfirmed' ), true );
 		echo '<form class="toolkit-release" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'Release this application to Mzizi now? Confirm first that it is not already present in Mzizi.\');"><input type="hidden" name="action" value="toolkit_application_release"><input type="hidden" name="application" value="' . absint( $record->id ) . '">';
 		wp_nonce_field( 'toolkit_application_release_' . $record->id );
 		if ( $is_retry && $record->last_error ) {

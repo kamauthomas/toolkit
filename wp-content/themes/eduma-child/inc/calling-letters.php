@@ -801,17 +801,36 @@ function toolkit_calling_letter_generate( $application_id, $deliver = false ) {
  */
 function toolkit_calling_letter_upsert( $application_id, array $fields ) {
 	global $wpdb;
-	$table = toolkit_calling_letter_table_name();
-	$now   = current_time( 'mysql', true );
-	$existing = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE application_id = %d", $application_id ) );
-	$fields['updated_at'] = $now;
-	if ( $existing ) {
-		$wpdb->update( $table, $fields, array( 'id' => (int) $existing ) );
-		return (int) $existing;
+	$table   = toolkit_calling_letter_table_name();
+	$allowed = array( 'status', 'file_path', 'pdf_path', 'email_status', 'sms_status', 'print_status', 'last_error', 'generated_at' );
+	$values  = array( 'application_id' => (int) $application_id );
+	foreach ( $fields as $key => $value ) {
+		if ( in_array( $key, $allowed, true ) ) {
+			$values[ $key ] = $value;
+		}
 	}
-	$fields['application_id'] = $application_id;
-	$wpdb->insert( $table, $fields );
-	return (int) $wpdb->insert_id;
+	$values['updated_at'] = current_time( 'mysql', true );
+	$columns = array();
+	$holders = array();
+	$args    = array();
+	$updates = array();
+	foreach ( $values as $key => $value ) {
+		$columns[] = '`' . $key . '`';
+		if ( null === $value ) {
+			$holders[] = 'NULL';
+		} else {
+			$holders[] = 'application_id' === $key ? '%d' : '%s';
+			$args[]    = $value;
+		}
+		if ( 'application_id' !== $key ) {
+			$updates[] = '`' . $key . '` = VALUES(`' . $key . '`)';
+		}
+	}
+	$sql = 'INSERT INTO `' . $table . '` (' . implode( ', ', $columns ) . ') VALUES (' . implode( ', ', $holders ) . ') ON DUPLICATE KEY UPDATE ' . implode( ', ', $updates );
+	if ( false === $wpdb->query( $wpdb->prepare( $sql, $args ) ) ) {
+		return 0;
+	}
+	return (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE application_id = %d", $application_id ) );
 }
 
 /* Fires from toolkit_application_store() right after a new application is

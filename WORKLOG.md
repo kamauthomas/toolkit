@@ -5,6 +5,22 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-20 — Make admissions retries and calling-letter writes safe
+**Area:** admissions reliability
+**Environments:** local verified; deployment follows this commit
+**Commit(s):** this commit
+
+Removed the unsupported assumption that every Mzizi HTTP 4xx proves no record
+was stored. All uncertain submission outcomes now require a human to check
+Mzizi; staff can then explicitly confirm an existing record or re-send only
+after the existing mandatory duplicate check. Replaced calling letters'
+select-then-insert race with one atomic `INSERT ... ON DUPLICATE KEY UPDATE`.
+
+**Verified by:** PHP lint, focused source assertions and full child-theme
+whitespace checks.
+**Follow-ups:** deploy demo first, exercise only non-submitting route/admin
+smokes, then promote the identical payload to production.
+
 ## 2026-08-20 — Contain confirmed WordPress compromise exposure
 **Area:** security operations
 **Environments:** production ✅
