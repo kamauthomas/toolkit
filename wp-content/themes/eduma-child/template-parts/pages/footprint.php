@@ -1,9 +1,7 @@
 <?php
 /**
  * Toolkit footprint in youth skills and employability.
- * A dated record of programmes delivered with named partners, 2014-2026.
- * The source chronology is grouped into readable chapters without changing the
- * programme descriptions or attributing outcomes that the record does not show.
+ * A faithful, responsive interpretation of the supplied institutional poster.
  */
 get_header();
 
@@ -64,183 +62,54 @@ $eras = array(
 	) ),
 );
 
-/* Partner roll-call, de-duplicated in first-appearance order. Generic labels are
-   omitted because they name no external organisation. */
-$partners = array();
-$milestone_count = 0;
-foreach ( $eras as $era ) {
-	$milestone_count += count( $era['items'] );
-	foreach ( $era['items'] as $item ) {
-		foreach ( explode( ' & ', $item[0] ) as $partner ) {
-			if ( ! in_array( $partner, array( 'Toolkit', 'Sector partners' ), true ) && ! in_array( $partner, $partners, true ) ) {
-				$partners[] = $partner;
-			}
-		}
-	}
-}
-
-$assets = get_stylesheet_directory_uri() . '/assets/images/';
-$focus_areas = array(
-	array(
-		'title' => 'Practical trades and workforce readiness',
-		'copy'  => 'Hands-on training in painting, plumbing, welding and electrical work, supported by life and employability skills.',
-		'image' => $assets . 'courses/electrical.jpg',
-		'alt'   => 'A learner undertaking practical electrical training',
-	),
-	array(
-		'title' => 'Standards, recognition and evidence',
-		'copy'  => 'Work on training standards, instructor and assessor capacity, apprenticeship research and Recognition of Prior Learning.',
-		'image' => $assets . 'graduation/kmm-2071-jpg.webp',
-		'alt'   => 'Toolkit graduates gathered after their graduation ceremony',
-	),
-	array(
-		'title' => 'Green and technology transitions',
-		'copy'  => 'Solar skills, climate-smart agriculture, digital delivery and virtual reality brought new tools into practical learning.',
-		'image' => $assets . 'courses/experiences/solar-workshop.jpg',
-		'alt'   => 'Learners working with solar equipment during an outdoor practical session',
-	),
-);
-$chapters = array(
-	array(
-		'id'      => 'foundations',
-		'period'  => '2014 – 2016',
-		'title'   => 'Building the foundations',
-		'copy'    => 'The record begins with trade-specific mobilisation and practical training for painters, plumbers and tilers.',
-		'indexes' => array( 0 ),
-	),
-	array(
-		'id'      => 'scale',
-		'period'  => '2017 – 2020',
-		'title'   => 'Growing delivery and strengthening standards',
-		'copy'    => 'Toolkit expanded training across several trades and locations while contributing to standards, assessor development and online delivery.',
-		'indexes' => array( 1, 2, 3, 4, 5 ),
-	),
-	array(
-		'id'      => 'evidence',
-		'period'  => '2019 – 2022',
-		'title'   => 'Adding evidence, employability and digital reach',
-		'copy'    => 'Research, instructor development and technology-enabled employability programmes broadened the institution’s role beyond trade instruction alone.',
-		'indexes' => array( 6, 7, 8, 9 ),
-	),
-	array(
-		'id'      => 'innovation',
-		'period'  => '2021 – 2026',
-		'title'   => 'Advancing green skills and training technology',
-		'copy'    => 'The latest entries bring together Recognition of Prior Learning, solar and agricultural skills, digital assessment and virtual reality.',
-		'indexes' => array( 10, 11, 12 ),
-	),
+/* The supplied poster uses seven vertical columns, with overlapping programme
+   periods nested below their main year. Keeping that grouping makes the web
+   version immediately recognisable while the mobile layout can stack cleanly. */
+$poster_columns = array(
+	array( 0 ),
+	array( 1, 2, 3 ),
+	array( 4, 5 ),
+	array( 6 ),
+	array( 7, 8, 9 ),
+	array( 10, 11 ),
+	array( 12 ),
 );
 ?>
 <main id="main-content" class="toolkit-page toolkit-footprint-page">
-	<section class="toolkit-footprint-hero">
-		<div class="toolkit-footprint-hero__inner">
-			<div class="toolkit-footprint-hero__copy">
-				<p class="toolkit-kicker">Our institutional record · 2014–2026</p>
-				<h1>Skills grow when people build together.</h1>
-				<p class="toolkit-footprint-lede">Our footprint records more than a decade of practical skills, employability, research and innovation programmes delivered with partners across Kenya.</p>
-				<div class="toolkit-footprint-actions">
-					<a class="toolkit-btn toolkit-btn--primary" href="#journey">Explore the journey <i class="fas fa-arrow-down" aria-hidden="true"></i></a>
-					<a class="toolkit-footprint-text-link" href="#partners">See our partners <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-				</div>
-			</div>
-			<figure class="toolkit-footprint-hero__media">
-				<img src="<?php echo esc_url( $assets . 'pages/impact.jpg' ); ?>" alt="Toolkit graduates and trainers gathered after a skills programme">
-				<figcaption>Practical learning. Strong partnerships. New possibilities.</figcaption>
-			</figure>
-		</div>
-		<div class="toolkit-footprint-record" aria-label="Source record at a glance">
-			<p><span>Source record</span> The figures below describe documented programme entries, not participant totals.</p>
-			<ul class="toolkit-footprint-stats">
-				<li><strong>2014–2026</strong><span>Documented span</span></li>
-				<li><strong><?php echo esc_html( $milestone_count ); ?></strong><span>Programme records</span></li>
-				<li><strong><?php echo esc_html( count( $partners ) ); ?></strong><span>Named partners</span></li>
-			</ul>
-		</div>
-	</section>
+	<header class="toolkit-footprint-title">
+		<p>The Toolkit for Skills and Innovation</p>
+		<h1>Toolkit footprint in youth skills and employability</h1>
+		<div class="toolkit-footprint-rule" aria-hidden="true"><span></span></div>
+	</header>
 
-	<nav class="toolkit-footprint-nav" aria-label="Footprint page sections">
-		<a href="#focus">What we have worked on</a>
-		<a href="#journey">How the work developed</a>
-		<a href="#partners">Partners</a>
-	</nav>
-
-	<section id="focus" class="toolkit-footprint-focus">
-		<header class="toolkit-footprint-section-heading">
-			<p class="toolkit-kicker">A connected body of work</p>
-			<h2>Practical skills are only one part of the story.</h2>
-			<p>The programme record shows three connected areas of contribution: direct training, stronger systems for skills recognition, and newer approaches to green and technology-enabled work.</p>
-		</header>
-		<div class="toolkit-footprint-focus__grid">
-			<?php foreach ( $focus_areas as $index => $area ) : ?>
-			<article class="toolkit-footprint-focus-card">
-				<div class="toolkit-footprint-focus-card__media">
-					<img src="<?php echo esc_url( $area['image'] ); ?>" alt="<?php echo esc_attr( $area['alt'] ); ?>" loading="lazy">
-					<span aria-hidden="true">0<?php echo esc_html( $index + 1 ); ?></span>
-				</div>
-				<div>
-					<h3><?php echo esc_html( $area['title'] ); ?></h3>
-					<p><?php echo esc_html( $area['copy'] ); ?></p>
-				</div>
-			</article>
-			<?php endforeach; ?>
-		</div>
-	</section>
-
-	<section id="journey" class="toolkit-footprint-journey">
-		<header class="toolkit-footprint-section-heading toolkit-footprint-section-heading--light">
-			<p class="toolkit-kicker">How the work developed</p>
-			<h2>The full programme record, made easier to follow.</h2>
-			<p>Every entry below is retained from the supplied institutional footprint. Partner attribution appears alongside the work it supported.</p>
-		</header>
-		<div class="toolkit-footprint-chapters">
-			<?php foreach ( $chapters as $chapter_index => $chapter ) : ?>
-			<section id="<?php echo esc_attr( $chapter['id'] ); ?>" class="toolkit-footprint-chapter">
-				<header class="toolkit-footprint-chapter__intro">
-					<span class="toolkit-footprint-chapter__number" aria-hidden="true">0<?php echo esc_html( $chapter_index + 1 ); ?></span>
-					<p><?php echo esc_html( $chapter['period'] ); ?></p>
-					<h3><?php echo esc_html( $chapter['title'] ); ?></h3>
-					<span><?php echo esc_html( $chapter['copy'] ); ?></span>
-				</header>
-				<div class="toolkit-footprint-chapter__records">
-					<?php foreach ( $chapter['indexes'] as $era_index ) : $era = $eras[ $era_index ]; ?>
+	<section class="toolkit-footprint-poster" aria-label="Toolkit programme footprint from 2014 to 2026">
+		<ol class="toolkit-footprint-columns">
+			<?php foreach ( $poster_columns as $column_index => $era_indexes ) : ?>
+			<li class="toolkit-footprint-column" style="--footprint-order:<?php echo esc_attr( $column_index ); ?>">
+				<span class="toolkit-footprint-dot" aria-hidden="true"></span>
+				<div class="toolkit-footprint-column__line">
+					<?php foreach ( $era_indexes as $era_index ) : $era = $eras[ $era_index ]; ?>
 					<article class="toolkit-footprint-era">
-						<h4><?php echo esc_html( $era['years'] ); ?></h4>
+						<h2><?php echo esc_html( $era['years'] ); ?></h2>
 						<ul>
 							<?php foreach ( $era['items'] as $item ) : ?>
-							<li><strong><?php echo esc_html( $item[0] ); ?></strong><span><?php echo esc_html( $item[1] ); ?></span></li>
+							<li>
+								<strong><?php echo esc_html( $item[0] ); ?></strong>
+								<span><?php echo esc_html( $item[1] ); ?></span>
+							</li>
 							<?php endforeach; ?>
 						</ul>
 					</article>
 					<?php endforeach; ?>
 				</div>
-			</section>
+				<span class="toolkit-footprint-step" aria-hidden="true">
+					<svg viewBox="0 0 64 42" role="presentation" focusable="false"><ellipse cx="36" cy="25" rx="18" ry="12" transform="rotate(8 36 25)"/><ellipse cx="13" cy="27" rx="8" ry="5" transform="rotate(28 13 27)"/><circle cx="12" cy="16" r="4"/><circle cx="19" cy="10" r="3.6"/><circle cx="27" cy="7" r="3.2"/><circle cx="35" cy="7" r="2.8"/></svg>
+				</span>
+			</li>
 			<?php endforeach; ?>
-		</div>
+		</ol>
 	</section>
 
-	<section id="partners" class="toolkit-footprint-partners">
-		<div>
-			<p class="toolkit-kicker">Shared effort</p>
-			<h2>Partners in the record</h2>
-			<p>These organisations are named in the supplied 2014–2026 programme chronology.</p>
-		</div>
-		<ul>
-			<?php foreach ( $partners as $partner ) : ?>
-			<li><?php echo esc_html( $partner ); ?></li>
-			<?php endforeach; ?>
-		</ul>
-	</section>
-
-	<section class="toolkit-footprint-cta">
-		<div>
-			<p class="toolkit-kicker">Build what comes next</p>
-			<h2>Turn practical skills into lasting opportunity.</h2>
-			<p>Explore our current learning pathways or start a conversation about partnership.</p>
-		</div>
-		<div class="toolkit-footprint-cta__actions">
-			<a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Explore courses <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-			<a class="toolkit-btn toolkit-btn--secondary" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Talk to Toolkit</a>
-		</div>
-	</section>
+	<p class="toolkit-footprint-source">Programme chronology supplied by The Toolkit for Skills and Innovation.</p>
 </main>
 <?php get_footer();

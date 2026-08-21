@@ -19,6 +19,13 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-footprint-poster-2026.08.21.2.sh` is the corrective Footprint
+release requested after the first redesign proved too elaborate. It applies the
+small `2026.08.21.1..2026.08.21.2` patch to fetched live files, rejects remnants
+of the superseded editorial layout, and verifies the poster-style chronology,
+release marker, public route, and byte identity. Use it demo first and
+production second.
+
 `releases/deploy-footprint-ui-2026.08.21.1.sh` preserves the complete Footprint
 UI redesign. It rebuilds the payload from each environment's fetched live
 files using the exact `d8b61c7..toolkit-release-2026.08.21.1` patch, keeps

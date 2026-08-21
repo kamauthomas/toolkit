@@ -5,9 +5,29 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-21 — Simplify Footprint to match the supplied poster
+**Area:** public website · institutional footprint · corrective release
+**Environments:** local ✅ · demo/production pending
+**Commit(s):** this commit
+
+Replaced the rejected editorial redesign with a direct responsive interpretation
+of the supplied poster: seven chronological desktop columns, red and green year
+pills, dashed programme paths, partner/work descriptions and connected footprint
+markers. Mobile stacks the same chronology into one legible vertical path, and
+restrained line, column, dot and step motion never hides content.
+
+Added a separate browser-free corrective deployment script for release
+`2026.08.21.2`, based exactly on the deployed `2026.08.21.1` payload.
+
+**Verified by:** PHP lint, CSS marker review, `git diff --check`, and isolated
+headless desktop (1440 px) and mobile (390 px) renders against the supplied
+poster.
+**Follow-ups:** deploy and visually verify demo, then promote the byte-identical
+payload to production and update this entry.
+
 ## 2026-08-21 — Rebuild the institutional Footprint page
 **Area:** public website · institutional impact · deployment operations
-**Environments:** local ✅ · demo/production pending
+**Environments:** demo ✅ · production ✅ · superseded by corrective release
 **Commit(s):** this commit
 
 Replaced the oversized alternating footprint trail with an editorial page that
@@ -23,8 +43,9 @@ retains rollback copies, and verifies the public route and image assets.
 **Verified by:** PHP lint for the template and release file; Bash syntax and
 ShellCheck for the deployment script; `git diff --check`; isolated headless
 desktop (1440 px) and mobile (390 px) renders of the complete responsive layout.
-**Follow-ups:** deploy demo first, verify the real cached/uncached page visually,
-then promote the byte-identical payload to production and update this entry.
+**Follow-ups:** the result was rejected as over-engineered after production
+promotion; corrective release `2026.08.21.2` restores the supplied poster's
+simple visual structure.
 
 ## 2026-08-21 — Activate the stable Windows Toolkit workspace
 **Area:** workstation organisation · reporting continuity
