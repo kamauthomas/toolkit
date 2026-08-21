@@ -5,6 +5,27 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-21 — Rebuild the institutional Footprint page
+**Area:** public website · institutional impact · deployment operations
+**Environments:** local ✅ · demo/production pending
+**Commit(s):** this commit
+
+Replaced the oversized alternating footprint trail with an editorial page that
+uses genuine Toolkit photography, three evidence-based areas of work, and four
+readable chronological chapters. All 28 supplied programme records and their
+partner attributions remain intact, while the displayed counts are explicitly
+labelled as source-record figures rather than participant or outcome totals.
+
+Added a release-specific, browser-free cPanel deployment script that patches
+the three fetched live files with zero fuzz, activates `functions.php` last,
+retains rollback copies, and verifies the public route and image assets.
+
+**Verified by:** PHP lint for the template and release file; Bash syntax and
+ShellCheck for the deployment script; `git diff --check`; isolated headless
+desktop (1440 px) and mobile (390 px) renders of the complete responsive layout.
+**Follow-ups:** deploy demo first, verify the real cached/uncached page visually,
+then promote the byte-identical payload to production and update this entry.
+
 ## 2026-08-21 — Activate the stable Windows Toolkit workspace
 **Area:** workstation organisation · reporting continuity
 **Environments:** Windows NVMe Desktop ✅; not a website deployment

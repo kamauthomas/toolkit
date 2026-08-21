@@ -19,6 +19,13 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-footprint-ui-2026.08.21.1.sh` preserves the complete Footprint
+UI redesign. It rebuilds the payload from each environment's fetched live
+files using the exact `d8b61c7..toolkit-release-2026.08.21.1` patch, keeps
+`functions.php` last, rejects the retired trail markup, checks byte identity,
+and verifies the public page, release marker, copy markers, PHP-error absence,
+and all four photographic assets. Use it demo first and production second.
+
 `releases/deploy-claude-review-fixes-2026.08.20.2.sh` preserves the review
 release that disables misleading calling-letter email delivery, relabels old
 mail attempts as unverified, and promotes the pending story Yoast metadata.
