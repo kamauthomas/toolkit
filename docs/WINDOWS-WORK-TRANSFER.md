@@ -21,10 +21,12 @@ on 21 August 2026. It is organised for use from the Windows system drive at:
 
 ## Deliberately excluded
 
-The transfer does not contain `.env` files, WordPress configuration, SQL or
-SQLite databases, private keys, credentials, private storage, Git metadata,
-agent sessions/worktrees, dependency folders, caches, application logs, large
-server rollback archives, or runtime hosting backups.
+The transfer does not contain live `.env` files, WordPress configuration, SQL
+or SQLite databases, private keys, credentials, private storage, Git metadata,
+agent sessions/worktrees, generated dependency trees, caches, application logs,
+large server rollback archives, or runtime hosting backups. Tracked
+`.env.example` files contain placeholders only and are retained where a project
+needs them for setup.
 
 Applicant spreadsheets, generated calling letters, and their ZIP archives were
 also excluded because they contain personal data. The reusable blank template
@@ -38,8 +40,8 @@ machine state. The untracked Virtual Campus application was copied separately
 with its credentials, database, dependencies, and runtime storage excluded.
 
 `SOURCE_COMMITS.tsv` records the exact branch and commit used for each tracked
-project. `FILES_SHA256.txt` records a checksum for every copied file and can be
-checked later from a shell with:
+project. `FILES_SHA256.txt` records a checksum for every archive file except the
+checksum manifest itself and can be checked later from a shell with:
 
 ```bash
 sha256sum -c 00_READ_ME/FILES_SHA256.txt

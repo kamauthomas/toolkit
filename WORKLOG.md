@@ -5,6 +5,25 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-21 — Complete and verify the Windows work archive
+**Area:** workstation organisation · continuity · security hygiene
+**Environments:** local Linux → Windows NVMe ✅; not deployed
+**Commit(s):** this commit
+
+Created the organised Toolkit archive on the Windows Desktop with clean project
+snapshots, reports, posters/media, 27 requested XCF sources, safe admissions
+tools, and reference material. Added a durable verification log and daily-report
+draft, and clarified that tracked placeholder `.env.example` templates are safe
+to retain while live environment files remain excluded.
+
+**Verified by:** 1,929-file initial inventory (1.3 GB); 1,927 SHA-256 entries
+passed with zero failures; all 27 XCF files matched byte-for-byte; prohibited
+secret/database and applicant-output path checks were clear; token signatures
+were clear; TruffleHog returned zero findings on the six content folders after
+excluding its checksum-manifest false positive.
+**Follow-ups:** open the archive from Windows and retain the manifest with the
+files; resume the website/repository review and deployment-script work.
+
 ## 2026-08-21 — Prepare a curated Windows work transfer
 **Area:** workstation organisation · continuity
 **Environments:** local Linux and Windows NVMe only; not deployed

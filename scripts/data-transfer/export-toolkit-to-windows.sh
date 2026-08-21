@@ -170,4 +170,9 @@ cp -p "${TOOLKIT_ROOT}/report-system/REPORT-SYSTEM-QUICK-GUIDE.md" \
     printf 'Total size: %s\n' "$(du -sh "${DESTINATION}" | cut -f1)"
 } > "${DESTINATION}/00_READ_ME/INVENTORY.txt"
 
+(
+    cd "${DESTINATION}"
+    sha256sum "00_READ_ME/INVENTORY.txt" >> "00_READ_ME/FILES_SHA256.txt"
+)
+
 printf 'Export complete: %s\n' "${DESTINATION}"
