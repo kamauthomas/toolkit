@@ -5,6 +5,23 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-21 — Prepare a curated Windows work transfer
+**Area:** workstation organisation · continuity
+**Environments:** local Linux and Windows NVMe only; not deployed
+**Commit(s):** this commit
+
+Added a repeatable, browser-free export that organises clean project snapshots,
+reports, planning records, design/poster assets, editable XCF sources, and safe
+admissions tooling on the Windows Desktop. Documented the archive layout and
+explicitly excluded credentials, databases, private storage, applicant records,
+generated letters, dependencies, caches, logs, rollback archives, and agent
+worktrees.
+
+**Verified by:** shell syntax validation and a reviewed source/exclusion inventory;
+the completed copy and checksum results will be recorded after the one-time run.
+**Follow-ups:** run the export against the writable Windows NVMe, scan the result
+for secret-bearing paths/content, and verify the checksum manifest.
+
 ## 2026-08-20 — Close the post-containment full-account scan
 **Area:** security incident cleanup
 **Environments:** production hosting account ✅
