@@ -5,6 +5,25 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-21 — Reconcile the Claude/Codex handoff and incident reports
+**Area:** handoff · security reporting · deployment operations
+**Environments:** documentation only; demo and production read-only checks ✅
+**Commit(s):** this commit
+
+Reconciled Claude's final checkpoint, the subsequent Codex deployment and
+incident work, Git history, retained browser-free scripts, and the master
+handoff. Corrected stale report sections that still described deployed pages
+as demo-only and completed containment actions as open, without changing the
+historical incident evidence.
+
+**Verified by:** current clean/synchronised branch state, release tags, worklog,
+Claude's final session checkpoint, Codex scan/deployment evidence, the final
+cPGuard scan record, and a local search confirming only Eduma 5.3.0 is available;
+six public routes on both demo and production returned 200 without fatal-error
+markers, while all five known exposed/payload indicator URLs returned 404.
+**Follow-ups:** obtain a licensed Eduma 5.7.7+ package for demo-first testing;
+staff must handle personal password/device checks and approved secret rotation.
+
 ## 2026-08-21 — Complete and verify the Windows work archive
 **Area:** workstation organisation · continuity · security hygiene
 **Environments:** local Linux → Windows NVMe ✅; not deployed
