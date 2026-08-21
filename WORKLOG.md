@@ -5,6 +5,24 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-21 — Activate the stable Windows Toolkit workspace
+**Area:** workstation organisation · reporting continuity
+**Environments:** Windows NVMe Desktop ✅; not a website deployment
+**Commit(s):** this commit
+
+Renamed the dated Windows folder in place to `Toolkit_Workspace` and ran the
+first ongoing synchronization. The stable seven-section layout now holds the
+current project commits, reports and briefing notes, media/design work, 27 XCF
+sources, safe admissions tools, and reference material without creating another
+dated copy.
+
+**Verified by:** 1,936 files and 457 directories totalling 1.3 GB; all 1,935
+manifest checksums passed; all 27 XCF files matched Linux byte-for-byte; the
+briefing note is present; prohibited secret/database and applicant-output path
+scans returned no matches; the former dated Desktop folder no longer exists.
+**Follow-ups:** scheduling can be added later once the Windows volume has a
+reliable non-interactive read/write mount policy.
+
 ## 2026-08-21 — Convert the Windows copy into an ongoing workspace mirror
 **Area:** workstation organisation · reporting continuity
 **Environments:** local workflow; Windows synchronization pending remount
