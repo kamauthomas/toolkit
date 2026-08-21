@@ -5,6 +5,29 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-21 — Convert the Windows copy into an ongoing workspace mirror
+**Area:** workstation organisation · reporting continuity
+**Environments:** local workflow; Windows synchronization pending remount
+**Commit(s):** this commit
+
+Changed the dated one-time export into a stable `Toolkit_Workspace` mirror that
+can be refreshed as work continues. Controlled subfolders now remove stale
+mirrored files, Git projects are rebuilt from exact commits, sync history and
+checksums are regenerated, and prohibited credential/database/applicant paths
+stop the run.
+
+Prepared briefing notes covering the website releases, security incident
+closure, reporting practice, current operational risks, and decisions required
+from management.
+
+**Verified by:** shell syntax and whitespace checks plus three successive syncs
+to a temporary destination; all 1,933 checksum entries passed, a deliberately
+stale file inside a managed project was removed, and an unmanaged root note was
+preserved. Every source, destination, exclusion, and deletion boundary was
+reviewed.
+**Follow-ups:** run the first in-place synchronization when the Windows volume
+can be mounted without interrupting the active desktop session.
+
 ## 2026-08-21 — Reconcile the Claude/Codex handoff and incident reports
 **Area:** handoff · security reporting · deployment operations
 **Environments:** documentation only; demo and production read-only checks ✅

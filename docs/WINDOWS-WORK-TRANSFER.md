@@ -1,9 +1,12 @@
-# Toolkit Windows Work Archive
+# Toolkit Windows Workspace
 
-This folder is a curated working archive copied from the Toolkit Linux machine
-on 21 August 2026. It is organised for use from the Windows system drive at:
+This is a curated, updateable working mirror of Toolkit material from Linux. It
+uses a stable location on the Windows system drive:
 
-`C:\Users\user\Desktop\Toolkit_Work_Archive_2026-08-21`
+`C:\Users\user\Desktop\Toolkit_Workspace`
+
+It is not a dated archive. Re-running the synchronization updates the same
+organised folders as work progresses.
 
 ## Folder map
 
@@ -40,12 +43,27 @@ machine state. The untracked Virtual Campus application was copied separately
 with its credentials, database, dependencies, and runtime storage excluded.
 
 `SOURCE_COMMITS.tsv` records the exact branch and commit used for each tracked
-project. `FILES_SHA256.txt` records a checksum for every archive file except the
+project. `SYNC_HISTORY.tsv` records when the mirror was refreshed.
+`FILES_SHA256.txt` records a checksum for every workspace file except the
 checksum manifest itself and can be checked later from a shell with:
 
 ```bash
 sha256sum -c 00_READ_ME/FILES_SHA256.txt
 ```
 
-Do not treat this archive as a live deployment or a backup of production data.
-It is an organised, secret-free working copy for the Windows desktop.
+## Keeping it current
+
+From Linux, mount the Windows system volume normally and run:
+
+```bash
+./scripts/data-transfer/sync-toolkit-to-windows.sh
+```
+
+Each managed subfolder is synchronized independently. Files removed from a
+managed Linux source are removed from its Windows mirror, but the script never
+deletes unrelated folders elsewhere on the Desktop. Git projects are rebuilt
+from their current commits before synchronization, so stale tracked files do
+not accumulate.
+
+Do not treat this workspace as a live deployment or a backup of production
+data. It is an organised, secret-free working mirror for the Windows desktop.

@@ -5,15 +5,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOLKIT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 LINUX_DOCUMENTS="/home/t316/Documents"
-DEFAULT_DESTINATION="/media/t316/16A0C8F7A0C8DE7D/Users/user/Desktop/Toolkit_Work_Archive_2026-08-21"
+WINDOWS_DESKTOP="/media/t316/16A0C8F7A0C8DE7D/Users/user/Desktop"
+DEFAULT_DESTINATION="${WINDOWS_DESKTOP}/Toolkit_Workspace"
+LEGACY_DESTINATION="${WINDOWS_DESKTOP}/Toolkit_Work_Archive_2026-08-21"
 DESTINATION="${1:-${DEFAULT_DESTINATION}}"
+STAGING_ROOT=""
 
 fail() {
     printf 'ERROR: %s\n' "$*" >&2
     exit 1
 }
 
-for command in git rsync tar find sort sha256sum; do
+for command in cp date git mktemp mv rg rm rsync tar find sort sha256sum; do
     command -v "${command}" >/dev/null 2>&1 || fail "Required command not found: ${command}"
 done
 
@@ -21,13 +24,22 @@ done
 [[ -d "${LINUX_DOCUMENTS}" ]] || fail "Linux Documents folder is unavailable: ${LINUX_DOCUMENTS}"
 [[ -d "$(dirname "${DESTINATION}")" ]] || fail "Destination parent is unavailable: $(dirname "${DESTINATION}")"
 [[ -w "$(dirname "${DESTINATION}")" ]] || fail "Destination parent is not writable."
-[[ ! -e "${DESTINATION}" ]] || fail "Destination already exists; refusing to merge or overwrite: ${DESTINATION}"
 
 case "$(realpath -m "${DESTINATION}")" in
     "$(realpath "${TOOLKIT_ROOT}")"/*)
         fail "Destination must be outside the Toolkit source tree."
         ;;
 esac
+
+if [[ "${DESTINATION}" == "${DEFAULT_DESTINATION}" && ! -e "${DESTINATION}" && -d "${LEGACY_DESTINATION}" ]]; then
+    mv -- "${LEGACY_DESTINATION}" "${DESTINATION}"
+fi
+
+STAGING_ROOT="$(mktemp -d /tmp/toolkit-windows-sync.XXXXXX)"
+cleanup() {
+    [[ -n "${STAGING_ROOT}" && -d "${STAGING_ROOT}" ]] && rm -rf -- "${STAGING_ROOT}"
+}
+trap cleanup EXIT
 
 mkdir -p \
     "${DESTINATION}/00_READ_ME" \
@@ -42,9 +54,11 @@ export_git_snapshot() {
     local source_path="$1"
     local destination_name="$2"
     local destination_path="${DESTINATION}/01_Projects/${destination_name}"
+    local staging_path="${STAGING_ROOT}/projects/${destination_name}"
 
-    mkdir -p "${destination_path}"
-    git -C "${source_path}" archive --format=tar HEAD | tar -xf - -C "${destination_path}"
+    mkdir -p "${staging_path}"
+    git -C "${source_path}" archive --format=tar HEAD | tar -xf - -C "${staging_path}"
+    copy_tree "${staging_path}" "${destination_path}"
 }
 
 copy_tree() {
@@ -53,7 +67,7 @@ copy_tree() {
     shift 2
 
     mkdir -p "${destination_path}"
-    rsync -rt --modify-window=1 "$@" "${source_path}/" "${destination_path}/"
+    rsync -rt --delete --modify-window=1 "$@" "${source_path}/" "${destination_path}/"
 }
 
 # Git archives provide reproducible source snapshots without .git directories,
@@ -111,13 +125,14 @@ cp -p "${TOOLKIT_ROOT}/Poster Social Media 2025 Comms (1080 x 1080 px) (727 x 91
     "${DESTINATION}/03_Design_Posters_and_Media/"
 
 # These are the editable XCF files requested from the Linux Documents folder.
-find "${LINUX_DOCUMENTS}" -maxdepth 1 -type f -iname '*.xcf' -exec cp -p -t "${DESTINATION}/04_XCF_Source_Files/Linux_Documents" -- {} +
+rsync -rt --delete --modify-window=1 --include='*.xcf' --include='*.XCF' --exclude='*' \
+    "${LINUX_DOCUMENTS}/" "${DESTINATION}/04_XCF_Source_Files/Linux_Documents/"
 
 # Keep reusable admissions tooling, not applicant records or generated letters.
-cp -p "${TOOLKIT_ROOT}/sms/calling/Calling Letter 2026 UPDATED.docx" \
-    "${DESTINATION}/05_Admissions_Templates_and_Tools/"
-cp -p "${TOOLKIT_ROOT}/sms/calling/generate_calling_letters.py" \
-    "${DESTINATION}/05_Admissions_Templates_and_Tools/"
+mkdir -p "${STAGING_ROOT}/admissions"
+cp -p "${TOOLKIT_ROOT}/sms/calling/Calling Letter 2026 UPDATED.docx" "${STAGING_ROOT}/admissions/"
+cp -p "${TOOLKIT_ROOT}/sms/calling/generate_calling_letters.py" "${STAGING_ROOT}/admissions/"
+copy_tree "${STAGING_ROOT}/admissions" "${DESTINATION}/05_Admissions_Templates_and_Tools"
 
 # Research/reference material is useful context but is not a deployable project.
 copy_tree \
@@ -138,6 +153,16 @@ cp -p "${TOOLKIT_ROOT}/wordpress/docs/WINDOWS-WORK-TRANSFER.md" "${DESTINATION}/
 cp -p "${TOOLKIT_ROOT}/report-system/REPORT-SYSTEM-QUICK-GUIDE.md" \
     "${DESTINATION}/02_Reports_and_Planning/REPORT-SYSTEM-QUICK-GUIDE.md"
 
+if find "${DESTINATION}" -type f | rg -qi \
+    '(^|/)(\.env($|\.(local|production|development)$)|wp-config\.php$|.*\.(sql|sqlite|sqlite3|pem|key|p12|pfx)$|credentials?[^/]*|secrets?[^/]*)(/|$)'; then
+    fail "A prohibited secret/database path was found in the synchronized workspace."
+fi
+
+if find "${DESTINATION}" -type f | rg -qi \
+    '(Mzizi Applicants|Calling Letters - 20|Excluded - Non-Kenyan|PDF\.zip)'; then
+    fail "Applicant data or generated calling-letter output was found in the synchronized workspace."
+fi
+
 {
     printf 'Source\tBranch\tCommit\n'
     for project in \
@@ -154,16 +179,29 @@ cp -p "${TOOLKIT_ROOT}/report-system/REPORT-SYSTEM-QUICK-GUIDE.md" \
     done
 } > "${DESTINATION}/00_READ_ME/SOURCE_COMMITS.tsv"
 
+if [[ ! -f "${DESTINATION}/00_READ_ME/SYNC_HISTORY.tsv" ]]; then
+    printf 'Synchronized_at\tWordPress_commit\tReport_System_commit\n' \
+        > "${DESTINATION}/00_READ_ME/SYNC_HISTORY.tsv"
+fi
+printf '%s\t%s\t%s\n' \
+    "$(date --iso-8601=seconds)" \
+    "$(git -C "${TOOLKIT_ROOT}/wordpress" rev-parse HEAD)" \
+    "$(git -C "${TOOLKIT_ROOT}/report-system" rev-parse HEAD)" \
+    >> "${DESTINATION}/00_READ_ME/SYNC_HISTORY.tsv"
+
 (
     cd "${DESTINATION}"
-    find . -type f ! -path './00_READ_ME/FILES_SHA256.txt' -print0 \
+    find . -type f \
+        ! -path './00_READ_ME/FILES_SHA256.txt' \
+        ! -path './00_READ_ME/INVENTORY.txt' \
+        -print0 \
         | sort -z \
         | xargs -0 sha256sum > "00_READ_ME/FILES_SHA256.txt"
 )
 
 {
-    printf 'Toolkit Windows work archive\n'
-    printf 'Created: 2026-08-21\n'
+    printf 'Toolkit Windows workspace mirror\n'
+    printf 'Last synchronized: %s\n' "$(date --iso-8601=seconds)"
     printf 'Files: %s\n' "$(find "${DESTINATION}" -type f | wc -l)"
     printf 'Directories: %s\n' "$(find "${DESTINATION}" -type d | wc -l)"
     printf 'XCF files from Linux Documents: %s\n' "$(find "${DESTINATION}/04_XCF_Source_Files/Linux_Documents" -type f -iname '*.xcf' | wc -l)"
@@ -175,4 +213,4 @@ cp -p "${TOOLKIT_ROOT}/report-system/REPORT-SYSTEM-QUICK-GUIDE.md" \
     sha256sum "00_READ_ME/INVENTORY.txt" >> "00_READ_ME/FILES_SHA256.txt"
 )
 
-printf 'Export complete: %s\n' "${DESTINATION}"
+printf 'Synchronization complete: %s\n' "${DESTINATION}"
