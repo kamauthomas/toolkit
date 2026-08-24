@@ -221,6 +221,7 @@
 .toolkit-catalog-course .toolkit-course-data dl { border:0; background:rgba(150,158,42,.18); }
 .toolkit-catalog-course .toolkit-course-data dl div { background:#fff; }
 .toolkit-catalog-course .toolkit-course-data dd small { display:block; margin-top:6px; color:#647065; font-size:12px; line-height:1.45; }
+.toolkit-course-directory__fee { margin-top:8px; padding-top:8px; border-top:1px solid #e4e8df; color:#145e55; }
 .toolkit-catalog-course .toolkit-course-outcomes { padding-top:16px; }
 .toolkit-course-outcomes>.toolkit-skill-grid { gap:0; border-top:1px solid var(--toolkit-line); border-bottom:1px solid var(--toolkit-line); }
 .toolkit-course-outcomes .toolkit-skill-grid article { position:relative; min-height:190px; align-items:flex-start; padding:30px 22px; text-align:left; background:#fff; border-right:1px solid var(--toolkit-line); border-radius:0; }
