@@ -5,6 +5,24 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-24 — Record WordPress handoff before Virtual Campus recovery
+**Area:** operations · handoff · continuity
+**Environments:** documentation only; production remains on `2026.08.24.5`
+**Commit(s):** this commit
+
+Recorded the exact public-site checkpoint, completed releases, outstanding
+applicant-encryption migration, analytics audit, Windows refresh and deployment
+engine follow-ups before moving active work to the independent Virtual Campus.
+The handoff names the production release, repository pickup point, safety rules
+and new Virtual Campus objective so unfinished WordPress work is not lost.
+
+**Verified by:** clean branch comparison with `origin/wordpress-modernisation`,
+recent release history, deployment records and the approved-pricing public
+verification completed for release `2026.08.24.5`.
+**Follow-ups:** use the checkpoint document when returning to WordPress; begin
+Virtual Campus recovery without treating its untracked Claude implementation as
+accepted or production-ready.
+
 ## 2026-08-24 — Version application encryption and restore legacy decryption
 **Area:** admissions · applicant-data encryption · recovery
 **Environments:** local ✅ · demo/prod pending keyring configuration
