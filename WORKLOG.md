@@ -398,3 +398,21 @@ readable source.
 
 **Verified by:** no `.bak` files remain in the demo theme root or `inc/`.
 **Follow-ups:** empty cPanel trash to remove them permanently.
+
+## 2026-08-24 — Migrate production applicant encryption with temporary PHP CLI
+**Area:** admissions security
+**Environments:** production ✅
+**Commit(s):** pending documentation commit
+
+Used the documented CLI-only fallback because WP-CLI was unavailable. The
+runner stayed outside `public_html`, defaulted to dry-run, required two explicit
+guards for live execution, and emitted aggregate counts only. A completed cPanel
+backup was confirmed before execution.
+
+**Verified by:** pre-run 16/16 eligible with zero failures/conflicts; execute
+migrated 16/16 with exit code 0; post-run reported 16/16 already on
+`application-2026-08-24`. All temporary cron entries, runner/probe files and
+aggregate output files were removed and verified absent.
+**Follow-ups:** retain the legacy key until the normal key-retention window has
+passed; verify an applicant detail screen during the next authenticated admin
+review.
