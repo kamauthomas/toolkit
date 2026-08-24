@@ -152,48 +152,156 @@ add_action( 'toolkit_application_resolve_course_names', function() {
 	update_option( 'toolkit_application_resolver_last_run', array( 'at' => current_time( 'mysql', true ), 'resolved' => $resolved, 'failed' => $failed ), false );
 } );
 
+/**
+ * Return configured application keys without ever exposing their values to a
+ * caller. Values in wp-config.php must be base64-encoded 32-byte keys.
+ */
+function toolkit_application_configured_keyring() {
+	$keyring = array();
+	if ( defined( 'TOOLKIT_APPLICATION_ENCRYPTION_KEYS' ) && is_array( TOOLKIT_APPLICATION_ENCRYPTION_KEYS ) ) {
+		foreach ( TOOLKIT_APPLICATION_ENCRYPTION_KEYS as $key_id => $encoded_key ) {
+			if ( ! is_string( $key_id ) || '' === $key_id || ! is_string( $encoded_key ) ) continue;
+			$decoded = base64_decode( $encoded_key, true );
+			if ( false !== $decoded && 32 === strlen( $decoded ) ) $keyring[ $key_id ] = $decoded;
+		}
+	}
+	if ( defined( 'TOOLKIT_APPLICATION_ENCRYPTION_KEY' ) && is_string( TOOLKIT_APPLICATION_ENCRYPTION_KEY ) ) {
+		$decoded = base64_decode( TOOLKIT_APPLICATION_ENCRYPTION_KEY, true );
+		if ( false !== $decoded && 32 === strlen( $decoded ) ) {
+			$key_id = defined( 'TOOLKIT_APPLICATION_ENCRYPTION_CURRENT_KEY_ID' ) ? (string) TOOLKIT_APPLICATION_ENCRYPTION_CURRENT_KEY_ID : 'application-current';
+			$keyring[ $key_id ] = $decoded;
+		}
+	}
+	return $keyring;
+}
+
+function toolkit_application_current_key() {
+	$keyring = toolkit_application_configured_keyring();
+	$key_id  = defined( 'TOOLKIT_APPLICATION_ENCRYPTION_CURRENT_KEY_ID' ) ? (string) TOOLKIT_APPLICATION_ENCRYPTION_CURRENT_KEY_ID : '';
+	if ( $key_id && isset( $keyring[ $key_id ] ) ) {
+		return array( 'id' => $key_id, 'key' => $keyring[ $key_id ], 'dedicated' => true );
+	}
+	/* Compatibility mode keeps existing sites operational until wp-config.php
+	 * receives a dedicated key and an explicit current key ID. New records leave
+	 * this mode once both are configured. */
+	return array(
+		'id'        => 'wp-auth-current',
+		'key'       => hash( 'sha256', wp_salt( 'auth' ) . '|toolkit-applications', true ),
+		'dedicated' => false,
+	);
+}
+
+function toolkit_application_decryption_keys() {
+	$keys    = toolkit_application_configured_keyring();
+	$current = toolkit_application_current_key();
+	$ordered = array( $current['id'] => $current['key'] );
+	foreach ( $keys as $key_id => $key ) $ordered[ $key_id ] = $key;
+	/* Version 1 records made before the keyring was introduced used the current
+	 * WordPress auth salts. Keep that exact derivation as a legacy candidate. */
+	$ordered['wp-auth-current'] = hash( 'sha256', wp_salt( 'auth' ) . '|toolkit-applications', true );
+	return $ordered;
+}
+
 function toolkit_application_encrypt_payload( array $payload ) {
 	if ( ! function_exists( 'openssl_encrypt' ) ) {
 		return new WP_Error( 'application_encryption', 'Application storage encryption is unavailable.' );
 	}
-	$key       = hash( 'sha256', wp_salt( 'auth' ) . '|toolkit-applications', true );
+	$current   = toolkit_application_current_key();
 	$iv        = random_bytes( 12 );
 	$tag       = '';
 	$plaintext = wp_json_encode( $payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-	$cipher    = openssl_encrypt( $plaintext, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag );
+	$cipher    = openssl_encrypt( $plaintext, 'aes-256-gcm', $current['key'], OPENSSL_RAW_DATA, $iv, $tag );
 	if ( false === $cipher ) {
 		return new WP_Error( 'application_encryption', 'The application could not be encrypted for storage.' );
 	}
-	return wp_json_encode( array(
-		'v'    => 1,
+	$envelope = array(
+		'v'    => $current['dedicated'] ? 2 : 1,
 		'iv'   => base64_encode( $iv ),
 		'tag'  => base64_encode( $tag ),
 		'data' => base64_encode( $cipher ),
-	) );
+	);
+	if ( $current['dedicated'] ) $envelope['kid'] = $current['id'];
+	return wp_json_encode( $envelope );
 }
 
 function toolkit_application_decrypt_payload( $envelope ) {
 	$data = json_decode( (string) $envelope, true );
-	if ( ! is_array( $data ) || 1 !== (int) ( $data['v'] ?? 0 ) || ! function_exists( 'openssl_decrypt' ) ) {
-		return new WP_Error( 'application_decryption', 'The stored application format is not supported.' );
+	if ( ! is_array( $data ) || ! function_exists( 'openssl_decrypt' ) ) {
+		return new WP_Error( 'application_decryption_format', 'The stored application format is not supported.' );
+	}
+	$version = (int) ( $data['v'] ?? 0 );
+	if ( ! in_array( $version, array( 1, 2 ), true ) ) {
+		return new WP_Error( 'application_decryption_format', 'The stored application format is not supported.' );
 	}
 	$cipher = base64_decode( (string) ( $data['data'] ?? '' ), true );
 	$iv     = base64_decode( (string) ( $data['iv'] ?? '' ), true );
 	$tag    = base64_decode( (string) ( $data['tag'] ?? '' ), true );
 	if ( false === $cipher || false === $iv || false === $tag || 12 !== strlen( $iv ) || 16 !== strlen( $tag ) ) {
-		return new WP_Error( 'application_decryption', 'The stored application is damaged or incomplete.' );
+		return new WP_Error( 'application_decryption_damaged', 'The stored application is damaged or incomplete.' );
 	}
-	$key   = hash( 'sha256', wp_salt( 'auth' ) . '|toolkit-applications', true );
-	$plain = openssl_decrypt(
-		$cipher,
-		'aes-256-gcm',
-		$key,
-		OPENSSL_RAW_DATA,
-		$iv,
-		$tag
-	);
-	$payload = false === $plain ? null : json_decode( $plain, true );
-	return is_array( $payload ) ? $payload : new WP_Error( 'application_decryption', 'The stored application could not be decrypted.' );
+
+	$keys = 1 === $version ? toolkit_application_decryption_keys() : array();
+	if ( 2 === $version ) {
+		$key_id = sanitize_key( (string) ( $data['kid'] ?? '' ) );
+		$configured = toolkit_application_configured_keyring();
+		if ( ! $key_id || ! isset( $configured[ $key_id ] ) ) {
+			return new WP_Error( 'application_decryption_key_missing', 'The application encryption key is not configured.' );
+		}
+		$keys = array( $key_id => $configured[ $key_id ] );
+	}
+	foreach ( $keys as $key ) {
+		$plain   = openssl_decrypt( $cipher, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag );
+		$payload = false === $plain ? null : json_decode( $plain, true );
+		if ( is_array( $payload ) ) return $payload;
+	}
+	return new WP_Error( 'application_decryption_auth', 'The stored application could not be authenticated with the configured keys.' );
+}
+
+function toolkit_application_encryption_key_status() {
+	$current = toolkit_application_current_key();
+	return array( 'key_id' => $current['id'], 'dedicated' => (bool) $current['dedicated'] );
+}
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	add_action( 'cli_init', function() {
+		WP_CLI::add_command( 'toolkit applications-migrate-encryption', function( $args, $assoc_args ) {
+			if ( ! toolkit_application_current_key()['dedicated'] ) WP_CLI::error( 'Configure TOOLKIT_APPLICATION_ENCRYPTION_KEYS before migrating.' );
+			global $wpdb;
+			$table = toolkit_application_table_name();
+			$rows  = $wpdb->get_results( "SELECT id, payload FROM {$table} ORDER BY id ASC" );
+			$dry_run = isset( $assoc_args['dry-run'] );
+			$stats = array( 'scanned' => 0, 'already_current' => 0, 'migrated' => 0, 'failed' => 0, 'conflicts' => 0 );
+			$current = toolkit_application_current_key();
+			foreach ( $rows as $row ) {
+				$stats['scanned']++;
+				$data = json_decode( (string) $row->payload, true );
+				if ( is_array( $data ) && 2 === (int) ( $data['v'] ?? 0 ) && $current['id'] === (string) ( $data['kid'] ?? '' ) ) {
+					$stats['already_current']++;
+					continue;
+				}
+				$payload = toolkit_application_decrypt_payload( $row->payload );
+				if ( is_wp_error( $payload ) ) {
+					$stats['failed']++;
+					continue;
+				}
+				$encrypted = toolkit_application_encrypt_payload( $payload );
+				$roundtrip = is_wp_error( $encrypted ) ? $encrypted : toolkit_application_decrypt_payload( $encrypted );
+				if ( is_wp_error( $roundtrip ) ) {
+					$stats['failed']++;
+					continue;
+				}
+				if ( $dry_run ) {
+					$stats['migrated']++;
+					continue;
+				}
+				$updated = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET payload = %s, updated_at = %s WHERE id = %d AND payload = %s", $encrypted, current_time( 'mysql', true ), (int) $row->id, $row->payload ) );
+				if ( 1 === (int) $updated ) $stats['migrated']++;
+				else $stats['conflicts']++;
+			}
+			WP_CLI::line( wp_json_encode( array( 'dry_run' => $dry_run, 'key_id' => $current['id'], 'stats' => $stats ) ) );
+			if ( $stats['failed'] || $stats['conflicts'] ) WP_CLI::warning( 'Migration did not complete cleanly; resolve the reported counts before removing legacy keys.' );
+		} );
+	} );
 }
 
 function toolkit_application_sanitized_storage_payload( array $data ) {
@@ -974,7 +1082,6 @@ add_action( 'admin_post_toolkit_application_export', function() {
 	if ( $search ) { $where[] = 'reference LIKE %s'; $args[] = '%' . $wpdb->esc_like( $search ) . '%'; }
 	$sql = 'SELECT * FROM ' . toolkit_application_table_name() . ' WHERE ' . implode( ' AND ', $where ) . ' ORDER BY created_at DESC LIMIT 5000';
 	$records = $args ? $wpdb->get_results( $wpdb->prepare( $sql, $args ) ) : $wpdb->get_results( $sql );
-	toolkit_application_log_event( 0, 'applications_exported', sprintf( 'CSV export by user %d: %d rows; delivery=%s; reference filter=%s.', get_current_user_id(), count( $records ), $status ?: 'all', $search ?: 'none' ), get_current_user_id() );
 	nocache_headers();
 	header( 'Content-Type: text/csv; charset=utf-8' );
 	header( 'Content-Disposition: attachment; filename="toolkit-applications-' . gmdate( 'Y-m-d-His' ) . '.csv"' );
@@ -982,12 +1089,17 @@ add_action( 'admin_post_toolkit_application_export', function() {
 	$output = fopen( 'php://output', 'w' );
 	fwrite( $output, "\xEF\xBB\xBF" );
 	fputcsv( $output, array( 'Reference', 'Received', 'Applicant', 'Email', 'Primary phone', 'Secondary phone', 'County', 'Campus', 'Campus ID', 'Course', 'Course ID', 'Intake', 'Intake ID', 'Study mode', 'Fee payment', 'Referral source', 'KCSE mean grade', 'High school', 'Other qualifications', 'Delivery status', 'Workflow status', 'Relay attempts', 'Relayed at', 'Mzizi confirmation', 'Last error' ) );
+	$skipped = 0;
 	foreach ( $records as $record ) {
 		$data = toolkit_application_decrypt_payload( $record->payload );
-		if ( is_wp_error( $data ) ) continue;
+		if ( is_wp_error( $data ) ) {
+			$skipped++;
+			continue;
+		}
 		$row = array( $record->reference, get_date_from_gmt( $record->created_at, 'Y-m-d H:i:s' ), trim( ( $data['first_name'] ?? '' ) . ' ' . ( $data['middle_name'] ?? '' ) . ' ' . ( $data['surname'] ?? '' ) ), $data['email'] ?? '', $data['primary_phone'] ?? '', $data['secondary_phone'] ?? '', $data['county'] ?? '', $data['school_name'] ?? '', $data['school_id'] ?? '', $data['course_name'] ?? '', $data['course_id'] ?? '', $data['intake_name'] ?? '', $data['intake_id'] ?? '', $data['study_mode'] ?? '', $data['sponsorship_type'] ?? '', $data['referral_source'] ?? '', $data['mean_grade'] ?? '', $data['high_school'] ?? '', $data['qualifications'] ?? '', toolkit_application_status_label( $record->status ), ucwords( str_replace( '_', ' ', $record->workflow_status ) ), $record->relay_attempts, $record->relayed_at ? get_date_from_gmt( $record->relayed_at, 'Y-m-d H:i:s' ) : '', $record->mzizi_message, $record->last_error );
 		fputcsv( $output, array_map( 'toolkit_application_csv_cell', $row ) );
 	}
+	toolkit_application_log_event( 0, 'applications_exported', sprintf( 'CSV export by user %d: selected=%d; written=%d; skipped_encrypted=%d; delivery=%s; reference filter=%s.', get_current_user_id(), count( $records ), count( $records ) - $skipped, $skipped, $status ?: 'all', $search ?: 'none' ), get_current_user_id() );
 	fclose( $output ); exit;
 } );
 

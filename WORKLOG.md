@@ -5,6 +5,27 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-24 — Version application encryption and restore legacy decryption
+**Area:** admissions · applicant-data encryption · recovery
+**Environments:** local ✅ · demo/prod pending keyring configuration
+**Commit(s):** this commit
+
+Reworked application payload encryption so dedicated application keys are
+independent of rotating WordPress authentication salts. New records use a
+version-2 AES-256-GCM envelope with an explicit key ID when the private keyring
+is configured. Existing version-1 records can be opened with the current auth
+key or explicitly configured legacy K2/K3 keys. Added a WP-CLI batch migration
+with dry-run mode, round-trip verification, compare-and-swap updates, and
+counts-only output. CSV exports now record selected, written and encrypted-row
+skips instead of silently hiding omissions.
+
+**Verified by:** PHP lint, `git diff --check`, dedicated-key v2 round trip,
+legacy v1 round trip using the pre-rotation production configuration, and GCM
+tamper detection. No applicant fields, ciphertext or key material were emitted.
+**Follow-ups:** configure the private current/legacy keyring, run the count-only
+production audit and dry run, then migrate and verify authorised applicant
+details before removing legacy key material.
+
 ## 2026-08-21 — Simplify Footprint to match the supplied poster
 **Area:** public website · institutional footprint · corrective release
 **Environments:** local ✅ · demo/production pending

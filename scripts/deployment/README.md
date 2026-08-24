@@ -4,6 +4,13 @@ This directory retains the terminal-driven cPanel Fileman deployment scripts
 used for the Toolkit WordPress child theme. They do not attach to an existing
 browser session and therefore do not interrupt an operator using the browser.
 
+`releases/deploy-application-encryption-2026.08.24.1.sh` deploys the
+versioned application encryption code to demo or production and verifies the
+Apply route and byte identity. It deliberately does not edit `wp-config.php`,
+copy keys, or run the migration. Configure the private keyring separately,
+take a database backup, run the WP-CLI dry run, and review its counts before
+running the migration command described in `docs/APPLICATION-ENCRYPTION-KEYRING.md`.
+
 ## Credentials
 
 Credentials never belong in these scripts or Git. Supply them either as an
