@@ -10,17 +10,35 @@ function eduma_child_2026_course_catalog() {
 			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 150,000 standard; KES 120,962 subsidised', 'intakes' => 'January, April, July and October',
 			'outcomes' => array( 'Electrical safety and tools', 'Domestic and commercial wiring', 'Installation testing', 'Industry attachment' ),
 		),
-		'solar-technician' => array(
-			'title' => 'Solar Technician Pathway', 'short' => 'Train for solar PV installation and electrical work, with a focused upskilling option for experienced learners.',
-			'image' => $assets . 'solar.jpg', 'icon' => 'fa-solar-panel', 'qualification' => 'Solar PV Installer or Solar Electrician Skills Certificate', 'examining' => 'NITA Solar PV Assessment, Wireman Grade III or Solar T1',
-			'duration' => '6 months: 3 months of on-site training and 3 months in industry; upskilling course: 10 days', 'entry' => 'KCPE or KCSE certificate; prior electrical experience for upskilling', 'fees' => 'KES 150,000 standard; KES 120,962 subsidised; upskilling KES 30,684', 'intakes' => 'January, April, July and October; upskilling monthly',
+		'solar-pv-installer' => array(
+			'title' => 'Solar PV Installer', 'short' => 'Build practical skills for safe solar photovoltaic system installation, testing, and maintenance.',
+			'image' => $assets . 'solar.jpg', 'icon' => 'fa-solar-panel', 'qualification' => 'Solar PV Installer Skills Certificate', 'examining' => 'NITA Solar PV Assessment or Solar T1',
+			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 150,000 standard; KES 120,962 subsidised', 'intakes' => 'January, April, July and October',
 			'outcomes' => array( 'Solar PV system fundamentals', 'Safe installation practice', 'Testing and maintenance', 'Industry attachment' ),
+		),
+		'solar-electrician' => array(
+			'title' => 'Solar Electrician', 'short' => 'Develop electrical and renewable-energy skills for solar installations and related technical work.',
+			'image' => $assets . 'solar.jpg', 'icon' => 'fa-bolt', 'qualification' => 'Solar Electrician Skills Certificate', 'examining' => 'NITA Wireman Grade III or Solar T1',
+			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 150,000 standard; KES 120,962 subsidised', 'intakes' => 'January, April, July and October',
+			'outcomes' => array( 'Electrical safety', 'Solar system wiring', 'Testing and fault finding', 'Industry attachment' ),
+		),
+		'solar-upskilling' => array(
+			'title' => 'Solar Upskilling', 'short' => 'A focused fast-track pathway for learners with prior electrical experience.',
+			'image' => $assets . 'solar.jpg', 'icon' => 'fa-tools', 'qualification' => 'Solar Upskilling Certificate', 'examining' => 'Toolkit or applicable NITA assessment',
+			'duration' => '10 days', 'entry' => 'Prior electrical experience', 'fees' => 'KES 30,684', 'intakes' => 'Monthly',
+			'outcomes' => array( 'Solar system review', 'Installation practice', 'Testing and commissioning', 'Current industry practice' ),
 		),
 		'advanced-welding-vr' => array(
 			'title' => 'Advanced MIG/MAG Welding with VR', 'short' => 'Develop advanced MIG/MAG welding skills through workshop practice, simulation, and industry placement.',
 			'image' => $assets . 'welding.jpg', 'icon' => 'fa-fire', 'qualification' => 'Advanced Welding Skills Certificate with VR', 'examining' => 'KEBS, NITA or IIW',
 			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 176,276 standard; KES 120,962 subsidised', 'intakes' => 'January, April, July and October',
 			'outcomes' => array( 'Workshop safety', 'Advanced welding techniques', 'VR-supported practice', 'Quality control and industry attachment' ),
+		),
+		'advanced-welding-upskilling' => array(
+			'title' => 'Advanced Welding Upskilling with VR', 'short' => 'Advance existing welding skills through VR-supported practice and modern fabrication methods.',
+			'image' => $assets . 'welding.jpg', 'icon' => 'fa-vr-cardboard', 'qualification' => 'Advanced Welding Upskilling Certificate with VR', 'examining' => 'KEBS, NITA or International Institute of Welding (IIW)',
+			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'Prior welding training or relevant industry experience', 'fees' => 'KES 66,300 standard; KES 30,684 subsidised', 'intakes' => 'Monthly',
+			'outcomes' => array( 'Advanced welding control', 'VR-supported practice', 'Fabrication methods', 'Workshop progression' ),
 		),
 		'smart-agriculture' => array(
 			'title' => 'Smart Agriculture', 'short' => 'Learn climate-smart production methods and practical enterprise skills for resilient agriculture.',
@@ -40,12 +58,21 @@ function eduma_child_2026_course_catalog() {
 			'duration' => '2 weeks to 6 months', 'entry' => 'Open entry for most courses', 'fees' => 'KES 18,000 to KES 65,000, depending on course', 'intakes' => 'Monthly',
 			'outcomes' => array( 'Digital literacy', 'Productivity and online work', 'Cyber security foundations', 'AI and automation foundations' ),
 		),
-		'languages' => array(
-			'title' => 'French & German Languages', 'short' => 'Build recognised language proficiency for study, work, mobility, and international opportunities.',
-			'image' => $assets . 'languages.jpg', 'icon' => 'fa-language', 'qualification' => 'French or German language proficiency by level', 'examining' => 'Alliance Francaise for French; Goethe-Institut for German',
-			'duration' => 'A1: 3 months; A2: 3 months; B1: 4 months', 'entry' => 'Open entry', 'fees' => 'French: KES 35,000 to KES 45,000 per level; German: KES 40,000 to KES 50,000 per level', 'intakes' => 'Monthly; online and physical delivery',
-			'outcomes' => array( 'Everyday communication', 'Progressive A1 to B1 proficiency', 'Exam preparation', 'Work and mobility readiness' ),
-		),
+		'french-a1' => eduma_child_language_course( $assets, 'French A1', 'Beginner', '3 months', 'Alliance Française', 'KES 35,000', 'French A1–A2 package: KES 65,000; A1–B1 package: KES 105,000' ),
+		'french-a2' => eduma_child_language_course( $assets, 'French A2', 'Elementary', '3 months', 'Alliance Française', 'KES 35,000', 'French A1–A2 package: KES 65,000; A1–B1 package: KES 105,000' ),
+		'french-b1' => eduma_child_language_course( $assets, 'French B1', 'Intermediate', '4 months', 'Alliance Française', 'KES 45,000', 'French A1–B1 package: KES 105,000' ),
+		'german-a1' => eduma_child_language_course( $assets, 'German A1', 'Beginner', '3 months', 'Goethe-Institut', 'KES 40,000', 'German A1–A2 package: KES 75,000; A1–B1 package: KES 120,000' ),
+		'german-a2' => eduma_child_language_course( $assets, 'German A2', 'Elementary', '3 months', 'Goethe-Institut', 'KES 40,000', 'German A1–A2 package: KES 75,000; A1–B1 package: KES 120,000' ),
+		'german-b1' => eduma_child_language_course( $assets, 'German B1', 'Intermediate', '4 months', 'Goethe-Institut', 'KES 50,000', 'German A1–B1 package: KES 120,000' ),
+	);
+}
+
+function eduma_child_language_course( $assets, $title, $level, $duration, $examining, $fees, $package ) {
+	return array(
+		'title' => $title, 'short' => "Build {$level} language proficiency for communication, study, work, and international mobility.",
+		'image' => $assets . 'languages.jpg', 'icon' => 'fa-language', 'qualification' => "{$title} language proficiency", 'examining' => $examining,
+		'duration' => $duration, 'entry' => 'Open entry', 'fees' => $fees, 'pricing_note' => $package, 'intakes' => 'Monthly; online and physical delivery',
+		'outcomes' => array( "{$level} communication", 'Listening and speaking', 'Reading and writing', 'Exam and mobility readiness' ),
 	);
 }
 

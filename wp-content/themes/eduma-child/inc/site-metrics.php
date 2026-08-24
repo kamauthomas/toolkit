@@ -200,7 +200,7 @@ function toolkit_render_metrics_page() {
 	echo '<div class="toolkit-admin__panel-heading"><div><small>Controlled rollout</small><h2>Release controls</h2></div><span class="toolkit-pill">' . esc_html( toolkit_theme_release() ) . '</span></div><p>Constants in <code>wp-config.php</code> take priority over these settings.</p>';
 	toolkit_render_control_toggle( 'redesign', 'Modern redesign', eduma_child_redesign_enabled(), 'Activates the reviewed child-theme experience.' );
 	toolkit_render_control_toggle( 'catalog', '2026 course catalogue', eduma_child_2026_catalog_enabled(), 'Activates the separately verified 2026 catalogue.' );
-	toolkit_render_control_toggle( 'pricing', 'September 2026 pricing', eduma_child_2026_pricing_enabled(), 'Must remain off until the approved effective date.' );
+	toolkit_render_control_toggle( 'pricing', '2026 brochure pricing', eduma_child_2026_pricing_enabled(), 'Publishes the approved 7 July 2026 brochure fees on course pages. Keep off until the effective date is confirmed.' );
 	echo '<p><button class="button button-primary" type="submit">Save release controls</button></p></form>';
 	echo '<div class="toolkit-admin__panel"><div class="toolkit-admin__panel-heading"><div><small>Live health</small><h2>System status</h2></div><span class="toolkit-health toolkit-health--good">Operational</span></div><dl class="toolkit-admin__status">';
 	printf( '<div><dt>Site</dt><dd>%s</dd></div>', esc_html( home_url() ) );

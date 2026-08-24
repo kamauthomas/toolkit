@@ -220,6 +220,7 @@
 .toolkit-catalog-course .toolkit-course-data { width:min(1180px,calc(100% - 40px)); padding:54px; background:var(--course-surface); border-left:6px solid var(--course-accent); }
 .toolkit-catalog-course .toolkit-course-data dl { border:0; background:rgba(150,158,42,.18); }
 .toolkit-catalog-course .toolkit-course-data dl div { background:#fff; }
+.toolkit-catalog-course .toolkit-course-data dd small { display:block; margin-top:6px; color:#647065; font-size:12px; line-height:1.45; }
 .toolkit-catalog-course .toolkit-course-outcomes { padding-top:16px; }
 .toolkit-course-outcomes>.toolkit-skill-grid { gap:0; border-top:1px solid var(--toolkit-line); border-bottom:1px solid var(--toolkit-line); }
 .toolkit-course-outcomes .toolkit-skill-grid article { position:relative; min-height:190px; align-items:flex-start; padding:30px 22px; text-align:left; background:#fff; border-right:1px solid var(--toolkit-line); border-radius:0; }
