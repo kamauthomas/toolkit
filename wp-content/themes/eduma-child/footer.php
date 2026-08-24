@@ -57,6 +57,9 @@ $logo = get_stylesheet_directory_uri() . '/assets/images/toolkit-logo.png';
 	</div>
 </footer>
 <?php $support_settings = function_exists( 'toolkit_support_settings' ) ? toolkit_support_settings() : array( 'enabled' => 0 ); ?>
+<a class="toolkit-whatsapp-float" href="https://wa.me/254711802855?text=Hello%20Toolkit%2C%20I%27d%20like%20some%20help." target="_blank" rel="noopener noreferrer" aria-label="Chat with Toolkit on WhatsApp" data-metric="whatsapp_float">
+	<i class="fab fa-whatsapp" aria-hidden="true"></i><span>WhatsApp us</span>
+</a>
 <?php if ( ! empty( $support_settings['enabled'] ) ) : ?>
 <aside class="toolkit-chat" aria-label="Toolkit website assistant">
 	<button class="toolkit-chat__toggle" data-metric="chat_open" type="button" aria-expanded="false" aria-controls="toolkit-chat-panel"><i class="far fa-comment-dots" aria-hidden="true"></i><span>Need help?</span></button>
