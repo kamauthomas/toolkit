@@ -37,3 +37,8 @@ The environment update is staged in a private temporary directory under the
 literal filename `.env`; this is required because cPanel's upload API preserves
 the local basename. An exit trap removes both that temporary directory and the
 exact one-time cron entry if any later deployment or verification step fails.
+
+Deployment completed on 25 August 2026: demo passed first, then the identical
+commit passed production. Both logs ended in `RECEPTION_RELEASE_OK` and all
+scripted HTTP/security checks passed. Rollback snapshots remain ignored and
+owner-restricted on the deployment workstation.

@@ -7,7 +7,7 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ## 2026-08-25 — Preserve Reception release automation
 **Area:** reception · deployment · operations
-**Environments:** demo migrations applied; corrected verification rerun pending; production untouched
+**Environments:** demo ✅ · production ✅
 **Commit(s):** this commit
 
 Added the browser-free demo-first deployment script for Reception release
@@ -26,10 +26,16 @@ trash, production remained untouched, and the script now stages the payload as
 the literal `.env`. Its exit trap also removes the exact temporary cron entry
 and local secret staging directory on every failure path.
 
-**Verified by:** Bash syntax and Git whitespace checks; demo migration log ended
-in `RECEPTION_RELEASE_OK`; misplaced copies were enumerated and contained.
-**Follow-ups:** rerun complete demo verification, then promote the identical
-commit to production and update this entry with actual evidence.
+The corrected release then passed the complete guarded demo verification and
+was promoted unchanged to production. Separate ignored rollback snapshots and
+private staff-path records were retained for both environments.
+
+**Verified by:** Bash syntax and Git whitespace checks; demo and production
+migration logs ended in `RECEPTION_RELEASE_OK`; both passed homepage, QR,
+legacy-path 404, private-login header and settings-authentication checks;
+misplaced copies were enumerated and contained.
+**Follow-ups:** implement and separately test the WhatsApp delivery pipeline;
+the deployed administrator vault is configuration storage, not message delivery.
 
 ## 2026-08-25 — Prepare evidence-backed reporting backfill
 **Area:** reports · Wingu Box · operational continuity
