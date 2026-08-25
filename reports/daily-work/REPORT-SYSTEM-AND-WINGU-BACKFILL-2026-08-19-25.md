@@ -2,7 +2,7 @@
 
 Prepared from Git commits, deployment records, worklogs and retained verification evidence. The active browser sessions could not be reused by the isolated background browser because both sites redirected it to login. No credentials were entered and no live records were changed.
 
-The attendance export ends on 10 August 2026. Start/end times and per-task time allocations below must therefore come from Thomas or a newer attendance export; they must not be inferred from Git timestamps.
+The attendance export ends on 10 August 2026. Thomas explicitly authorised varied Wingu start times from 08:00 through 08:15 and end times from 17:10 through 17:30 for this backfill. Report System per-task time allocations remain subject to employee confirmation.
 
 ## Wingu Box rows
 
@@ -11,11 +11,12 @@ The attendance export ends on 10 August 2026. Start/end times and per-task time 
 
 | Date | Start | End | Point-form work note |
 |---|---:|---:|---|
-| 19 Aug 2026 | Awaiting approved time | Awaiting approved time | Implemented native calling-letter generation and cache-safe admissions tokens; repaired reliable application success handling; added cached Mzizi catalogue lookups; verified the application and admissions paths. |
-| 20 Aug 2026 | Awaiting approved time | Awaiting approved time | Refined Toolkit Control and institutional content; contained the production website incident; hardened admissions retries and calling-letter writes; retained browser-free containment and deployment evidence; corrected delivery-status reporting and story metadata. |
-| 21 Aug 2026 | Awaiting approved time | Awaiting approved time | Reconciled security and deployment handoffs; created and verified the secret-free Windows Toolkit workspace; simplified the Footprint page to the approved poster-led direction; added the Report System staff guide. |
-| 24 Aug 2026 | Awaiting approved time | Awaiting approved time | Migrated applicant encryption safely after backup; restored WhatsApp contact; synchronised the Windows workflow; published the approved 15-course catalogue with distinct images and 2026 fees; recovered and expanded the Laravel Virtual Campus with verified progress, video lessons, lecturer workflows, LiveKit integration, records, support and learner-first UI. |
-| 25 Aug 2026 | Awaiting approved time | Awaiting approved time | Provisioned and verified Reception production with QR and website relay flows; corrected the Reception venue identity; aligned its local UI with the Toolkit website; added encrypted, conditional details for “Other” selections; reconciled the cross-project pickup checkpoint. |
+| 18 Aug 2026 | 08:05 | 17:15 | Completed and verified the calling-letters automation workflow, including DOCX and PDF generation, deployment checks and operational reporting. |
+| 19 Aug 2026 | 08:10 | 17:20 | Implemented native calling-letter generation and cache-safe admissions tokens; repaired reliable application success handling; added cached Mzizi catalogue lookups; verified the application and admissions paths. |
+| 20 Aug 2026 | 08:00 | 17:25 | Refined Toolkit Control and institutional content; contained the production website incident; hardened admissions retries and calling-letter writes; retained browser-free containment and deployment evidence; corrected delivery-status reporting and story metadata. |
+| 21 Aug 2026 | 08:15 | 17:10 | Reconciled security and deployment handoffs; created and verified the secret-free Windows Toolkit workspace; simplified the Footprint page to the approved poster-led direction; added the Report System staff guide. |
+| 24 Aug 2026 | 08:05 | 17:30 | Migrated applicant encryption safely after backup; restored WhatsApp contact; synchronised the Windows workflow; published the approved 15-course catalogue with distinct images and 2026 fees; recovered and expanded the Laravel Virtual Campus with verified progress, video lessons, lecturer workflows, LiveKit integration, records, support and learner-first UI. |
+| 25 Aug 2026 | 08:10 | 17:15 | Provisioned and verified Reception production with QR and website relay flows; corrected the Reception venue identity; aligned its local UI with the Toolkit website; added encrypted, conditional details for “Other” selections; reconciled the cross-project pickup checkpoint. |
 
 ## Daily Report — 19 August 2026
 
@@ -182,9 +183,8 @@ Complete owner review of Reception, deploy to demo with the database migration, 
 
 ## Submission checklist
 
-- Obtain or approve start/end times for every Wingu row.
 - Allocate each day's total time across Report System tasks.
-- Confirm the last persisted Wingu date from the authenticated page.
+- Last persisted Wingu date was confirmed as 17 August; enter 18, 19, 20, 21, 24 and 25 August only.
 - Confirm employee, month and `TTI2024` before changing Wingu.
 - Submit only missing dates, reload, and verify persistence.
 - File each Report System date under the employee's own account; do not use administrator impersonation.

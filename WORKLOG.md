@@ -19,6 +19,13 @@ The active Wingu and Report System tabs could not be transferred to the approved
 isolated background browser because both sessions redirected the copy to login.
 No credentials were entered and no live report or timesheet record was changed.
 
+Thomas subsequently authorised varied Wingu times within 08:00–08:15 for
+arrival and 17:10–17:30 for departure. The live grid confirmed 17 August as the
+last completed row and 22–23 August as off days; the worksheet now provides
+approved times for 18, 19, 20, 21, 24 and 25 August. Visible X11 automation was
+abandoned after it interfered with terminal focus; its clipboard content,
+scripts and processes were cleared.
+
 **Verified by:** cross-repository dated commit history, deployment worklogs,
 attendance-export boundary and read-only isolated session check.
 **Follow-ups:** obtain approved times or a current attendance export, then use an
