@@ -5,6 +5,29 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-25 — Provision Reception production and repair cPanel authentication
+**Area:** Reception · production infrastructure · WordPress relay · QR workflows
+**Environments:** demo verified ✅ · production deployed ✅
+**Reception commit:** `f16790c`
+
+Provisioned `reception.toolkitafrica.ac.ke` with isolated private/public roots,
+a fresh least-privilege database, fresh application and relay secrets, PHP 8.4,
+the `office@toolkitafrica.ac.ke` administrator and the Laravel scheduler. Backed
+up production `wp-config.php` before enabling the signed WordPress reception
+relay. Demo configuration, secrets and records were not promoted.
+
+Diagnosed cPanel HTTP 401 responses: the credential remained valid, but the host
+now rejects HTTP Basic UAPI authentication. Added a reusable private-cookie and
+short-lived-session-token helper and documented the reception deployment path.
+
+**Verified by:** 18 tests and 92 assertions; Pint; live HTTP 200 for production
+home, staff login, both QR SVGs and the main-site reception form; desktop/mobile
+headless checks with no overflow or browser errors; successful signed WordPress
+relay producing a website/follow-up reference with no physical check-in.
+**Follow-up:** authorized staff must delete labelled acceptance record
+`WEB-260825-JBJXCB`; rotate the generated initial administrator password after
+first login and confirm the scheduled retention job in the next operations check.
+
 ## 2026-08-24 — Record WordPress handoff before Virtual Campus recovery
 **Area:** operations · handoff · continuity
 **Environments:** documentation only; production remains on `2026.08.24.5`
