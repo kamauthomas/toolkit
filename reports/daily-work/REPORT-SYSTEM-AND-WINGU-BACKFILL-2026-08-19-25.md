@@ -1,13 +1,13 @@
-# Report System and Wingu Box backfill — 19 to 25 August 2026
+# Report System and Wingu Box backfill — 18 to 25 August 2026
 
-Prepared from Git commits, deployment records, worklogs and retained verification evidence. The active browser sessions could not be reused by the isolated background browser because both sites redirected it to login. No credentials were entered and no live records were changed.
+Prepared from Git commits, deployment records, worklogs and retained verification evidence. Wingu was updated through a dedicated authenticated browser profile controlled over a localhost-only browser port; no credentials were read or written by automation. Report System entries remain prepared drafts and have not been filed.
 
-The attendance export ends on 10 August 2026. Thomas explicitly authorised varied Wingu start times from 08:00 through 08:15 and end times from 17:10 through 17:30 for this backfill. Report System per-task time allocations remain subject to employee confirmation.
+The attendance export ends on 10 August 2026. Thomas explicitly authorised varied Wingu start times from 08:00 through 08:15 and end times from 17:10 through 17:30 for this backfill. The Report System task allocations below reconcile exactly to those authorised daily durations.
 
 ## Wingu Box rows
 
 **Employee:** Thomas Kamau  
-**Project:** confirm `TTI2024` before submission
+**Project:** `TTI0224 / TTI 2024`, verified before and after submission
 
 | Date | Start | End | Point-form work note |
 |---|---:|---:|---|
@@ -17,6 +17,44 @@ The attendance export ends on 10 August 2026. Thomas explicitly authorised varie
 | 21 Aug 2026 | 08:15 | 17:10 | Reconciled security and deployment handoffs; created and verified the secret-free Windows Toolkit workspace; simplified the Footprint page to the approved poster-led direction; added the Report System staff guide. |
 | 24 Aug 2026 | 08:05 | 17:30 | Migrated applicant encryption safely after backup; restored WhatsApp contact; synchronised the Windows workflow; published the approved 15-course catalogue with distinct images and 2026 fees; recovered and expanded the Laravel Virtual Campus with verified progress, video lessons, lecturer workflows, LiveKit integration, records, support and learner-first UI. |
 | 25 Aug 2026 | 08:10 | 17:15 | Provisioned and verified Reception production with QR and website relay flows; corrected the Reception venue identity; aligned its local UI with the Toolkit website; added encrypted, conditional details for “Other” selections; reconciled the cross-project pickup checkpoint. |
+
+### Live submission status — 25 August 2026
+
+- Persisted as **Draft** after reload: 18, 19, 20, 21 and 24 August, with the authorised times, project and notes verified.
+- Unchanged: 22 and 23 August remained empty **Off Day** rows.
+- Pending: Wingu returned HTTP 200 for the update but did not persist 25 August; after selecting `TTI0224 / TTI 2024` and refreshing, the row remained empty. Do not report this date as filed until it is accepted and independently reloaded.
+
+## Daily Report — 18 August 2026
+
+### Summary
+
+Completed the calling-letter automation and prepared it for reliable operational use, including document generation, validation evidence and deployment reporting.
+
+### Tasks completed
+
+| Description | Time spent | Status |
+|---|---:|---|
+| Completed the calling-letter automation and application-data workflow. | 4 hours | Completed |
+| Verified DOCX/PDF generation, protected data handling and delivery-state behaviour. | 3 hours 10 minutes | Completed |
+| Prepared deployment evidence and operational documentation. | 2 hours | Completed |
+
+### Challenges
+
+Calling-letter generation needed to preserve applicant confidentiality while producing usable documents and honest delivery states. Validation was performed without exposing applicant information or treating a generated document as proof of email delivery.
+
+### Decisions and comments
+
+Document generation and delivery are reported separately. Protected applicant data must remain outside reports and deployment archives.
+
+### Plan for next working day
+
+Complete native calling-letter release work, strengthen cache-safe admissions handling and address slow Mzizi catalogue lookups.
+
+### ICT metrics
+
+- Systems maintained: 2
+- Issues resolved: 2
+- Deployments made: confirm against the retained 18 August deployment record before submission
 
 ## Daily Report — 19 August 2026
 
@@ -28,8 +66,8 @@ Improved the admissions journey so successful applications remain reliable and c
 
 | Description | Time spent | Status |
 |---|---:|---|
-| Implemented native calling-letter PDF generation and cache-safe form tokens. | Awaiting approved allocation | Completed |
-| Made application success handling reliable and cached Mzizi catalogue lookups. | Awaiting approved allocation | Completed |
+| Implemented native calling-letter PDF generation and cache-safe form tokens. | 4 hours 30 minutes | Completed |
+| Made application success handling reliable and cached Mzizi catalogue lookups. | 4 hours 40 minutes | Completed |
 
 ### Challenges
 
@@ -59,9 +97,9 @@ Contained the website security incident, strengthened admissions and calling-let
 
 | Description | Time spent | Status |
 |---|---:|---|
-| Refined Toolkit Control and supporting institutional content. | Awaiting approved allocation | Completed |
-| Contained the production incident and retained a browser-free response procedure. | Awaiting approved allocation | Completed |
-| Hardened admissions retries and calling-letter writes and corrected delivery-status reporting. | Awaiting approved allocation | Completed |
+| Refined Toolkit Control and supporting institutional content. | 2 hours | Completed |
+| Contained the production incident and retained a browser-free response procedure. | 4 hours | Completed |
+| Hardened admissions retries and calling-letter writes and corrected delivery-status reporting. | 3 hours 25 minutes | Completed |
 
 ### Challenges
 
@@ -91,10 +129,10 @@ Closed the website/security handoff, created a verified secret-free Windows work
 
 | Description | Time spent | Status |
 |---|---:|---|
-| Reconciled Claude/Codex security and deployment evidence. | Awaiting approved allocation | Completed |
-| Created, verified and made repeatable the Windows Toolkit workspace sync. | Awaiting approved allocation | Completed |
-| Rebuilt then simplified the Footprint page to match the approved poster. | Awaiting approved allocation | Completed |
-| Added a plain-language Report System staff guide. | Awaiting approved allocation | Completed |
+| Reconciled Claude/Codex security and deployment evidence. | 2 hours | Completed |
+| Created, verified and made repeatable the Windows Toolkit workspace sync. | 3 hours 30 minutes | Completed |
+| Rebuilt then simplified the Footprint page to match the approved poster. | 2 hours 30 minutes | Completed |
+| Added a plain-language Report System staff guide. | 55 minutes | Completed |
 
 ### Challenges
 
@@ -124,10 +162,10 @@ Completed the public-site catalogue and admissions-security release, then recove
 
 | Description | Time spent | Status |
 |---|---:|---|
-| Migrated 16 applicant records to the current encryption key with zero failures/conflicts after backup and dry-run verification. | Awaiting approved allocation | Completed |
-| Restored the WhatsApp contact and published 15 approved courses with distinct imagery and 2026 fees. | Awaiting approved allocation | Completed |
-| Recovered and tested the Virtual Campus foundation and learner-first UI. | Awaiting approved allocation | Completed |
-| Added verified video progress, lecturer authoring, assignments, discussions, records, support, notifications and LiveKit token/webhook integration. | Awaiting approved allocation | Completed |
+| Migrated 16 applicant records to the current encryption key with zero failures/conflicts after backup and dry-run verification. | 2 hours | Completed |
+| Restored the WhatsApp contact and published 15 approved courses with distinct imagery and 2026 fees. | 2 hours 15 minutes | Completed |
+| Recovered and tested the Virtual Campus foundation and learner-first UI. | 2 hours 30 minutes | Completed |
+| Added verified video progress, lecturer authoring, assignments, discussions, records, support, notifications and LiveKit token/webhook integration. | 2 hours 40 minutes | Completed |
 
 ### Challenges
 
@@ -157,11 +195,11 @@ Provisioned Reception production and verified its website/QR flows, documented p
 
 | Description | Time spent | Status |
 |---|---:|---|
-| Provisioned `reception.toolkitafrica.ac.ke` with isolated application/database configuration, PHP 8.4, scheduler and WordPress relay. | Awaiting approved allocation | Completed |
-| Verified Reception home, staff login, QR routes and website reception page on desktop/mobile. | Awaiting approved allocation | Completed |
-| Reconciled WordPress, Reception, Smart Lecturer and Virtual Campus pickup state. | Awaiting approved allocation | Completed |
-| Corrected the Reception venue and aligned the local UI with the public website design system. | Awaiting approved allocation | Completed |
-| Added encrypted conditional explanations when visitors or applicants select “Other”. | Awaiting approved allocation | Completed |
+| Provisioned `reception.toolkitafrica.ac.ke` with isolated application/database configuration, PHP 8.4, scheduler and WordPress relay. | 3 hours | Completed |
+| Verified Reception home, staff login, QR routes and website reception page on desktop/mobile. | 1 hour 30 minutes | Completed |
+| Reconciled WordPress, Reception, Smart Lecturer and Virtual Campus pickup state. | 1 hour | Completed |
+| Corrected the Reception venue and aligned the local UI with the public website design system. | 2 hours | Completed |
+| Added encrypted conditional explanations when visitors or applicants select “Other”. | 1 hour 35 minutes | Completed |
 
 ### Challenges
 
@@ -183,9 +221,8 @@ Complete owner review of Reception, deploy to demo with the database migration, 
 
 ## Submission checklist
 
-- Allocate each day's total time across Report System tasks.
-- Last persisted Wingu date was confirmed as 17 August; enter 18, 19, 20, 21, 24 and 25 August only.
-- Confirm employee, month and `TTI2024` before changing Wingu.
-- Submit only missing dates, reload, and verify persistence.
+- Retry only the still-empty 25 August Wingu row when Wingu permits it, then reload `TTI0224 / TTI 2024` and verify its status, times and note.
+- Do not resubmit 18, 19, 20, 21 or 24 August; they are already persisted as Draft.
+- Keep 22 and 23 August unchanged as Off Days.
 - File each Report System date under the employee's own account; do not use administrator impersonation.
 - Remove the temporary browser profile after the authenticated submission path is available.

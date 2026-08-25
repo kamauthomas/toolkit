@@ -7,29 +7,33 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ## 2026-08-25 — Prepare evidence-backed reporting backfill
 **Area:** reports · Wingu Box · operational continuity
-**Environments:** local reporting draft; live systems unchanged
+**Environments:** local reporting draft; live Wingu updated and reloaded
 **Commit(s):** this commit
 
-Prepared Wingu notes and complete Report System drafts for 19, 20, 21, 24 and
-25 August using commit history, worklogs and deployment evidence. Start/end
-times and task allocations remain explicitly unfilled because the retained
-attendance export ends on 10 August and those values must not be inferred.
+Prepared Wingu notes and complete Report System drafts for 18, 19, 20, 21, 24
+and 25 August using commit history, worklogs and deployment evidence. Thomas
+authorised the bounded start/end times, and the per-task allocations reconcile
+exactly to each authorised daily duration.
 
-The active Wingu and Report System tabs could not be transferred to the approved
-isolated background browser because both sessions redirected the copy to login.
-No credentials were entered and no live report or timesheet record was changed.
+Wingu was opened in a dedicated browser profile and controlled through a
+localhost-only browser port after Thomas logged in himself. The automation did
+not read or write credentials. Report System remains a prepared draft and no
+Report System entry has been filed.
 
 Thomas subsequently authorised varied Wingu times within 08:00–08:15 for
 arrival and 17:10–17:30 for departure. The live grid confirmed 17 August as the
 last completed row and 22–23 August as off days; the worksheet now provides
 approved times for 18, 19, 20, 21, 24 and 25 August. Visible X11 automation was
 abandoned after it interfered with terminal focus; its clipboard content,
-scripts and processes were cleared.
+scripts and processes were cleared. The isolated workflow persisted and
+reload-verified 18, 19, 20, 21 and 24 August as Draft under TTI0224 / TTI 2024.
+Wingu returned HTTP 200 but did not persist 25 August, so that row remains the
+only pending Wingu item. Off days 22–23 August remained unchanged.
 
 **Verified by:** cross-repository dated commit history, deployment worklogs,
-attendance-export boundary and read-only isolated session check.
-**Follow-ups:** obtain approved times or a current attendance export, then use an
-authenticated employee session to submit and reload only the missing dates.
+successful Wingu update response, project refresh and row-by-row reload check.
+**Follow-ups:** retry only 25 August when Wingu permits it and reload to confirm;
+file the prepared Report System drafts through the employee's own account.
 
 ## 2026-08-25 — Reconcile cross-project pickup state
 **Area:** continuity · WordPress · Reception · Smart Lecturer · Virtual Campus
