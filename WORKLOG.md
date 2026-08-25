@@ -5,6 +5,27 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-25 — Reconcile cross-project pickup state
+**Area:** continuity · WordPress · Reception · Smart Lecturer · Virtual Campus
+**Environments:** documentation; live Reception health read-only verified ✅
+**Commit(s):** this commit
+
+Reconciled the older WordPress handoff with the completed production applicant
+encryption migration, the new Reception production deployment, the independent
+Smart Lecturer prototype and the local-only Laravel Virtual Campus. Added one
+pickup map that identifies verified work, disabled or missing capabilities, the
+exact resumption point and the remaining outcome for each system.
+
+A guarded private Reception cleanup was attempted for the labelled acceptance
+record, but cPanel did not execute the temporary minute cron and private SSH is
+unavailable. The cron and uploaded private artifacts were removed; no public
+maintenance endpoint was introduced. Reception home, staff login and the
+WordPress Reception page continued to return HTTP 200.
+
+**Follow-ups:** delete `WEB-260825-JBJXCB` through authenticated staff operations
+or a restored private CLI path; resume the Virtual Campus at its remaining
+learner-facing UI journeys, then staging and production acceptance gates.
+
 ## 2026-08-25 — Provision Reception production and repair cPanel authentication
 **Area:** Reception · production infrastructure · WordPress relay · QR workflows
 **Environments:** demo verified ✅ · production deployed ✅
