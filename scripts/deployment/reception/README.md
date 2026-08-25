@@ -21,3 +21,19 @@ Production verification passed for backend, staff login, WordPress reception,
 visitor QR and applicant QR, including desktop/mobile headless checks. Authorized
 staff must delete labelled acceptance record `WEB-260825-JBJXCB`; it is a website
 follow-up and does not count as physical attendance.
+
+## Release 2026.08.25.1
+
+`deploy-reception-2026.08.25.1.sh` deploys Reception commit `86b7293` demo
+first and production second. It preserves remote files in the ignored rollback
+tree, uploads only the reviewed private/public delta, assigns a per-environment
+unadvertised staff path in the mode-600 deployment store, runs migrations and
+cache clearing through a temporary cPanel cron entry, removes that entry, and
+verifies the public page, old-path 404, QR output, private login headers and
+administrator-settings authentication boundary. It never prints credentials,
+environment contents or the private staff path.
+
+The environment update is staged in a private temporary directory under the
+literal filename `.env`; this is required because cPanel's upload API preserves
+the local basename. An exit trap removes both that temporary directory and the
+exact one-time cron entry if any later deployment or verification step fails.

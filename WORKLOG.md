@@ -5,6 +5,32 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-25 — Preserve Reception release automation
+**Area:** reception · deployment · operations
+**Environments:** demo migrations applied; corrected verification rerun pending; production untouched
+**Commit(s):** this commit
+
+Added the browser-free demo-first deployment script for Reception release
+`2026.08.25.1` / Reception commit `86b7293`. It backs up each remote file, separates the
+private Laravel root from public assets, maintains per-environment private staff
+paths outside Git, runs migrations and cache clearing through a temporary cPanel
+job, removes the job and verifies public, QR, legacy-path and staff-header
+boundaries without printing secrets.
+
+The first demo migration exposed a hosted-MariaDB `TIMESTAMP` compatibility
+issue and stopped before production. The corrected `DATETIME` migration then
+completed on demo. Route verification revealed that cPanel preserves an upload's
+local basename, so two randomly named environment copies had been created
+instead of updating `.env`. Both exact copies were moved to recoverable cPanel
+trash, production remained untouched, and the script now stages the payload as
+the literal `.env`. Its exit trap also removes the exact temporary cron entry
+and local secret staging directory on every failure path.
+
+**Verified by:** Bash syntax and Git whitespace checks; demo migration log ended
+in `RECEPTION_RELEASE_OK`; misplaced copies were enumerated and contained.
+**Follow-ups:** rerun complete demo verification, then promote the identical
+commit to production and update this entry with actual evidence.
+
 ## 2026-08-25 — Prepare evidence-backed reporting backfill
 **Area:** reports · Wingu Box · operational continuity
 **Environments:** local reporting draft; live Wingu updated and reloaded
