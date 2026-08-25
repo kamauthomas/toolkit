@@ -5,6 +5,25 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-25 — Prepare evidence-backed reporting backfill
+**Area:** reports · Wingu Box · operational continuity
+**Environments:** local reporting draft; live systems unchanged
+**Commit(s):** this commit
+
+Prepared Wingu notes and complete Report System drafts for 19, 20, 21, 24 and
+25 August using commit history, worklogs and deployment evidence. Start/end
+times and task allocations remain explicitly unfilled because the retained
+attendance export ends on 10 August and those values must not be inferred.
+
+The active Wingu and Report System tabs could not be transferred to the approved
+isolated background browser because both sessions redirected the copy to login.
+No credentials were entered and no live report or timesheet record was changed.
+
+**Verified by:** cross-repository dated commit history, deployment worklogs,
+attendance-export boundary and read-only isolated session check.
+**Follow-ups:** obtain approved times or a current attendance export, then use an
+authenticated employee session to submit and reload only the missing dates.
+
 ## 2026-08-25 — Reconcile cross-project pickup state
 **Area:** continuity · WordPress · Reception · Smart Lecturer · Virtual Campus
 **Environments:** documentation; live Reception health read-only verified ✅
