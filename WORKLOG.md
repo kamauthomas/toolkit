@@ -5,6 +5,25 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-28 — Add whole-Toolkit briefing report
+**Area:** cross-project briefing · website · Reception · Virtual Campus · Smart
+Lecturer · reporting · chatbot · graphics/posters · operations
+**Environments:** documentation only; no deployment
+**Commit(s):** this commit
+
+Added a dated management briefing covering the current state of every major
+project under the Toolkit directory, including the poster/image library,
+security containment, deployed website/Reception boundaries, local Virtual
+Campus/live-class evidence, Smart Lecturer prototype limits, reporting and
+chatbot status, Windows transfer controls, and direct decisions still needed
+from Toolkit.
+
+**Verified by:** cross-repository file inventory, current worklogs, deployment
+handoffs, module trackers, test/build output and poster asset counts collected
+on 28 August 2026.
+**Follow-ups:** provide the briefing to management; keep owner trackers and
+system-specific worklogs current as decisions are made.
+
 ## 2026-08-25 — Preserve Reception release automation
 **Area:** reception · deployment · operations
 **Environments:** demo ✅ · production ✅
