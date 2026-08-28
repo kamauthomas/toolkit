@@ -584,15 +584,17 @@ def expansion_modules(insights=None):
             "title": "Admissions",
             "summary": "Verification queue, officer ownership, intake status, and admissions trend visibility.",
             "metric": insights.get("applications_processed", 0),
-            "label": "Applications processed",
-            "status": "Dashboard preview",
+            "label": "Daily-report signal",
+            "status": "Operational workflow",
+            "endpoint": "admissions",
         },
         {
             "title": "Monthly Intake",
             "summary": "Target attainment, monthly progress, completion percentages, and ranked officer output.",
             "metric": insights.get("admissions_activity", 0),
             "label": "Admissions activity",
-            "status": "Target model pending",
+            "status": "Operational targets",
+            "endpoint": "intake_targets",
         },
         {
             "title": "Marketing Reports",
@@ -600,6 +602,7 @@ def expansion_modules(insights=None):
             "metric": insights.get("marketing_activity", 0),
             "label": "Marketing activity",
             "status": "Live metrics proxy",
+            "endpoint": None,
         },
         {
             "title": "Incentives",
@@ -607,13 +610,15 @@ def expansion_modules(insights=None):
             "metric": insights.get("approved", 0),
             "label": "Approved reports",
             "status": "Workflow pending",
+            "endpoint": None,
         },
         {
             "title": "Minutes",
             "summary": "Meeting records, action items, owners, deadlines, completion status, and follow-up views.",
             "metric": insights.get("meetings_logged", 0),
             "label": "Meeting signals",
-            "status": "Repository pending",
+            "status": "Operational repository",
+            "endpoint": "meetings",
         },
     ]
 
@@ -801,6 +806,7 @@ def init_db():
             contact TEXT DEFAULT '',
             course TEXT NOT NULL,
             intake TEXT DEFAULT '',
+            admission_date TEXT DEFAULT '',
             source TEXT DEFAULT '',
             notes TEXT DEFAULT '',
             status TEXT NOT NULL DEFAULT 'pending',
@@ -819,6 +825,60 @@ def init_db():
             created_at TEXT NOT NULL,
             FOREIGN KEY(admission_id) REFERENCES admissions(id),
             FOREIGN KEY(reviewer_id) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS intake_targets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            officer_id INTEGER NOT NULL,
+            target_month TEXT NOT NULL,
+            target_count INTEGER NOT NULL,
+            created_by INTEGER NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE(officer_id, target_month),
+            FOREIGN KEY(officer_id) REFERENCES users(id),
+            FOREIGN KEY(created_by) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS meetings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            meeting_date TEXT NOT NULL,
+            department TEXT NOT NULL,
+            attendees TEXT DEFAULT '',
+            summary TEXT NOT NULL,
+            created_by INTEGER NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(created_by) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS meeting_actions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            meeting_id INTEGER NOT NULL,
+            description TEXT NOT NULL,
+            owner_id INTEGER NOT NULL,
+            due_date TEXT DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'open',
+            completion_notes TEXT DEFAULT '',
+            completed_at TEXT,
+            created_by INTEGER NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(meeting_id) REFERENCES meetings(id),
+            FOREIGN KEY(owner_id) REFERENCES users(id),
+            FOREIGN KEY(created_by) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS account_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            actor_id INTEGER,
+            event TEXT NOT NULL,
+            reason TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(actor_id) REFERENCES users(id)
         );
 
         CREATE TABLE IF NOT EXISTS report_access (
@@ -847,12 +907,21 @@ def init_db():
         "CREATE INDEX IF NOT EXISTS idx_admissions_status ON admissions(status)",
         "CREATE INDEX IF NOT EXISTS idx_admissions_creator ON admissions(created_by)",
         "CREATE INDEX IF NOT EXISTS idx_admission_history_record ON admission_verification_history(admission_id, created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_intake_target_month ON intake_targets(target_month)",
+        "CREATE INDEX IF NOT EXISTS idx_meetings_date ON meetings(meeting_date)",
+        "CREATE INDEX IF NOT EXISTS idx_meeting_actions_owner ON meeting_actions(owner_id, status)",
+        "CREATE INDEX IF NOT EXISTS idx_account_events_user ON account_events(user_id, created_at)",
     ):
         try:
             conn.execute(index_sql)
         except Exception:
             pass
     conn.commit()
+
+    try:
+        conn.execute("ALTER TABLE admissions ADD COLUMN admission_date TEXT DEFAULT ''")
+    except Exception:
+        pass
 
     try:
         conn.execute("ALTER TABLE reports ADD COLUMN status TEXT NOT NULL DEFAULT 'submitted'")
@@ -982,15 +1051,6 @@ def init_db():
         )
     try:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_notif_user_read ON notifications(user_id, is_read)")
-    except Exception:
-        pass
-
-    try:
-        conn.execute(
-            "UPDATE users SET is_active = 1, locked_at = NULL, lock_reason = '' "
-            "WHERE role IN ('admin','principal','superadmin','shadowadmin') AND locked_at IS NOT NULL"
-        )
-        conn.commit()
     except Exception:
         pass
 
@@ -1191,6 +1251,19 @@ def admin_required(view):
         if g.user is None:
             return redirect(url_for("login"))
         if g.user["role"] not in ADMIN_ROLES:
+            abort(403)
+        return view(*args, **kwargs)
+
+    return wrapped
+
+
+def department_admin_required(view):
+    """User-management boundary: principals review data but do not manage accounts."""
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for("login"))
+        if g.user["role"] not in ("admin", "superadmin", "shadowadmin"):
             abort(403)
         return view(*args, **kwargs)
 
@@ -1702,15 +1775,12 @@ def login():
             return redirect(url_for("login"))
         user = get_db().execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
         if user and check_password_hash(user["password_hash"], password):
+            locked = row_get(user, "locked_at", None)
+            if locked:
+                flash("Your account has been locked due to inactivity. Contact your administrator.", "warning")
+                return redirect(url_for("login"))
             if not user["is_active"]:
-                try:
-                    locked = user["locked_at"]
-                except (KeyError, IndexError, TypeError):
-                    locked = None
-                if locked:
-                    flash("Your account has been locked due to inactivity. Contact your administrator.", "warning")
-                else:
-                    flash("Your account is pending activation by your department admin.", "warning")
+                flash("Your account is pending activation by your department admin.", "warning")
                 return redirect(url_for("login"))
             try:
                 last_login = user["last_login"]
@@ -1724,6 +1794,11 @@ def login():
                         db.execute(
                             "UPDATE users SET is_active = 0, locked_at = ?, lock_reason = 'Auto-locked: inactive for 5+ days' WHERE id = ?",
                             (now(), user["id"]),
+                        )
+                        db.execute(
+                            """INSERT INTO account_events (user_id, actor_id, event, reason, created_at)
+                               VALUES (?, NULL, 'auto_locked', 'Inactive for 5+ days', ?)""",
+                            (user["id"], now()),
                         )
                         db.commit()
                         flash("Your account has been locked due to 5 days of inactivity. Contact your administrator.", "warning")
@@ -2003,19 +2078,24 @@ def admissions():
         csrf_protect()
         applicant_name = clean_text(request.form.get("applicant_name"), 160)
         course = clean_text(request.form.get("course"), 160)
+        admission_date = clean_text(request.form.get("admission_date"), 10)
         if not applicant_name or not course:
             flash("Applicant name and course are required.", "danger")
+            return redirect(url_for("admissions"))
+        if admission_date and not parse_report_date(admission_date):
+            flash("Use a valid admission date.", "danger")
             return redirect(url_for("admissions"))
         timestamp = now()
         cursor = db.execute(
             """INSERT INTO admissions
-               (applicant_name, contact, course, intake, source, notes, status, created_by, created_at, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)""",
+               (applicant_name, contact, course, intake, admission_date, source, notes, status, created_by, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)""",
             (
                 applicant_name,
                 clean_text(request.form.get("contact"), 80),
                 course,
                 clean_text(request.form.get("intake"), 80),
+                admission_date,
                 clean_text(request.form.get("source"), 120),
                 clean_text(request.form.get("notes"), 2000),
                 g.user["id"],
@@ -2114,6 +2194,342 @@ def verify_admission(admission_id):
         )
     flash("Admission verification status updated.", "success")
     return redirect(url_for("admission_detail", admission_id=admission_id))
+
+
+def scoped_users(include_self=True):
+    """Return active users the signed-in user is allowed to coordinate."""
+    db = get_db()
+    if g.user["role"] in EXECUTIVE_ROLES:
+        rows = db.execute(
+            """SELECT id, full_name, department, position, role
+               FROM users WHERE is_active = 1 AND deleted_at IS NULL AND """ + hide_shadow_sql() +
+            " ORDER BY department, full_name"
+        ).fetchall()
+    elif g.user["role"] == "admin":
+        rows = db.execute(
+            """SELECT DISTINCT users.id, users.full_name, users.department, users.position, users.role
+               FROM users LEFT JOIN report_access ON report_access.employee_id = users.id
+               WHERE users.is_active = 1 AND users.deleted_at IS NULL
+                 AND (users.id = ? OR report_access.admin_id = ?)
+               ORDER BY users.department, users.full_name""",
+            (g.user["id"], g.user["id"]),
+        ).fetchall()
+    else:
+        rows = db.execute(
+            """SELECT id, full_name, department, position, role
+               FROM users WHERE id = ? AND is_active = 1 AND deleted_at IS NULL""",
+            (g.user["id"],),
+        ).fetchall()
+    if include_self:
+        return rows
+    return [row for row in rows if row["id"] != g.user["id"]]
+
+
+def can_coordinate_user(user_id):
+    return any(row["id"] == user_id for row in scoped_users())
+
+
+@app.route("/intake-targets", methods=["GET", "POST"])
+@login_required
+def intake_targets():
+    db = get_db()
+    officers = scoped_users()
+    if request.method == "POST":
+        csrf_protect()
+        if g.user["role"] not in ADMIN_ROLES:
+            abort(403)
+        try:
+            officer_id = int(request.form.get("officer_id", ""))
+            target_count = int(request.form.get("target_count", ""))
+        except (TypeError, ValueError):
+            flash("Choose an officer and enter a valid target.", "danger")
+            return redirect(url_for("intake_targets"))
+        target_month = clean_text(request.form.get("target_month"), 7)
+        try:
+            datetime.strptime(target_month, "%Y-%m")
+        except (TypeError, ValueError):
+            flash("Choose a valid target month.", "danger")
+            return redirect(url_for("intake_targets"))
+        if target_count < 1 or target_count > 10000:
+            flash("Target must be between 1 and 10,000 admissions.", "danger")
+            return redirect(url_for("intake_targets"))
+        if not can_coordinate_user(officer_id):
+            abort(403)
+        timestamp = now()
+        db.execute(
+            """INSERT INTO intake_targets
+               (officer_id, target_month, target_count, created_by, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?)
+               ON CONFLICT(officer_id, target_month) DO UPDATE SET
+                   target_count = excluded.target_count,
+                   created_by = excluded.created_by,
+                   updated_at = excluded.updated_at""",
+            (officer_id, target_month, target_count, g.user["id"], timestamp, timestamp),
+        )
+        db.commit()
+        if officer_id != g.user["id"]:
+            create_notification(
+                user_id=officer_id,
+                kind="intake_target",
+                title=f"Intake target set for {target_month}",
+                body=f"Your admissions target is {target_count} for {target_month}.",
+                link=url_for("intake_targets"),
+                actor_id=g.user["id"],
+            )
+        flash("Monthly intake target saved.", "success")
+        return redirect(url_for("intake_targets", month=target_month))
+
+    target_month = clean_text(request.args.get("month"), 7) or datetime.now().strftime("%Y-%m")
+    try:
+        datetime.strptime(target_month, "%Y-%m")
+    except (TypeError, ValueError):
+        target_month = datetime.now().strftime("%Y-%m")
+    rows = []
+    for officer in officers:
+        target = db.execute(
+            "SELECT * FROM intake_targets WHERE officer_id = ? AND target_month = ?",
+            (officer["id"], target_month),
+        ).fetchone()
+        actual_row = db.execute(
+            """SELECT COUNT(*) AS c, MAX(updated_at) AS last_activity
+               FROM admissions
+               WHERE created_by = ? AND status = 'verified'
+                 AND substr(COALESCE(NULLIF(admission_date, ''), created_at), 1, 7) = ?""",
+            (officer["id"], target_month),
+        ).fetchone()
+        target_count = target["target_count"] if target else 0
+        actual = actual_row["c"] if actual_row else 0
+        rows.append({
+            "officer": officer,
+            "target": target_count,
+            "actual": actual,
+            "remaining": max(target_count - actual, 0),
+            "percentage": min(int((actual / target_count) * 100), 100) if target_count else 0,
+            "last_activity": actual_row["last_activity"] if actual_row else None,
+        })
+    rows.sort(key=lambda item: (item["percentage"], item["actual"]), reverse=True)
+    return render_template(
+        "intake_targets.html",
+        target_month=target_month,
+        officers=officers,
+        rows=rows,
+        total_target=sum(item["target"] for item in rows),
+        total_actual=sum(item["actual"] for item in rows),
+    )
+
+
+MEETING_ACTION_STATUSES = ("open", "in_progress", "blocked", "completed")
+
+
+def can_view_meeting(user, meeting):
+    if not meeting:
+        return False
+    if user["role"] in EXECUTIVE_ROLES:
+        return True
+    if meeting["created_by"] == user["id"]:
+        return True
+    if user["role"] == "admin":
+        creator_allowed = get_db().execute(
+            "SELECT 1 FROM report_access WHERE admin_id = ? AND employee_id = ?",
+            (user["id"], meeting["created_by"]),
+        ).fetchone()
+        if creator_allowed:
+            return True
+    assigned = get_db().execute(
+        "SELECT 1 FROM meeting_actions WHERE meeting_id = ? AND owner_id = ?",
+        (meeting["id"], user["id"]),
+    ).fetchone()
+    return bool(assigned)
+
+
+def get_meeting_or_404(meeting_id):
+    meeting = get_db().execute(
+        """SELECT meetings.*, users.full_name AS creator_name
+           FROM meetings JOIN users ON users.id = meetings.created_by
+           WHERE meetings.id = ?""",
+        (meeting_id,),
+    ).fetchone()
+    if not meeting or not can_view_meeting(g.user, meeting):
+        abort(404)
+    return meeting
+
+
+@app.route("/meetings", methods=["GET", "POST"])
+@login_required
+def meetings():
+    db = get_db()
+    if request.method == "POST":
+        csrf_protect()
+        title = clean_text(request.form.get("title"), 180)
+        meeting_date = clean_text(request.form.get("meeting_date"), 10)
+        summary = clean_text(request.form.get("summary"), 4000)
+        if not title or not parse_report_date(meeting_date) or not summary:
+            flash("Meeting title, valid date and summary are required.", "danger")
+            return redirect(url_for("meetings"))
+        timestamp = now()
+        cursor = db.execute(
+            """INSERT INTO meetings
+               (title, meeting_date, department, attendees, summary, created_by, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                title,
+                meeting_date,
+                clean_text(request.form.get("department"), 100) or g.user["department"],
+                clean_text(request.form.get("attendees"), 2000),
+                summary,
+                g.user["id"],
+                timestamp,
+                timestamp,
+            ),
+        )
+        meeting_id = cursor.lastrowid
+        db.commit()
+        flash("Meeting record saved. Add accountable actions next.", "success")
+        return redirect(url_for("meeting_detail", meeting_id=meeting_id))
+
+    if g.user["role"] in EXECUTIVE_ROLES:
+        records = db.execute(
+            """SELECT meetings.*, users.full_name AS creator_name,
+                      COUNT(meeting_actions.id) AS action_count,
+                      SUM(CASE WHEN meeting_actions.status != 'completed' THEN 1 ELSE 0 END) AS open_count
+               FROM meetings JOIN users ON users.id = meetings.created_by
+               LEFT JOIN meeting_actions ON meeting_actions.meeting_id = meetings.id
+               GROUP BY meetings.id, users.full_name
+               ORDER BY meetings.meeting_date DESC, meetings.id DESC"""
+        ).fetchall()
+    elif g.user["role"] == "admin":
+        records = db.execute(
+            """SELECT meetings.*, users.full_name AS creator_name,
+                      COUNT(DISTINCT meeting_actions.id) AS action_count,
+                      COUNT(DISTINCT CASE WHEN meeting_actions.status != 'completed' THEN meeting_actions.id END) AS open_count
+               FROM meetings JOIN users ON users.id = meetings.created_by
+               LEFT JOIN report_access ON report_access.employee_id = meetings.created_by
+               LEFT JOIN meeting_actions ON meeting_actions.meeting_id = meetings.id
+               WHERE meetings.created_by = ? OR report_access.admin_id = ? OR meeting_actions.owner_id = ?
+               GROUP BY meetings.id, users.full_name
+               ORDER BY meetings.meeting_date DESC, meetings.id DESC""",
+            (g.user["id"], g.user["id"], g.user["id"]),
+        ).fetchall()
+    else:
+        records = db.execute(
+            """SELECT meetings.*, users.full_name AS creator_name,
+                      COUNT(DISTINCT meeting_actions.id) AS action_count,
+                      COUNT(DISTINCT CASE WHEN meeting_actions.status != 'completed' THEN meeting_actions.id END) AS open_count
+               FROM meetings JOIN users ON users.id = meetings.created_by
+               LEFT JOIN meeting_actions ON meeting_actions.meeting_id = meetings.id
+               WHERE meetings.created_by = ? OR meeting_actions.owner_id = ?
+               GROUP BY meetings.id, users.full_name
+               ORDER BY meetings.meeting_date DESC, meetings.id DESC""",
+            (g.user["id"], g.user["id"]),
+        ).fetchall()
+    return render_template("meetings.html", meetings=records, departments=DEPARTMENTS)
+
+
+@app.route("/meetings/<int:meeting_id>")
+@login_required
+def meeting_detail(meeting_id):
+    meeting = get_meeting_or_404(meeting_id)
+    actions = get_db().execute(
+        """SELECT meeting_actions.*, users.full_name AS owner_name,
+                  creator.full_name AS action_creator_name
+           FROM meeting_actions
+           JOIN users ON users.id = meeting_actions.owner_id
+           JOIN users creator ON creator.id = meeting_actions.created_by
+           WHERE meeting_actions.meeting_id = ?
+           ORDER BY meeting_actions.due_date ASC, meeting_actions.id ASC""",
+        (meeting_id,),
+    ).fetchall()
+    can_add_actions = g.user["role"] in ADMIN_ROLES or meeting["created_by"] == g.user["id"]
+    return render_template(
+        "meeting_detail.html",
+        meeting=meeting,
+        actions=actions,
+        owners=scoped_users(),
+        action_statuses=MEETING_ACTION_STATUSES,
+        can_add_actions=can_add_actions,
+    )
+
+
+@app.route("/meetings/<int:meeting_id>/actions", methods=["POST"])
+@login_required
+def add_meeting_action(meeting_id):
+    csrf_protect()
+    meeting = get_meeting_or_404(meeting_id)
+    if g.user["role"] not in ADMIN_ROLES and meeting["created_by"] != g.user["id"]:
+        abort(403)
+    description = clean_text(request.form.get("description"), 1000)
+    due_date = clean_text(request.form.get("due_date"), 10)
+    try:
+        owner_id = int(request.form.get("owner_id", ""))
+    except (TypeError, ValueError):
+        owner_id = 0
+    if not description or not owner_id or not can_coordinate_user(owner_id):
+        flash("Action description and an authorised owner are required.", "danger")
+        return redirect(url_for("meeting_detail", meeting_id=meeting_id))
+    if due_date and not parse_report_date(due_date):
+        flash("Use a valid due date.", "danger")
+        return redirect(url_for("meeting_detail", meeting_id=meeting_id))
+    timestamp = now()
+    get_db().execute(
+        """INSERT INTO meeting_actions
+           (meeting_id, description, owner_id, due_date, status, created_by, created_at, updated_at)
+           VALUES (?, ?, ?, ?, 'open', ?, ?, ?)""",
+        (meeting_id, description, owner_id, due_date, g.user["id"], timestamp, timestamp),
+    )
+    get_db().commit()
+    if owner_id != g.user["id"]:
+        create_notification(
+            user_id=owner_id,
+            kind="meeting_action",
+            title=f"New action: {meeting['title']}",
+            body=description,
+            link=url_for("meeting_detail", meeting_id=meeting_id),
+            actor_id=g.user["id"],
+        )
+    flash("Meeting action assigned.", "success")
+    return redirect(url_for("meeting_detail", meeting_id=meeting_id))
+
+
+@app.route("/meetings/<int:meeting_id>/actions/<int:action_id>/status", methods=["POST"])
+@login_required
+def update_meeting_action(meeting_id, action_id):
+    csrf_protect()
+    meeting = get_meeting_or_404(meeting_id)
+    action = get_db().execute(
+        "SELECT * FROM meeting_actions WHERE id = ? AND meeting_id = ?",
+        (action_id, meeting_id),
+    ).fetchone()
+    if not action:
+        abort(404)
+    if action["owner_id"] != g.user["id"] and g.user["role"] not in ADMIN_ROLES:
+        abort(403)
+    status = clean_text(request.form.get("status"), 30)
+    notes = clean_text(request.form.get("completion_notes"), 2000)
+    if status not in MEETING_ACTION_STATUSES:
+        abort(400)
+    if status == "blocked" and not notes:
+        flash("Explain what is blocking this action.", "danger")
+        return redirect(url_for("meeting_detail", meeting_id=meeting_id))
+    timestamp = now()
+    completed_at = timestamp if status == "completed" else None
+    get_db().execute(
+        """UPDATE meeting_actions
+           SET status = ?, completion_notes = ?, completed_at = ?, updated_at = ?
+           WHERE id = ?""",
+        (status, notes, completed_at, timestamp, action_id),
+    )
+    get_db().commit()
+    if meeting["created_by"] != g.user["id"]:
+        create_notification(
+            user_id=meeting["created_by"],
+            kind="meeting_action",
+            title=f"Action marked {status.replace('_', ' ')}",
+            body=action["description"],
+            link=url_for("meeting_detail", meeting_id=meeting_id),
+            actor_id=g.user["id"],
+        )
+    flash("Action status updated.", "success")
+    return redirect(url_for("meeting_detail", meeting_id=meeting_id))
 
 @app.route("/principal")
 @principal_required
@@ -2387,6 +2803,9 @@ def admin_users():
         guard_admin_target(target)
         if role == "shadowadmin" and not viewer_is_owner():
             abort(403)
+        if target["locked_at"] and is_active:
+            is_active = 0
+            flash("This account is locked. Use Unlock and record a reason before reactivating it.", "warning")
         db.execute("UPDATE users SET role = ?, is_active = ? WHERE id = ?", (role, is_active, user_id))
         db.commit()
         flash("User updated.", "success")
@@ -2465,13 +2884,19 @@ def admin_settings():
 
 
 @app.route("/admin/unlock/<int:user_id>", methods=["GET", "POST"])
-@superadmin_required
+@login_required
 def admin_unlock(user_id):
     db = get_db()
+    if g.user["role"] not in ("admin", "superadmin", "shadowadmin"):
+        abort(403)
     target = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     if not target:
         abort(404)
-    guard_admin_target(target)
+    if g.user["role"] == "admin":
+        if target["role"] != "employee" or target["department"] != g.user["department"]:
+            abort(404)
+    else:
+        guard_admin_target(target)
     if request.method == "POST":
         csrf_protect()
         reason = clean_text(request.form.get("reason", ""), 500)
@@ -2482,10 +2907,17 @@ def admin_unlock(user_id):
             "UPDATE users SET is_active = 1, locked_at = NULL, lock_reason = ? WHERE id = ?",
             (reason, user_id),
         )
+        db.execute(
+            """INSERT INTO account_events (user_id, actor_id, event, reason, created_at)
+               VALUES (?, ?, 'unlocked', ?, ?)""",
+            (user_id, g.user["id"], reason, now()),
+        )
         db.commit()
         flash(f"{target['full_name']} has been unlocked. Reason recorded: {reason}", "success")
-        return redirect(url_for("admin_users"))
-    return render_template("admin_unlock.html", target=target)
+        destination = "admin_department" if g.user["role"] == "admin" else "admin_users"
+        return redirect(url_for(destination))
+    back_url = url_for("admin_department") if g.user["role"] == "admin" else url_for("admin_users")
+    return render_template("admin_unlock.html", target=target, back_url=back_url)
 
 
 @app.route("/admin/users/<int:user_id>/manage", methods=["GET", "POST"])
@@ -2537,7 +2969,7 @@ def admin_manage_user(user_id):
 
 
 @app.route("/admin/department", methods=["GET", "POST"])
-@admin_required
+@department_admin_required
 def admin_department():
     db = get_db()
     dept = g.user["department"]
@@ -2547,6 +2979,9 @@ def admin_department():
         if toggle_id:
             target = db.execute("SELECT * FROM users WHERE id = ? AND department = ?", (toggle_id, dept)).fetchone()
             if target and target["role"] == "employee":
+                if target["locked_at"]:
+                    flash("This account is locked. Use Unlock and record a reason.", "warning")
+                    return redirect(url_for("admin_department"))
                 new_active = 0 if target["is_active"] else 1
                 db.execute("UPDATE users SET is_active = ? WHERE id = ?", (new_active, toggle_id))
                 db.commit()
@@ -2605,7 +3040,7 @@ def admin_department():
 
 
 @app.route("/admin/department/<int:user_id>/reset-password", methods=["GET", "POST"])
-@admin_required
+@department_admin_required
 def admin_department_reset_password(user_id):
     db = get_db()
     target = db.execute(

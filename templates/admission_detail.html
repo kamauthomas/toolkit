@@ -16,6 +16,7 @@
       <div><dt>Contact</dt><dd>{{ admission.contact or 'Not recorded' }}</dd></div>
       <div><dt>Course</dt><dd>{{ admission.course }}</dd></div>
       <div><dt>Intake</dt><dd>{{ admission.intake or 'Not specified' }}</dd></div>
+      <div><dt>Admission date</dt><dd>{{ admission.admission_date or 'Not recorded' }}</dd></div>
       <div><dt>Source</dt><dd>{{ admission.source or 'Not specified' }}</dd></div>
       <div><dt>Notes</dt><dd style="white-space:pre-wrap;">{{ admission.notes or 'No notes recorded.' }}</dd></div>
       <div><dt>Last updated</dt><dd>{{ admission.updated_at }}</dd></div>

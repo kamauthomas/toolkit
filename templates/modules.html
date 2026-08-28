@@ -25,6 +25,7 @@
         <strong>{{ module.metric }}</strong>
         <span>{{ module.label }}</span>
       </div>
+      {% if module.endpoint %}<a class="secondary small-button" href="{{ url_for(module.endpoint) }}">Open module</a>{% endif %}
     </article>
   {% endfor %}
 </section>

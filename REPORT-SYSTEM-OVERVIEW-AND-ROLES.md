@@ -3,7 +3,7 @@
 **System:** Daily operations reporting for The Toolkit for Skills & Innovation
 **Address:** reports.toolkitafrica.ac.ke
 **Audience:** staff, department heads, and management
-**Last updated:** 18 August 2026
+**Last updated:** 28 August 2026
 
 ---
 
@@ -69,6 +69,12 @@ Regardless of role, every signed-in user has:
 Account security is built in: repeated failed logins lock an account, and locked accounts
 must be unlocked by a manager with a recorded reason.
 
+The operations workspace also includes:
+
+- admissions follow-up records with verification decisions and history;
+- monthly intake targets compared with verified admissions;
+- meeting minutes with responsible action owners, deadlines and progress states.
+
 ---
 
 ## 5. Roles
@@ -100,7 +106,9 @@ A Department Admin can:
   assigned to them.
 - See a dashboard scoped to their assigned team's activity and metrics.
 - Manage their **department's staff**: add employees to the department, activate/deactivate
-  them, and reset an employee's password.
+  them, reset an employee's password, and unlock an inactivity-locked employee with a
+  recorded reason.
+- Set intake targets and coordinate meeting actions for staff assigned to them.
 - Export their team's reports.
 
 A Department Admin sees the reports of the staff **explicitly assigned to them**, and can only
@@ -116,6 +124,7 @@ A Principal can:
 - See **every department and every report** across the institution.
 - Use the **executive overview** — the organisation-wide dashboard with per-department
   staffing, report volumes, review/approval rates, and rolled-up metrics.
+- Review institution-wide admissions, intake targets, meetings and action follow-up.
 - Review and sign off reports anywhere in the institution.
 - Export the full report record.
 
@@ -153,6 +162,9 @@ can seize control of another's account.
 | Executive overview (all departments) | — | — | ✓ | ✓ |
 | Manage own department's staff | — | ✓ | — | ✓ |
 | Reset / unlock staff accounts | — | Own dept, lower level | — | All lower levels |
+| Admissions verification | — | Assigned scope | All | All |
+| Set monthly intake targets | — | Assigned scope | All | All |
+| Record meetings / update own actions | ✓ | ✓ | ✓ | ✓ |
 | Manage all users, roles & report access | — | — | — | ✓ |
 | System settings & registration | — | — | — | ✓ |
 
@@ -166,5 +178,9 @@ can seize control of another's account.
   Super Admin. A Department Admin with no assignments sees only their own reports.
 - **Account protection**: failed-login lockouts, recorded-reason unlocks, and the rule that
   management accounts cannot reset one another keep administrative control accountable.
+  Employee inactivity locks remain enforced even if a role is changed; the account must use
+  the explicit reasoned unlock path.
 - **Data on account removal**: deleting a user offers a choice to keep their historical
   reports (for the institutional record) or remove them.
+- **Wingu Box**: no live integration exists. The safe proposal and required owner decisions
+  are recorded in `WINGU_BOX_INTEGRATION_DESIGN.md` and `OWNER_INPUT_TRACKER.md`.

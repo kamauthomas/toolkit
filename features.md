@@ -174,6 +174,11 @@ Visual indicators shall include:
 * Monthly comparison charts
 * Target attainment rankings
 
+The implemented monthly view lets authorised managers set or revise an
+officer's target and compares it only with verified admissions attributed to
+that officer in the selected month. Employees can see their own figures while
+executive roles retain institution-wide visibility.
+
 ---
 
 ## 3.5 Incentives Management Module
@@ -207,6 +212,12 @@ A centralized meeting minutes repository shall be implemented.
 * Assign action items
 * Set deadlines
 * Track completion status
+
+The implemented repository records the meeting, attendees, summary and
+department, then assigns actions to authorised users with due dates. Owners or
+authorised managers can move an action through open, in-progress, blocked and
+completed states; blocked actions require an explanation and completed actions
+retain their completion time.
 
 ### Minutes Information
 

@@ -54,6 +54,14 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
             <span>Admissions</span>
           </a>
+          <a class="nav-item {% if request.endpoint == 'intake_targets' %}active{% endif %}" href="{{ url_for('intake_targets') }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 16 4-4 3 3 5-7"/></svg>
+            <span>Intake Targets</span>
+          </a>
+          <a class="nav-item {% if request.endpoint in ('meetings', 'meeting_detail', 'add_meeting_action', 'update_meeting_action') %}active{% endif %}" href="{{ url_for('meetings') }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01"/></svg>
+            <span>Meetings</span>
+          </a>
           <a class="nav-item {% if request.endpoint == 'my_drafts' %}active{% endif %}" href="{{ url_for('my_drafts') }}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
             <span>Drafts</span>
@@ -65,7 +73,7 @@
               <span>Principal Overview</span>
             </a>
           {% endif %}
-          {% if g.user.role in ('admin', 'principal', 'superadmin', 'shadowadmin') %}
+          {% if g.user.role in ('admin', 'superadmin', 'shadowadmin') %}
             <span class="nav-section-label">Oversight</span>
             <a class="nav-item {% if request.endpoint == 'admin_department' %}active{% endif %}" href="{{ url_for('admin_department') }}">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/></svg>

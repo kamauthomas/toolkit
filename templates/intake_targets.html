@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Admissions performance</p>
+    <h1>Monthly intake targets</h1>
+    <p class="muted">Targets are compared with verified admissions attributed to each officer for the selected month.</p>
+  </div>
+  <form method="get" class="actions">
+    <label class="compact-field">Month<input type="month" name="month" value="{{ target_month }}" onchange="this.form.submit()"></label>
+  </form>
+</section>
+
+<section class="module-grid" style="margin-bottom:18px;">
+  <article class="module-card" style="min-height:0;"><div><span class="eyebrow">Combined target</span><div class="module-metric"><strong>{{ total_target }}</strong><span>admissions</span></div></div></article>
+  <article class="module-card" style="min-height:0;"><div><span class="eyebrow">Verified actual</span><div class="module-metric"><strong>{{ total_actual }}</strong><span>admissions</span></div></div></article>
+  <article class="module-card" style="min-height:0;"><div><span class="eyebrow">Overall progress</span><div class="module-metric"><strong>{{ ((total_actual / total_target) * 100)|int if total_target else 0 }}%</strong><span>of target</span></div></div></article>
+</section>
+
+{% if g.user.role in ('admin', 'principal', 'superadmin', 'shadowadmin') %}
+<section class="card">
+  <h2>Set or revise a target</h2>
+  <form method="post" class="form grid">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label>Officer
+      <select name="officer_id" required>{% for officer in officers %}<option value="{{ officer.id }}">{{ officer.full_name }} · {{ officer.department }}</option>{% endfor %}</select>
+    </label>
+    <label>Month<input type="month" name="target_month" value="{{ target_month }}" required></label>
+    <label>Target admissions<input type="number" name="target_count" min="1" max="10000" required></label>
+    <div style="display:flex;align-items:end;"><button class="primary" type="submit">Save target</button></div>
+  </form>
+</section>
+{% endif %}
+
+<section class="card">
+  <div class="inline-head"><h2>Officer progress · {{ target_month }}</h2><span class="muted">Verified records only</span></div>
+  {% if rows %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Officer</th><th>Target</th><th>Verified</th><th>Remaining</th><th>Progress</th><th>Last activity</th></tr></thead>
+    <tbody>{% for item in rows %}<tr>
+      <td><strong>{{ item.officer.full_name }}</strong><br><span class="muted small">{{ item.officer.department }}</span></td>
+      <td>{{ item.target }}</td><td>{{ item.actual }}</td><td>{{ item.remaining }}</td>
+      <td><div class="progress-track"><span style="width:{{ item.percentage }}%"></span></div><span class="small">{{ item.percentage }}%</span></td>
+      <td>{{ item.last_activity or 'No verified admission' }}</td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="empty">No officers are available in your scope.</p>{% endif %}
+</section>
+{% endblock %}

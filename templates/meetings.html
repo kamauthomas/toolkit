@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Institutional follow-up</p>
+    <h1>Meetings and actions</h1>
+    <p class="muted">Keep the meeting decision, responsible person and due date together so follow-up is visible.</p>
+  </div>
+  <div class="actions"><a class="primary" href="#new-meeting">Record meeting</a></div>
+</section>
+
+<section class="card" id="new-meeting">
+  <h2>Record a meeting</h2>
+  <form method="post" class="form grid">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label>Meeting title<input type="text" name="title" maxlength="180" required></label>
+    <label>Date<input type="date" name="meeting_date" required></label>
+    <label>Department<select name="department">{% for department in departments %}<option {% if department == g.user.department %}selected{% endif %}>{{ department }}</option>{% endfor %}</select></label>
+    <label class="full">Attendees<textarea name="attendees" maxlength="2000" placeholder="Names or groups present"></textarea></label>
+    <label class="full">Minutes summary<textarea name="summary" maxlength="4000" required placeholder="Key discussion, decisions and context"></textarea></label>
+    <div class="full" style="display:flex;justify-content:flex-end;"><button class="primary" type="submit">Save meeting</button></div>
+  </form>
+</section>
+
+<section class="card">
+  <div class="inline-head"><h2>Meetings in your scope</h2><span class="muted">{{ meetings|length }} shown</span></div>
+  {% if meetings %}<div class="table-wrap"><table>
+    <thead><tr><th>Date</th><th>Meeting</th><th>Department</th><th>Recorded by</th><th>Actions</th><th>Open</th><th></th></tr></thead>
+    <tbody>{% for meeting in meetings %}<tr>
+      <td>{{ meeting.meeting_date }}</td><td><strong>{{ meeting.title }}</strong></td><td>{{ meeting.department }}</td><td>{{ meeting.creator_name }}</td><td>{{ meeting.action_count or 0 }}</td><td>{{ meeting.open_count or 0 }}</td>
+      <td><a class="secondary small-button" href="{{ url_for('meeting_detail', meeting_id=meeting.id) }}">Open</a></td>
+    </tr>{% endfor %}</tbody>
+  </table></div>{% else %}<p class="empty">No meetings have been recorded in your scope.</p>{% endif %}
+</section>
+{% endblock %}

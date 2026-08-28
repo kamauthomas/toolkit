@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div><p class="eyebrow">{{ meeting.department }} · {{ meeting.meeting_date }}</p><h1>{{ meeting.title }}</h1><p class="muted">Recorded by {{ meeting.creator_name }}</p></div>
+  <div class="actions"><a class="secondary" href="{{ url_for('meetings') }}">Back to meetings</a></div>
+</section>
+
+<div class="two-col">
+  <section class="card"><h2>Minutes summary</h2><p style="white-space:pre-wrap;line-height:1.7;">{{ meeting.summary }}</p></section>
+  <section class="card"><h2>Attendees</h2><p style="white-space:pre-wrap;line-height:1.7;">{{ meeting.attendees or 'Not recorded' }}</p></section>
+</div>
+
+{% if can_add_actions %}
+<section class="card">
+  <h2>Assign an action</h2>
+  <form method="post" action="{{ url_for('add_meeting_action', meeting_id=meeting.id) }}" class="form grid">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label class="full">Action required<textarea name="description" maxlength="1000" required></textarea></label>
+    <label>Responsible person<select name="owner_id" required>{% for owner in owners %}<option value="{{ owner.id }}">{{ owner.full_name }} · {{ owner.department }}</option>{% endfor %}</select></label>
+    <label>Due date<input type="date" name="due_date"></label>
+    <div class="full" style="display:flex;justify-content:flex-end;"><button class="primary" type="submit">Assign action</button></div>
+  </form>
+</section>
+{% endif %}
+
+<section class="card">
+  <h2>Action register</h2>
+  {% if actions %}<div class="action-list">
+    {% for action in actions %}<article class="read-block">
+      <div class="inline-head"><div><h3>{{ action.description }}</h3><p class="muted">Owner: {{ action.owner_name }} · Due: {{ action.due_date or 'No date set' }}</p></div><span class="status-badge {{ 'approved' if action.status == 'completed' else 'reviewed' if action.status == 'in_progress' else 'submitted' }}">{{ action.status|replace('_', ' ')|title }}</span></div>
+      {% if action.completion_notes %}<p><strong>Update:</strong> {{ action.completion_notes }}</p>{% endif %}
+      {% if action.owner_id == g.user.id or g.user.role in ('admin', 'principal', 'superadmin', 'shadowadmin') %}
+      <form method="post" action="{{ url_for('update_meeting_action', meeting_id=meeting.id, action_id=action.id) }}" class="form grid" style="margin-top:12px;">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+        <label>Status<select name="status">{% for status in action_statuses %}<option value="{{ status }}" {% if status == action.status %}selected{% endif %}>{{ status|replace('_', ' ')|title }}</option>{% endfor %}</select></label>
+        <label class="full">Progress / completion note<textarea name="completion_notes" maxlength="2000" placeholder="Required when blocked">{{ action.completion_notes }}</textarea></label>
+        <div class="full" style="display:flex;justify-content:flex-end;"><button class="secondary small-button" type="submit">Update action</button></div>
+      </form>
+      {% endif %}
+    </article>{% endfor %}
+  </div>{% else %}<p class="empty">No action items have been assigned.</p>{% endif %}
+</section>
+{% endblock %}

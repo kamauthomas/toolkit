@@ -5,6 +5,28 @@ change itself. Format and rules: see `../AGENTS.md` section 1.
 
 ---
 
+## 2026-08-28 — Operationalise intake, meetings and account unlocking
+**Area:** admissions · targets · meetings · authentication · Wingu planning
+**Environments:** local verification; not deployed
+**Commit(s):** this commit
+
+Implemented monthly intake targets backed by verified admission records and a
+meeting repository with accountable action owners, deadlines, status updates
+and notifications. Fixed the five-day inactivity reactivation defect: locks are
+now enforced independently of role, department admins can unlock their own
+employees through a reasoned action, and promotion no longer bypasses a lock.
+
+Added a direct owner-input tracker and a credential-free Wingu Box integration
+design. The design recommends an approved API/SSO path, server-side identity
+mapping, idempotent queued dispatch after report approval, authoritative
+attendance times and visible reconciliation; it does not connect to Wingu or
+store credentials.
+
+**Verified by:** Python compilation, full automated suite and authenticated
+route/render checks for targets, meeting actions and unlock behaviour.
+**Follow-ups:** review on demo; provide RPT-001–RPT-012 owner decisions; obtain
+Wingu vendor documentation/sandbox before integration work.
+
 ## 2026-08-28 — Implement admissions capture and verification workflow
 **Area:** admissions operations · reporting
 **Environments:** local verification; not deployed
