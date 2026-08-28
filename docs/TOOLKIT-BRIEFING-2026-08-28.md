@@ -176,16 +176,19 @@ supports employee drafts and submissions, branded PDF output, review states
 (Submitted → Reviewed → Approved), role-scoped dashboards, notifications,
 profiles, password changes, account lockout/unlock and executive visibility.
 
-The first operational expansion is now implemented locally: authorised staff
-can capture an admissions follow-up record, see records within their scope,
-assign a verification outcome, and retain a time-stamped decision history. A
-record owner is notified when another authorised reviewer changes the outcome.
-This module is not deployed yet; it needs a demo review before hosting changes.
+The operational expansion is now implemented locally: authorised staff can
+capture and verify admissions follow-up records, set monthly intake targets
+against verified admissions, and record meetings with responsible action
+owners, due dates and progress states. The five-day inactivity workflow now has
+a direct, reasoned department-admin unlock path; a role change can no longer be
+used as a reactivation workaround, and lock/unlock events are recorded. These
+changes are not deployed yet and need a demo review before hosting changes.
 
-The existing proposal also identifies future normalized modules for admissions
-monthly intake targets, incentives, meeting minutes/action items, notification
-rules/delivery logs, Excel export, reminders and richer department dashboards.
-Those remain proposals/TODO items, not all current live workflows.
+The remaining proposal identifies incentives, notification rules/delivery logs,
+Excel export, scheduled reminders and richer department dashboards. A Wingu Box
+integration design is documented but deliberately disconnected until Toolkit
+provides vendor API/SSO details, identity/project mappings, the approved dispatch
+trigger and an authoritative attendance-time source.
 
 The deployment postmortem records a prior Passenger/template mismatch that took
 the reports and main domains offline. Future releases must deploy the application,

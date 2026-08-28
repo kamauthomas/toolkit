@@ -5,6 +5,22 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-28 — Reconcile briefing with operational reporting modules
+**Area:** cross-project briefing · reports · management communication
+**Environments:** documentation only; Report System changes remain local
+**Commit(s):** this commit
+
+Updated the whole-Toolkit briefing and non-technical presentation summary after
+the Report System gained working intake targets, meeting/action tracking and a
+reasoned inactivity-unlock flow. The documents also preserve the boundary that
+Wingu Box is a design only until its supported integration method, identity
+mapping, project code and attendance source are approved.
+
+**Verified by:** reconciled against Report System commit `07a19c6`, its registered
+routes and 38-test passing result.
+**Follow-ups:** use the Report System owner tracker for the demo and Wingu
+decisions; regenerate the long-form PDF/DOCX briefing after management approval.
+
 ## 2026-08-28 — Add non-technical presentation summary
 **Area:** cross-project briefing · management communication
 **Environments:** documentation only; no deployment

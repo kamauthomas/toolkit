@@ -33,8 +33,10 @@ Toolkit is moving from separate manual processes to a connected set of services 
 - Lets staff save a draft, submit a daily report and receive feedback.
 - Gives managers a clear review and approval trail.
 - Produces consistent summaries and printable reports for leadership.
-- Includes a local admissions follow-up register with role-limited access,
-  verification decisions and a visible history of changes.
+- Includes local admissions follow-up and verification, monthly intake targets,
+  meeting minutes and accountable action tracking.
+- Gives department administrators a direct, recorded way to reactivate an
+  inactivity-locked employee without changing the employee's role.
 
 **Value:** Leadership can see progress and follow-up needs without collecting scattered paper or chat messages.
 
@@ -75,7 +77,7 @@ Toolkit is moving from separate manual processes to a connected set of services 
 2. Provide the approved live-video service and campus hosting arrangements.
 3. Confirm the final learner-support, attendance and data-retention rules.
 4. Approve the email/WhatsApp notification owner and message templates for Reception.
-5. Confirm the reporting modules leadership wants next: admissions follow-up, intake targets, meeting actions and reminders.
+5. Review the new reporting modules on demo and decide the official intake measure, five-day inactivity policy and remaining incentives/reminder priorities.
 6. Approve the patched website theme release after the demo review.
 
 ## Suggested closing
