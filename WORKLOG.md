@@ -21,6 +21,20 @@ production claims included.
 **Follow-ups:** use the summary as speaking notes and keep the owner trackers
 aligned with decisions made in the meeting.
 
+## 2026-08-28 — Refresh cross-project reports after admissions module work
+**Area:** cross-project briefing · reporting status
+**Environments:** documentation only; no deployment
+**Commit(s):** this commit
+
+Updated the whole-Toolkit briefing and presentation summary to identify the
+Report System's newly implemented local admissions capture and verification
+slice, while keeping the demo-review and hosting boundary explicit.
+
+**Verified by:** reconciled against Report System commit `36b92e7` and its
+29-test passing result.
+**Follow-ups:** update the management materials again after demo review or
+additional reporting modules are approved.
+
 ## 2026-08-28 — Add whole-Toolkit briefing report
 **Area:** cross-project briefing · website · Reception · Virtual Campus · Smart
 Lecturer · reporting · chatbot · graphics/posters · operations

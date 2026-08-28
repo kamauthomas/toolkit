@@ -33,6 +33,8 @@ Toolkit is moving from separate manual processes to a connected set of services 
 - Lets staff save a draft, submit a daily report and receive feedback.
 - Gives managers a clear review and approval trail.
 - Produces consistent summaries and printable reports for leadership.
+- Includes a local admissions follow-up register with role-limited access,
+  verification decisions and a visible history of changes.
 
 **Value:** Leadership can see progress and follow-up needs without collecting scattered paper or chat messages.
 
@@ -79,4 +81,3 @@ Toolkit is moving from separate manual processes to a connected set of services 
 ## Suggested closing
 
 The work is no longer a collection of isolated prototypes. The core public and reception journeys are operating, the reporting foundation is in place, and a supervised Virtual Campus class has worked end to end. The next step is disciplined piloting: agree the owners and policies, run with a small learner group, collect feedback and then expand with confidence.
-
