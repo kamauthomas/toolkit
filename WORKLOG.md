@@ -5,6 +5,22 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-28 — Add non-technical presentation summary
+**Area:** cross-project briefing · management communication
+**Environments:** documentation only; no deployment
+**Commit(s):** this commit
+
+Added a concise, meeting-ready summary of the Toolkit portfolio for non-technical
+stakeholders. It covers the website, Reception, staff reporting, Smart Lecturer,
+Virtual Campus, security posture, communications assets and the decisions needed
+for the next pilot phase.
+
+**Verified by:** cross-checked against the dated whole-Toolkit briefing and
+current project handoff/status documents; no credentials or unsupported
+production claims included.
+**Follow-ups:** use the summary as speaking notes and keep the owner trackers
+aligned with decisions made in the meeting.
+
 ## 2026-08-28 — Add whole-Toolkit briefing report
 **Area:** cross-project briefing · website · Reception · Virtual Campus · Smart
 Lecturer · reporting · chatbot · graphics/posters · operations
