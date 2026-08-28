@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Admissions operations</p>
+    <h1>Admission records</h1>
+    <p class="muted">Capture an enquiry or application follow-up once, then keep its verification history visible to authorised staff.</p>
+  </div>
+  <div class="actions">
+    <a class="primary" href="#new-admission">Capture record</a>
+  </div>
+</section>
+
+<section class="module-grid" style="margin-bottom:18px;">
+  {% for status, label in [('pending', 'Pending verification'), ('needs_info', 'Needs information'), ('verified', 'Verified'), ('rejected', 'Rejected')] %}
+    <article class="module-card" style="min-height:0;">
+      <div><span class="eyebrow">{{ label }}</span><div class="module-metric"><strong>{{ counts.get(status, 0) }}</strong><span>records</span></div></div>
+    </article>
+  {% endfor %}
+</section>
+
+<section class="card" id="new-admission">
+  <h2>Capture an admission record</h2>
+  <p class="hint">Use this for a follow-up record. Do not enter passwords or unnecessary sensitive information.</p>
+  <form method="post" class="form grid">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label>Applicant name
+      <input type="text" name="applicant_name" maxlength="160" required>
+    </label>
+    <label>Contact
+      <input type="text" name="contact" maxlength="80" placeholder="Phone or email (optional)">
+    </label>
+    <label>Course / programme
+      <input type="text" name="course" maxlength="160" required>
+    </label>
+    <label>Intake
+      <input type="text" name="intake" maxlength="80" placeholder="e.g. September 2026">
+    </label>
+    <label>Source
+      <input type="text" name="source" maxlength="120" placeholder="Website, Reception, referral…">
+    </label>
+    <label class="full">Notes
+      <textarea name="notes" maxlength="2000" placeholder="Useful follow-up context"></textarea>
+    </label>
+    <div class="full" style="display:flex;justify-content:flex-end;">
+      <button class="primary" type="submit">Save and queue for verification</button>
+    </div>
+  </form>
+</section>
+
+<section class="card">
+  <div class="inline-head"><h2>Records in your scope</h2><span class="muted">{{ admissions|length }} shown</span></div>
+  {% if admissions %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Applicant</th><th>Course</th><th>Intake</th><th>Status</th><th>Captured by</th><th>Updated</th><th></th></tr></thead>
+        <tbody>
+          {% for record in admissions %}
+            <tr>
+              <td><strong>{{ record.applicant_name }}</strong><br><span class="muted small">{{ record.contact or 'No contact recorded' }}</span></td>
+              <td>{{ record.course }}</td>
+              <td>{{ record.intake or '—' }}</td>
+              <td><span class="status-badge {{ 'approved' if record.status == 'verified' else 'reviewed' if record.status == 'needs_info' else 'submitted' }}">{{ record.status|replace('_', ' ')|title }}</span></td>
+              <td>{{ record.creator_name }}</td>
+              <td>{{ record.updated_at }}</td>
+              <td><a class="secondary small-button" href="{{ url_for('admission_detail', admission_id=record.id) }}">Open</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">No admission records have been captured in your scope yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

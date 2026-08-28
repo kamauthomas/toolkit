@@ -795,6 +795,32 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
 
+        CREATE TABLE IF NOT EXISTS admissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            applicant_name TEXT NOT NULL,
+            contact TEXT DEFAULT '',
+            course TEXT NOT NULL,
+            intake TEXT DEFAULT '',
+            source TEXT DEFAULT '',
+            notes TEXT DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'pending',
+            created_by INTEGER NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(created_by) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS admission_verification_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            admission_id INTEGER NOT NULL,
+            reviewer_id INTEGER,
+            status TEXT NOT NULL,
+            notes TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(admission_id) REFERENCES admissions(id),
+            FOREIGN KEY(reviewer_id) REFERENCES users(id)
+        );
+
         CREATE TABLE IF NOT EXISTS report_access (
             admin_id INTEGER NOT NULL,
             employee_id INTEGER NOT NULL,
@@ -815,6 +841,17 @@ def init_db():
         );
         """
     )
+    conn.commit()
+
+    for index_sql in (
+        "CREATE INDEX IF NOT EXISTS idx_admissions_status ON admissions(status)",
+        "CREATE INDEX IF NOT EXISTS idx_admissions_creator ON admissions(created_by)",
+        "CREATE INDEX IF NOT EXISTS idx_admission_history_record ON admission_verification_history(admission_id, created_at)",
+    ):
+        try:
+            conn.execute(index_sql)
+        except Exception:
+            pass
     conn.commit()
 
     try:
@@ -1924,6 +1961,159 @@ def modules():
         ).fetchall()
     insights = build_dashboard_insights(reports, get_visible_staff_count(db))
     return render_template("modules.html", modules=expansion_modules(insights), insights=insights)
+
+
+ADMISSION_STATUSES = ("pending", "needs_info", "verified", "rejected")
+
+
+def can_view_admission(user, admission):
+    """Keep admission records within the creator's reporting scope."""
+    if not admission:
+        return False
+    if user["role"] in EXECUTIVE_ROLES:
+        return True
+    if admission["created_by"] == user["id"]:
+        return True
+    if user["role"] == "admin":
+        allowed = get_db().execute(
+            "SELECT 1 FROM report_access WHERE admin_id = ? AND employee_id = ?",
+            (user["id"], admission["created_by"]),
+        ).fetchone()
+        return bool(allowed)
+    return False
+
+
+def get_admission_or_404(admission_id):
+    admission = get_db().execute(
+        """SELECT admissions.*, users.full_name AS creator_name
+           FROM admissions JOIN users ON users.id = admissions.created_by
+           WHERE admissions.id = ?""",
+        (admission_id,),
+    ).fetchone()
+    if not admission or not can_view_admission(g.user, admission):
+        abort(404)
+    return admission
+
+
+@app.route("/admissions", methods=["GET", "POST"])
+@login_required
+def admissions():
+    db = get_db()
+    if request.method == "POST":
+        csrf_protect()
+        applicant_name = clean_text(request.form.get("applicant_name"), 160)
+        course = clean_text(request.form.get("course"), 160)
+        if not applicant_name or not course:
+            flash("Applicant name and course are required.", "danger")
+            return redirect(url_for("admissions"))
+        timestamp = now()
+        cursor = db.execute(
+            """INSERT INTO admissions
+               (applicant_name, contact, course, intake, source, notes, status, created_by, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)""",
+            (
+                applicant_name,
+                clean_text(request.form.get("contact"), 80),
+                course,
+                clean_text(request.form.get("intake"), 80),
+                clean_text(request.form.get("source"), 120),
+                clean_text(request.form.get("notes"), 2000),
+                g.user["id"],
+                timestamp,
+                timestamp,
+            ),
+        )
+        admission_id = cursor.lastrowid
+        db.execute(
+            """INSERT INTO admission_verification_history
+               (admission_id, reviewer_id, status, notes, created_at)
+               VALUES (?, ?, 'pending', ?, ?)""",
+            (admission_id, g.user["id"], "Record captured; awaiting verification.", timestamp),
+        )
+        db.commit()
+        flash("Admission record captured and queued for verification.", "success")
+        return redirect(url_for("admission_detail", admission_id=admission_id))
+
+    if g.user["role"] in EXECUTIVE_ROLES:
+        records = db.execute(
+            """SELECT admissions.*, users.full_name AS creator_name
+               FROM admissions JOIN users ON users.id = admissions.created_by
+               ORDER BY admissions.created_at DESC, admissions.id DESC"""
+        ).fetchall()
+    elif g.user["role"] == "admin":
+        records = db.execute(
+            """SELECT DISTINCT admissions.*, users.full_name AS creator_name
+               FROM admissions JOIN users ON users.id = admissions.created_by
+               LEFT JOIN report_access ON report_access.employee_id = admissions.created_by
+               WHERE admissions.created_by = ? OR report_access.admin_id = ?
+               ORDER BY admissions.created_at DESC, admissions.id DESC""",
+            (g.user["id"], g.user["id"]),
+        ).fetchall()
+    else:
+        records = db.execute(
+            """SELECT admissions.*, users.full_name AS creator_name
+               FROM admissions JOIN users ON users.id = admissions.created_by
+               WHERE admissions.created_by = ?
+               ORDER BY admissions.created_at DESC, admissions.id DESC""",
+            (g.user["id"],),
+        ).fetchall()
+    counts = {status: 0 for status in ADMISSION_STATUSES}
+    for record in records:
+        counts[record["status"]] = counts.get(record["status"], 0) + 1
+    return render_template("admissions.html", admissions=records, counts=counts, statuses=ADMISSION_STATUSES)
+
+
+@app.route("/admissions/<int:admission_id>")
+@login_required
+def admission_detail(admission_id):
+    admission = get_admission_or_404(admission_id)
+    history = get_db().execute(
+        """SELECT h.*, u.full_name AS reviewer_name
+           FROM admission_verification_history h
+           LEFT JOIN users u ON u.id = h.reviewer_id
+           WHERE h.admission_id = ?
+           ORDER BY h.created_at ASC, h.id ASC""",
+        (admission_id,),
+    ).fetchall()
+    return render_template("admission_detail.html", admission=admission, history=history, statuses=ADMISSION_STATUSES)
+
+
+@app.route("/admissions/<int:admission_id>/verify", methods=["POST"])
+@admin_required
+def verify_admission(admission_id):
+    csrf_protect()
+    admission = get_admission_or_404(admission_id)
+    status = clean_text(request.form.get("status"), 30)
+    notes = clean_text(request.form.get("notes"), 2000)
+    if status not in ADMISSION_STATUSES or status == "pending":
+        abort(400)
+    if status in ("needs_info", "rejected") and not notes:
+        flash("Add a note explaining the verification decision.", "danger")
+        return redirect(url_for("admission_detail", admission_id=admission_id))
+    timestamp = now()
+    db = get_db()
+    db.execute(
+        "UPDATE admissions SET status = ?, notes = ?, updated_at = ? WHERE id = ?",
+        (status, notes, timestamp, admission_id),
+    )
+    db.execute(
+        """INSERT INTO admission_verification_history
+           (admission_id, reviewer_id, status, notes, created_at)
+           VALUES (?, ?, ?, ?, ?)""",
+        (admission_id, g.user["id"], status, notes, timestamp),
+    )
+    db.commit()
+    if admission["created_by"] != g.user["id"]:
+        create_notification(
+            user_id=admission["created_by"],
+            kind="admission",
+            title=f"Admission marked {status.replace('_', ' ')}",
+            body=f"The admission record for {admission['applicant_name']} was updated by {g.user['full_name']}.",
+            link=url_for("admission_detail", admission_id=admission_id),
+            actor_id=g.user["id"],
+        )
+    flash("Admission verification status updated.", "success")
+    return redirect(url_for("admission_detail", admission_id=admission_id))
 
 @app.route("/principal")
 @principal_required

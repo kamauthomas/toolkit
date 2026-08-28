@@ -115,6 +115,10 @@ Capture and manage:
 * Assigned Officer
 * Verification Status
 
+The first working slice is now available in the reporting platform: authorised
+staff can capture an admission record, see records within their reporting scope,
+and open its detail/history page.
+
 ### Admission Verification
 
 Administrators shall be able to:
@@ -123,6 +127,10 @@ Administrators shall be able to:
 * Verify admissions
 * Reject invalid admissions
 * Track verification history
+
+The implemented workflow requires a decision note when a record needs more
+information or is rejected, records the reviewer and time, and notifies the
+record owner when another authorised reviewer changes the status.
 
 Status indicators:
 

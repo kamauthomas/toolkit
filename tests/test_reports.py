@@ -182,3 +182,80 @@ class TestReports:
         resp = client.get("/principal")
         assert resp.status_code == 200
         assert b"Institution executive overview" in resp.data
+
+    def test_admission_record_is_captured_with_pending_history(self, client):
+        self._login_as_admin(client)
+        resp = client.post(
+            "/admissions",
+            data={
+                "_csrf_token": "test-token",
+                "applicant_name": "Amina Example",
+                "contact": "+254700000001",
+                "course": "Digital Marketing",
+                "intake": "September 2026",
+                "source": "Website",
+                "notes": "Requested a call back.",
+            },
+            follow_redirects=False,
+        )
+        assert resp.status_code == 302
+        with app_module.app.app_context():
+            admission = app_module.get_db().execute("SELECT * FROM admissions").fetchone()
+            history = app_module.get_db().execute(
+                "SELECT * FROM admission_verification_history WHERE admission_id = ?",
+                (admission["id"],),
+            ).fetchall()
+        assert admission["status"] == "pending"
+        assert admission["created_by"] == 1
+        assert len(history) == 1
+        assert history[0]["status"] == "pending"
+
+    def test_admission_verification_requires_reason_for_rejection(self, client):
+        self._login_as_admin(client)
+        with app_module.app.app_context():
+            cursor = app_module.get_db().execute(
+                """INSERT INTO admissions (applicant_name, course, status, created_by, created_at, updated_at)
+                   VALUES (?, ?, 'pending', ?, ?, ?)""",
+                ("Test Applicant", "Welding", 1, app_module.now(), app_module.now()),
+            )
+            admission_id = cursor.lastrowid
+            app_module.get_db().commit()
+
+        response = client.post(
+            f"/admissions/{admission_id}/verify",
+            data={"_csrf_token": "test-token", "status": "rejected", "notes": ""},
+            follow_redirects=True,
+        )
+        assert response.status_code == 200
+        assert b"note explaining the verification decision" in response.data
+        with app_module.app.app_context():
+            row = app_module.get_db().execute("SELECT status FROM admissions WHERE id = ?", (admission_id,)).fetchone()
+        assert row["status"] == "pending"
+
+    def test_admission_verification_records_decision_and_history(self, client):
+        self._login_as_admin(client)
+        with app_module.app.app_context():
+            cursor = app_module.get_db().execute(
+                """INSERT INTO admissions (applicant_name, course, status, created_by, created_at, updated_at)
+                   VALUES (?, ?, 'pending', ?, ?, ?)""",
+                ("Verified Applicant", "Plumbing", 1, app_module.now(), app_module.now()),
+            )
+            admission_id = cursor.lastrowid
+            app_module.get_db().commit()
+
+        response = client.post(
+            f"/admissions/{admission_id}/verify",
+            data={"_csrf_token": "test-token", "status": "verified", "notes": "Documents checked by admissions."},
+            follow_redirects=False,
+        )
+        assert response.status_code == 302
+        with app_module.app.app_context():
+            row = app_module.get_db().execute("SELECT status, notes FROM admissions WHERE id = ?", (admission_id,)).fetchone()
+            history = app_module.get_db().execute(
+                "SELECT status, reviewer_id, notes FROM admission_verification_history WHERE admission_id = ? ORDER BY id",
+                (admission_id,),
+            ).fetchall()
+        assert row["status"] == "verified"
+        assert row["notes"] == "Documents checked by admissions."
+        assert history[-1]["status"] == "verified"
+        assert history[-1]["reviewer_id"] == 1

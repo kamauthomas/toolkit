@@ -8,12 +8,14 @@
 * Add role-aware dashboard KPIs for reports, pending reviews, approvals, departments, staff, admissions proxy activity, and marketing activity.
 * Add module preview surfaces for Admissions, Monthly Intake, Incentives, Minutes, Notifications, and Analytics.
 * Add an Operations Modules page for the proposed expansion areas.
+* Add an admissions record capture and verification workflow with scoped access,
+  decision notes, notifications, and immutable status history.
 
 ## Next implementation work
 
-* Create normalized database tables for admissions records, admission verification history, intake targets, incentives, meeting minutes, action items, notification rules, and notification delivery logs.
-* Add CRUD routes and forms for admissions records, minutes, incentive records, and intake targets.
-* Add verification workflows for admissions records with reviewer, status, notes, and timestamp tracking.
+* Create normalized database tables for intake targets, incentives, meeting minutes,
+  action items, notification rules, and notification delivery logs.
+* Add CRUD routes and forms for minutes, incentive records, and intake targets.
 * Add role-specific dashboards for Principal, Administrator, Department Head, and Employee once those roles are mapped to the current role model.
 * Add date range, employee, department, status, and report category filters to the dashboard and export routes.
 * Add Excel export support in addition to the existing CSV and PDF outputs.

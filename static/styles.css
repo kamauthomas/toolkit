@@ -662,6 +662,12 @@ a:focus-visible {
 
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 
+.detail-list { display: grid; gap: 0; margin: 0; }
+.detail-list > div { display: grid; grid-template-columns: minmax(110px, 0.35fr) 1fr; gap: 16px; padding: 11px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.detail-list > div:last-child { border-bottom: 0; }
+.detail-list dt { color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.detail-list dd { margin: 0; color: var(--text-secondary); line-height: 1.5; }
+
 .table-wrap,
 .principal-table {
   width: 100%;

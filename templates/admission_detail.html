@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Admission record</p>
+    <h1>{{ admission.applicant_name }}</h1>
+    <p class="muted">{{ admission.course }}{% if admission.intake %} · {{ admission.intake }}{% endif %} · Captured by {{ admission.creator_name }}</p>
+  </div>
+  <div class="actions"><a class="secondary" href="{{ url_for('admissions') }}">Back to admissions</a></div>
+</section>
+
+<div class="two-col">
+  <section class="card">
+    <div class="inline-head"><h2>Record details</h2><span class="status-badge {{ 'approved' if admission.status == 'verified' else 'reviewed' if admission.status == 'needs_info' else 'submitted' }}">{{ admission.status|replace('_', ' ')|title }}</span></div>
+    <dl class="detail-list">
+      <div><dt>Contact</dt><dd>{{ admission.contact or 'Not recorded' }}</dd></div>
+      <div><dt>Course</dt><dd>{{ admission.course }}</dd></div>
+      <div><dt>Intake</dt><dd>{{ admission.intake or 'Not specified' }}</dd></div>
+      <div><dt>Source</dt><dd>{{ admission.source or 'Not specified' }}</dd></div>
+      <div><dt>Notes</dt><dd style="white-space:pre-wrap;">{{ admission.notes or 'No notes recorded.' }}</dd></div>
+      <div><dt>Last updated</dt><dd>{{ admission.updated_at }}</dd></div>
+    </dl>
+  </section>
+
+  {% if g.user.role in ('admin', 'principal', 'superadmin', 'shadowadmin') %}
+    <section class="card">
+      <h2>Verification decision</h2>
+      <p class="hint">Choose the current outcome. A note is required when more information is needed or the record is rejected.</p>
+      <form method="post" action="{{ url_for('verify_admission', admission_id=admission.id) }}" class="form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+        <label>Status
+          <select name="status" required>
+            {% for status in statuses if status != 'pending' %}<option value="{{ status }}" {% if status == admission.status %}selected{% endif %}>{{ status|replace('_', ' ')|title }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Decision note
+          <textarea name="notes" maxlength="2000" placeholder="What was checked, or what is still needed?"></textarea>
+        </label>
+        <button class="primary" type="submit">Save verification decision</button>
+      </form>
+    </section>
+  {% endif %}
+</div>
+
+<section class="card">
+  <h2>Verification history</h2>
+  {% if history %}
+    <div class="table-wrap"><table>
+      <thead><tr><th>Time</th><th>Status</th><th>Recorded by</th><th>Note</th></tr></thead>
+      <tbody>{% for entry in history %}<tr><td>{{ entry.created_at }}</td><td>{{ entry.status|replace('_', ' ')|title }}</td><td>{{ entry.reviewer_name or 'System' }}</td><td>{{ entry.notes or '—' }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+  {% else %}<p class="empty">No verification events recorded.</p>{% endif %}
+</section>
+{% endblock %}
