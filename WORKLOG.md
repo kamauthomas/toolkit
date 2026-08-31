@@ -5,6 +5,30 @@ change itself. Format and rules: see `../AGENTS.md` section 1.
 
 ---
 
+## 2026-08-31 — Add portfolio OKR tracking and approved Wingu queue
+**Area:** strategy · reporting · Wingu · auditability
+**Environments:** local verification; not deployed
+**Commit(s):** this commit
+
+Implemented role-scoped objectives and measurable key results with assigned
+owners, dates, lifecycle states, server-calculated progress and append-only
+evidence updates. The workflow can track evidence from every Toolkit project,
+including campaign and poster deliverables, while the portfolio OKR document
+remains the draft management source until owners and targets are approved.
+
+Implemented the internal Wingu handoff: only approved reports can be queued,
+attendance provenance is explicit (manual or approved Excel reference), repeat
+queue rows are prevented, Wingu project selection remains unset until read from
+Wingu itself, and reconciliation changes create audit events. No external Wingu
+submission or credential/session storage was introduced.
+
+**Verified by:** Python compilation, 49 automated tests, authenticated rendering
+of `/okrs` and `/wingu`, and local health checks.
+**Follow-ups:** management assigns/approves OKR owners and targets (RPT-015);
+provide the attendance spreadsheet format (RPT-013), rejected-row owner
+(RPT-010), and one human-authenticated Wingu discovery session (RPT-014) before
+the external dispatcher is connected.
+
 ## 2026-08-31 — Apply intake, Wingu and reporting policy decisions
 **Area:** admissions · authentication · incentives · exports · reminders · Wingu
 **Environments:** local verification; not deployed

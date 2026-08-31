@@ -1,6 +1,6 @@
 # Report System → Wingu Box Integration Design
 
-**Status:** Approved direction; browser bridge not yet connected
+**Status:** Internal queue implemented locally; browser bridge not yet connected
 **Updated:** 31 August 2026
 **Current production connection:** None
 
@@ -20,8 +20,8 @@ System or its database.
 
 1. The employee saves and submits a report.
 2. A manager reviews and approves it.
-3. Approval creates one idempotent Wingu dispatch record for that report
-   revision.
+3. The employee or authorised manager attaches attendance and queues the
+   approved report; the report ID uniqueness rule prevents duplicate queue rows.
 4. Attendance start/end values are attached from an approved Excel import or
    explicit manual entry.
 5. The dispatch remains queued until the employee provides an authenticated
@@ -57,19 +57,21 @@ session is absent or expired.
 
 ## Data and delivery records
 
-The future implementation should add:
+The local implementation now provides:
 
-- `external_identities`: Toolkit user and confirmed Wingu employee identifier;
 - `wingu_dispatches`: report/revision, idempotency key, Wingu-provided project
   identifier/label, approved attendance source, state,
-  attempt count, external reference and timestamps;
+  external reference and timestamps;
 - `wingu_dispatch_events`: append-only, sanitised success/rejection/retry events;
-- an administrator mapping screen that never reveals provider secrets;
-- a local dispatcher that consumes only approved queued records while an
-  authenticated isolated Wingu session is available.
+- employee and authorised-manager queue forms for approved reports;
+- a reconciliation screen that never reveals provider secrets.
 
-Suggested dispatch states are `queued`, `sending`, `accepted`, `rejected`,
-`retry_wait`, `needs_attention` and `cancelled`.
+Still pending are an external identity mapping, the deterministic Excel parser,
+and the isolated local browser dispatcher. Those require RPT-013 and RPT-014;
+the system does not guess the spreadsheet columns or Wingu page fields.
+
+Implemented dispatch states are `ready`, `dispatching`, `accepted`, `rejected`,
+`needs_attention` and `cancelled`.
 
 ## What can be sent
 

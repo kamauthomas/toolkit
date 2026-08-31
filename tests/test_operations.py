@@ -55,6 +55,8 @@ class TestIntakeTargets:
             "/intake-targets": b"Monthly intake targets",
             "/meetings": b"Meetings and actions",
             "/modules": b"Operational workflow",
+            "/okrs": b"Objectives and key results",
+            "/wingu": b"Wingu dispatch queue",
         }
         for path, marker in expected.items():
             response = client.get(path)
@@ -110,6 +112,127 @@ class TestIntakeTargets:
         )
         assert response.status_code == 403
 
+
+class TestOkrTracking:
+    def test_objective_key_result_and_append_only_progress_evidence(self, client):
+        login_session(client)
+        response = client.post(
+            "/okrs",
+            data={
+                "_csrf_token": "test-token",
+                "title": "Make Toolkit projects operational",
+                "description": "Track delivery across approved systems and creative work.",
+                "department": "Management",
+                "period_start": "2026-08-01",
+                "period_end": "2026-12-31",
+                "owner_id": "1",
+                "status": "active",
+            },
+        )
+        assert response.status_code == 302
+        assert response.headers["Location"].endswith("/okrs/1")
+
+        response = client.post(
+            "/okrs/1/key-results",
+            data={
+                "_csrf_token": "test-token",
+                "title": "Complete approved Toolkit delivery checkpoints",
+                "baseline": "2",
+                "target": "10",
+                "unit": "checkpoints",
+                "due_date": "2026-12-15",
+                "owner_id": "1",
+            },
+        )
+        assert response.status_code == 302
+
+        response = client.post(
+            "/okrs/1/key-results/1/updates",
+            data={
+                "_csrf_token": "test-token",
+                "progress_value": "6",
+                "status": "active",
+                "narrative": "Reception and reporting checkpoints verified.",
+                "evidence_reference": "Briefing report 2026-08-31",
+            },
+        )
+        assert response.status_code == 302
+        detail = client.get("/okrs/1")
+        assert detail.status_code == 200
+        assert b"50%" in detail.data
+        assert b"Briefing report 2026-08-31" in detail.data
+        with app_module.app.app_context():
+            db = app_module.get_db()
+            assert db.execute("SELECT COUNT(*) AS c FROM okr_updates").fetchone()["c"] == 1
+            assert db.execute("SELECT current_value FROM okr_key_results WHERE id = 1").fetchone()["current_value"] == 6
+
+    def test_employee_cannot_see_another_department_objective(self, client):
+        with app_module.app.app_context():
+            employee_id = add_employee(department="Admissions")
+            db = app_module.get_db()
+            db.execute(
+                """INSERT INTO okr_objectives
+                   (title, department, period_start, period_end, status, created_by, created_at, updated_at)
+                   VALUES ('Management only', 'Management', '2026-08-01', '2026-12-31', 'active', 1, ?, ?)""",
+                (app_module.now(), app_module.now()),
+            )
+            db.commit()
+        login_session(client, employee_id)
+        assert client.get("/okrs/1").status_code == 403
+        assert b"Management only" not in client.get("/okrs").data
+
+
+class TestWinguDispatchQueue:
+    def _approved_report(self):
+        db = app_module.get_db()
+        cursor = db.execute(
+            """INSERT INTO reports
+               (user_id, report_date, reporting_period, branch, department, position, day_summary,
+                tasks_json, challenges_json, tomorrow_json, metrics_json, status, archived, created_at)
+               VALUES (1, '2026-08-31', '31 Aug 2026 - 06 Sep 2026', 'Toolkit Africa Main Office',
+                'Management', 'System Administrator', 'Approved work', '[]', '[]', '[]', '{}', 'approved', 0, ?)""",
+            (app_module.now(),),
+        )
+        db.commit()
+        return cursor.lastrowid
+
+    def test_only_approved_report_is_queued_without_guessed_project(self, client):
+        login_session(client)
+        with app_module.app.app_context():
+            report_id = self._approved_report()
+        response = client.post(
+            f"/reports/{report_id}/wingu",
+            data={
+                "_csrf_token": "test-token",
+                "attendance_source": "manual",
+                "sign_in_time": "08:08",
+                "sign_out_time": "17:18",
+            },
+        )
+        assert response.status_code == 302
+        with app_module.app.app_context():
+            row = app_module.get_db().execute("SELECT * FROM wingu_dispatches").fetchone()
+            assert row["status"] == "ready"
+            assert row["wingu_project"] == ""
+            assert app_module.get_db().execute("SELECT COUNT(*) AS c FROM wingu_dispatch_events").fetchone()["c"] == 1
+
+    def test_unapproved_report_is_rejected_from_queue(self, client):
+        login_session(client)
+        with app_module.app.app_context():
+            report_id = self._approved_report()
+            app_module.get_db().execute("UPDATE reports SET status = 'reviewed' WHERE id = ?", (report_id,))
+            app_module.get_db().commit()
+        response = client.post(
+            f"/reports/{report_id}/wingu",
+            data={"_csrf_token": "test-token", "attendance_source": "manual", "sign_in_time": "08:05", "sign_out_time": "17:20"},
+            follow_redirects=True,
+        )
+        assert b"Only an approved report can be queued" in response.data
+        with app_module.app.app_context():
+            assert app_module.get_db().execute("SELECT COUNT(*) AS c FROM wingu_dispatches").fetchone()["c"] == 0
+
+
+class TestAdmissionsPayments:
     def test_fee_paid_state_requires_reference_and_is_audited(self, client):
         login_session(client)
         with app_module.app.app_context():

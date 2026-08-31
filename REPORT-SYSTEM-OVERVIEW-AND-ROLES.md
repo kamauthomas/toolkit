@@ -77,6 +77,11 @@ The operations workspace also includes:
 - monthly intake targets counted only from verified, fee-paid enrolments;
 - incentive proposals with independent approval and payment references;
 - configurable in-app reminder rules with delivery history.
+- objectives and key results with accountable owners, calculated progress and
+  an append-only evidence trail that can reference systems, reports, campaigns
+  and poster deliverables;
+- an approval-gated Wingu queue with manual or Excel attendance provenance and
+  visible reconciliation status.
 
 ---
 
@@ -96,6 +101,10 @@ An Employee can:
 - View, edit, and export **their own** reports, and download their PDFs.
 - See their own dashboard, trends, and notifications.
 - Manage their own profile and password.
+- View OKRs in their department or assigned directly to them, and record
+  evidence against key results they own.
+- Queue their own approved daily report for Wingu using an authoritative
+  attendance source.
 
 An Employee sees **only their own** work — no one else's reports or figures.
 
@@ -112,6 +121,8 @@ A Department Admin can:
   them, reset an employee's password, and unlock an inactivity-locked employee with a
   recorded reason.
 - Set intake targets and coordinate meeting actions for staff assigned to them.
+- Create and manage their department's OKRs and reconcile Wingu queue outcomes
+  for reports in their authorised scope.
 - Export their team's reports.
 
 A Department Admin sees the reports of the staff **explicitly assigned to them**, and can only
@@ -129,6 +140,7 @@ A Principal can:
   staffing, report volumes, review/approval rates, and rolled-up metrics.
 - Review institution-wide admissions, intake targets, meetings and action follow-up.
 - Review and sign off reports anywhere in the institution.
+- Create and oversee institution-wide OKRs and view the full Wingu queue.
 - Export the full report record.
 
 A Principal is a **read-and-oversight** role: full visibility and sign-off, but no user
@@ -168,6 +180,10 @@ can seize control of another's account.
 | Admissions verification | — | Assigned scope | All | All |
 | Set monthly intake targets | — | Assigned scope | All | All |
 | Record meetings / update own actions | ✓ | ✓ | ✓ | ✓ |
+| View OKRs / update assigned results | Scoped | Scoped | All | All |
+| Create and manage OKRs | — | Own dept | All | All |
+| Queue own approved report for Wingu | ✓ | ✓ | ✓ | ✓ |
+| Reconcile Wingu dispatch status | — | Assigned scope | All | All |
 | Manage all users, roles & report access | — | — | — | ✓ |
 | System settings & registration | — | — | — | ✓ |
 
@@ -185,5 +201,8 @@ can seize control of another's account.
   the explicit reasoned unlock path. The inactivity threshold is 14 days.
 - **Data on account removal**: deleting a user offers a choice to keep their historical
   reports (for the institutional record) or remove them.
-- **Wingu Box**: no live integration exists. The safe proposal and required owner decisions
-  are recorded in `WINGU_BOX_INTEGRATION_DESIGN.md` and `OWNER_INPUT_TRACKER.md`.
+- **Wingu Box**: the internal approval-gated queue and reconciliation history
+  are operational locally. External browser dispatch is not yet connected; it
+  requires the approved Excel format and one human-authenticated discovery
+  session. The safe procedure and remaining inputs are recorded in
+  `WINGU_BOX_INTEGRATION_DESIGN.md` and `OWNER_INPUT_TRACKER.md`.

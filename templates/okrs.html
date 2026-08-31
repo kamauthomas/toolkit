@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div><p class="eyebrow">Strategy into measurable work</p><h1>Objectives and key results</h1><p class="muted">Assign outcomes, record evidence and keep progress visible without replacing the daily report trail.</p></div>
+  {% if can_create %}<div class="actions"><a class="primary" href="#new-objective">New objective</a></div>{% endif %}
+</section>
+
+{% if can_create %}<section class="card" id="new-objective">
+  <h2>Create an objective</h2>
+  <form method="post" class="form grid">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label class="full">Objective title<input name="title" maxlength="180" required placeholder="The outcome the institution needs to achieve"></label>
+    <label>Department<select name="department">{% for department in departments %}<option {% if department == g.user.department %}selected{% endif %}>{{ department }}</option>{% endfor %}</select></label>
+    <label>Owner<select name="owner_id"><option value="">Unassigned</option>{% for user in users %}<option value="{{ user.id }}">{{ user.full_name }} · {{ user.department }}</option>{% endfor %}</select></label>
+    <label>Starts<input type="date" name="period_start" required></label>
+    <label>Ends<input type="date" name="period_end" required></label>
+    <label>Status<select name="status"><option value="draft">Draft</option><option value="active">Active</option></select></label>
+    <label class="full">Context<textarea name="description" maxlength="3000" placeholder="Why this matters and what success should change"></textarea></label>
+    <div class="full" style="display:flex;justify-content:flex-end"><button class="primary" type="submit">Create objective</button></div>
+  </form>
+</section>{% endif %}
+
+<section class="card">
+  <div class="inline-head"><h2>Objectives in your scope</h2><span class="muted">{{ objectives|length }} visible</span></div>
+  {% if objectives %}<div class="table-wrap"><table>
+    <thead><tr><th>Objective</th><th>Department</th><th>Owner</th><th>Period</th><th>Key results</th><th>Status</th><th></th></tr></thead>
+    <tbody>{% for objective in objectives %}<tr>
+      <td><strong>{{ objective.title }}</strong></td><td>{{ objective.department }}</td><td>{{ objective.owner_name or 'Unassigned' }}</td><td>{{ objective.period_start }} – {{ objective.period_end }}</td><td>{{ objective.key_result_count }}</td><td><span class="status-badge {{ 'approved' if objective.status == 'completed' else 'reviewed' if objective.status == 'active' else 'submitted' }}">{{ objective.status|replace('_', ' ')|title }}</span></td><td><a class="secondary small-button" href="{{ url_for('okr_detail', objective_id=objective.id) }}">Open</a></td>
+    </tr>{% endfor %}</tbody>
+  </table></div>{% else %}<p class="empty">No OKRs are currently visible in your scope.</p>{% endif %}
+</section>
+{% endblock %}

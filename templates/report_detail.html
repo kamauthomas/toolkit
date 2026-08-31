@@ -220,4 +220,17 @@
     {% endfor %}
   </div>
 </section>
+{% if report.status == 'approved' and (report.user_id == g.user.id or g.user.role in ('admin', 'principal', 'superadmin', 'shadowadmin')) %}
+<section class="card">
+  <h2>Queue approved report for Wingu</h2>
+  <p class="muted">Attendance may come from a reviewed Excel row or manual entry. The Wingu project is deliberately not requested here; it is read from Wingu itself during dispatch.</p>
+  <form method="post" action="{{ url_for('queue_wingu_dispatch', report_id=report.id) }}" class="form grid">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label>Attendance source<select name="attendance_source"><option value="manual">Manual entry</option><option value="excel">Approved Excel sheet</option></select></label>
+    <label>Excel reference (if used)<input name="attendance_reference" maxlength="300" placeholder="File/sheet and row reference"></label>
+    <label>Sign in<input type="time" name="sign_in_time" required></label><label>Sign out<input type="time" name="sign_out_time" required></label>
+    <div class="full" style="display:flex;justify-content:flex-end"><button class="primary" type="submit">Add to Wingu queue</button></div>
+  </form>
+</section>
+{% endif %}
 {% endblock %}

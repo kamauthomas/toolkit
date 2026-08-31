@@ -9,7 +9,7 @@ tokens or personal data in this file.
 |---|---|---|---|---|
 | RPT-001 | Approve the inactivity period | Controls automatic employee lock timing | Employee accounts lock after more than 14 days; privileged roles remain exempt | **Resolved: 14 days** |
 | RPT-002 | Name the department administrator(s) authorised to unlock employee accounts | Unlocking now requires a reason and is limited to employees in that administrator's department | Super administrators retain institution-wide oversight | Names needed before deployment |
-| RPT-003 | Approve review of Admissions, Monthly Intake, Meetings/Actions, Incentives and Reminders | Modules must be reviewed before deployment | Local service only | **Resolved: local review requested** |
+| RPT-003 | Approve review of Admissions, Monthly Intake, Meetings/Actions, Incentives, Reminders, OKRs and Wingu Queue | Modules must be reviewed before deployment | Local service only | **Resolved: local review requested** |
 | RPT-004 | Define the official intake actual | Target percentages need one institutional definition | Count only verified admissions with recorded fee-paid state | **Resolved: verified fee-paid enrolment** |
 | RPT-005 | Confirm who may create meeting minutes and who may reassign/close action items | This determines final role policy | Any active user may record a meeting; creators and authorised managers assign actions; owners/managers update status | Review needed |
 | RPT-006 | Select the Wingu integration mechanism | No API/SSO is available | Isolated authenticated-browser bridge; user signs in, no credentials stored | **Resolved: browser automation** |
@@ -21,6 +21,19 @@ tokens or personal data in this file.
 | RPT-012 | Approve retention periods for reports, admissions, minutes, action histories and integration logs | Permanent retention may conflict with institutional privacy obligations | No automated deletion introduced | Policy needed |
 | RPT-013 | Provide one approved sample attendance Excel sheet or its exact column names/date/time formats | The importer must be deterministic and reject ambiguous rows | No Excel importer guesses | Needed for Wingu bridge |
 | RPT-014 | Provide an authenticated Wingu review session when prompted | Stable fields, project selection and persistence behavior must be inspected before writing the dispatcher | Dry-run only; the human signs in | Needed for Wingu bridge |
+| RPT-015 | Review and assign the eight Toolkit portfolio objectives and their key-result owners | The system now supports OKRs, but management must approve ownership and targets before institutional activation | Keep objectives as draft until assigned | Needed for OKR activation |
+
+## What is already implemented locally
+
+- Role-scoped objectives, numeric key results, owners, due dates and lifecycle
+  states.
+- Server-calculated progress from baseline, current value and target.
+- Append-only progress notes with an evidence reference suitable for report,
+  meeting, project, campaign and poster records.
+- A Wingu queue that accepts only approved reports, records manual or Excel
+  attendance provenance, leaves project selection blank until it is read from
+  Wingu, and maintains append-only reconciliation events.
+- No Wingu credentials, cookies or guessed project codes are stored.
 
 ## How to respond
 

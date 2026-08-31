@@ -697,6 +697,22 @@ def expansion_modules(insights=None):
             "endpoint": "meetings",
         },
         {
+            "title": "Objectives & Key Results",
+            "summary": "Role-scoped objectives, measurable key results, accountable owners, calculated progress and append-only evidence.",
+            "metric": 0,
+            "label": "Open the live portfolio",
+            "status": "Operational workflow",
+            "endpoint": "okrs",
+        },
+        {
+            "title": "Wingu Dispatch",
+            "summary": "Approval-gated report handoff with manual or Excel attendance provenance and visible reconciliation states.",
+            "metric": 0,
+            "label": "Approved queue",
+            "status": "Queue operational; browser bridge pending",
+            "endpoint": "wingu_dispatches",
+        },
+        {
             "title": "Notifications",
             "summary": "Scheduled in-app reminders for pending verification, due actions, report review, and intake follow-up with delivery history.",
             "metric": insights.get("pending_review", 0),
@@ -1181,6 +1197,80 @@ def init_db():
             created_at TEXT NOT NULL,
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
+
+        CREATE TABLE IF NOT EXISTS okr_objectives (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            department TEXT NOT NULL,
+            period_start TEXT NOT NULL,
+            period_end TEXT NOT NULL,
+            owner_id INTEGER,
+            status TEXT NOT NULL DEFAULT 'draft',
+            created_by INTEGER NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(owner_id) REFERENCES users(id),
+            FOREIGN KEY(created_by) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS okr_key_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            objective_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            baseline REAL NOT NULL DEFAULT 0,
+            target REAL NOT NULL,
+            current_value REAL NOT NULL DEFAULT 0,
+            unit TEXT DEFAULT '',
+            due_date TEXT NOT NULL,
+            owner_id INTEGER,
+            status TEXT NOT NULL DEFAULT 'active',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(objective_id) REFERENCES okr_objectives(id),
+            FOREIGN KEY(owner_id) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS okr_updates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key_result_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            progress_value REAL NOT NULL,
+            narrative TEXT NOT NULL,
+            evidence_reference TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(key_result_id) REFERENCES okr_key_results(id),
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS wingu_dispatches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            report_id INTEGER NOT NULL UNIQUE,
+            attendance_source TEXT NOT NULL,
+            attendance_reference TEXT DEFAULT '',
+            sign_in_time TEXT NOT NULL,
+            sign_out_time TEXT NOT NULL,
+            wingu_project TEXT DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'ready',
+            external_reference TEXT DEFAULT '',
+            last_error TEXT DEFAULT '',
+            queued_by INTEGER NOT NULL,
+            queued_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(report_id) REFERENCES reports(id),
+            FOREIGN KEY(queued_by) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS wingu_dispatch_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            dispatch_id INTEGER NOT NULL,
+            actor_id INTEGER NOT NULL,
+            event TEXT NOT NULL,
+            notes TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(dispatch_id) REFERENCES wingu_dispatches(id),
+            FOREIGN KEY(actor_id) REFERENCES users(id)
+        );
         """
     )
     conn.commit()
@@ -1197,6 +1287,10 @@ def init_db():
         "CREATE INDEX IF NOT EXISTS idx_incentive_events_record ON incentive_events(incentive_id, created_at)",
         "CREATE INDEX IF NOT EXISTS idx_reminder_rules_enabled ON reminder_rules(is_enabled, kind)",
         "CREATE INDEX IF NOT EXISTS idx_delivery_logs_rule ON notification_delivery_logs(rule_id, created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_okr_objective_scope ON okr_objectives(department, status)",
+        "CREATE INDEX IF NOT EXISTS idx_okr_key_results_objective ON okr_key_results(objective_id)",
+        "CREATE INDEX IF NOT EXISTS idx_okr_updates_key_result ON okr_updates(key_result_id, created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_wingu_dispatch_status ON wingu_dispatches(status, queued_at)",
     ):
         try:
             conn.execute(index_sql)
@@ -1647,6 +1741,58 @@ def clean_text(value, limit=4000):
     value = (value or "").strip()
     value = re.sub(r"\r\n?", "\n", value)
     return value[:limit]
+
+
+def decimal_field(name):
+    try:
+        return Decimal(request.form.get(name, "").strip())
+    except (InvalidOperation, AttributeError):
+        return None
+
+
+def okr_progress_percent(key_result):
+    baseline = Decimal(str(key_result["baseline"]))
+    target = Decimal(str(key_result["target"]))
+    current = Decimal(str(key_result["current_value"]))
+    span = target - baseline
+    if span == 0:
+        return 100 if current == target else 0
+    progress = ((current - baseline) / span) * 100
+    return max(0, min(100, int(progress.quantize(Decimal("1"), rounding=ROUND_HALF_UP))))
+
+
+def can_view_okr(user, objective):
+    if (
+        user["role"] in EXECUTIVE_ROLES
+        or objective["department"] == user["department"]
+        or objective["owner_id"] == user["id"]
+    ):
+        return True
+    if objective["id"]:
+        assigned = get_db().execute(
+            "SELECT 1 FROM okr_key_results WHERE objective_id = ? AND owner_id = ?",
+            (objective["id"], user["id"]),
+        ).fetchone()
+        return bool(assigned)
+    return False
+
+
+def can_manage_okr(user, objective=None):
+    if user["role"] in EXECUTIVE_ROLES:
+        return True
+    return bool(
+        user["role"] == "admin"
+        and (objective is None or objective["department"] == user["department"])
+    )
+
+
+def parse_clock_time(value):
+    value = clean_text(value, 5)
+    try:
+        datetime.strptime(value, "%H:%M")
+        return value
+    except (TypeError, ValueError):
+        return ""
 
 
 def make_report_pdf(report_id):
@@ -3041,6 +3187,294 @@ def update_incentive_status(incentive_id):
         )
     flash(f"Incentive marked {new_status}.", "success")
     return redirect(url_for("incentives"))
+
+OKR_STATUSES = ("draft", "active", "at_risk", "completed", "archived")
+OKR_KEY_RESULT_STATUSES = ("active", "at_risk", "achieved", "closed")
+WINGU_DISPATCH_STATUSES = ("ready", "dispatching", "accepted", "rejected", "needs_attention", "cancelled")
+
+
+@app.route("/okrs", methods=["GET", "POST"])
+@login_required
+def okrs():
+    db = get_db()
+    if request.method == "POST":
+        csrf_protect()
+        if not can_manage_okr(g.user):
+            abort(403)
+        title = clean_text(request.form.get("title"), 180)
+        description = clean_text(request.form.get("description"), 3000)
+        department = clean_text(request.form.get("department"), 100)
+        period_start = clean_text(request.form.get("period_start"), 10)
+        period_end = clean_text(request.form.get("period_end"), 10)
+        owner_id = int_field("owner_id") or None
+        status = clean_text(request.form.get("status"), 20)
+        if g.user["role"] == "admin":
+            department = g.user["department"]
+        if not title or department not in DEPARTMENTS or status not in ("draft", "active"):
+            flash("Provide a title, valid department and valid status.", "danger")
+            return redirect(url_for("okrs"))
+        start = parse_report_date(period_start)
+        end = parse_report_date(period_end)
+        if not start or not end or end < start:
+            flash("Provide a valid OKR period; the end date must follow the start date.", "danger")
+            return redirect(url_for("okrs"))
+        owner = None
+        if owner_id:
+            owner = db.execute("SELECT * FROM users WHERE id = ? AND deleted_at IS NULL", (owner_id,)).fetchone()
+            if not owner or (g.user["role"] == "admin" and owner["department"] != g.user["department"]):
+                abort(400)
+        timestamp = now()
+        cursor = db.execute(
+            """INSERT INTO okr_objectives
+               (title, description, department, period_start, period_end, owner_id, status, created_by, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (title, description, department, period_start, period_end, owner_id, status, g.user["id"], timestamp, timestamp),
+        )
+        db.commit()
+        flash("Objective created. Add measurable key results next.", "success")
+        return redirect(url_for("okr_detail", objective_id=cursor.lastrowid))
+
+    objectives = db.execute(
+        """SELECT o.*, owner.full_name AS owner_name,
+                  COUNT(kr.id) AS key_result_count
+           FROM okr_objectives o
+           LEFT JOIN users owner ON owner.id = o.owner_id
+           LEFT JOIN okr_key_results kr ON kr.objective_id = o.id
+           GROUP BY o.id, owner.full_name
+           ORDER BY o.period_end ASC, o.id DESC"""
+    ).fetchall()
+    objectives = [row for row in objectives if can_view_okr(g.user, row)]
+    users = strip_hidden_users(db.execute(
+        "SELECT id, full_name, department, role FROM users WHERE is_active = 1 AND deleted_at IS NULL ORDER BY full_name"
+    ).fetchall())
+    if g.user["role"] == "admin":
+        users = [user for user in users if user["department"] == g.user["department"]]
+    return render_template(
+        "okrs.html", objectives=objectives, users=users, departments=DEPARTMENTS,
+        can_create=can_manage_okr(g.user), statuses=OKR_STATUSES,
+    )
+
+
+def get_okr_or_404(objective_id):
+    objective = get_db().execute(
+        """SELECT o.*, owner.full_name AS owner_name, creator.full_name AS creator_name
+           FROM okr_objectives o
+           LEFT JOIN users owner ON owner.id = o.owner_id
+           JOIN users creator ON creator.id = o.created_by
+           WHERE o.id = ?""",
+        (objective_id,),
+    ).fetchone()
+    if not objective:
+        abort(404)
+    if not can_view_okr(g.user, objective):
+        abort(403)
+    return objective
+
+
+@app.route("/okrs/<int:objective_id>")
+@login_required
+def okr_detail(objective_id):
+    db = get_db()
+    objective = get_okr_or_404(objective_id)
+    key_results = db.execute(
+        """SELECT kr.*, owner.full_name AS owner_name
+           FROM okr_key_results kr LEFT JOIN users owner ON owner.id = kr.owner_id
+           WHERE kr.objective_id = ? ORDER BY kr.due_date, kr.id""",
+        (objective_id,),
+    ).fetchall()
+    rendered_results = []
+    for result in key_results:
+        updates = db.execute(
+            """SELECT u.*, users.full_name FROM okr_updates u JOIN users ON users.id = u.user_id
+               WHERE u.key_result_id = ? ORDER BY u.created_at DESC, u.id DESC""",
+            (result["id"],),
+        ).fetchall()
+        rendered_results.append({"record": result, "progress": okr_progress_percent(result), "updates": updates})
+    users = strip_hidden_users(db.execute(
+        "SELECT id, full_name, department, role FROM users WHERE is_active = 1 AND deleted_at IS NULL ORDER BY full_name"
+    ).fetchall())
+    if g.user["role"] == "admin":
+        users = [user for user in users if user["department"] == g.user["department"]]
+    return render_template(
+        "okr_detail.html", objective=objective, key_results=rendered_results, users=users,
+        can_manage=can_manage_okr(g.user, objective), result_statuses=OKR_KEY_RESULT_STATUSES,
+    )
+
+
+@app.route("/okrs/<int:objective_id>/key-results", methods=["POST"])
+@login_required
+def add_okr_key_result(objective_id):
+    csrf_protect()
+    db = get_db()
+    objective = get_okr_or_404(objective_id)
+    if not can_manage_okr(g.user, objective):
+        abort(403)
+    title = clean_text(request.form.get("title"), 240)
+    baseline = decimal_field("baseline")
+    target = decimal_field("target")
+    due_date = clean_text(request.form.get("due_date"), 10)
+    unit = clean_text(request.form.get("unit"), 40)
+    owner_id = int_field("owner_id") or objective["owner_id"]
+    if not title or baseline is None or target is None or baseline == target or not parse_report_date(due_date):
+        flash("Provide a title, different numeric baseline and target, and valid due date.", "danger")
+        return redirect(url_for("okr_detail", objective_id=objective_id))
+    owner = db.execute("SELECT * FROM users WHERE id = ? AND deleted_at IS NULL", (owner_id,)).fetchone() if owner_id else None
+    if owner_id and (not owner or (g.user["role"] == "admin" and owner["department"] != g.user["department"])):
+        abort(400)
+    timestamp = now()
+    db.execute(
+        """INSERT INTO okr_key_results
+           (objective_id, title, baseline, target, current_value, unit, due_date, owner_id, status, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)""",
+        (objective_id, title, float(baseline), float(target), float(baseline), unit, due_date, owner_id, timestamp, timestamp),
+    )
+    db.commit()
+    flash("Key result added.", "success")
+    return redirect(url_for("okr_detail", objective_id=objective_id))
+
+
+@app.route("/okrs/<int:objective_id>/key-results/<int:key_result_id>/updates", methods=["POST"])
+@login_required
+def add_okr_update(objective_id, key_result_id):
+    csrf_protect()
+    db = get_db()
+    objective = get_okr_or_404(objective_id)
+    result = db.execute(
+        "SELECT * FROM okr_key_results WHERE id = ? AND objective_id = ?", (key_result_id, objective_id)
+    ).fetchone()
+    if not result:
+        abort(404)
+    if not (can_manage_okr(g.user, objective) or objective["owner_id"] == g.user["id"] or result["owner_id"] == g.user["id"]):
+        abort(403)
+    progress_value = decimal_field("progress_value")
+    narrative = clean_text(request.form.get("narrative"), 2000)
+    evidence = clean_text(request.form.get("evidence_reference"), 500)
+    status = clean_text(request.form.get("status"), 20)
+    if progress_value is None or not narrative or status not in OKR_KEY_RESULT_STATUSES:
+        flash("Provide a numeric progress value, update note and valid status.", "danger")
+        return redirect(url_for("okr_detail", objective_id=objective_id))
+    timestamp = now()
+    db.execute(
+        """INSERT INTO okr_updates (key_result_id, user_id, progress_value, narrative, evidence_reference, created_at)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (key_result_id, g.user["id"], float(progress_value), narrative, evidence, timestamp),
+    )
+    db.execute(
+        "UPDATE okr_key_results SET current_value = ?, status = ?, updated_at = ? WHERE id = ?",
+        (float(progress_value), status, timestamp, key_result_id),
+    )
+    db.commit()
+    flash("Progress update recorded with its evidence trail.", "success")
+    return redirect(url_for("okr_detail", objective_id=objective_id))
+
+
+@app.route("/okrs/<int:objective_id>/status", methods=["POST"])
+@login_required
+def update_okr_status(objective_id):
+    csrf_protect()
+    objective = get_okr_or_404(objective_id)
+    if not can_manage_okr(g.user, objective):
+        abort(403)
+    status = clean_text(request.form.get("status"), 20)
+    if status not in OKR_STATUSES:
+        abort(400)
+    get_db().execute("UPDATE okr_objectives SET status = ?, updated_at = ? WHERE id = ?", (status, now(), objective_id))
+    get_db().commit()
+    flash("Objective status updated.", "success")
+    return redirect(url_for("okr_detail", objective_id=objective_id))
+
+
+@app.route("/wingu", methods=["GET"])
+@login_required
+def wingu_dispatches():
+    rows = get_db().execute(
+        """SELECT d.*, r.report_date, r.department, r.user_id, users.full_name
+           FROM wingu_dispatches d JOIN reports r ON r.id = d.report_id
+           JOIN users ON users.id = r.user_id ORDER BY d.queued_at DESC, d.id DESC"""
+    ).fetchall()
+    rows = [row for row in rows if can_view_report(g.user, row)]
+    return render_template("wingu_dispatches.html", dispatches=rows, statuses=WINGU_DISPATCH_STATUSES)
+
+
+@app.route("/reports/<int:report_id>/wingu", methods=["POST"])
+@login_required
+def queue_wingu_dispatch(report_id):
+    csrf_protect()
+    db = get_db()
+    report = db.execute("SELECT * FROM reports WHERE id = ?", (report_id,)).fetchone()
+    if not report:
+        abort(404)
+    if not can_view_report(g.user, report) or (report["user_id"] != g.user["id"] and g.user["role"] not in ADMIN_ROLES):
+        abort(403)
+    if report["status"] != "approved":
+        flash("Only an approved report can be queued for Wingu.", "danger")
+        return redirect(url_for("view_report", report_id=report_id))
+    source = clean_text(request.form.get("attendance_source"), 20)
+    reference = clean_text(request.form.get("attendance_reference"), 300)
+    sign_in = parse_clock_time(request.form.get("sign_in_time"))
+    sign_out = parse_clock_time(request.form.get("sign_out_time"))
+    if source not in ("manual", "excel") or not sign_in or not sign_out or sign_out <= sign_in:
+        flash("Select manual or Excel attendance and provide a valid sign-in/sign-out range.", "danger")
+        return redirect(url_for("view_report", report_id=report_id))
+    if source == "excel" and not reference:
+        flash("Identify the approved Excel sheet or row used as the attendance source.", "danger")
+        return redirect(url_for("view_report", report_id=report_id))
+    timestamp = now()
+    if db.execute("SELECT id FROM wingu_dispatches WHERE report_id = ?", (report_id,)).fetchone():
+        flash("This approved report is already in the Wingu queue.", "warning")
+        return redirect(url_for("view_report", report_id=report_id))
+    cursor = db.execute(
+        """INSERT INTO wingu_dispatches
+           (report_id, attendance_source, attendance_reference, sign_in_time, sign_out_time,
+            status, queued_by, queued_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, 'ready', ?, ?, ?)""",
+        (report_id, source, reference, sign_in, sign_out, g.user["id"], timestamp, timestamp),
+    )
+    db.execute(
+        "INSERT INTO wingu_dispatch_events (dispatch_id, actor_id, event, notes, created_at) VALUES (?, ?, 'queued', ?, ?)",
+        (cursor.lastrowid, g.user["id"], f"Attendance source: {source}", timestamp),
+    )
+    db.commit()
+    flash("Approved report queued. Wingu project selection will be read from Wingu during dispatch.", "success")
+    return redirect(url_for("wingu_dispatches"))
+
+
+@app.route("/wingu/<int:dispatch_id>/status", methods=["POST"])
+@admin_required
+def update_wingu_dispatch(dispatch_id):
+    csrf_protect()
+    db = get_db()
+    dispatch = db.execute(
+        """SELECT d.*, r.user_id FROM wingu_dispatches d JOIN reports r ON r.id = d.report_id WHERE d.id = ?""",
+        (dispatch_id,),
+    ).fetchone()
+    if not dispatch:
+        abort(404)
+    if not can_view_report(g.user, dispatch):
+        abort(403)
+    status = clean_text(request.form.get("status"), 30)
+    project = clean_text(request.form.get("wingu_project"), 180)
+    external_reference = clean_text(request.form.get("external_reference"), 300)
+    notes = clean_text(request.form.get("notes"), 1000)
+    if status not in WINGU_DISPATCH_STATUSES:
+        abort(400)
+    if status in ("accepted", "rejected", "needs_attention") and not notes:
+        flash("Add a reconciliation note for the final Wingu result.", "danger")
+        return redirect(url_for("wingu_dispatches"))
+    timestamp = now()
+    db.execute(
+        """UPDATE wingu_dispatches SET status = ?, wingu_project = ?, external_reference = ?,
+           last_error = ?, updated_at = ? WHERE id = ?""",
+        (status, project, external_reference, notes if status in ("rejected", "needs_attention") else "", timestamp, dispatch_id),
+    )
+    db.execute(
+        "INSERT INTO wingu_dispatch_events (dispatch_id, actor_id, event, notes, created_at) VALUES (?, ?, ?, ?, ?)",
+        (dispatch_id, g.user["id"], status, notes, timestamp),
+    )
+    db.commit()
+    flash("Wingu reconciliation status recorded.", "success")
+    return redirect(url_for("wingu_dispatches"))
+
 
 @app.route("/principal")
 @principal_required

@@ -25,14 +25,19 @@
   scheduler-safe `flask reminders-run` command.
 * Apply owner policy decisions: fee-paid intake actuals and 14-day inactivity
   locking.
+* Add role-scoped OKR objectives, measurable key results, owners, lifecycle
+  states, calculated progress and append-only evidence updates.
+* Add an approval-gated Wingu queue with manual/Excel attendance provenance,
+  duplicate prevention and append-only reconciliation events.
 
 ## Next implementation work
 
 * Add email delivery after an authenticated provider is approved.
 * Add role-specific dashboards for Principal, Administrator, Department Head, and Employee once those roles are mapped to the current role model.
-* Add date range, employee, department, status, and report category filters to the dashboard and export routes.
 * Add browser-assisted Wingu dispatch after the authenticated review session,
   attendance-sheet format and rejected-row owner are supplied.
-* Add automated tests for remaining dashboard analytics and Wingu dry-run
-  reconciliation.
+* Add the deterministic attendance Excel importer after the approved columns
+  and formats are supplied.
+* Add automated tests for remaining dashboard analytics and the external Wingu
+  browser dispatcher once its authenticated field map is approved.
 * Add seed/demo data for showcasing the new module dashboards during stakeholder review.

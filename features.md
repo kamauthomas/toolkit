@@ -267,6 +267,33 @@ Configurable in-app rules now cover pending admissions, due meeting actions,
 reports awaiting review and intake follow-up. Each run is idempotent and keeps
 a delivery log; email remains a separate provider-gated follow-up.
 
+## 3.8 Objectives and Key Results
+
+The operational OKR module provides:
+
+* institution-wide or department-scoped objectives;
+* assigned owners, periods and lifecycle states;
+* numeric baselines, targets, current values, units and due dates;
+* server-calculated progress, including decreasing targets;
+* append-only progress notes and evidence references;
+* employee access only to departmental or directly assigned work.
+
+The August 2026–July 2027 Toolkit portfolio draft remains the planning source.
+Management must approve its owners and targets before those records are treated
+as institutional commitments. Poster and campaign outputs can be cited in the
+same evidence trail as software, meetings and reports.
+
+## 3.9 Wingu Dispatch Queue
+
+The local workflow now queues only approved daily reports. It records whether
+attendance came from manual entry or an approved Excel reference, prevents a
+second queue row for the same report, deliberately leaves the project blank
+until read from Wingu, and records reconciliation events.
+
+External browser submission remains disabled until an authenticated Wingu field
+review and approved attendance spreadsheet format are provided. No credentials,
+cookies or assumed Wingu project codes are stored.
+
 ---
 
 ## 4. Reporting and Analytics
