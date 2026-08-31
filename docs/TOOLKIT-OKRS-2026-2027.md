@@ -3,7 +3,7 @@
 **Prepared:** 31 August 2026  
 **Scope:** Website, Reception, Report System, Smart Lecturer, Virtual Campus,
 Chat-bot, security, deployment operations and the poster/communications library  
-**Status:** Draft for management approval
+**Status:** Draft for management approval; live tracking module available locally
 
 ## How to use this document
 
@@ -11,6 +11,13 @@ These are outcome measures for the Toolkit portfolio, not a list of coding
 tasks. The baseline records what is evidenced in the working repositories as of
 31 August 2026. Targets become commitments only after management assigns an
 owner, confirms the denominator and approves the policy behind each measure.
+
+The Report System now provides the working register for these objectives: an
+authorised manager can create the approved objectives and key results, assign
+owners, set baselines and targets, and keep append-only progress/evidence
+updates. Poster and campaign work is recorded by referencing the approved asset
+or campaign in the key result evidence trail. The draft is not auto-imported so
+unapproved targets cannot silently become staff commitments.
 
 ## Objective 1 — Make the public website a trusted digital front door
 
@@ -126,4 +133,5 @@ and no disruptive browser-click deployment.
 - Virtual Campus owner inputs: `SmartLecturer_VirtualCampus/virtual-campus/docs/OWNER_INPUT_TRACKER.md`
 - Report System owner inputs: `report-system/OWNER_INPUT_TRACKER.md`
 - Report System/Wingu design: `report-system/WINGU_BOX_INTEGRATION_DESIGN.md`
-
+- Working OKR register: Report System `/okrs` module (local review currently at
+  `http://127.0.0.1:5155/okrs`)

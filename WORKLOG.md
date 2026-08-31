@@ -5,6 +5,22 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-31 — Connect the portfolio OKRs to the working register
+**Area:** portfolio governance · reports · posters/communications
+**Environments:** documentation and local Report System; not deployed
+**Commit(s):** this commit
+
+Updated the portfolio OKR draft after the Report System gained a working OKR
+register. Approved objectives can now be assigned, measured and supported by an
+append-only evidence trail, including references to approved posters and
+campaign assets. The source draft remains intentionally unseeded until
+management approves owners, baselines and targets.
+
+**Verified by:** Report System commit `b058b43`, 49 passing tests and healthy
+local `/okrs` and `/wingu` routes.
+**Follow-ups:** management assigns the eight objective owners and approves the
+targets/denominators before activation.
+
 ## 2026-08-31 — Add cross-project OKR draft and Wingu policy correction
 **Area:** portfolio governance · reports · Wingu · posters/communications
 **Environments:** documentation only; no deployment
