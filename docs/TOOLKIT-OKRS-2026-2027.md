@@ -12,12 +12,14 @@ tasks. The baseline records what is evidenced in the working repositories as of
 31 August 2026. Targets become commitments only after management assigns an
 owner, confirms the denominator and approves the policy behind each measure.
 
-The Report System now provides the working register for these objectives: an
-authorised manager can create the approved objectives and key results, assign
-owners, set baselines and targets, and keep append-only progress/evidence
-updates. Poster and campaign work is recorded by referencing the approved asset
-or campaign in the key result evidence trail. The draft is not auto-imported so
-unapproved targets cannot silently become staff commitments.
+The Report System now provides the working register for these objectives. An
+executive can explicitly load all eight objectives and thirty proposed key
+results as idempotent drafts, then assign owners, approve baselines/targets and
+keep append-only progress/evidence updates. Poster and campaign work is recorded
+by referencing the approved asset or campaign in the key-result evidence trail.
+Activation is blocked until the objective and all its key results have owners
+and have been moved out of Draft, so proposed targets cannot silently become
+staff commitments.
 
 ## Objective 1 — Make the public website a trusted digital front door
 

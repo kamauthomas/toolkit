@@ -5,6 +5,20 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-31 — Reconcile OKR draft with the operational loader
+**Area:** portfolio governance · reporting · posters/communications
+**Environments:** documentation and local Report System; not deployed
+**Commit(s):** this commit
+
+Reconciled the portfolio document with the completed operational loader. The
+Report System now loads eight objectives and thirty key results idempotently as
+drafts, including the poster/brand objective, and blocks activation until every
+objective and result has accountable ownership and approved status.
+
+**Verified by:** Report System commit `38a78c4` and 52 passing automated tests.
+**Follow-ups:** management reviews the draft targets and assigns owners before
+activation; external Wingu dispatch still requires authenticated discovery.
+
 ## 2026-08-31 — Connect the portfolio OKRs to the working register
 **Area:** portfolio governance · reports · posters/communications
 **Environments:** documentation and local Report System; not deployed
