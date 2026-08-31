@@ -132,6 +132,9 @@ The implemented workflow requires a decision note when a record needs more
 information or is rejected, records the reviewer and time, and notifies the
 record owner when another authorised reviewer changes the status.
 
+Fee status is tracked separately and requires an approved payment reference;
+only verified records marked fee-paid contribute to monthly intake actuals.
+
 Status indicators:
 
 * Pending Verification
@@ -199,6 +202,10 @@ Reports:
 * Employee incentive history
 * Department incentive summary
 
+The working slice calculates each proposal server-side, prevents the creator
+from self-approving, requires an independent approval before payment, and keeps
+proposal/approval/payment events in an audit history.
+
 ---
 
 ## 3.6 Minutes Management Module
@@ -255,6 +262,10 @@ Administrators shall be able to configure:
 * Reminder frequency
 * Reminder recipients
 * Escalation timelines
+
+Configurable in-app rules now cover pending admissions, due meeting actions,
+reports awaiting review and intake follow-up. Each run is idempotent and keeps
+a delivery log; email remains a separate provider-gated follow-up.
 
 ---
 

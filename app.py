@@ -11,6 +11,7 @@ import time
 import zlib
 from collections import defaultdict
 from datetime import datetime, timedelta
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from functools import wraps
 from pathlib import Path
 
@@ -28,6 +29,8 @@ from flask import (
     url_for,
 )
 from PIL import Image
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
@@ -180,6 +183,7 @@ LOGIN_RATE_LIMIT_WINDOW = 300
 LOGIN_RATE_LIMIT_MAX = 10
 ACCOUNT_LOCKOUT_THRESHOLD = 5
 ACCOUNT_LOCKOUT_DURATION = timedelta(minutes=15)
+INACTIVITY_LOCK_DAYS = 14
 
 _rate_limit_store = defaultdict(list)
 _login_attempts_cache = defaultdict(list)
@@ -469,6 +473,78 @@ def csv_safe(value):
     return text
 
 
+def visible_report_rows(db, archived=0):
+    """Return reports within the current user's established visibility scope."""
+    archived_expr = archived_filter("reports.archived")
+    if g.user["role"] == "employee":
+        return db.execute(
+            f"""SELECT reports.*, users.full_name
+                FROM reports JOIN users ON users.id = reports.user_id
+                WHERE reports.user_id = ? AND {archived_expr} = ?
+                ORDER BY reports.report_date DESC, reports.id DESC""",
+            (g.user["id"], archived),
+        ).fetchall()
+    if g.user["role"] == "admin":
+        return db.execute(
+            f"""SELECT DISTINCT reports.*, users.full_name
+                FROM reports JOIN users ON users.id = reports.user_id
+                LEFT JOIN report_access ON report_access.employee_id = reports.user_id
+                WHERE (reports.user_id = ? OR report_access.admin_id = ?)
+                  AND {archived_expr} = ?
+                ORDER BY reports.report_date DESC, reports.id DESC""",
+            (g.user["id"], g.user["id"], archived),
+        ).fetchall()
+    return db.execute(
+        f"""SELECT reports.*, users.full_name
+            FROM reports JOIN users ON users.id = reports.user_id
+            WHERE {archived_expr} = ? AND {hide_shadow_sql('users')}
+            ORDER BY reports.report_date DESC, reports.id DESC""",
+        (archived,),
+    ).fetchall()
+
+
+def report_filter_values():
+    date_from = clean_text(request.args.get("date_from"), 10)
+    date_to = clean_text(request.args.get("date_to"), 10)
+    department = clean_text(request.args.get("department"), 100)
+    status = clean_text(request.args.get("status"), 20)
+    employee_id = clean_text(request.args.get("employee_id"), 20)
+    if date_from and not parse_report_date(date_from):
+        date_from = ""
+    if date_to and not parse_report_date(date_to):
+        date_to = ""
+    if department not in DEPARTMENTS:
+        department = ""
+    if status not in ("submitted", "reviewed", "approved"):
+        status = ""
+    if not employee_id.isdigit():
+        employee_id = ""
+    return {
+        "date_from": date_from,
+        "date_to": date_to,
+        "department": department,
+        "status": status,
+        "employee_id": employee_id,
+    }
+
+
+def apply_report_filters(rows, filters):
+    filtered = []
+    for row in rows:
+        if filters["date_from"] and row["report_date"] < filters["date_from"]:
+            continue
+        if filters["date_to"] and row["report_date"] > filters["date_to"]:
+            continue
+        if filters["department"] and row["department"] != filters["department"]:
+            continue
+        if filters["status"] and row["status"] != filters["status"]:
+            continue
+        if filters["employee_id"] and str(row["user_id"]) != filters["employee_id"]:
+            continue
+        filtered.append(row)
+    return filtered
+
+
 def safe_metrics(report):
     try:
         return json.loads(row_get(report, "metrics_json", "{}") or "{}")
@@ -609,8 +685,8 @@ def expansion_modules(insights=None):
             "summary": "Performance-linked rewards, approval flow, monthly history, and payment record tracking.",
             "metric": insights.get("approved", 0),
             "label": "Approved reports",
-            "status": "Workflow pending",
-            "endpoint": None,
+            "status": "Operational workflow",
+            "endpoint": "incentives",
         },
         {
             "title": "Minutes",
@@ -619,6 +695,14 @@ def expansion_modules(insights=None):
             "label": "Meeting signals",
             "status": "Operational repository",
             "endpoint": "meetings",
+        },
+        {
+            "title": "Notifications",
+            "summary": "Scheduled in-app reminders for pending verification, due actions, report review, and intake follow-up with delivery history.",
+            "metric": insights.get("pending_review", 0),
+            "label": "Pending report reviews",
+            "status": "In-app delivery operational",
+            "endpoint": "admin_reminders" if getattr(g, "user", None) and g.user["role"] in SUPER_ROLES else None,
         },
     ]
 
@@ -652,6 +736,138 @@ def get_notifications(limit=20):
            LIMIT ?""",
         (g.user["id"], limit),
     ).fetchall()
+
+
+REMINDER_KINDS = {
+    "admission_pending": "Admissions awaiting verification",
+    "meeting_action_due": "Meeting actions due soon",
+    "report_review": "Submitted reports awaiting review",
+    "intake_review": "Monthly intake target follow-up",
+}
+
+
+def reminder_candidates(rule):
+    """Build in-app reminder recipients without external transmission."""
+    db = get_db()
+    today = datetime.now().date()
+    lead_date = (today + timedelta(days=int(rule["lead_days"] or 0))).strftime("%Y-%m-%d")
+    date_key = today.strftime("%Y-%m-%d")
+    candidates = []
+    if rule["kind"] == "admission_pending":
+        for row in db.execute(
+            """SELECT id, applicant_name, status, created_by FROM admissions
+               WHERE status IN ('pending', 'needs_info')"""
+        ).fetchall():
+            candidates.append({
+                "user_id": row["created_by"],
+                "title": "Admission verification outstanding",
+                "body": f"{row['applicant_name']} remains {row['status'].replace('_', ' ')}.",
+                "link": f"/admissions/{row['id']}",
+                "source_key": f"admission:{row['id']}:{date_key}",
+            })
+    elif rule["kind"] == "meeting_action_due":
+        for row in db.execute(
+            """SELECT meeting_actions.id, meeting_actions.description, meeting_actions.owner_id,
+                      meeting_actions.due_date, meetings.id AS meeting_id, meetings.title AS meeting_title
+               FROM meeting_actions JOIN meetings ON meetings.id = meeting_actions.meeting_id
+               WHERE meeting_actions.status != 'completed' AND meeting_actions.due_date != ''
+                 AND meeting_actions.due_date <= ?""",
+            (lead_date,),
+        ).fetchall():
+            candidates.append({
+                "user_id": row["owner_id"],
+                "title": f"Action due: {row['meeting_title']}",
+                "body": f"{row['description']} · due {row['due_date']}",
+                "link": f"/meetings/{row['meeting_id']}",
+                "source_key": f"meeting_action:{row['id']}:{date_key}",
+            })
+    elif rule["kind"] == "report_review":
+        for report in db.execute("SELECT id, user_id, report_date FROM reports WHERE status = 'submitted' AND archived = 0").fetchall():
+            reviewers = db.execute(
+                """SELECT users.id FROM users JOIN report_access ON report_access.admin_id = users.id
+                   WHERE report_access.employee_id = ? AND users.is_active = 1""",
+                (report["user_id"],),
+            ).fetchall()
+            if not reviewers:
+                reviewers = db.execute(
+                    """SELECT id FROM users WHERE role IN ('principal', 'superadmin')
+                       AND is_active = 1 AND deleted_at IS NULL"""
+                ).fetchall()
+            for reviewer in reviewers:
+                candidates.append({
+                    "user_id": reviewer["id"],
+                    "title": "Report awaiting review",
+                    "body": f"A submitted report dated {report['report_date']} is awaiting review.",
+                    "link": f"/reports/{report['id']}",
+                    "source_key": f"report_review:{report['id']}:{date_key}",
+                })
+    elif rule["kind"] == "intake_review":
+        month = today.strftime("%Y-%m")
+        for target in db.execute(
+            "SELECT * FROM intake_targets WHERE target_month = ?",
+            (month,),
+        ).fetchall():
+            actual = db.execute(
+                """SELECT COUNT(*) AS c FROM admissions WHERE created_by = ? AND status = 'verified' AND fee_status = 'paid'
+                   AND substr(COALESCE(NULLIF(admission_date, ''), created_at), 1, 7) = ?""",
+                (target["officer_id"], month),
+            ).fetchone()["c"]
+            if actual < target["target_count"]:
+                candidates.append({
+                    "user_id": target["officer_id"],
+                    "title": f"Intake target follow-up · {month}",
+                    "body": f"Verified admissions: {actual} of {target['target_count']}.",
+                    "link": f"/intake-targets?month={month}",
+                    "source_key": f"intake:{target['id']}:{date_key}",
+                })
+    return candidates
+
+
+def reminder_rule_is_due(rule, force=False):
+    if force or not rule["last_run_at"]:
+        return True
+    try:
+        last_run = datetime.strptime(rule["last_run_at"], "%Y-%m-%d %H:%M:%S")
+    except (TypeError, ValueError):
+        return True
+    interval = timedelta(days=7 if rule["cadence"] == "weekly" else 1)
+    return datetime.now() - last_run >= interval
+
+
+def run_reminder_rules(force=False):
+    db = get_db()
+    rules = db.execute("SELECT * FROM reminder_rules WHERE is_enabled = 1 ORDER BY id").fetchall()
+    result = {"rules": 0, "delivered": 0, "skipped": 0}
+    for rule in rules:
+        if not reminder_rule_is_due(rule, force=force):
+            continue
+        result["rules"] += 1
+        for candidate in reminder_candidates(rule):
+            exists = db.execute(
+                """SELECT 1 FROM notification_delivery_logs
+                   WHERE rule_id = ? AND user_id = ? AND source_key = ?""",
+                (rule["id"], candidate["user_id"], candidate["source_key"]),
+            ).fetchone()
+            if exists:
+                result["skipped"] += 1
+                continue
+            timestamp = now()
+            db.execute(
+                """INSERT INTO notifications
+                   (user_id, actor_id, kind, title, body, link, is_read, created_at)
+                   VALUES (?, NULL, 'reminder', ?, ?, ?, 0, ?)""",
+                (candidate["user_id"], candidate["title"], candidate["body"], candidate["link"], timestamp),
+            )
+            db.execute(
+                """INSERT INTO notification_delivery_logs
+                   (rule_id, user_id, channel, source_key, title, status, created_at)
+                   VALUES (?, ?, 'in_app', ?, ?, 'delivered', ?)""",
+                (rule["id"], candidate["user_id"], candidate["source_key"], candidate["title"], timestamp),
+            )
+            result["delivered"] += 1
+        db.execute("UPDATE reminder_rules SET last_run_at = ?, updated_at = ? WHERE id = ?", (now(), now(), rule["id"]))
+    db.commit()
+    return result
 
 
 def build_principal_overview(reports, users):
@@ -807,6 +1023,9 @@ def init_db():
             course TEXT NOT NULL,
             intake TEXT DEFAULT '',
             admission_date TEXT DEFAULT '',
+            fee_status TEXT NOT NULL DEFAULT 'unpaid',
+            fee_paid_at TEXT,
+            fee_payment_reference TEXT DEFAULT '',
             source TEXT DEFAULT '',
             notes TEXT DEFAULT '',
             status TEXT NOT NULL DEFAULT 'pending',
@@ -881,6 +1100,69 @@ def init_db():
             FOREIGN KEY(actor_id) REFERENCES users(id)
         );
 
+        CREATE TABLE IF NOT EXISTS incentives (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            employee_id INTEGER NOT NULL,
+            period_month TEXT NOT NULL,
+            description TEXT NOT NULL,
+            units INTEGER NOT NULL,
+            rate_cents INTEGER NOT NULL,
+            amount_cents INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'proposed',
+            notes TEXT DEFAULT '',
+            payment_reference TEXT DEFAULT '',
+            created_by INTEGER NOT NULL,
+            approved_by INTEGER,
+            approved_at TEXT,
+            paid_by INTEGER,
+            paid_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(employee_id) REFERENCES users(id),
+            FOREIGN KEY(created_by) REFERENCES users(id),
+            FOREIGN KEY(approved_by) REFERENCES users(id),
+            FOREIGN KEY(paid_by) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS incentive_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            incentive_id INTEGER NOT NULL,
+            actor_id INTEGER NOT NULL,
+            event TEXT NOT NULL,
+            notes TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(incentive_id) REFERENCES incentives(id),
+            FOREIGN KEY(actor_id) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS reminder_rules (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            kind TEXT NOT NULL,
+            cadence TEXT NOT NULL DEFAULT 'daily',
+            lead_days INTEGER NOT NULL DEFAULT 1,
+            is_enabled INTEGER NOT NULL DEFAULT 1,
+            created_by INTEGER NOT NULL,
+            last_run_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(created_by) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS notification_delivery_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rule_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            channel TEXT NOT NULL DEFAULT 'in_app',
+            source_key TEXT NOT NULL,
+            title TEXT NOT NULL,
+            status TEXT NOT NULL,
+            error TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            UNIQUE(rule_id, user_id, source_key),
+            FOREIGN KEY(rule_id) REFERENCES reminder_rules(id),
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+
         CREATE TABLE IF NOT EXISTS report_access (
             admin_id INTEGER NOT NULL,
             employee_id INTEGER NOT NULL,
@@ -911,6 +1193,10 @@ def init_db():
         "CREATE INDEX IF NOT EXISTS idx_meetings_date ON meetings(meeting_date)",
         "CREATE INDEX IF NOT EXISTS idx_meeting_actions_owner ON meeting_actions(owner_id, status)",
         "CREATE INDEX IF NOT EXISTS idx_account_events_user ON account_events(user_id, created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_incentives_employee_period ON incentives(employee_id, period_month)",
+        "CREATE INDEX IF NOT EXISTS idx_incentive_events_record ON incentive_events(incentive_id, created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_reminder_rules_enabled ON reminder_rules(is_enabled, kind)",
+        "CREATE INDEX IF NOT EXISTS idx_delivery_logs_rule ON notification_delivery_logs(rule_id, created_at)",
     ):
         try:
             conn.execute(index_sql)
@@ -922,6 +1208,15 @@ def init_db():
         conn.execute("ALTER TABLE admissions ADD COLUMN admission_date TEXT DEFAULT ''")
     except Exception:
         pass
+    for admission_column in (
+        "fee_status TEXT NOT NULL DEFAULT 'unpaid'",
+        "fee_paid_at TEXT",
+        "fee_payment_reference TEXT DEFAULT ''",
+    ):
+        try:
+            conn.execute(f"ALTER TABLE admissions ADD COLUMN {admission_column}")
+        except Exception:
+            pass
 
     try:
         conn.execute("ALTER TABLE reports ADD COLUMN status TEXT NOT NULL DEFAULT 'submitted'")
@@ -1789,19 +2084,19 @@ def login():
             if last_login:
                 try:
                     last_dt = datetime.strptime(last_login, "%Y-%m-%d %H:%M:%S")
-                    if (datetime.now() - last_dt) > timedelta(days=5) and user["role"] not in ("admin", "principal", "superadmin", "shadowadmin"):
+                    if (datetime.now() - last_dt) > timedelta(days=INACTIVITY_LOCK_DAYS) and user["role"] not in ("admin", "principal", "superadmin", "shadowadmin"):
                         db = get_db()
                         db.execute(
-                            "UPDATE users SET is_active = 0, locked_at = ?, lock_reason = 'Auto-locked: inactive for 5+ days' WHERE id = ?",
-                            (now(), user["id"]),
+                            "UPDATE users SET is_active = 0, locked_at = ?, lock_reason = ? WHERE id = ?",
+                            (now(), f"Auto-locked: inactive for {INACTIVITY_LOCK_DAYS}+ days", user["id"]),
                         )
                         db.execute(
                             """INSERT INTO account_events (user_id, actor_id, event, reason, created_at)
-                               VALUES (?, NULL, 'auto_locked', 'Inactive for 5+ days', ?)""",
-                            (user["id"], now()),
+                               VALUES (?, NULL, 'auto_locked', ?, ?)""",
+                            (user["id"], f"Inactive for {INACTIVITY_LOCK_DAYS}+ days", now()),
                         )
                         db.commit()
-                        flash("Your account has been locked due to 5 days of inactivity. Contact your administrator.", "warning")
+                        flash(f"Your account has been locked due to {INACTIVITY_LOCK_DAYS} days of inactivity. Contact your administrator.", "warning")
                         return redirect(url_for("login"))
                 except (ValueError, TypeError):
                     pass
@@ -1960,35 +2255,8 @@ def logout():
 def dashboard(archived=0):
     db = get_db()
     show_archived = 1 if archived == 1 else 0
-    archived_expr = archived_filter("reports.archived")
-    if g.user["role"] == "employee":
-        reports = db.execute(
-            f"SELECT * FROM reports WHERE user_id = ? AND {archived_filter()} = ? ORDER BY report_date DESC, id DESC",
-            (g.user["id"], show_archived),
-        ).fetchall()
-    elif g.user["role"] == "admin":
-        reports = db.execute(
-            f"""
-            SELECT reports.*, users.full_name
-            FROM reports
-            JOIN users ON users.id = reports.user_id
-            JOIN report_access ON report_access.employee_id = reports.user_id
-            WHERE report_access.admin_id = ? AND {archived_expr} = ?
-            ORDER BY reports.report_date DESC, reports.id DESC
-            """,
-            (g.user["id"], show_archived),
-        ).fetchall()
-    else:
-        reports = db.execute(
-            f"""
-            SELECT reports.*, users.full_name
-            FROM reports
-            JOIN users ON users.id = reports.user_id
-            WHERE {archived_expr} = ?
-            ORDER BY reports.report_date DESC, reports.id DESC
-            """,
-            (show_archived,),
-        ).fetchall()
+    filters = report_filter_values()
+    reports = apply_report_filters(visible_report_rows(db, show_archived), filters)
     # Stats cover every role-scoped report (no truncation), so "Total Reports"
     # and every derived rate are accurate; the rendered list is capped for size.
     insights = build_dashboard_insights(reports, get_visible_staff_count(db))
@@ -1999,6 +2267,9 @@ def dashboard(archived=0):
         show_archived=bool(show_archived),
         insights=insights,
         modules=modules,
+        filters=filters,
+        filter_users=scoped_users(),
+        departments=DEPARTMENTS,
     )
 
 
@@ -2196,6 +2467,60 @@ def verify_admission(admission_id):
     return redirect(url_for("admission_detail", admission_id=admission_id))
 
 
+@app.route("/admissions/<int:admission_id>/payment", methods=["POST"])
+@admin_required
+def update_admission_payment(admission_id):
+    csrf_protect()
+    admission = get_admission_or_404(admission_id)
+    action = clean_text(request.form.get("action"), 20)
+    note = clean_text(request.form.get("note"), 1000)
+    timestamp = now()
+    db = get_db()
+    if action == "mark_paid":
+        reference = clean_text(request.form.get("payment_reference"), 120)
+        if not reference:
+            flash("Record the approved payment reference before marking fees paid.", "danger")
+            return redirect(url_for("admission_detail", admission_id=admission_id))
+        db.execute(
+            """UPDATE admissions SET fee_status = 'paid', fee_paid_at = ?,
+                   fee_payment_reference = ?, updated_at = ? WHERE id = ?""",
+            (timestamp, reference, timestamp, admission_id),
+        )
+        history_status = "fee_paid"
+        history_note = note or f"Fee payment recorded under reference {reference}."
+    elif action == "reopen":
+        if not note:
+            flash("Explain why the fee-paid state is being reopened.", "danger")
+            return redirect(url_for("admission_detail", admission_id=admission_id))
+        db.execute(
+            """UPDATE admissions SET fee_status = 'unpaid', fee_paid_at = NULL,
+                   fee_payment_reference = '', updated_at = ? WHERE id = ?""",
+            (timestamp, admission_id),
+        )
+        history_status = "fee_reopened"
+        history_note = note
+    else:
+        abort(400)
+    db.execute(
+        """INSERT INTO admission_verification_history
+           (admission_id, reviewer_id, status, notes, created_at)
+           VALUES (?, ?, ?, ?, ?)""",
+        (admission_id, g.user["id"], history_status, history_note, timestamp),
+    )
+    db.commit()
+    if admission["created_by"] != g.user["id"]:
+        create_notification(
+            user_id=admission["created_by"],
+            kind="admission",
+            title="Admission fee state updated",
+            body=f"The fee state for {admission['applicant_name']} was updated.",
+            link=url_for("admission_detail", admission_id=admission_id),
+            actor_id=g.user["id"],
+        )
+    flash("Admission fee state updated.", "success")
+    return redirect(url_for("admission_detail", admission_id=admission_id))
+
+
 def scoped_users(include_self=True):
     """Return active users the signed-in user is allowed to coordinate."""
     db = get_db()
@@ -2293,7 +2618,7 @@ def intake_targets():
         actual_row = db.execute(
             """SELECT COUNT(*) AS c, MAX(updated_at) AS last_activity
                FROM admissions
-               WHERE created_by = ? AND status = 'verified'
+               WHERE created_by = ? AND status = 'verified' AND fee_status = 'paid'
                  AND substr(COALESCE(NULLIF(admission_date, ''), created_at), 1, 7) = ?""",
             (officer["id"], target_month),
         ).fetchone()
@@ -2305,7 +2630,7 @@ def intake_targets():
             "actual": actual,
             "remaining": max(target_count - actual, 0),
             "percentage": min(int((actual / target_count) * 100), 100) if target_count else 0,
-            "last_activity": actual_row["last_activity"] if actual_row else None,
+                "last_activity": actual_row["last_activity"] if actual_row else None,
         })
     rows.sort(key=lambda item: (item["percentage"], item["actual"]), reverse=True)
     return render_template(
@@ -2530,6 +2855,192 @@ def update_meeting_action(meeting_id, action_id):
         )
     flash("Action status updated.", "success")
     return redirect(url_for("meeting_detail", meeting_id=meeting_id))
+
+
+INCENTIVE_STATUSES = ("proposed", "approved", "rejected", "paid")
+
+
+def can_view_incentive(user, incentive):
+    if not incentive:
+        return False
+    if user["role"] in EXECUTIVE_ROLES:
+        return True
+    if incentive["employee_id"] == user["id"]:
+        return True
+    if user["role"] == "admin":
+        return bool(get_db().execute(
+            "SELECT 1 FROM report_access WHERE admin_id = ? AND employee_id = ?",
+            (user["id"], incentive["employee_id"]),
+        ).fetchone())
+    return False
+
+
+def visible_incentives():
+    db = get_db()
+    if g.user["role"] in EXECUTIVE_ROLES:
+        return db.execute(
+            """SELECT incentives.*, users.full_name AS employee_name, users.department
+               FROM incentives JOIN users ON users.id = incentives.employee_id
+               WHERE """ + hide_shadow_sql() +
+            " ORDER BY incentives.period_month DESC, incentives.id DESC"
+        ).fetchall()
+    if g.user["role"] == "admin":
+        return db.execute(
+            """SELECT DISTINCT incentives.*, users.full_name AS employee_name, users.department
+               FROM incentives JOIN users ON users.id = incentives.employee_id
+               LEFT JOIN report_access ON report_access.employee_id = incentives.employee_id
+               WHERE incentives.employee_id = ? OR report_access.admin_id = ?
+               ORDER BY incentives.period_month DESC, incentives.id DESC""",
+            (g.user["id"], g.user["id"]),
+        ).fetchall()
+    return db.execute(
+        """SELECT incentives.*, users.full_name AS employee_name, users.department
+           FROM incentives JOIN users ON users.id = incentives.employee_id
+           WHERE incentives.employee_id = ?
+           ORDER BY incentives.period_month DESC, incentives.id DESC""",
+        (g.user["id"],),
+    ).fetchall()
+
+
+@app.route("/incentives", methods=["GET", "POST"])
+@login_required
+def incentives():
+    db = get_db()
+    if request.method == "POST":
+        csrf_protect()
+        if g.user["role"] not in ("admin", "superadmin", "shadowadmin"):
+            abort(403)
+        try:
+            employee_id = int(request.form.get("employee_id", ""))
+            units = int(request.form.get("units", ""))
+            rate = Decimal(clean_text(request.form.get("rate"), 30))
+        except (TypeError, ValueError, InvalidOperation):
+            flash("Choose an employee and enter valid units and rate.", "danger")
+            return redirect(url_for("incentives"))
+        period_month = clean_text(request.form.get("period_month"), 7)
+        description = clean_text(request.form.get("description"), 500)
+        try:
+            datetime.strptime(period_month, "%Y-%m")
+        except (TypeError, ValueError):
+            flash("Choose a valid incentive month.", "danger")
+            return redirect(url_for("incentives"))
+        if not can_coordinate_user(employee_id):
+            abort(403)
+        if not description or units < 1 or units > 100000 or rate <= 0 or rate > Decimal("10000000"):
+            flash("Description, positive units and a reasonable rate are required.", "danger")
+            return redirect(url_for("incentives"))
+        rate_cents = int((rate * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+        amount_cents = units * rate_cents
+        timestamp = now()
+        cursor = db.execute(
+            """INSERT INTO incentives
+               (employee_id, period_month, description, units, rate_cents, amount_cents,
+                status, notes, created_by, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, 'proposed', ?, ?, ?, ?)""",
+            (
+                employee_id,
+                period_month,
+                description,
+                units,
+                rate_cents,
+                amount_cents,
+                clean_text(request.form.get("notes"), 2000),
+                g.user["id"],
+                timestamp,
+                timestamp,
+            ),
+        )
+        incentive_id = cursor.lastrowid
+        db.execute(
+            """INSERT INTO incentive_events (incentive_id, actor_id, event, notes, created_at)
+               VALUES (?, ?, 'proposed', ?, ?)""",
+            (incentive_id, g.user["id"], description, timestamp),
+        )
+        db.commit()
+        if employee_id != g.user["id"]:
+            create_notification(
+                user_id=employee_id,
+                kind="incentive",
+                title=f"Incentive proposed for {period_month}",
+                body=f"KES {amount_cents / 100:,.2f} is awaiting independent approval.",
+                link=url_for("incentives"),
+                actor_id=g.user["id"],
+            )
+        flash("Incentive proposal saved for independent approval.", "success")
+        return redirect(url_for("incentives"))
+
+    records = visible_incentives()
+    totals = {status: sum(row["amount_cents"] for row in records if row["status"] == status) for status in INCENTIVE_STATUSES}
+    return render_template(
+        "incentives.html",
+        incentives=records,
+        totals=totals,
+        employees=scoped_users(),
+        current_month=datetime.now().strftime("%Y-%m"),
+    )
+
+
+@app.route("/incentives/<int:incentive_id>/status", methods=["POST"])
+@login_required
+def update_incentive_status(incentive_id):
+    csrf_protect()
+    db = get_db()
+    incentive = db.execute("SELECT * FROM incentives WHERE id = ?", (incentive_id,)).fetchone()
+    if not incentive or not can_view_incentive(g.user, incentive):
+        abort(404)
+    action = clean_text(request.form.get("action"), 30)
+    notes = clean_text(request.form.get("notes"), 2000)
+    timestamp = now()
+    if action in ("approve", "reject"):
+        if g.user["role"] not in EXECUTIVE_ROLES:
+            abort(403)
+        if incentive["status"] != "proposed":
+            abort(400)
+        if incentive["created_by"] == g.user["id"]:
+            flash("A different authorised executive must review this proposal.", "danger")
+            return redirect(url_for("incentives"))
+        if action == "reject" and not notes:
+            flash("Explain why the incentive is rejected.", "danger")
+            return redirect(url_for("incentives"))
+        new_status = "approved" if action == "approve" else "rejected"
+        db.execute(
+            """UPDATE incentives SET status = ?, notes = ?, approved_by = ?, approved_at = ?, updated_at = ?
+               WHERE id = ?""",
+            (new_status, notes, g.user["id"], timestamp, timestamp, incentive_id),
+        )
+    elif action == "mark_paid":
+        if g.user["role"] not in SUPER_ROLES or incentive["status"] != "approved":
+            abort(403)
+        payment_reference = clean_text(request.form.get("payment_reference"), 120)
+        if not payment_reference:
+            flash("A payment reference is required before marking an incentive paid.", "danger")
+            return redirect(url_for("incentives"))
+        new_status = "paid"
+        notes = notes or "Payment recorded."
+        db.execute(
+            """UPDATE incentives SET status = 'paid', payment_reference = ?, paid_by = ?, paid_at = ?,
+                   notes = ?, updated_at = ? WHERE id = ?""",
+            (payment_reference, g.user["id"], timestamp, notes, timestamp, incentive_id),
+        )
+    else:
+        abort(400)
+    db.execute(
+        """INSERT INTO incentive_events (incentive_id, actor_id, event, notes, created_at)
+           VALUES (?, ?, ?, ?, ?)""",
+        (incentive_id, g.user["id"], new_status, notes, timestamp),
+    )
+    db.commit()
+    if incentive["employee_id"] != g.user["id"]:
+        create_notification(
+            user_id=incentive["employee_id"],
+            kind="incentive",
+            title=f"Incentive {new_status}",
+            body=f"Your {incentive['period_month']} incentive is now {new_status}.",
+            link=url_for("incentives"),
+            actor_id=g.user["id"],
+        )
+    flash(f"Incentive marked {new_status}.", "success")
+    return redirect(url_for("incentives"))
 
 @app.route("/principal")
 @principal_required
@@ -2883,6 +3394,78 @@ def admin_settings():
     return render_template("admin_settings.html", registration_open=(reg_open and reg_open["value"] == "1"))
 
 
+@app.route("/admin/reminders", methods=["GET", "POST"])
+@superadmin_required
+def admin_reminders():
+    db = get_db()
+    if request.method == "POST":
+        csrf_protect()
+        action = clean_text(request.form.get("action"), 30)
+        if action == "create":
+            kind = clean_text(request.form.get("kind"), 50)
+            cadence = clean_text(request.form.get("cadence"), 20)
+            try:
+                lead_days = int(request.form.get("lead_days", "0"))
+            except (TypeError, ValueError):
+                lead_days = -1
+            if kind not in REMINDER_KINDS or cadence not in ("daily", "weekly") or not 0 <= lead_days <= 30:
+                abort(400)
+            existing = db.execute("SELECT id FROM reminder_rules WHERE kind = ?", (kind,)).fetchone()
+            if existing:
+                flash("A reminder rule for that workflow already exists.", "warning")
+                return redirect(url_for("admin_reminders"))
+            timestamp = now()
+            db.execute(
+                """INSERT INTO reminder_rules
+                   (kind, cadence, lead_days, is_enabled, created_by, created_at, updated_at)
+                   VALUES (?, ?, ?, 1, ?, ?, ?)""",
+                (kind, cadence, lead_days, g.user["id"], timestamp, timestamp),
+            )
+            db.commit()
+            flash("In-app reminder rule created.", "success")
+        elif action == "toggle":
+            try:
+                rule_id = int(request.form.get("rule_id", ""))
+            except (TypeError, ValueError):
+                abort(400)
+            rule = db.execute("SELECT * FROM reminder_rules WHERE id = ?", (rule_id,)).fetchone()
+            if not rule:
+                abort(404)
+            enabled = 0 if rule["is_enabled"] else 1
+            db.execute("UPDATE reminder_rules SET is_enabled = ?, updated_at = ? WHERE id = ?", (enabled, now(), rule_id))
+            db.commit()
+            flash("Reminder rule updated.", "success")
+        else:
+            abort(400)
+        return redirect(url_for("admin_reminders"))
+    rules = db.execute(
+        """SELECT reminder_rules.*, users.full_name AS creator_name
+           FROM reminder_rules JOIN users ON users.id = reminder_rules.created_by
+           ORDER BY reminder_rules.id"""
+    ).fetchall()
+    logs = db.execute(
+        """SELECT notification_delivery_logs.*, users.full_name, reminder_rules.kind
+           FROM notification_delivery_logs
+           JOIN users ON users.id = notification_delivery_logs.user_id
+           JOIN reminder_rules ON reminder_rules.id = notification_delivery_logs.rule_id
+           ORDER BY notification_delivery_logs.created_at DESC, notification_delivery_logs.id DESC
+           LIMIT 100"""
+    ).fetchall()
+    return render_template("admin_reminders.html", rules=rules, logs=logs, reminder_kinds=REMINDER_KINDS)
+
+
+@app.route("/admin/reminders/run", methods=["POST"])
+@superadmin_required
+def admin_run_reminders():
+    csrf_protect()
+    result = run_reminder_rules(force=True)
+    flash(
+        f"Reminder run complete: {result['delivered']} delivered, {result['skipped']} duplicate deliveries skipped.",
+        "success",
+    )
+    return redirect(url_for("admin_reminders"))
+
+
 @app.route("/admin/unlock/<int:user_id>", methods=["GET", "POST"])
 @login_required
 def admin_unlock(user_id):
@@ -3102,27 +3685,7 @@ def update_status(report_id):
 @login_required
 def export_csv():
     db = get_db()
-    archived_expr = archived_filter("reports.archived")
-    if g.user["role"] == "employee":
-        rows = db.execute(
-            f"SELECT reports.*, users.full_name FROM reports JOIN users ON users.id = reports.user_id WHERE reports.user_id = ? AND {archived_expr} = 0 ORDER BY reports.report_date DESC",
-            (g.user["id"],),
-        ).fetchall()
-    elif g.user["role"] == "admin":
-        rows = db.execute(
-            f"""
-            SELECT reports.*, users.full_name FROM reports
-            JOIN users ON users.id = reports.user_id
-            JOIN report_access ON report_access.employee_id = reports.user_id
-            WHERE report_access.admin_id = ? AND {archived_expr} = 0
-            ORDER BY reports.report_date DESC
-            """,
-            (g.user["id"],),
-        ).fetchall()
-    else:
-        rows = db.execute(
-            f"SELECT reports.*, users.full_name FROM reports JOIN users ON users.id = reports.user_id WHERE {archived_expr} = 0 AND {hide_shadow_sql('users')} ORDER BY reports.report_date DESC"
-        ).fetchall()
+    rows = apply_report_filters(visible_report_rows(db, 0), report_filter_values())
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -3143,6 +3706,46 @@ def export_csv():
         output.getvalue(),
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment; filename=toolkit_reports_export.csv"},
+    )
+
+
+@app.route("/reports/export.xlsx")
+@login_required
+def export_xlsx():
+    rows = apply_report_filters(visible_report_rows(get_db(), 0), report_filter_values())
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Toolkit Reports"
+    headers = ["Date", "Employee", "Department", "Position", "Branch", "Summary", "Status", "Submitted At"]
+    sheet.append(headers)
+    header_fill = PatternFill("solid", fgColor="1B4D2E")
+    for cell in sheet[1]:
+        cell.font = Font(color="FFFFFF", bold=True)
+        cell.fill = header_fill
+    for report in rows:
+        sheet.append([
+            csv_safe(report["report_date"]),
+            csv_safe(report["full_name"]),
+            csv_safe(report["department"]),
+            csv_safe(report["position"]),
+            csv_safe(report["branch"]),
+            csv_safe(report["day_summary"]),
+            csv_safe(report["status"]),
+            csv_safe(report["created_at"]),
+        ])
+    widths = {"A": 14, "B": 24, "C": 22, "D": 24, "E": 30, "F": 58, "G": 14, "H": 22}
+    for column, width in widths.items():
+        sheet.column_dimensions[column].width = width
+    sheet.freeze_panes = "A2"
+    sheet.auto_filter.ref = sheet.dimensions
+    output = io.BytesIO()
+    workbook.save(output)
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="toolkit_reports_export.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
@@ -3224,6 +3827,13 @@ def cleanup_expired_resets():
         db.commit()
     except Exception:
         pass
+
+
+@app.cli.command("reminders-run")
+def reminders_run_command():
+    """Deliver due in-app reminder rules; safe for a scheduled cron invocation."""
+    result = run_reminder_rules(force=False)
+    print(json.dumps(result, sort_keys=True))
 
 
 @app.route("/health")

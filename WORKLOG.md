@@ -5,6 +5,25 @@ change itself. Format and rules: see `../AGENTS.md` section 1.
 
 ---
 
+## 2026-08-31 — Apply intake, Wingu and reporting policy decisions
+**Area:** admissions · authentication · incentives · exports · reminders · Wingu
+**Environments:** local verification; not deployed
+**Commit(s):** this commit
+
+Applied the owner's decisions: intake actuals now require a verified, fee-paid
+enrolment; employee inactivity locks occur after 14 days; and Wingu project
+selection is always read from Wingu's own project list. Incentive proposals,
+report filters/XLSX export, and configurable in-app reminder rules are now
+operational, with audit/delivery records and no outbound Wingu/email writes.
+
+**Verified by:** 45 automated tests passed after the policy update; the new
+fee-payment, intake, export, incentive, reminder and lock routes are covered by
+authenticated tests. The Wingu procedure was reconciled to the same dynamic
+project-selection rule.
+**Follow-ups:** review locally; provide the approved attendance-sheet format,
+rejected-row owner and authenticated Wingu review session before browser
+dispatch work.
+
 ## 2026-08-28 — Operationalise intake, meetings and account unlocking
 **Area:** admissions · targets · meetings · authentication · Wingu planning
 **Environments:** local verification; not deployed
@@ -17,10 +36,10 @@ now enforced independently of role, department admins can unlock their own
 employees through a reasoned action, and promotion no longer bypasses a lock.
 
 Added a direct owner-input tracker and a credential-free Wingu Box integration
-design. The design recommends an approved API/SSO path, server-side identity
-mapping, idempotent queued dispatch after report approval, authoritative
-attendance times and visible reconciliation; it does not connect to Wingu or
-store credentials.
+design. The approved direction is an isolated authenticated-browser bridge with
+Wingu-provided project selection, idempotent queued dispatch after report
+approval, Excel/manual attendance times and visible reconciliation; it does not
+connect to Wingu or store credentials.
 
 **Verified by:** Python compilation, full automated suite and authenticated
 route/render checks for targets, meeting actions and unlock behaviour.

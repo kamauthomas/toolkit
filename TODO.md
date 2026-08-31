@@ -18,15 +18,21 @@
   employees with a reason and role changes cannot bypass a lock.
 * Document the proposed Report System to Wingu Box integration without storing
   or sharing credentials.
+* Add incentives proposals with server-side calculations, independent approval,
+  payment references and audit events.
+* Add report filters and true XLSX export alongside CSV export.
+* Add configurable in-app reminder rules, idempotent delivery logs and a
+  scheduler-safe `flask reminders-run` command.
+* Apply owner policy decisions: fee-paid intake actuals and 14-day inactivity
+  locking.
 
 ## Next implementation work
 
-* Create normalized database tables for incentives, notification rules, and
-  notification delivery logs.
-* Add CRUD routes and forms for incentive records.
+* Add email delivery after an authenticated provider is approved.
 * Add role-specific dashboards for Principal, Administrator, Department Head, and Employee once those roles are mapped to the current role model.
 * Add date range, employee, department, status, and report category filters to the dashboard and export routes.
-* Add Excel export support in addition to the existing CSV and PDF outputs.
-* Add reminder scheduling and email delivery using production-safe SMTP settings and delivery logs.
-* Add automated tests for dashboard analytics, module route access and incentive calculations.
+* Add browser-assisted Wingu dispatch after the authenticated review session,
+  attendance-sheet format and rejected-row owner are supplied.
+* Add automated tests for remaining dashboard analytics and Wingu dry-run
+  reconciliation.
 * Add seed/demo data for showcasing the new module dashboards during stakeholder review.

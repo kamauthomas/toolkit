@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div><p class="eyebrow">Performance recognition</p><h1>Incentives</h1><p class="muted">Calculated proposals, independent approval and payment history in one accountable workflow.</p></div>
+</section>
+
+<section class="module-grid" style="margin-bottom:18px;">
+  {% for status, label in [('proposed', 'Awaiting approval'), ('approved', 'Approved'), ('paid', 'Paid'), ('rejected', 'Rejected')] %}
+  <article class="module-card" style="min-height:0;"><div><span class="eyebrow">{{ label }}</span><div class="module-metric"><strong>KES {{ '{:,.2f}'.format(totals.get(status, 0) / 100) }}</strong><span>{{ status }}</span></div></div></article>
+  {% endfor %}
+</section>
+
+{% if g.user.role in ('admin', 'superadmin', 'shadowadmin') %}
+<section class="card">
+  <h2>Create an incentive proposal</h2>
+  <p class="hint">The amount is calculated by the server as units × rate. A different executive must approve the proposal.</p>
+  <form method="post" class="form grid">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label>Employee<select name="employee_id" required>{% for employee in employees %}<option value="{{ employee.id }}">{{ employee.full_name }} · {{ employee.department }}</option>{% endfor %}</select></label>
+    <label>Month<input type="month" name="period_month" value="{{ current_month }}" required></label>
+    <label>Units<input type="number" name="units" min="1" max="100000" required></label>
+    <label>Rate per unit (KES)<input type="number" name="rate" min="0.01" max="10000000" step="0.01" required></label>
+    <label class="full">Basis / description<textarea name="description" maxlength="500" required placeholder="What measurable result qualifies for this incentive?"></textarea></label>
+    <label class="full">Supporting note<textarea name="notes" maxlength="2000"></textarea></label>
+    <div class="full" style="display:flex;justify-content:flex-end;"><button class="primary" type="submit">Save proposal</button></div>
+  </form>
+</section>
+{% endif %}
+
+<section class="card">
+  <div class="inline-head"><h2>Incentives in your scope</h2><span class="muted">{{ incentives|length }} records</span></div>
+  {% if incentives %}<div class="table-wrap"><table>
+    <thead><tr><th>Month</th><th>Employee</th><th>Basis</th><th>Calculation</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>{% for incentive in incentives %}<tr>
+      <td>{{ incentive.period_month }}</td><td><strong>{{ incentive.employee_name }}</strong><br><span class="muted small">{{ incentive.department }}</span></td><td>{{ incentive.description }}</td>
+      <td>{{ incentive.units }} × KES {{ '{:,.2f}'.format(incentive.rate_cents / 100) }}</td><td><strong>KES {{ '{:,.2f}'.format(incentive.amount_cents / 100) }}</strong></td>
+      <td><span class="status-badge {{ 'approved' if incentive.status in ('approved', 'paid') else 'submitted' if incentive.status in ('proposed', 'rejected') else 'reviewed' }}">{{ incentive.status|title }}</span>{% if incentive.payment_reference %}<br><span class="small muted">Ref: {{ incentive.payment_reference }}</span>{% endif %}</td>
+      <td>
+        {% if incentive.status == 'proposed' and g.user.role in ('principal', 'superadmin', 'shadowadmin') %}
+        <form method="post" action="{{ url_for('update_incentive_status', incentive_id=incentive.id) }}" class="form" style="min-width:220px;">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}"><textarea name="notes" placeholder="Required for rejection"></textarea>
+          <div class="actions"><button class="secondary small-button" name="action" value="approve">Approve</button><button class="secondary small-button danger" name="action" value="reject">Reject</button></div>
+        </form>
+        {% elif incentive.status == 'approved' and g.user.role in ('superadmin', 'shadowadmin') %}
+        <form method="post" action="{{ url_for('update_incentive_status', incentive_id=incentive.id) }}" class="form" style="min-width:220px;">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token }}"><input name="payment_reference" maxlength="120" required placeholder="Payment reference"><textarea name="notes" placeholder="Payment note"></textarea>
+          <button class="secondary small-button" name="action" value="mark_paid">Mark paid</button>
+        </form>
+        {% else %}<span class="muted small">No action available</span>{% endif %}
+      </td>
+    </tr>{% endfor %}</tbody>
+  </table></div>{% else %}<p class="empty">No incentive records are visible yet.</p>{% endif %}
+</section>
+{% endblock %}

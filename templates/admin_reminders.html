@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-head">
+  <div><p class="eyebrow">Administration</p><h1>In-app reminders</h1><p class="muted">Scheduled rules create accountable in-app notifications and delivery logs. Email remains disabled until an approved provider is configured.</p></div>
+  <form method="post" action="{{ url_for('admin_run_reminders') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token }}"><button class="primary" type="submit">Run enabled rules now</button></form>
+</section>
+
+<section class="card">
+  <h2>Create a reminder rule</h2>
+  <form method="post" class="form grid">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}"><input type="hidden" name="action" value="create">
+    <label>Workflow<select name="kind">{% for key, label in reminder_kinds.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select></label>
+    <label>Cadence<select name="cadence"><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
+    <label>Lead days<input type="number" name="lead_days" min="0" max="30" value="1" required></label>
+    <div style="display:flex;align-items:end;"><button class="primary" type="submit">Create rule</button></div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Configured rules</h2>
+  {% if rules %}<div class="table-wrap"><table><thead><tr><th>Workflow</th><th>Cadence</th><th>Lead days</th><th>Last run</th><th>Status</th><th></th></tr></thead><tbody>
+  {% for rule in rules %}<tr><td>{{ reminder_kinds.get(rule.kind, rule.kind) }}</td><td>{{ rule.cadence|title }}</td><td>{{ rule.lead_days }}</td><td>{{ rule.last_run_at or 'Never' }}</td><td><span class="status-badge {{ 'approved' if rule.is_enabled else 'submitted' }}">{{ 'Enabled' if rule.is_enabled else 'Disabled' }}</span></td><td><form method="post"><input type="hidden" name="_csrf_token" value="{{ csrf_token }}"><input type="hidden" name="action" value="toggle"><input type="hidden" name="rule_id" value="{{ rule.id }}"><button class="secondary small-button">{{ 'Disable' if rule.is_enabled else 'Enable' }}</button></form></td></tr>{% endfor %}
+  </tbody></table></div>{% else %}<p class="empty">No reminder rules configured.</p>{% endif %}
+</section>
+
+<section class="card">
+  <h2>Recent delivery history</h2>
+  {% if logs %}<div class="table-wrap"><table><thead><tr><th>Time</th><th>Recipient</th><th>Workflow</th><th>Title</th><th>Channel</th><th>Status</th></tr></thead><tbody>
+  {% for log in logs %}<tr><td>{{ log.created_at }}</td><td>{{ log.full_name }}</td><td>{{ reminder_kinds.get(log.kind, log.kind) }}</td><td>{{ log.title }}</td><td>{{ log.channel }}</td><td>{{ log.status|title }}</td></tr>{% endfor %}
+  </tbody></table></div>{% else %}<p class="empty">No reminder deliveries have been recorded.</p>{% endif %}
+</section>
+{% endblock %}

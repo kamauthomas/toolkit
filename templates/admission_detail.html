@@ -17,6 +17,8 @@
       <div><dt>Course</dt><dd>{{ admission.course }}</dd></div>
       <div><dt>Intake</dt><dd>{{ admission.intake or 'Not specified' }}</dd></div>
       <div><dt>Admission date</dt><dd>{{ admission.admission_date or 'Not recorded' }}</dd></div>
+      <div><dt>Fee state</dt><dd><span class="status-badge {{ 'approved' if admission.fee_status == 'paid' else 'submitted' }}">{{ admission.fee_status|title }}</span></dd></div>
+      {% if admission.fee_status == 'paid' %}<div><dt>Payment reference</dt><dd>{{ admission.fee_payment_reference }}</dd></div><div><dt>Paid at</dt><dd>{{ admission.fee_paid_at }}</dd></div>{% endif %}
       <div><dt>Source</dt><dd>{{ admission.source or 'Not specified' }}</dd></div>
       <div><dt>Notes</dt><dd style="white-space:pre-wrap;">{{ admission.notes or 'No notes recorded.' }}</dd></div>
       <div><dt>Last updated</dt><dd>{{ admission.updated_at }}</dd></div>
@@ -38,6 +40,21 @@
           <textarea name="notes" maxlength="2000" placeholder="What was checked, or what is still needed?"></textarea>
         </label>
         <button class="primary" type="submit">Save verification decision</button>
+      </form>
+    </section>
+    <section class="card">
+      <h2>Fee-paid enrolment state</h2>
+      <p class="hint">Only verified admissions with a recorded fee-paid state count toward intake targets.</p>
+      <form method="post" action="{{ url_for('update_admission_payment', admission_id=admission.id) }}" class="form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+        {% if admission.fee_status != 'paid' %}
+          <label>Approved payment reference<input type="text" name="payment_reference" maxlength="120" required></label>
+          <label>Note<textarea name="note" maxlength="1000"></textarea></label>
+          <button class="primary" name="action" value="mark_paid" type="submit">Mark fees paid</button>
+        {% else %}
+          <label>Reason for reopening<textarea name="note" maxlength="1000" required></textarea></label>
+          <button class="secondary danger" name="action" value="reopen" type="submit">Reopen fee state</button>
+        {% endif %}
       </form>
     </section>
   {% endif %}

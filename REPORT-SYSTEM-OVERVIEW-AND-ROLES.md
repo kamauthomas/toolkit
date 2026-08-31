@@ -3,7 +3,7 @@
 **System:** Daily operations reporting for The Toolkit for Skills & Innovation
 **Address:** reports.toolkitafrica.ac.ke
 **Audience:** staff, department heads, and management
-**Last updated:** 28 August 2026
+**Last updated:** 31 August 2026
 
 ---
 
@@ -74,6 +74,9 @@ The operations workspace also includes:
 - admissions follow-up records with verification decisions and history;
 - monthly intake targets compared with verified admissions;
 - meeting minutes with responsible action owners, deadlines and progress states.
+- monthly intake targets counted only from verified, fee-paid enrolments;
+- incentive proposals with independent approval and payment references;
+- configurable in-app reminder rules with delivery history.
 
 ---
 
@@ -179,7 +182,7 @@ can seize control of another's account.
 - **Account protection**: failed-login lockouts, recorded-reason unlocks, and the rule that
   management accounts cannot reset one another keep administrative control accountable.
   Employee inactivity locks remain enforced even if a role is changed; the account must use
-  the explicit reasoned unlock path.
+  the explicit reasoned unlock path. The inactivity threshold is 14 days.
 - **Data on account removal**: deleting a user offers a choice to keep their historical
   reports (for the institutional record) or remove them.
 - **Wingu Box**: no live integration exists. The safe proposal and required owner decisions

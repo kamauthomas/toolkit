@@ -4,7 +4,7 @@
   <div>
     <p class="eyebrow">Admissions performance</p>
     <h1>Monthly intake targets</h1>
-    <p class="muted">Targets are compared with verified admissions attributed to each officer for the selected month.</p>
+    <p class="muted">Targets are compared only with verified, fee-paid enrolments attributed to each officer for the selected month.</p>
   </div>
   <form method="get" class="actions">
     <label class="compact-field">Month<input type="month" name="month" value="{{ target_month }}" onchange="this.form.submit()"></label>
@@ -33,7 +33,7 @@
 {% endif %}
 
 <section class="card">
-  <div class="inline-head"><h2>Officer progress · {{ target_month }}</h2><span class="muted">Verified records only</span></div>
+  <div class="inline-head"><h2>Officer progress · {{ target_month }}</h2><span class="muted">Verified + fee paid only</span></div>
   {% if rows %}
   <div class="table-wrap"><table>
     <thead><tr><th>Officer</th><th>Target</th><th>Verified</th><th>Remaining</th><th>Progress</th><th>Last activity</th></tr></thead>
@@ -41,7 +41,7 @@
       <td><strong>{{ item.officer.full_name }}</strong><br><span class="muted small">{{ item.officer.department }}</span></td>
       <td>{{ item.target }}</td><td>{{ item.actual }}</td><td>{{ item.remaining }}</td>
       <td><div class="progress-track"><span style="width:{{ item.percentage }}%"></span></div><span class="small">{{ item.percentage }}%</span></td>
-      <td>{{ item.last_activity or 'No verified admission' }}</td>
+      <td>{{ item.last_activity or 'No verified fee-paid enrolment' }}</td>
     </tr>{% endfor %}</tbody>
   </table></div>
   {% else %}<p class="empty">No officers are available in your scope.</p>{% endif %}
