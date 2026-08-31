@@ -42,8 +42,9 @@ Create one concise, point-form note per working date:
 
 1. Open **ESS → Time Sheet → Edit Time Sheet**.
 2. Select the employee and target month.
-3. Select the applicable project. For the current Toolkit workstream, confirm
-   that the displayed project is `TTI2024`.
+3. Read the project choices presented by Wingu and select the approved Toolkit
+   project for that employee and period. Wingu is the authority for the project
+   identifier; never hard-code or substitute a project code in automation.
 4. Refresh the grid.
 5. For each working date, enter:
    - start time in 12-hour format;
@@ -87,7 +88,8 @@ After submission, reload the Wingu page and confirm for every changed date:
 - start and end times match the employee-supplied values;
 - calculated hours are plausible;
 - the complete note persisted;
-- the project remains `TTI2024`;
+- the project remains the approved value selected from Wingu's own project
+  list;
 - weekends/off days remain unchanged;
 - no unrelated rows were modified.
 

@@ -5,6 +5,24 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-08-31 — Add cross-project OKR draft and Wingu policy correction
+**Area:** portfolio governance · reports · Wingu · posters/communications
+**Environments:** documentation only; no deployment
+**Commit(s):** this commit
+
+Added a management-ready OKR draft covering every Toolkit workstream, including
+the website, Reception, Report System, Smart Lecturer, Virtual Campus, chatbot,
+security, release operations and the `imgs` poster library. Reconciled the
+Wingu procedure so project identity is selected from Wingu's own values rather
+than a hard-coded project code, and updated the briefing with the new outcome
+measures.
+
+**Verified by:** cross-checked against current repository worklogs, deployment
+handoffs, module trackers, poster inventory and the Report System's 45-test
+result.
+**Follow-ups:** management approval of OKR owners/denominators; regenerate the
+long-form briefing PDF/DOCX after approved changes.
+
 ## 2026-08-28 — Reconcile briefing with operational reporting modules
 **Area:** cross-project briefing · reports · management communication
 **Environments:** documentation only; Report System changes remain local

@@ -1,6 +1,6 @@
 # Toolkit for Skills & Innovation — Whole-Toolkit Briefing
 
-**Date:** 28 August 2026  
+**Date:** 28 August 2026 (status refresh: 31 August 2026)
 **Scope:** `/home/t316/Desktop/Projects_father/toolkit` and its working
 projects, operational documents, reports and poster/image library.  
 **Audience:** management, ICT, admissions, finance, academic and communications
@@ -179,16 +179,22 @@ profiles, password changes, account lockout/unlock and executive visibility.
 The operational expansion is now implemented locally: authorised staff can
 capture and verify admissions follow-up records, set monthly intake targets
 against verified admissions, and record meetings with responsible action
-owners, due dates and progress states. The five-day inactivity workflow now has
+owners, due dates and progress states. The 14-day inactivity workflow now has
 a direct, reasoned department-admin unlock path; a role change can no longer be
 used as a reactivation workaround, and lock/unlock events are recorded. These
 changes are not deployed yet and need a demo review before hosting changes.
 
-The remaining proposal identifies incentives, notification rules/delivery logs,
-Excel export, scheduled reminders and richer department dashboards. A Wingu Box
-integration design is documented but deliberately disconnected until Toolkit
-provides vendor API/SSO details, identity/project mappings, the approved dispatch
-trigger and an authoritative attendance-time source.
+The remaining proposal identifies richer department dashboards and authenticated
+email delivery. Incentives, Excel export and in-app reminder rules are now
+implemented locally. A Wingu Box integration design is documented but remains
+disconnected from live submission until the authenticated browser review,
+attendance-sheet format and rejected-row owner are provided. Wingu itself is the
+authority for project selection; no project code is hard-coded.
+
+The portfolio OKR draft is recorded in
+[`TOOLKIT-OKRS-2026-2027.md`](TOOLKIT-OKRS-2026-2027.md), with measurable
+outcomes for the website, Reception, learning systems, reporting, security,
+communications assets and delivery operations.
 
 The deployment postmortem records a prior Passenger/template mismatch that took
 the reports and main domains offline. Future releases must deploy the application,
