@@ -2,7 +2,10 @@
 {% block content %}
 <section class="section-head">
   <div><p class="eyebrow">Strategy into measurable work</p><h1>Objectives and key results</h1><p class="muted">Assign outcomes, record evidence and keep progress visible without replacing the daily report trail.</p></div>
-  {% if can_create %}<div class="actions"><a class="primary" href="#new-objective">New objective</a></div>{% endif %}
+  {% if can_create %}<div class="actions">
+    {% if g.user.role in ('principal','superadmin','shadowadmin') %}<form method="post" action="{{ url_for('load_toolkit_okr_draft') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token }}"><button class="secondary" type="submit">Load Toolkit portfolio drafts</button></form>{% endif %}
+    <a class="primary" href="#new-objective">New objective</a>
+  </div>{% endif %}
 </section>
 
 {% if can_create %}<section class="card" id="new-objective">
@@ -14,7 +17,7 @@
     <label>Owner<select name="owner_id"><option value="">Unassigned</option>{% for user in users %}<option value="{{ user.id }}">{{ user.full_name }} · {{ user.department }}</option>{% endfor %}</select></label>
     <label>Starts<input type="date" name="period_start" required></label>
     <label>Ends<input type="date" name="period_end" required></label>
-    <label>Status<select name="status"><option value="draft">Draft</option><option value="active">Active</option></select></label>
+    <label>Status<select name="status"><option value="draft">Draft — assign key-result owners before activation</option></select></label>
     <label class="full">Context<textarea name="description" maxlength="3000" placeholder="Why this matters and what success should change"></textarea></label>
     <div class="full" style="display:flex;justify-content:flex-end"><button class="primary" type="submit">Create objective</button></div>
   </form>

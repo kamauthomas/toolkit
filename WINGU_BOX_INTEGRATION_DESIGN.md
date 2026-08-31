@@ -66,9 +66,11 @@ The local implementation now provides:
 - employee and authorised-manager queue forms for approved reports;
 - a reconciliation screen that never reveals provider secrets.
 
-Still pending are an external identity mapping, the deterministic Excel parser,
-and the isolated local browser dispatcher. Those require RPT-013 and RPT-014;
-the system does not guess the spreadsheet columns or Wingu page fields.
+The deterministic Excel parser is now operational with a downloadable canonical
+template, preview-only validation, exact approved-report matching and a
+250-populated-row limit. Still pending are external identity confirmation and
+the isolated local browser dispatcher. The dispatcher requires RPT-014; the
+system does not guess Wingu page fields.
 
 Implemented dispatch states are `ready`, `dispatching`, `accepted`, `rejected`,
 `needs_attention` and `cancelled`.
@@ -107,8 +109,9 @@ attendance time.
 1. **Authenticated discovery:** after the employee signs in, record the current
    timesheet fields, Wingu-provided project control and validation behavior
    without submitting.
-2. **Mapping prototype:** build employee mapping, Excel/manual attendance input
-   and a dry-run payload preview with no external writes.
+2. **Mapping prototype:** **partially complete locally** — Excel/manual
+   attendance input, validation preview and approved-report queuing work with no
+   external writes. Wingu identity confirmation remains part of discovery.
 3. **Controlled browser dispatch:** test idempotency, persistence reload,
    validation failures and corrections on explicitly approved rows.
 4. **Controlled pilot:** enable a small approved staff group with administrator

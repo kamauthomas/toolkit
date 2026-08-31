@@ -62,7 +62,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01"/></svg>
             <span>Meetings</span>
           </a>
-          <a class="nav-item {% if request.endpoint in ('okrs', 'okr_detail', 'add_okr_key_result', 'add_okr_update', 'update_okr_status') %}active{% endif %}" href="{{ url_for('okrs') }}">
+          <a class="nav-item {% if request.endpoint in ('okrs', 'okr_detail', 'add_okr_key_result', 'add_okr_update', 'update_okr_key_result', 'update_okr_status', 'load_toolkit_okr_draft') %}active{% endif %}" href="{{ url_for('okrs') }}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 16 4-4 3 3 5-7"/><path d="M17 8h2v2"/></svg>
             <span>OKRs</span>
           </a>

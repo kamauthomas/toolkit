@@ -19,9 +19,9 @@ tokens or personal data in this file.
 | RPT-010 | Approve Wingu retry, correction and failure-escalation ownership | Failed or rejected timesheet rows need a human-owned resolution path | Fail closed; retain a queued record and notify an administrator | Decision needed |
 | RPT-011 | Provide approved SMTP or notification provider configuration | Reminders and failure notices require authenticated delivery | In-app notifications only | Provider needed |
 | RPT-012 | Approve retention periods for reports, admissions, minutes, action histories and integration logs | Permanent retention may conflict with institutional privacy obligations | No automated deletion introduced | Policy needed |
-| RPT-013 | Provide one approved sample attendance Excel sheet or its exact column names/date/time formats | The importer must be deterministic and reject ambiguous rows | No Excel importer guesses | Needed for Wingu bridge |
+| RPT-013 | Approve the generated attendance workbook format | The live importer now uses five fixed columns and row-level validation | Downloadable Toolkit template: email, report date, sign-in, sign-out and source reference | **Implemented locally; approval requested** |
 | RPT-014 | Provide an authenticated Wingu review session when prompted | Stable fields, project selection and persistence behavior must be inspected before writing the dispatcher | Dry-run only; the human signs in | Needed for Wingu bridge |
-| RPT-015 | Review and assign the eight Toolkit portfolio objectives and their key-result owners | The system now supports OKRs, but management must approve ownership and targets before institutional activation | Keep objectives as draft until assigned | Needed for OKR activation |
+| RPT-015 | Review and assign the eight Toolkit portfolio objectives and their thirty proposed key-result owners | The register can load the complete prepared portfolio, but management must approve ownership and targets before institutional activation | Idempotent import keeps every template record in Draft | Needed for OKR activation |
 
 ## What is already implemented locally
 
@@ -34,6 +34,19 @@ tokens or personal data in this file.
   attendance provenance, leaves project selection blank until it is read from
   Wingu, and maintains append-only reconciliation events.
 - No Wingu credentials, cookies or guessed project codes are stored.
+
+## Direct response needed from Toolkit
+
+The next reply can be plain text using these IDs:
+
+- **RPT-010:** name the role or person who owns correction of a Wingu-rejected
+  row.
+- **RPT-013:** approve the downloadable five-column workbook, or list any column
+  that must change.
+- **RPT-014:** when ready, sign in to Wingu in the isolated review session and
+  state that discovery may begin. No password should be sent.
+- **RPT-015:** approve the eight portfolio drafts for owner assignment, or list
+  the objectives/key results management wants changed.
 
 ## How to respond
 

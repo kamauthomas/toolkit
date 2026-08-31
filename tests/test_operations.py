@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from io import BytesIO
 
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
 from werkzeug.security import generate_password_hash
 
 import app as app_module
@@ -114,6 +114,42 @@ class TestIntakeTargets:
 
 
 class TestOkrTracking:
+    def test_toolkit_portfolio_draft_loader_is_complete_and_idempotent(self, client):
+        login_session(client)
+        first = client.post("/okrs/load-toolkit-draft", data={"_csrf_token": "test-token"})
+        second = client.post("/okrs/load-toolkit-draft", data={"_csrf_token": "test-token"})
+        assert first.status_code == 302
+        assert second.status_code == 302
+        with app_module.app.app_context():
+            db = app_module.get_db()
+            assert db.execute("SELECT COUNT(*) AS c FROM okr_objectives WHERE template_key != ''").fetchone()["c"] == 8
+            assert db.execute("SELECT COUNT(*) AS c FROM okr_key_results WHERE template_key != ''").fetchone()["c"] == 30
+            poster = db.execute("SELECT * FROM okr_objectives WHERE template_key LIKE '%:brand-posters'").fetchone()
+            assert poster["status"] == "draft"
+            assert poster["department"] == "Marketing"
+        blocked = client.post(
+            "/okrs/1/status",
+            data={"_csrf_token": "test-token", "owner_id": "1", "status": "active"},
+            follow_redirects=True,
+        )
+        assert b"move all key results out of Draft" in blocked.data
+        with app_module.app.app_context():
+            assert app_module.get_db().execute("SELECT status FROM okr_objectives WHERE id = 1").fetchone()["status"] == "draft"
+
+        assigned = client.post(
+            "/okrs/1/key-results/1/settings",
+            data={
+                "_csrf_token": "test-token", "baseline": "10", "target": "99.5",
+                "unit": "%", "due_date": "2027-07-31", "owner_id": "1", "status": "active",
+            },
+        )
+        assert assigned.status_code == 302
+        with app_module.app.app_context():
+            result = app_module.get_db().execute("SELECT * FROM okr_key_results WHERE id = 1").fetchone()
+            assert result["owner_id"] == 1
+            assert result["baseline"] == 10
+            assert result["current_value"] == 10
+
     def test_objective_key_result_and_append_only_progress_evidence(self, client):
         login_session(client)
         response = client.post(
@@ -126,10 +162,11 @@ class TestOkrTracking:
                 "period_start": "2026-08-01",
                 "period_end": "2026-12-31",
                 "owner_id": "1",
-                "status": "active",
+                "status": "draft",
             },
         )
         assert response.status_code == 302
+
         assert response.headers["Location"].endswith("/okrs/1")
 
         response = client.post(
@@ -145,6 +182,14 @@ class TestOkrTracking:
             },
         )
         assert response.status_code == 302
+
+        response = client.post(
+            "/okrs/1/status",
+            data={"_csrf_token": "test-token", "owner_id": "1", "status": "active"},
+        )
+        assert response.status_code == 302
+        with app_module.app.app_context():
+            assert app_module.get_db().execute("SELECT status FROM okr_objectives WHERE id = 1").fetchone()["status"] == "active"
 
         response = client.post(
             "/okrs/1/key-results/1/updates",
@@ -195,6 +240,56 @@ class TestWinguDispatchQueue:
         )
         db.commit()
         return cursor.lastrowid
+
+    def _attendance_book(self, email="admin@toolkit.local"):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.append(["email", "report_date", "sign_in_time", "sign_out_time", "attendance_reference"])
+        sheet.append([email, "2026-08-31", "08:09", "17:21", "Attendance register row 12"])
+        output = BytesIO()
+        workbook.save(output)
+        output.seek(0)
+        return output
+
+    def test_attendance_template_downloads_as_real_xlsx(self, client):
+        login_session(client)
+        response = client.get("/wingu/attendance-template.xlsx")
+        assert response.status_code == 200
+        workbook = load_workbook(BytesIO(response.data), read_only=True)
+        assert list(next(workbook.active.iter_rows(values_only=True))) == [
+            "email", "report_date", "sign_in_time", "sign_out_time", "attendance_reference"
+        ]
+
+    def test_excel_attendance_previews_then_queues_approved_report(self, client):
+        login_session(client)
+        with app_module.app.app_context():
+            self._approved_report()
+        preview = client.post(
+            "/wingu/import-attendance",
+            data={
+                "_csrf_token": "test-token", "action": "preview",
+                "attendance_file": (self._attendance_book(), "attendance.xlsx"),
+            },
+            content_type="multipart/form-data",
+        )
+        assert preview.status_code == 200
+        assert b"Ready to queue" in preview.data
+        with app_module.app.app_context():
+            assert app_module.get_db().execute("SELECT COUNT(*) AS c FROM wingu_dispatches").fetchone()["c"] == 0
+        imported = client.post(
+            "/wingu/import-attendance",
+            data={
+                "_csrf_token": "test-token", "action": "import",
+                "attendance_file": (self._attendance_book(), "attendance.xlsx"),
+            },
+            content_type="multipart/form-data",
+        )
+        assert imported.status_code == 302
+        with app_module.app.app_context():
+            dispatch = app_module.get_db().execute("SELECT * FROM wingu_dispatches").fetchone()
+            assert dispatch["attendance_source"] == "excel"
+            assert dispatch["wingu_project"] == ""
+            assert "row 2" in dispatch["attendance_reference"]
 
     def test_only_approved_report_is_queued_without_guessed_project(self, client):
         login_session(client)

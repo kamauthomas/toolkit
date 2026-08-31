@@ -1,0 +1,101 @@
+{
+  "template": "toolkit-portfolio-2026-2027-v1",
+  "period_start": "2026-08-01",
+  "period_end": "2027-07-31",
+  "objectives": [
+    {
+      "key": "public-website",
+      "title": "Make the public website a trusted digital front door",
+      "department": "ICT",
+      "description": "Prospective learners can find accurate course information, prices, stories and application paths quickly and confidently.",
+      "key_results": [
+        ["availability", "Maintain monthly availability of priority public pages", 0, 99.5, "%"],
+        ["course-price-accuracy", "Reconcile public course and price entries to the approved catalogue", 0, 100, "%"],
+        ["application-reliability", "Deliver valid application submissions to the authorised destination", 0, 98, "%"],
+        ["security-findings", "Reduce unresolved critical or high website findings", 1, 0, "findings"]
+      ]
+    },
+    {
+      "key": "reception",
+      "title": "Replace paper-first reception with a consistent, secure welcome",
+      "department": "Administration",
+      "description": "Visitors and applicants complete a guided check-in while staff retain accurate records without manual filing.",
+      "key_results": [
+        ["digital-coverage", "Capture eligible on-site registrations digitally", 0, 90, "%"],
+        ["data-completeness", "Complete all required visitor contact and course fields", 0, 95, "%"],
+        ["follow-up", "Log follow-up outcomes within two working days", 0, 90, "%"],
+        ["unauthorised-access", "Reduce unauthorised staff-area access events", 1, 0, "events"]
+      ]
+    },
+    {
+      "key": "virtual-campus",
+      "title": "Deliver a safe, learner-friendly Virtual Campus pilot",
+      "department": "Training",
+      "description": "An approved learner group can learn, submit evidence and join live classes with clear support and reliable progress records.",
+      "key_results": [
+        ["pilot", "Complete one approved lecturer and learner cohort pilot", 0, 1, "pilot"],
+        ["evidence", "Back pilot learner progress events with verifiable evidence", 0, 90, "%"],
+        ["live-class", "Complete scheduled pilot classes without critical learner-blocking incidents", 0, 95, "%"],
+        ["captions", "Provide captions and a documented low-bandwidth option for pilot lesson videos", 0, 100, "%"]
+      ]
+    },
+    {
+      "key": "smart-lecturer",
+      "title": "Turn Smart Lecturer into governed learner support",
+      "department": "Training",
+      "description": "Learners receive useful, consistent answers without the system inventing policies, fees or admissions decisions.",
+      "key_results": [
+        ["approved-sources", "Trace every published answer to an approved source", 0, 100, "%"],
+        ["escalation", "Show a human-support route for uncertain or high-impact questions", 0, 100, "%"],
+        ["learner-rating", "Achieve a positive supervised learner review rating", 0, 85, "%"]
+      ]
+    },
+    {
+      "key": "reporting",
+      "title": "Make daily work, intake and decisions visible",
+      "department": "Management",
+      "description": "Managers can see what was done, what is verified, what is behind target and who owns the next action.",
+      "key_results": [
+        ["report-discipline", "Submit expected staff reports by the agreed monthly deadline", 0, 90, "%"],
+        ["review-turnaround", "Review submitted reports within two working days", 0, 95, "%"],
+        ["intake-reviews", "Complete monthly target reviews for active intake officers", 0, 100, "%"],
+        ["action-closure", "Close meeting actions by their due date", 0, 85, "%"],
+        ["wingu-compliance", "Dispatch Wingu rows with approved attendance and Wingu-presented projects", 0, 100, "%"]
+      ]
+    },
+    {
+      "key": "security-recovery",
+      "title": "Protect institutional data and keep services recoverable",
+      "department": "ICT",
+      "description": "Security incidents are contained quickly, sensitive information is protected and the team can restore service.",
+      "key_results": [
+        ["high-risk", "Reduce critical or high security findings older than fourteen days", 1, 0, "findings"],
+        ["secret-handling", "Keep production secrets outside Git and complete quarterly review", 0, 100, "%"],
+        ["restore-exercises", "Complete recorded restore exercises for priority systems", 0, 4, "exercises"],
+        ["access-reviews", "Complete quarterly privileged-access reviews", 0, 4, "reviews"]
+      ]
+    },
+    {
+      "key": "brand-posters",
+      "title": "Use the Toolkit brand and poster library consistently",
+      "department": "Marketing",
+      "description": "Public, print and learning communications look like one institution and approved campaign work retains reusable editable sources.",
+      "key_results": [
+        ["asset-index", "Index approved campaign assets with purpose, status and source format", 0, 100, "%"],
+        ["brand-compliance", "Pass the brand checklist for sampled public and print outputs", 0, 95, "%"],
+        ["campaign-handoff", "Include required web, print or social and editable-source handoff in campaign releases", 0, 100, "%"]
+      ]
+    },
+    {
+      "key": "delivery-governance",
+      "title": "Operate a calm, auditable delivery process",
+      "department": "ICT",
+      "description": "Changes reach users through repeatable checks, clear ownership and non-disruptive deployment procedures.",
+      "key_results": [
+        ["demo-first", "Record a demo result, backup reference and route check for production releases", 0, 100, "%"],
+        ["blocker-ownership", "Assign every open launch blocker an owner and monthly next action", 0, 100, "%"],
+        ["operator-docs", "Maintain an operator guide, rollback note and status page for production systems", 0, 100, "%"]
+      ]
+    }
+  ]
+}

@@ -283,6 +283,10 @@ Management must approve its owners and targets before those records are treated
 as institutional commitments. Poster and campaign outputs can be cited in the
 same evidence trail as software, meetings and reports.
 
+An executive-only idempotent loader now creates all eight objectives and thirty
+proposed key results as drafts. It includes the brand/poster objective and can
+be run repeatedly without duplicating records.
+
 ## 3.9 Wingu Dispatch Queue
 
 The local workflow now queues only approved daily reports. It records whether
@@ -293,6 +297,11 @@ until read from Wingu, and records reconciliation events.
 External browser submission remains disabled until an authenticated Wingu field
 review and approved attendance spreadsheet format are provided. No credentials,
 cookies or assumed Wingu project codes are stored.
+
+The spreadsheet side is operational locally: the system generates the canonical
+five-column workbook, previews and validates each row without mutation, and can
+queue valid rows only when they match exactly one approved report in the user's
+authorised scope.
 
 ---
 

@@ -29,6 +29,10 @@
   states, calculated progress and append-only evidence updates.
 * Add an approval-gated Wingu queue with manual/Excel attendance provenance,
   duplicate prevention and append-only reconciliation events.
+* Add an idempotent loader for all eight Toolkit portfolio draft objectives and
+  thirty proposed key results, including brand/poster outcomes.
+* Add a canonical attendance workbook download, preview-only validation and
+  exact approved-report Excel import.
 
 ## Next implementation work
 
@@ -36,8 +40,8 @@
 * Add role-specific dashboards for Principal, Administrator, Department Head, and Employee once those roles are mapped to the current role model.
 * Add browser-assisted Wingu dispatch after the authenticated review session,
   attendance-sheet format and rejected-row owner are supplied.
-* Add the deterministic attendance Excel importer after the approved columns
-  and formats are supplied.
+* Obtain owner approval or requested changes for the canonical attendance Excel
+  columns and formats.
 * Add automated tests for remaining dashboard analytics and the external Wingu
   browser dispatcher once its authenticated field map is approved.
 * Add seed/demo data for showcasing the new module dashboards during stakeholder review.

@@ -2,6 +2,18 @@
 {% block content %}
 <section class="section-head"><div><p class="eyebrow">Approval-gated reporting handoff</p><h1>Wingu dispatch queue</h1><p class="muted">Only approved reports appear here. Project choice is read from Wingu during the isolated authenticated dispatch; this system stores no Wingu password or browser session.</p></div></section>
 <section class="card">
+  <div class="inline-head"><div><h2>Import verified attendance</h2><p class="muted">Download the standard workbook, keep its five headers unchanged, then preview every row before queuing it.</p></div><a class="secondary" href="{{ url_for('download_wingu_attendance_template') }}">Download Excel template</a></div>
+  <form method="post" action="{{ url_for('import_wingu_attendance') }}" enctype="multipart/form-data" class="form" style="margin-top:16px">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+    <label>Completed attendance workbook<input type="file" name="attendance_file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required></label>
+    <div class="actions"><button class="secondary" type="submit" name="action" value="preview">Preview only</button><button class="primary" type="submit" name="action" value="import">Validate and queue valid rows</button></div>
+  </form>
+</section>
+{% if attendance_preview is not none %}<section class="card">
+  <div class="inline-head"><h2>Attendance preview</h2><span class="muted">{{ preview_filename }} · {{ attendance_preview|length }} populated rows</span></div>
+  {% if attendance_preview %}<div class="table-wrap"><table><thead><tr><th>Row</th><th>Employee</th><th>Date</th><th>Time</th><th>Reference</th><th>Validation</th></tr></thead><tbody>{% for item in attendance_preview %}<tr><td>{{ item.row }}</td><td>{{ item.email or '—' }}</td><td>{{ item.report_date or '—' }}</td><td>{{ item.sign_in or '—' }}–{{ item.sign_out or '—' }}</td><td>{{ item.reference or '—' }}</td><td><span class="status-badge {{ 'approved' if item.status == 'valid' else 'submitted' }}">{{ item.message }}</span></td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="empty">The workbook contains no populated attendance rows.</p>{% endif %}
+</section>{% endif %}
+<section class="card">
   <div class="inline-head"><h2>Queue and reconciliation</h2><span class="muted">{{ dispatches|length }} visible</span></div>
   {% if dispatches %}<div class="table-wrap"><table><thead><tr><th>Report</th><th>Staff</th><th>Attendance</th><th>Wingu project</th><th>Status</th><th>Reconciliation</th></tr></thead><tbody>
     {% for dispatch in dispatches %}<tr><td><a href="{{ url_for('view_report', report_id=dispatch.report_id) }}">{{ dispatch.report_date }}</a><br><span class="small muted">{{ dispatch.department }}</span></td><td>{{ dispatch.full_name }}</td><td>{{ dispatch.sign_in_time }}–{{ dispatch.sign_out_time }}<br><span class="small muted">{{ dispatch.attendance_source|title }}{% if dispatch.attendance_reference %}: {{ dispatch.attendance_reference }}{% endif %}</span></td><td>{{ dispatch.wingu_project or 'Read during dispatch' }}</td><td><span class="status-badge {{ 'approved' if dispatch.status == 'accepted' else 'reviewed' if dispatch.status in ('ready','dispatching') else 'submitted' }}">{{ dispatch.status|replace('_',' ')|title }}</span>{% if dispatch.last_error %}<br><span class="small">{{ dispatch.last_error }}</span>{% endif %}</td><td>

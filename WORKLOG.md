@@ -5,6 +5,31 @@ change itself. Format and rules: see `../AGENTS.md` section 1.
 
 ---
 
+## 2026-08-31 — Load portfolio drafts and validate Excel attendance
+**Area:** OKRs · posters/communications · attendance · Wingu
+**Environments:** local verification; not deployed
+**Commit(s):** this commit
+
+Added an explicit, idempotent loader for the prepared Toolkit portfolio: eight
+draft objectives and thirty proposed key results covering the website,
+Reception, Virtual Campus, Smart Lecturer, reporting/Wingu, security, the
+brand/poster library and delivery governance. Records remain drafts and
+unassigned until management approval. Activation is blocked until the objective
+and every key result have accountable owners and the proposed targets have been
+moved out of Draft.
+
+Added a generated Excel attendance template, preview-only row validation and a
+controlled import that matches exactly one approved report by staff email and
+date. Valid rows retain their workbook/row source reference and enter the Wingu
+queue without a guessed project; invalid, duplicate or out-of-scope rows fail
+closed.
+
+**Verified by:** Python compilation and 52 automated tests, including portfolio
+completeness/idempotency, a real XLSX download, non-mutating preview and approved
+Excel queue import.
+**Follow-ups:** owner responses RPT-010, RPT-013, RPT-014 and RPT-015; browser
+dispatch remains disabled until authenticated Wingu field discovery.
+
 ## 2026-08-31 — Add portfolio OKR tracking and approved Wingu queue
 **Area:** strategy · reporting · Wingu · auditability
 **Environments:** local verification; not deployed

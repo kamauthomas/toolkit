@@ -8,9 +8,11 @@ import secrets
 import sqlite3
 import textwrap
 import time
+import zipfile
 import zlib
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import date as date_type
+from datetime import datetime, time as time_type, timedelta
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from functools import wraps
 from pathlib import Path
@@ -29,7 +31,7 @@ from flask import (
     url_for,
 )
 from PIL import Image
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -1210,6 +1212,7 @@ def init_db():
             created_by INTEGER NOT NULL,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
+            template_key TEXT DEFAULT '',
             FOREIGN KEY(owner_id) REFERENCES users(id),
             FOREIGN KEY(created_by) REFERENCES users(id)
         );
@@ -1227,6 +1230,7 @@ def init_db():
             status TEXT NOT NULL DEFAULT 'active',
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
+            template_key TEXT DEFAULT '',
             FOREIGN KEY(objective_id) REFERENCES okr_objectives(id),
             FOREIGN KEY(owner_id) REFERENCES users(id)
         );
@@ -1291,6 +1295,26 @@ def init_db():
         "CREATE INDEX IF NOT EXISTS idx_okr_key_results_objective ON okr_key_results(objective_id)",
         "CREATE INDEX IF NOT EXISTS idx_okr_updates_key_result ON okr_updates(key_result_id, created_at)",
         "CREATE INDEX IF NOT EXISTS idx_wingu_dispatch_status ON wingu_dispatches(status, queued_at)",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_okr_objective_template ON okr_objectives(template_key) WHERE template_key != ''",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_okr_result_template ON okr_key_results(template_key) WHERE template_key != ''",
+    ):
+        try:
+            conn.execute(index_sql)
+        except Exception:
+            pass
+    conn.commit()
+
+    for table, column in (
+        ("okr_objectives", "template_key TEXT DEFAULT ''"),
+        ("okr_key_results", "template_key TEXT DEFAULT ''"),
+    ):
+        try:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column}")
+        except Exception:
+            pass
+    for index_sql in (
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_okr_objective_template ON okr_objectives(template_key) WHERE template_key != ''",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_okr_result_template ON okr_key_results(template_key) WHERE template_key != ''",
     ):
         try:
             conn.execute(index_sql)
@@ -1793,6 +1817,29 @@ def parse_clock_time(value):
         return value
     except (TypeError, ValueError):
         return ""
+
+
+def normalise_excel_date(value):
+    if isinstance(value, datetime):
+        return value.strftime("%Y-%m-%d")
+    if isinstance(value, date_type):
+        return value.strftime("%Y-%m-%d")
+    text_value = str(value or "").strip()
+    return text_value if parse_report_date(text_value) else ""
+
+
+def normalise_excel_time(value):
+    if isinstance(value, datetime):
+        return value.strftime("%H:%M")
+    if isinstance(value, time_type):
+        return value.strftime("%H:%M")
+    text_value = str(value or "").strip()
+    for pattern in ("%H:%M", "%H:%M:%S", "%I:%M %p"):
+        try:
+            return datetime.strptime(text_value, pattern).strftime("%H:%M")
+        except ValueError:
+            continue
+    return ""
 
 
 def make_report_pdf(report_id):
@@ -3189,7 +3236,7 @@ def update_incentive_status(incentive_id):
     return redirect(url_for("incentives"))
 
 OKR_STATUSES = ("draft", "active", "at_risk", "completed", "archived")
-OKR_KEY_RESULT_STATUSES = ("active", "at_risk", "achieved", "closed")
+OKR_KEY_RESULT_STATUSES = ("draft", "active", "at_risk", "achieved", "closed")
 WINGU_DISPATCH_STATUSES = ("ready", "dispatching", "accepted", "rejected", "needs_attention", "cancelled")
 
 
@@ -3210,7 +3257,7 @@ def okrs():
         status = clean_text(request.form.get("status"), 20)
         if g.user["role"] == "admin":
             department = g.user["department"]
-        if not title or department not in DEPARTMENTS or status not in ("draft", "active"):
+        if not title or department not in DEPARTMENTS or status != "draft":
             flash("Provide a title, valid department and valid status.", "danger")
             return redirect(url_for("okrs"))
         start = parse_report_date(period_start)
@@ -3253,6 +3300,68 @@ def okrs():
         "okrs.html", objectives=objectives, users=users, departments=DEPARTMENTS,
         can_create=can_manage_okr(g.user), statuses=OKR_STATUSES,
     )
+
+
+@app.route("/okrs/load-toolkit-draft", methods=["POST"])
+@principal_required
+def load_toolkit_okr_draft():
+    csrf_protect()
+    template_path = BASE_DIR / "data" / "toolkit_okr_template.json"
+    try:
+        template = json.loads(template_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        log.exception("Unable to load Toolkit OKR template")
+        flash("The Toolkit OKR draft template could not be loaded.", "danger")
+        return redirect(url_for("okrs"))
+    db = get_db()
+    timestamp = now()
+    objective_count = 0
+    result_count = 0
+    for objective_data in template.get("objectives", []):
+        department = objective_data.get("department", "")
+        if department not in DEPARTMENTS:
+            log.error("Invalid department in OKR template: %s", department)
+            abort(500)
+        objective_key = f"{template['template']}:{objective_data['key']}"
+        objective = db.execute(
+            "SELECT id FROM okr_objectives WHERE template_key = ?", (objective_key,)
+        ).fetchone()
+        if objective:
+            objective_id = objective["id"]
+        else:
+            objective_id = db.execute(
+                """INSERT INTO okr_objectives
+                   (title, description, department, period_start, period_end, owner_id, status,
+                    created_by, created_at, updated_at, template_key)
+                   VALUES (?, ?, ?, ?, ?, NULL, 'draft', ?, ?, ?, ?)""",
+                (
+                    objective_data["title"], objective_data.get("description", ""), department,
+                    template["period_start"], template["period_end"], g.user["id"], timestamp,
+                    timestamp, objective_key,
+                ),
+            ).lastrowid
+            objective_count += 1
+        for kr_key, title, baseline, target, unit in objective_data.get("key_results", []):
+            result_key = f"{objective_key}:{kr_key}"
+            if db.execute("SELECT id FROM okr_key_results WHERE template_key = ?", (result_key,)).fetchone():
+                continue
+            db.execute(
+                """INSERT INTO okr_key_results
+                   (objective_id, title, baseline, target, current_value, unit, due_date, owner_id,
+                    status, created_at, updated_at, template_key)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 'draft', ?, ?, ?)""",
+                (
+                    objective_id, title, baseline, target, baseline, unit, template["period_end"],
+                    timestamp, timestamp, result_key,
+                ),
+            )
+            result_count += 1
+    db.commit()
+    if objective_count or result_count:
+        flash(f"Loaded {objective_count} portfolio objectives and {result_count} proposed key results as drafts.", "success")
+    else:
+        flash("The current Toolkit portfolio draft is already loaded; no duplicates were created.", "info")
+    return redirect(url_for("okrs"))
 
 
 def get_okr_or_404(objective_id):
@@ -3325,8 +3434,11 @@ def add_okr_key_result(objective_id):
     db.execute(
         """INSERT INTO okr_key_results
            (objective_id, title, baseline, target, current_value, unit, due_date, owner_id, status, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)""",
-        (objective_id, title, float(baseline), float(target), float(baseline), unit, due_date, owner_id, timestamp, timestamp),
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (
+            objective_id, title, float(baseline), float(target), float(baseline), unit,
+            due_date, owner_id, "active" if owner_id else "draft", timestamp, timestamp,
+        ),
     )
     db.commit()
     flash("Key result added.", "success")
@@ -3346,6 +3458,9 @@ def add_okr_update(objective_id, key_result_id):
         abort(404)
     if not (can_manage_okr(g.user, objective) or objective["owner_id"] == g.user["id"] or result["owner_id"] == g.user["id"]):
         abort(403)
+    if objective["status"] not in ("active", "at_risk") or result["status"] == "draft":
+        flash("Approve and activate the objective and key result before recording progress.", "danger")
+        return redirect(url_for("okr_detail", objective_id=objective_id))
     progress_value = decimal_field("progress_value")
     narrative = clean_text(request.form.get("narrative"), 2000)
     evidence = clean_text(request.form.get("evidence_reference"), 500)
@@ -3368,6 +3483,50 @@ def add_okr_update(objective_id, key_result_id):
     return redirect(url_for("okr_detail", objective_id=objective_id))
 
 
+@app.route("/okrs/<int:objective_id>/key-results/<int:key_result_id>/settings", methods=["POST"])
+@login_required
+def update_okr_key_result(objective_id, key_result_id):
+    csrf_protect()
+    db = get_db()
+    objective = get_okr_or_404(objective_id)
+    if not can_manage_okr(g.user, objective):
+        abort(403)
+    result = db.execute(
+        "SELECT * FROM okr_key_results WHERE id = ? AND objective_id = ?", (key_result_id, objective_id)
+    ).fetchone()
+    if not result:
+        abort(404)
+    baseline = decimal_field("baseline")
+    target = decimal_field("target")
+    owner_id = int_field("owner_id") or None
+    due_date = clean_text(request.form.get("due_date"), 10)
+    unit = clean_text(request.form.get("unit"), 40)
+    status = clean_text(request.form.get("status"), 20)
+    if baseline is None or target is None or baseline == target or not parse_report_date(due_date):
+        flash("Baseline and target must be different numbers and the due date must be valid.", "danger")
+        return redirect(url_for("okr_detail", objective_id=objective_id))
+    if status not in OKR_KEY_RESULT_STATUSES:
+        abort(400)
+    owner = db.execute("SELECT * FROM users WHERE id = ? AND deleted_at IS NULL", (owner_id,)).fetchone() if owner_id else None
+    if owner_id and (not owner or (g.user["role"] == "admin" and owner["department"] != g.user["department"])):
+        abort(400)
+    if status != "draft" and not owner_id:
+        flash("Assign an owner before moving a key result out of Draft.", "danger")
+        return redirect(url_for("okr_detail", objective_id=objective_id))
+    update_count = db.execute(
+        "SELECT COUNT(*) AS c FROM okr_updates WHERE key_result_id = ?", (key_result_id,)
+    ).fetchone()["c"]
+    current_value = float(baseline) if not update_count else result["current_value"]
+    db.execute(
+        """UPDATE okr_key_results SET baseline = ?, target = ?, current_value = ?, unit = ?, due_date = ?,
+           owner_id = ?, status = ?, updated_at = ? WHERE id = ?""",
+        (float(baseline), float(target), current_value, unit, due_date, owner_id, status, now(), key_result_id),
+    )
+    db.commit()
+    flash("Key result target and ownership updated.", "success")
+    return redirect(url_for("okr_detail", objective_id=objective_id))
+
+
 @app.route("/okrs/<int:objective_id>/status", methods=["POST"])
 @login_required
 def update_okr_status(objective_id):
@@ -3376,9 +3535,26 @@ def update_okr_status(objective_id):
     if not can_manage_okr(g.user, objective):
         abort(403)
     status = clean_text(request.form.get("status"), 20)
+    owner_id = int_field("owner_id") or None
     if status not in OKR_STATUSES:
         abort(400)
-    get_db().execute("UPDATE okr_objectives SET status = ?, updated_at = ? WHERE id = ?", (status, now(), objective_id))
+    owner = get_db().execute("SELECT * FROM users WHERE id = ? AND deleted_at IS NULL", (owner_id,)).fetchone() if owner_id else None
+    if owner_id and (not owner or (g.user["role"] == "admin" and owner["department"] != g.user["department"])):
+        abort(400)
+    if status == "active":
+        result_summary = get_db().execute(
+            """SELECT COUNT(*) AS total,
+                      SUM(CASE WHEN owner_id IS NULL OR status = 'draft' THEN 1 ELSE 0 END) AS incomplete
+               FROM okr_key_results WHERE objective_id = ?""",
+            (objective_id,),
+        ).fetchone()
+        if not owner_id or not result_summary["total"] or result_summary["incomplete"]:
+            flash("Assign the objective owner and every key-result owner, then move all key results out of Draft before activation.", "danger")
+            return redirect(url_for("okr_detail", objective_id=objective_id))
+    get_db().execute(
+        "UPDATE okr_objectives SET status = ?, owner_id = ?, updated_at = ? WHERE id = ?",
+        (status, owner_id, now(), objective_id),
+    )
     get_db().commit()
     flash("Objective status updated.", "success")
     return redirect(url_for("okr_detail", objective_id=objective_id))
@@ -3387,13 +3563,141 @@ def update_okr_status(objective_id):
 @app.route("/wingu", methods=["GET"])
 @login_required
 def wingu_dispatches():
+    return render_template(
+        "wingu_dispatches.html", dispatches=visible_wingu_dispatch_rows(),
+        statuses=WINGU_DISPATCH_STATUSES, attendance_preview=None,
+    )
+
+
+def visible_wingu_dispatch_rows():
     rows = get_db().execute(
         """SELECT d.*, r.report_date, r.department, r.user_id, users.full_name
            FROM wingu_dispatches d JOIN reports r ON r.id = d.report_id
            JOIN users ON users.id = r.user_id ORDER BY d.queued_at DESC, d.id DESC"""
     ).fetchall()
-    rows = [row for row in rows if can_view_report(g.user, row)]
-    return render_template("wingu_dispatches.html", dispatches=rows, statuses=WINGU_DISPATCH_STATUSES)
+    return [row for row in rows if can_view_report(g.user, row)]
+
+
+@app.route("/wingu/attendance-template.xlsx")
+@login_required
+def download_wingu_attendance_template():
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Attendance"
+    headers = ["email", "report_date", "sign_in_time", "sign_out_time", "attendance_reference"]
+    sheet.append(headers)
+    sheet.append(["staff@example.com", "2026-08-31", "08:10", "17:20", "Approved attendance sheet row/reference"])
+    for cell in sheet[1]:
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill("solid", fgColor="31572C")
+    widths = [32, 16, 16, 16, 44]
+    for index, width in enumerate(widths, start=1):
+        sheet.column_dimensions[chr(64 + index)].width = width
+    output = io.BytesIO()
+    workbook.save(output)
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="toolkit-wingu-attendance-template.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+@app.route("/wingu/import-attendance", methods=["POST"])
+@login_required
+def import_wingu_attendance():
+    csrf_protect()
+    upload = request.files.get("attendance_file")
+    action = clean_text(request.form.get("action"), 20)
+    if action not in ("preview", "import") or not upload or not upload.filename.lower().endswith(".xlsx"):
+        flash("Choose an .xlsx attendance workbook and preview or import it.", "danger")
+        return redirect(url_for("wingu_dispatches"))
+    safe_name = secure_filename(upload.filename) or "attendance.xlsx"
+    try:
+        upload_bytes = upload.stream.read()
+        with zipfile.ZipFile(io.BytesIO(upload_bytes)) as archive:
+            if sum(member.file_size for member in archive.infolist()) > 5 * 1024 * 1024:
+                raise ValueError("Workbook expands beyond the safe processing limit")
+        workbook = load_workbook(io.BytesIO(upload_bytes), read_only=True, data_only=True, keep_links=False)
+        sheet = workbook.active
+        raw_headers = next(sheet.iter_rows(min_row=1, max_row=1, values_only=True), ())
+    except Exception:
+        flash("The attendance workbook could not be read.", "danger")
+        return redirect(url_for("wingu_dispatches"))
+    headers = [str(value or "").strip().lower() for value in raw_headers]
+    required = ["email", "report_date", "sign_in_time", "sign_out_time", "attendance_reference"]
+    if headers[:len(required)] != required:
+        workbook.close()
+        flash("Use the Toolkit attendance template; its five column headers must remain unchanged.", "danger")
+        return redirect(url_for("wingu_dispatches"))
+    preview = []
+    db = get_db()
+    for row_number, values in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
+        if row_number > 251:
+            preview.append({"row": row_number, "status": "error", "message": "Maximum 250 data rows per import."})
+            break
+        if not any(value not in (None, "") for value in values[:5]):
+            continue
+        email = str(values[0] or "").strip().lower()[:254]
+        report_date = normalise_excel_date(values[1])
+        sign_in = normalise_excel_time(values[2])
+        sign_out = normalise_excel_time(values[3])
+        reference = clean_text(str(values[4] or ""), 300)
+        item = {
+            "row": row_number, "email": email, "report_date": report_date,
+            "sign_in": sign_in, "sign_out": sign_out, "reference": reference,
+            "status": "error", "message": "",
+        }
+        if not email or not report_date or not sign_in or not sign_out or sign_out <= sign_in or not reference:
+            item["message"] = "Email, valid date, sign-in before sign-out, and attendance reference are required."
+            preview.append(item)
+            continue
+        matches = db.execute(
+            """SELECT reports.* FROM reports JOIN users ON users.id = reports.user_id
+               WHERE lower(users.email) = ? AND reports.report_date = ? AND reports.status = 'approved'""",
+            (email, report_date),
+        ).fetchall()
+        matches = [report for report in matches if can_view_report(g.user, report)]
+        if len(matches) != 1:
+            item["message"] = "Expected exactly one approved report in your access scope for this employee and date."
+            preview.append(item)
+            continue
+        report = matches[0]
+        if db.execute("SELECT id FROM wingu_dispatches WHERE report_id = ?", (report["id"],)).fetchone():
+            item["message"] = "That approved report is already queued."
+            preview.append(item)
+            continue
+        item.update({"status": "valid", "message": "Ready to queue", "report_id": report["id"]})
+        preview.append(item)
+    workbook.close()
+    if action == "preview":
+        return render_template(
+            "wingu_dispatches.html", dispatches=visible_wingu_dispatch_rows(),
+            statuses=WINGU_DISPATCH_STATUSES, attendance_preview=preview,
+            preview_filename=safe_name,
+        )
+    valid_rows = [item for item in preview if item["status"] == "valid"]
+    timestamp = now()
+    for item in valid_rows:
+        cursor = db.execute(
+            """INSERT INTO wingu_dispatches
+               (report_id, attendance_source, attendance_reference, sign_in_time, sign_out_time,
+                status, queued_by, queued_at, updated_at)
+               VALUES (?, 'excel', ?, ?, ?, 'ready', ?, ?, ?)""",
+            (
+                item["report_id"], f"{safe_name} · row {item['row']} · {item['reference']}",
+                item["sign_in"], item["sign_out"], g.user["id"], timestamp, timestamp,
+            ),
+        )
+        db.execute(
+            "INSERT INTO wingu_dispatch_events (dispatch_id, actor_id, event, notes, created_at) VALUES (?, ?, 'queued', ?, ?)",
+            (cursor.lastrowid, g.user["id"], f"Validated Excel attendance: {safe_name}, row {item['row']}", timestamp),
+        )
+    db.commit()
+    errors = len(preview) - len(valid_rows)
+    flash(f"Queued {len(valid_rows)} approved reports from Excel; {errors} rows were not imported.", "success" if valid_rows else "warning")
+    return redirect(url_for("wingu_dispatches"))
 
 
 @app.route("/reports/<int:report_id>/wingu", methods=["POST"])
