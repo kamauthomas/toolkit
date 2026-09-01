@@ -5,6 +5,26 @@ change itself. Format and rules: see `../AGENTS.md` section 1.
 
 ---
 
+## 2026-09-01 — Add credential-safe Wingu field discovery
+**Area:** Wingu · isolated browser operations · security
+**Environments:** local fixture verification; no Wingu submission
+**Commit(s):** this commit
+
+Added a managed temporary Brave session and a discovery-only CDP tool for the
+remaining Wingu field-mapping step. It binds only to localhost, uses a separate
+profile, refuses non-temporary output, requires exactly one Wingu tab, strips
+query strings and inventories form names/labels/options without reading input
+values, cookies, storage, responses or screenshots. Stop validates the exact
+temporary profile before terminating and deleting it.
+
+**Verified by:** Python compilation, Bash syntax, the full Report System test
+suite, and a real headless-Brave fixture containing dummy time, notes and
+password values. The form structure was discovered and none of those values
+appeared in output; the temporary profile and JSON were removed.
+**Follow-ups:** RPT-014 requires the employee to sign into the isolated window
+and open Edit Time Sheet. Use that field map to implement and verify dry-run,
+submission and reload reconciliation; do not guess selectors.
+
 ## 2026-08-31 — Load portfolio drafts and validate Excel attendance
 **Area:** OKRs · posters/communications · attendance · Wingu
 **Environments:** local verification; not deployed

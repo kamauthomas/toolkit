@@ -1,7 +1,7 @@
 # Report System → Wingu Box Integration Design
 
 **Status:** Internal queue implemented locally; browser bridge not yet connected
-**Updated:** 31 August 2026
+**Updated:** 1 September 2026
 **Current production connection:** None
 
 ## Intended outcome
@@ -71,6 +71,13 @@ template, preview-only validation, exact approved-report matching and a
 250-populated-row limit. Still pending are external identity confirmation and
 the isolated local browser dispatcher. The dispatcher requires RPT-014; the
 system does not guess Wingu page fields.
+
+The credential-safe discovery tooling is implemented in
+`scripts/wingu-session.sh` and `scripts/wingu-discover.py`. It starts a separate
+temporary profile on a localhost-only debugging port and inventories form
+structure without field values, cookies, storage, screenshots or submission.
+The fixture verification and owner steps are documented in
+`WINGU_AUTHENTICATED_DISCOVERY.md`.
 
 Implemented dispatch states are `ready`, `dispatching`, `accepted`, `rejected`,
 `needs_attention` and `cancelled`.

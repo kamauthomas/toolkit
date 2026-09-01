@@ -1,6 +1,6 @@
 # Report System — Owner Input Tracker
 
-**Updated:** 31 August 2026
+**Updated:** 1 September 2026
 **Purpose:** The exact decisions or material needed from Toolkit before the
 remaining Report System work can be enabled safely. Do not place passwords,
 tokens or personal data in this file.
@@ -20,7 +20,7 @@ tokens or personal data in this file.
 | RPT-011 | Provide approved SMTP or notification provider configuration | Reminders and failure notices require authenticated delivery | In-app notifications only | Provider needed |
 | RPT-012 | Approve retention periods for reports, admissions, minutes, action histories and integration logs | Permanent retention may conflict with institutional privacy obligations | No automated deletion introduced | Policy needed |
 | RPT-013 | Approve the generated attendance workbook format | The live importer now uses five fixed columns and row-level validation | Downloadable Toolkit template: email, report date, sign-in, sign-out and source reference | **Implemented locally; approval requested** |
-| RPT-014 | Provide an authenticated Wingu review session when prompted | Stable fields, project selection and persistence behavior must be inspected before writing the dispatcher | Dry-run only; the human signs in | Needed for Wingu bridge |
+| RPT-014 | Start the isolated Wingu review session and sign in personally | Stable fields, project selection and persistence behavior must be inspected before writing the dispatcher | Run `scripts/wingu-session.sh start '<approved URL>'`, open Edit Time Sheet, then run `scripts/wingu-session.sh discover`; no password is accepted or copied | **Tooling ready; authenticated session needed** |
 | RPT-015 | Review and assign the eight Toolkit portfolio objectives and their thirty proposed key-result owners | The register can load the complete prepared portfolio, but management must approve ownership and targets before institutional activation | Idempotent import keeps every template record in Draft | Needed for OKR activation |
 
 ## What is already implemented locally
@@ -44,7 +44,8 @@ The next reply can be plain text using these IDs:
 - **RPT-013:** approve the downloadable five-column workbook, or list any column
   that must change.
 - **RPT-014:** when ready, sign in to Wingu in the isolated review session and
-  state that discovery may begin. No password should be sent.
+  run the documented discovery command, then state that the temporary field map
+  is ready. No password should be sent.
 - **RPT-015:** approve the eight portfolio drafts for owner assignment, or list
   the objectives/key results management wants changed.
 
