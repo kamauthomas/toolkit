@@ -3311,7 +3311,7 @@ def load_toolkit_okr_draft():
         template = json.loads(template_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         log.exception("Unable to load Toolkit OKR template")
-        flash("The Toolkit OKR draft template could not be loaded.", "danger")
+        flash("The finalized Toolkit OKR template could not be loaded.", "danger")
         return redirect(url_for("okrs"))
     db = get_db()
     timestamp = now()
@@ -3358,9 +3358,9 @@ def load_toolkit_okr_draft():
             result_count += 1
     db.commit()
     if objective_count or result_count:
-        flash(f"Loaded {objective_count} portfolio objectives and {result_count} proposed key results as drafts.", "success")
+        flash(f"Loaded {objective_count} finalized portfolio objectives and {result_count} key results for owner assignment.", "success")
     else:
-        flash("The current Toolkit portfolio draft is already loaded; no duplicates were created.", "info")
+        flash("The finalized Toolkit portfolio is already loaded; no duplicates were created.", "info")
     return redirect(url_for("okrs"))
 
 

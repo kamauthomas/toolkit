@@ -5,6 +5,22 @@ change itself. Format and rules: see `../AGENTS.md` section 1.
 
 ---
 
+## 2026-09-01 — Align the OKR register with the finalized portfolio
+**Area:** OKRs · governance · owner assignment
+**Environments:** local verification; not deployed
+**Commit(s):** this commit
+
+Updated the OKR loader and management copy after approval of the eight-objective,
+thirty-key-result portfolio. The targets are now described as finalized while
+records remain safely in Draft until named users are assigned; the owner tracker
+now separates the completed target decision from the outstanding accountability
+assignment.
+
+**Verified by:** full automated Report System suite and an idempotent portfolio
+loader check.
+**Follow-ups:** management assigns named owners and confirms denominators before
+activating objectives.
+
 ## 2026-09-01 — Add credential-safe Wingu field discovery
 **Area:** Wingu · isolated browser operations · security
 **Environments:** local fixture verification; no Wingu submission

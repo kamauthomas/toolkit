@@ -278,13 +278,13 @@ The operational OKR module provides:
 * append-only progress notes and evidence references;
 * employee access only to departmental or directly assigned work.
 
-The August 2026–July 2027 Toolkit portfolio draft remains the planning source.
+The finalized August 2026–July 2027 Toolkit portfolio is the planning source.
 Management must approve its owners and targets before those records are treated
 as institutional commitments. Poster and campaign outputs can be cited in the
 same evidence trail as software, meetings and reports.
 
 An executive-only idempotent loader now creates all eight objectives and thirty
-proposed key results as drafts. It includes the brand/poster objective and can
+key results as assignment-gated records. It includes the brand/poster objective and can
 be run repeatedly without duplicating records.
 
 ## 3.9 Wingu Dispatch Queue

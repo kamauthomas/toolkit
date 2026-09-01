@@ -3,7 +3,7 @@
 <section class="section-head">
   <div><p class="eyebrow">Strategy into measurable work</p><h1>Objectives and key results</h1><p class="muted">Assign outcomes, record evidence and keep progress visible without replacing the daily report trail.</p></div>
   {% if can_create %}<div class="actions">
-    {% if g.user.role in ('principal','superadmin','shadowadmin') %}<form method="post" action="{{ url_for('load_toolkit_okr_draft') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token }}"><button class="secondary" type="submit">Load Toolkit portfolio drafts</button></form>{% endif %}
+    {% if g.user.role in ('principal','superadmin','shadowadmin') %}<form method="post" action="{{ url_for('load_toolkit_okr_draft') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token }}"><button class="secondary" type="submit">Load finalized Toolkit portfolio</button></form>{% endif %}
     <a class="primary" href="#new-objective">New objective</a>
   </div>{% endif %}
 </section>
