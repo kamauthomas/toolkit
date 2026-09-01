@@ -5,6 +5,22 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-01 — Publish the finalized OKRs as a Word handoff
+**Area:** portfolio governance · OKRs · meeting documents
+**Environments:** documentation; no deployment
+**Commit(s):** this commit
+
+Generated an A4 Word version of the finalized and backdated Toolkit OKRs beside
+the Markdown source. The document retains all eight objectives, thirty key
+results, evidence checkpoint, targets, ownership decisions and first-quarter
+priorities in meeting-ready tables.
+
+**Verified by:** reopened through an isolated headless LibreOffice profile,
+exported to an eight-page A4 PDF, checked the first/final page visually and
+confirmed the backdated checkpoint, Objective 8, priorities and evidence
+sections remain present.
+**Follow-ups:** assign named users in the Report System register.
+
 ## 2026-09-01 — Finalize and backdate the Toolkit portfolio OKRs
 **Area:** portfolio governance · OKRs · evidence
 **Environments:** documentation and local Report System register; no deployment
