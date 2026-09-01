@@ -5,6 +5,28 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-01 — Finalize and backdate the Toolkit portfolio OKRs
+**Area:** portfolio governance · OKRs · evidence
+**Environments:** documentation and local Report System register; no deployment
+**Commit(s):** this commit
+
+Finalized the eight-objective, thirty-key-result portfolio as the working
+August 2026–July 2027 OKR set. Added an evidence-backed checkpoint covering work
+completed from 20–31 August across the website, Reception, Virtual Campus, Smart
+Lecturer, Report System, security, posters and delivery operations. Outcome
+percentages that require a real cohort or reporting month were deliberately not
+invented.
+
+Clarified that Draft in the Report System now represents pending named-user
+assignment, not unapproved portfolio targets. Activation remains blocked until
+each objective and key result has an accountable user and an operational
+denominator.
+
+**Verified by:** reconciled the checkpoint with repository worklogs, deployment
+records, the 2026 catalogue work and the 172-file/128-poster asset inventory.
+**Follow-ups:** management names owners; system owners record the first measured
+month/pilot as append-only OKR evidence.
+
 ## 2026-08-31 — Reconcile OKR draft with the operational loader
 **Area:** portfolio governance · reporting · posters/communications
 **Environments:** documentation and local Report System; not deployed

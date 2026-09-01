@@ -3,23 +3,43 @@
 **Prepared:** 31 August 2026  
 **Scope:** Website, Reception, Report System, Smart Lecturer, Virtual Campus,
 Chat-bot, security, deployment operations and the poster/communications library  
-**Status:** Draft for management approval; live tracking module available locally
+**Status:** Finalized portfolio baseline; backdated through 31 August 2026
 
 ## How to use this document
 
-These are outcome measures for the Toolkit portfolio, not a list of coding
-tasks. The baseline records what is evidenced in the working repositories as of
-31 August 2026. Targets become commitments only after management assigns an
-owner, confirms the denominator and approves the policy behind each measure.
+These are the approved outcome measures for the Toolkit portfolio, not a list
+of coding tasks. The baseline records work evidenced in the repositories from
+20 to 31 August 2026. The targets are now the working portfolio targets.
+Department leads must still assign a named person and confirm each operational
+denominator before the Report System activates a key result for live reporting.
 
 The Report System now provides the working register for these objectives. An
-executive can explicitly load all eight objectives and thirty proposed key
-results as idempotent drafts, then assign owners, approve baselines/targets and
-keep append-only progress/evidence updates. Poster and campaign work is recorded
+executive can explicitly load all eight objectives and thirty key results as
+idempotent assignment-ready records, then assign named owners and keep
+append-only progress/evidence updates. Poster and campaign work is recorded
 by referencing the approved asset or campaign in the key-result evidence trail.
-Activation is blocked until the objective and all its key results have owners
-and have been moved out of Draft, so proposed targets cannot silently become
-staff commitments.
+Activation is blocked until the objective and all its key results have named
+owners and have been moved out of Draft. Draft in the application therefore
+means “awaiting accountable user assignment”; it no longer means that the
+portfolio target itself is undecided.
+
+## Backdated portfolio checkpoint
+
+This checkpoint credits completed and verified foundation work without turning
+implementation activity into invented outcome percentages. Measures that need
+real users, a reporting month or an approved denominator remain at “measurement
+starts at pilot” even where their supporting system is already built.
+
+| Objective | Evidence date | Backdated position | Next measurable event |
+|---|---|---|---|
+| Public website | 20–24 Aug 2026 | Course/pricing catalogue, application relay, encrypted applicant details and incident containment were implemented or verified; patched theme release remains open | Reconcile the next approved catalogue release and begin monthly route monitoring |
+| Reception | 25–28 Aug 2026 | QR registration, draft autosave, required-field validation, private staff access, exports and audit records were implemented and deployed to demo; WhatsApp delivery remains approval-gated | Record the first approved operating month’s digital coverage, completeness and follow-up rates |
+| Virtual Campus | 24–28 Aug 2026 | Verified progress, assignments, lecturer authoring, video lessons, live-class controls, captions/fallback UI and a local LiveKit rehearsal were completed | Run the temporary hosted human rehearsal, then record an approved cohort pilot separately |
+| Smart Lecturer | 24–28 Aug 2026 | Curated-source, speech, caption and escalation-boundary prototype work was documented and locally demonstrated | Conduct the supervised learner review against approved content |
+| Report System | 28–31 Aug 2026 | Intake, meeting actions, unlock workflow, reporting exports/reminders, OKRs and approval-gated Wingu queue were implemented locally | Assign named OKR owners and capture the first full reporting month |
+| Security and recovery | 20–31 Aug 2026 | WordPress incident was contained, scan evidence recorded, secrets kept outside Git and repeatable deployment procedures documented | Complete and record the first quarterly access and restore reviews |
+| Brand and posters | 28–31 Aug 2026 | 172 assets including 128 poster files and editable XCF sources were inventoried; brand registry and reusable handoff expectations were documented | Approve the asset index owner and classify each asset as approved, archived or source-only |
+| Delivery governance | 20–31 Aug 2026 | Demo-first procedures, owner trackers, training material, status reports and non-browser deployment methods were documented across the portfolio | Apply the release checklist to the next production change and review blockers monthly |
 
 ## Objective 1 — Make the public website a trusted digital front door
 
@@ -28,10 +48,10 @@ stories and application paths quickly and confidently.
 
 | Key result | Baseline / evidence | Target by July 2027 | Owner / decision |
 |---|---|---|---|
-| Availability of priority public pages | Current release history and route checks; no single portfolio SLO yet | ≥99.5% monthly availability, with every high-priority route checked after release | ICT + Communications; approve page list and monitoring owner |
-| Course and price accuracy | Approved 2026 catalogue is available; controlled pricing switch exists | 100% of public course/price entries reconciled to the approved catalogue each release | Admissions + Finance; approve source-of-truth sign-off |
-| Application journey reliability | Website-to-Reception relay and applicant encryption are implemented and verified | ≥98% of valid demo submissions reach the authorised destination; production mail remains fail-closed until authenticated delivery is approved | ICT + Admissions; approve mail provider |
-| Security maintenance | Element Pack Lite incident contained; patched Eduma release still pending | Patched theme deployed through demo-first review; zero known critical/high findings after each release | ICT; approve maintenance window |
+| Availability of priority public pages | 20 Aug: release route checks passed; no monthly SLO history yet | ≥99.5% monthly availability, with every high-priority route checked after release | ICT + Communications; name monitoring owner and confirm page list |
+| Course and price accuracy | 24 Aug: approved 2026 catalogue was reconciled and the controlled pricing switch implemented | 100% of public course/price entries reconciled to the approved catalogue each release | Admissions + Finance; name sign-off owner |
+| Application journey reliability | 20–24 Aug: website-to-Reception relay and applicant encryption were implemented and verified | ≥98% of valid demo submissions reach the authorised destination; production mail remains fail-closed until authenticated delivery is approved | ICT + Admissions; approve mail provider |
+| Security maintenance | 20 Aug: Element Pack Lite incident contained and scan recorded; patched Eduma release remains open | Patched theme deployed through demo-first review; zero known critical/high findings after each release | ICT; approve maintenance window |
 
 ## Objective 2 — Replace paper-first reception with a consistent, secure welcome
 
@@ -117,7 +137,8 @@ and no disruptive browser-click deployment.
 
 ## First-quarter priorities (August–October 2026)
 
-1. Approve this OKR set, owners and denominators.
+1. Assign named owners and confirm the operating denominator for each finalized
+   key result in the Report System.
 2. Review the new Report System modules locally, then make a controlled demo
    deployment decision.
 3. Provide the approved attendance-sheet format and rejected-Wingu-row owner;
