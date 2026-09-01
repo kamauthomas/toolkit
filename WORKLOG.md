@@ -5,6 +5,34 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-01 — Deploy the temporary Virtual Campus for human testing
+**Area:** Virtual Campus · cPanel · LiveKit · staging handoff
+**Environments:** `campus-test.toolkitafrica.ac.ke` staging ✅ · production unchanged
+**Commit(s):** Campus `ea8c2fe`; deployment scripts in this commit
+
+Created the temporary Campus subdomain with Laravel's `public/` directory as the
+document root, provisioned an isolated MySQL database/user and deployed the
+private application non-interactively through maintained cPanel scripts. Demo
+registration is closed; the generated account password, database values,
+application key and reused LiveKit secrets remain in ignored private files and
+were not printed or committed.
+
+The initial host migration exposed legacy MySQL timestamp and identifier limits.
+Those were fixed and pushed in Campus commits `987a81c` and `c89fa98`, then the
+locked clean bootstrap succeeded. A non-destructive `2026.09.01.4` increment
+added and verified HSTS without resetting accepted test records. Both scripts
+remove their temporary cron entries; the header rollback is retained under
+`rollbacks/campus-test-pre-2026.09.01.4`.
+
+**Verified by:** 60 tests/232 assertions; production asset build; real HTTPS
+home/login and CSS/JS 200; registration 404; CSP/frame/HSTS headers; lecturer and
+learner login/class scoping; and three concurrent LiveKit participants with
+camera/microphone controls, screen sharing, captions and signed join/leave
+attendance events. Human checklist:
+`SmartLecturer_VirtualCampus/virtual-campus/docs/HUMAN-TEST-HANDOFF-2026-09-01.md`.
+**Follow-ups:** complete the human device/network checklist; approve automated
+captions, recording/retention, mail and pilot cohort before any production move.
+
 ## 2026-09-01 — Publish the finalized OKRs as a Word handoff
 **Area:** portfolio governance · OKRs · meeting documents
 **Environments:** documentation; no deployment
