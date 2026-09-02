@@ -1,15 +1,19 @@
-# Toolkit OKRs — August 2026 to July 2027
+# Toolkit OKRs — 26 May 2026 to July 2027
 
 **Prepared:** 31 August 2026  
+**Revised:** 2 September 2026  
 **Scope:** Website, Reception, Report System, Smart Lecturer, Virtual Campus,
 Chat-bot, security, deployment operations and the poster/communications library  
-**Status:** Finalized portfolio baseline; backdated through 31 August 2026
+**Status:** Finalized portfolio baseline; period starts 26 May 2026 and evidence
+is backdated through 31 August 2026
 
 ## How to use this document
 
 These are the approved outcome measures for the Toolkit portfolio, not a list
-of coding tasks. The baseline records work evidenced in the repositories from
-20 to 31 August 2026. The targets are now the working portfolio targets.
+of coding tasks. The baseline period starts on 26 May 2026. The earliest retained
+implementation evidence is the Report System’s initial commit on 27 May, followed
+by website analysis and delivery from June, then portfolio expansion through
+31 August 2026. The targets are now the working portfolio targets.
 Department leads must still assign a named person and confirm each operational
 denominator before the Report System activates a key result for live reporting.
 
@@ -25,21 +29,34 @@ portfolio target itself is undecided.
 
 ## Backdated portfolio checkpoint
 
-This checkpoint credits completed and verified foundation work without turning
+This checkpoint credits completed and verified foundation work from 26 May to
+31 August 2026 without turning
 implementation activity into invented outcome percentages. Measures that need
 real users, a reporting month or an approved denominator remain at “measurement
 starts at pilot” even where their supporting system is already built.
 
 | Objective | Evidence date | Backdated position | Next measurable event |
 |---|---|---|---|
-| Public website | 20–24 Aug 2026 | Course/pricing catalogue, application relay, encrypted applicant details and incident containment were implemented or verified; patched theme release remains open | Reconcile the next approved catalogue release and begin monthly route monitoring |
-| Reception | 25–28 Aug 2026 | QR registration, draft autosave, required-field validation, private staff access, exports and audit records were implemented and deployed to demo; WhatsApp delivery remains approval-gated | Record the first approved operating month’s digital coverage, completeness and follow-up rates |
-| Virtual Campus | 24–28 Aug 2026 | Verified progress, assignments, lecturer authoring, video lessons, live-class controls, captions/fallback UI and a local LiveKit rehearsal were completed | Run the temporary hosted human rehearsal, then record an approved cohort pilot separately |
-| Smart Lecturer | 24–28 Aug 2026 | Curated-source, speech, caption and escalation-boundary prototype work was documented and locally demonstrated | Conduct the supervised learner review against approved content |
-| Report System | 28–31 Aug 2026 | Intake, meeting actions, unlock workflow, reporting exports/reminders, OKRs and approval-gated Wingu queue were implemented locally | Assign named OKR owners and capture the first full reporting month |
-| Security and recovery | 20–31 Aug 2026 | WordPress incident was contained, scan evidence recorded, secrets kept outside Git and repeatable deployment procedures documented | Complete and record the first quarterly access and restore reviews |
-| Brand and posters | 28–31 Aug 2026 | 172 assets including 128 poster files and editable XCF sources were inventoried; brand registry and reusable handoff expectations were documented | Approve the asset index owner and classify each asset as approved, archived or source-only |
-| Delivery governance | 20–31 Aug 2026 | Demo-first procedures, owner trackers, training material, status reports and non-browser deployment methods were documented across the portfolio | Apply the release checklist to the next production change and review blockers monthly |
+| Public website | 5 Jun–24 Aug 2026 | Site analysis, child-theme isolation, brand tokens, course/institutional redesign, production cutover, SEO/editorial galleries, catalogue/pricing reconciliation, application reliability and incident containment were implemented or verified; patched theme release remains open | Reconcile the next approved catalogue release and begin monthly route monitoring |
+| Reception | 17 Jul–28 Aug 2026 | Secure visitor workflows, hosted database compatibility, website follow-up integration, QR registration, draft autosave, required-field validation, private staff access, exports and audit records were implemented; WhatsApp delivery remains approval-gated | Record the first approved operating month’s digital coverage, completeness and follow-up rates |
+| Virtual Campus | 24 Aug–1 Sep 2026 | Verified progress, assignments, lecturer authoring, video lessons and live-class controls were implemented; local and hosted three-participant LiveKit rehearsals passed | Complete the human device/network checklist, then record an approved cohort pilot separately |
+| Smart Lecturer | 27 Jul–28 Aug 2026 | Human portrait/speech prototype, native 3D controller, model pipeline research, curated-source boundaries and caption/fallback work were documented and locally demonstrated | Conduct the supervised learner review against approved content |
+| Report System | 27 May–31 Aug 2026 | Daily reporting, edit/audit controls, administrator comments, dashboards, notifications and inactivity handling were established before intake, meeting actions, exports/reminders, OKRs and the approval-gated Wingu queue were added | Assign named OKR owners and capture the first full reporting month |
+| Security and recovery | 10 Jun–1 Sep 2026 | Sensitive-file blocking, deployment routing, production preflight/snapshot work, WordPress incident containment, scan evidence, external secret handling and repeatable non-browser deployment were implemented | Complete and record the first quarterly access and restore reviews |
+| Brand and posters | 1 Jul–31 Aug 2026 | Brand tokens, identity normalization, course/gallery/editorial communication work and 172 inventoried assets—including 128 poster files and editable XCF sources—formed the reusable brand baseline | Approve the asset index owner and classify each asset as approved, archived or source-only |
+| Delivery governance | 13 Jul–1 Sep 2026 | Reproducible seeds, demo-first rollout controls, production preflight, owner trackers, training/status reports and retained non-browser deployment scripts were established | Apply the release checklist to the next production change and review blockers monthly |
+
+## Evidence chronology used for the backdated baseline
+
+| Date | Retained evidence | Portfolio contribution |
+|---|---|---|
+| 26 May 2026 | Portfolio baseline start requested by management | Measurement period begins; no completion is claimed for this date alone |
+| 27 May 2026 | Report System initial repository commit | Daily staff reporting foundation |
+| 5–24 Jun 2026 | Website/site analysis and Report System audit, dashboard, notification and inactivity-control commits | Operational visibility, deployment hardening and the first digital-experience baseline |
+| 1–20 Jul 2026 | WordPress brand tokens, child-theme isolation, course/institutional rebuild, accessibility/SEO handoff and controlled production cutover | Public website trust, brand consistency and demo-first delivery evidence |
+| 17–28 Jul 2026 | Reception build/integration, Smart Lecturer prototype/model work, media galleries/editorial stories and strategic roadmap | Secure reception, learner-support research and communications expansion |
+| 20–31 Aug 2026 | Catalogue/pricing, applicant encryption, incident response, Reception expansion, Virtual Campus, reporting/Wingu and asset inventory | Portfolio-wide operational baseline completed |
+| 1 Sep 2026 | Hosted Campus deployment and three-participant LiveKit rehearsal | Temporary staging and human-test handoff evidence; not production approval |
 
 ## Objective 1 — Make the public website a trusted digital front door
 
@@ -48,10 +65,10 @@ stories and application paths quickly and confidently.
 
 | Key result | Baseline / evidence | Target by July 2027 | Owner / decision |
 |---|---|---|---|
-| Availability of priority public pages | 20 Aug: release route checks passed; no monthly SLO history yet | ≥99.5% monthly availability, with every high-priority route checked after release | ICT + Communications; name monitoring owner and confirm page list |
-| Course and price accuracy | 24 Aug: approved 2026 catalogue was reconciled and the controlled pricing switch implemented | 100% of public course/price entries reconciled to the approved catalogue each release | Admissions + Finance; name sign-off owner |
-| Application journey reliability | 20–24 Aug: website-to-Reception relay and applicant encryption were implemented and verified | ≥98% of valid demo submissions reach the authorised destination; production mail remains fail-closed until authenticated delivery is approved | ICT + Admissions; approve mail provider |
-| Security maintenance | 20 Aug: Element Pack Lite incident contained and scan recorded; patched Eduma release remains open | Patched theme deployed through demo-first review; zero known critical/high findings after each release | ICT; approve maintenance window |
+| Availability of priority public pages | 5 Jun–20 Aug: site audit, demo/production route checks and controlled cutover evidence exist; no monthly SLO history yet | ≥99.5% monthly availability, with every high-priority route checked after release | ICT + Communications; name monitoring owner and confirm page list |
+| Course and price accuracy | 14 Jul–24 Aug: prospectus catalogue and later approved 2026 pricing were reconciled with controlled release switches | 100% of public course/price entries reconciled to the approved catalogue each release | Admissions + Finance; name sign-off owner |
+| Application journey reliability | Jul–24 Aug: application entry points, website-to-Reception relay and applicant encryption were implemented and verified | ≥98% of valid demo submissions reach the authorised destination; production mail remains fail-closed until authenticated delivery is approved | ICT + Admissions; approve mail provider |
+| Security maintenance | 10 Jun–20 Aug: sensitive-file blocking, rollout hardening and Element Pack Lite containment were recorded; patched Eduma release remains open | Patched theme deployed through demo-first review; zero known critical/high findings after each release | ICT; approve maintenance window |
 
 ## Objective 2 — Replace paper-first reception with a consistent, secure welcome
 
@@ -60,7 +77,7 @@ accurate records without manual filing.
 
 | Key result | Baseline / evidence | Target by July 2027 | Owner / decision |
 |---|---|---|---|
-| Digital registration coverage | QR modes, autosave drafts and completion attribution are implemented | ≥90% of eligible on-site registrations captured digitally, measured monthly | Reception lead; confirm eligible-visit denominator |
+| Digital registration coverage | 17 Jul–28 Aug: secure reception foundation, QR modes, autosave drafts and completion attribution were implemented | ≥90% of eligible on-site registrations captured digitally, measured monthly | Reception lead; confirm eligible-visit denominator |
 | Data completeness | Required fields and `Other` explanation are enforced | ≥95% of completed records contain all required contact/course fields | Reception lead |
 | Follow-up responsiveness | Staff records and exports exist; WhatsApp delivery is not enabled | 90% of records requiring follow-up have a logged outcome within two working days | Reception + Admissions; approve WhatsApp owner/template |
 | Privacy and access | Private staff path, encryption, throttling and audit logs are deployed | Zero unauthorised staff-area access events; quarterly access review completed | ICT + Administration |
@@ -72,7 +89,7 @@ live classes with clear support and reliable progress records.
 
 | Key result | Baseline / evidence | Target by July 2027 | Owner / decision |
 |---|---|---|---|
-| Pilot launch | Local LiveKit rehearsal passed with one lecturer and two learners; production readiness is blocked on hosting/provider inputs | Run an approved pilot with a named lecturer and learner cohort, then publish a review decision | Academic lead + ICT; approve cohort, host and live-video service |
+| Pilot launch | 1 Sep: temporary staging and a hosted LiveKit rehearsal passed with one lecturer and two learners; production approval remains blocked on owner/policy inputs | Run an approved pilot with a named lecturer and learner cohort, then publish a review decision | Academic lead + ICT; approve cohort and production topology |
 | Learning evidence | Video heartbeats/resume, checkpoints, assignments and assessment authoring are implemented locally | ≥90% of pilot learner progress events have verifiable evidence, not self-asserted completion | Registrar + Academic lead; approve evidence policy |
 | Live-class experience | Two-way video/audio, captions, screen sharing, role labels and leave controls verified locally | ≥95% of scheduled pilot classes complete without a critical learner-blocking incident | Lecturer lead + ICT; approve support escalation |
 | Accessibility and low-bandwidth support | Captions, reduced-motion/text fallbacks and lower-data media exist locally | 100% of pilot lesson videos have captions and a documented low-bandwidth option | Academic lead |
@@ -84,7 +101,7 @@ inventing policies, fees or admissions decisions.
 
 | Key result | Baseline / evidence | Target by July 2027 | Owner / decision |
 |---|---|---|---|
-| Curated answer coverage | Prototype supports curated Toolkit questions with sources, captions and speech | 100% of published answers trace to an approved source; monthly content review completed | Academic + Communications |
+| Curated answer coverage | 27 Jul onward: prototype/model pipeline supports curated Toolkit questions with sources, captions and speech | 100% of published answers trace to an approved source; monthly content review completed | Academic + Communications |
 | Human review and escalation | Prototype boundaries are documented; production authority is not granted | All uncertain/high-impact questions show a clear human-support route; zero autonomous admission decisions | Admissions lead; approve escalation wording |
 | Learner usability | Text, speech, captions and fallbacks are demonstrated | ≥85% positive rating in a supervised learner review before any public pilot | Academic lead |
 
@@ -95,7 +112,7 @@ target and who owns the next action.
 
 | Key result | Baseline / evidence | Target by July 2027 | Owner / decision |
 |---|---|---|---|
-| Daily report discipline | Drafts, submissions, review states, dashboards and PDFs work; new filters/XLSX export are implemented locally | ≥90% of expected staff reports submitted by the agreed deadline each month | Department heads; approve deadline/denominator |
+| Daily report discipline | 27 May onward: drafts, submissions, edit/audit controls, review states, dashboards and PDFs were established; filters/XLSX export were later implemented | ≥90% of expected staff reports submitted by the agreed deadline each month | Department heads; approve deadline/denominator |
 | Review turnaround | Submitted → Reviewed → Approved workflow exists | ≥95% of submitted reports reviewed within two working days | Department heads |
 | Admissions and intake accountability | Fee-paid verified enrolments now drive intake actuals; targets are implemented locally | Monthly target review completed for every active intake officer; gaps have a recorded action | Admissions + Finance; confirm fee-paid source |
 | Meeting action closure | Minutes, owners, due dates and status history are implemented locally | ≥85% of actions closed by due date, with blocked items carrying an explanation | Management; approve action policy |
@@ -108,7 +125,7 @@ not exposed through convenience shortcuts, and the team can restore service.
 
 | Key result | Baseline / evidence | Target by July 2027 | Owner / decision |
 |---|---|---|---|
-| High-risk exposure | WordPress incident contained; normal accounts preserved; scans reported zero infected files | Zero unresolved critical/high security findings older than 14 days | ICT; approve vulnerability reporting channel |
+| High-risk exposure | 10 Jun onward: sensitive-file blocking and deployment hardening preceded the contained WordPress incident; normal accounts were preserved and scans reported zero infected files | Zero unresolved critical/high security findings older than 14 days | ICT; approve vulnerability reporting channel |
 | Secret handling | Applicant encryption keyring and admin vault procedures exist; no secrets in committed docs | 100% of production secrets held outside Git and reviewed quarterly | ICT + Administration |
 | Recovery readiness | Deployment and backup procedures are documented; restore ownership remains open in some systems | Quarterly restore exercise for website, Reception and Report System with recorded result | ICT; name restore owner and backup location |
 | Access governance | Role-scoped campus/report/reception controls exist | Quarterly review of privileged accounts, staff paths and integrations; inactive access removed within two working days | Administration + ICT |
@@ -135,7 +152,7 @@ and no disruptive browser-click deployment.
 | Portfolio ownership | Owner trackers exist for Reception, Virtual Campus, Report System and Wingu decisions | 100% of open launch blockers have an owner and next action reviewed monthly | Management |
 | Operational documentation | Whole-toolkit briefing, presentation summary, training guides and worklogs exist | Every production system has an operator guide, rollback note and current status page | ICT + system owners |
 
-## First-quarter priorities (August–October 2026)
+## Initial-period priorities (26 May–October 2026)
 
 1. Assign named owners and confirm the operating denominator for each finalized
    key result in the Report System.

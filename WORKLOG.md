@@ -5,6 +5,26 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-02 — Extend the finalized OKR baseline to 26 May
+**Area:** portfolio governance · OKRs · historical evidence
+**Environments:** documentation and local Report System register; no deployment
+**Commit(s):** this commit
+
+Extended the approved portfolio measurement period from August back to 26 May
+2026 and reconciled the baseline against retained repository history. The
+chronology now credits the Report System foundation from 27 May, June website
+analysis/report controls, July WordPress/Reception/Smart Lecturer work, August
+portfolio expansion and the 1 September hosted Campus rehearsal.
+
+No completion is invented for 26 May itself: it is the requested period start,
+while the earliest retained implementation evidence is dated 27 May. Updated
+the Word handoff and Report System template to use the same period.
+
+**Verified by:** Git history across WordPress, Report System, Reception and Smart
+Lecturer/Virtual Campus plus retained June/July progress and deployment records.
+**Follow-ups:** named-owner assignment and first measured operating month remain
+required before live OKR activation.
+
 ## 2026-09-01 — Deploy the temporary Virtual Campus for human testing
 **Area:** Virtual Campus · cPanel · LiveKit · staging handoff
 **Environments:** `campus-test.toolkitafrica.ac.ke` staging ✅ · production unchanged
