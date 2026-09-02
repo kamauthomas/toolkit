@@ -3328,6 +3328,12 @@ def load_toolkit_okr_draft():
         ).fetchone()
         if objective:
             objective_id = objective["id"]
+            db.execute(
+                """UPDATE okr_objectives
+                   SET period_start = ?, period_end = ?, updated_at = ?
+                   WHERE id = ?""",
+                (template["period_start"], template["period_end"], timestamp, objective_id),
+            )
         else:
             objective_id = db.execute(
                 """INSERT INTO okr_objectives

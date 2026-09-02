@@ -127,6 +127,7 @@ class TestOkrTracking:
             poster = db.execute("SELECT * FROM okr_objectives WHERE template_key LIKE '%:brand-posters'").fetchone()
             assert poster["status"] == "draft"
             assert poster["department"] == "Marketing"
+            assert poster["period_start"] == "2026-05-26"
         blocked = client.post(
             "/okrs/1/status",
             data={"_csrf_token": "test-token", "owner_id": "1", "status": "active"},

@@ -5,6 +5,21 @@ change itself. Format and rules: see `../AGENTS.md` section 1.
 
 ---
 
+## 2026-09-02 — Backdate the finalized OKR period to 26 May
+**Area:** OKRs · historical baseline · idempotent portfolio loader
+**Environments:** local verification; not deployed
+**Commit(s):** this commit
+
+Moved the finalized Toolkit portfolio start date to 26 May 2026. Re-running the
+idempotent loader now reconciles the period on already-loaded objectives without
+duplicating records or overwriting owners, lifecycle status, targets or progress
+evidence.
+
+**Verified by:** full automated Report System suite, including eight objectives,
+thirty key results, loader idempotency and the revised start date.
+**Follow-ups:** assign named owners and record the first measured operating
+period against the backdated evidence chronology.
+
 ## 2026-09-01 — Align the OKR register with the finalized portfolio
 **Area:** OKRs · governance · owner assignment
 **Environments:** local verification; not deployed
