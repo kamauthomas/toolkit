@@ -19,8 +19,9 @@ Required private files, both ignored by Git:
 
 The deployment copies only the four LiveKit settings required for the test from
 the Campus repository’s local `.env`; no unrelated local secrets are carried.
-Registration remains disabled, mail stays on the local log driver and the
-non-production rehearsal flag is explicit. Production ignores that override.
+The initial release kept registration disabled; release `2026.09.02.3` enables
+it only for supervised staging. Mail stays on the local log driver and both
+non-production rehearsal flags are explicit. Production ignores those overrides.
 
 Run from the WordPress repository:
 
@@ -38,3 +39,20 @@ backs up and uploads only the HTTPS security-header middleware, clears cached
 application state under an exclusive lock, removes its temporary cron and
 verifies HSTS on the real login page. It does not touch the database or demo
 records created during acceptance testing.
+
+`deploy-campus-test-readiness-2026.09.02.2.sh` non-destructively reconciles the
+secret-safe readiness command with the explicit staging rehearsal gate. It
+backs up/uploads only `routes/console.php`, refreshes caches, requires the real
+host to report `ready: true` while retaining the production-caption warning,
+creates Laravel's missing public-storage link, and leaves the database and
+human-test records unchanged. The initial bootstrap script also retains that
+storage-link step for any clean future test provision.
+
+`deploy-campus-test-signup-2026.09.02.3.sh` is the reviewed, non-destructive
+student sign-up increment. It backs up every replaced file and the private
+environment, uploads the exact committed account-policy/controllers/views/CSS,
+enables the non-production registration acknowledgement, refreshes caches and
+requires readiness to pass. It then creates one named staging acceptance learner,
+proves the account has no course, proves the role is Student and proves `/admin`
+returns 403. It neither migrates nor resets the database and never prints a
+password or environment secret.

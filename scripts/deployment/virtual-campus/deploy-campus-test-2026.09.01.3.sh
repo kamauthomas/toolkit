@@ -115,7 +115,7 @@ upload "$private_root" "$env_payload"
 
 remote_archive="$private_root/$(basename -- "$archive")"
 log="$private_root/storage/logs/deploy-$release.log"
-command="/usr/bin/flock -n /tmp/toolkit-campus-test-deploy.lock -c 'cd $private_root && /usr/bin/tar -xzf $remote_archive && /bin/chmod -R u+rwX storage bootstrap/cache && /usr/local/bin/ea-php84 artisan migrate:fresh --seed --force > $log 2>&1 && /usr/local/bin/ea-php84 artisan optimize:clear >> $log 2>&1 && /usr/local/bin/ea-php84 artisan config:cache >> $log 2>&1 && /usr/local/bin/ea-php84 artisan route:cache >> $log 2>&1 && /usr/local/bin/ea-php84 artisan view:cache >> $log 2>&1 && /bin/rm -f $remote_archive && echo CAMPUS_RELEASE_OK >> $log'"
+command="/usr/bin/flock -n /tmp/toolkit-campus-test-deploy.lock -c 'cd $private_root && /usr/bin/tar -xzf $remote_archive && /bin/chmod -R u+rwX storage bootstrap/cache && /usr/local/bin/ea-php84 artisan migrate:fresh --seed --force > $log 2>&1 && /usr/local/bin/ea-php84 artisan storage:link >> $log 2>&1 && /usr/local/bin/ea-php84 artisan optimize:clear >> $log 2>&1 && /usr/local/bin/ea-php84 artisan config:cache >> $log 2>&1 && /usr/local/bin/ea-php84 artisan route:cache >> $log 2>&1 && /usr/local/bin/ea-php84 artisan view:cache >> $log 2>&1 && /bin/rm -f $remote_archive && echo CAMPUS_RELEASE_OK >> $log'"
 api2 --data-urlencode 'cpanel_jsonapi_module=Cron' --data-urlencode 'cpanel_jsonapi_func=add_line' \
   --data-urlencode "command=$command" --data-urlencode 'minute=*' --data-urlencode 'hour=*' --data-urlencode 'day=*' --data-urlencode 'month=*' --data-urlencode 'weekday=*' \
   | php -r '$j=json_decode(stream_get_contents(STDIN),true);if((int)($j["cpanelresult"]["event"]["result"]??0)!==1)exit(13);'

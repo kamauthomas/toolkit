@@ -5,6 +5,54 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-02 — Deploy bounded student sign-up to Campus staging
+**Area:** Virtual Campus · cPanel deployment · acceptance automation
+**Environments:** local verified ✅ · temporary staging page/readiness ✅ · hosted account acceptance pending host recovery
+**Commit(s):** Campus `3596b87`; deployment script in this commit
+
+Deployed the Toolkit-styled Virtual Campus student self-registration increment
+through retained non-browser cPanel automation. The script backed up all replaced
+application files and the private environment, enabled sign-up only under the
+explicit non-production acknowledgement, refreshed cached configuration and
+passed the staging readiness gate. `/register` returned the new page over HTTPS.
+No database reset, migration or production change was included.
+
+The first hosted acceptance request correctly exposed two test-harness issues:
+the older hexadecimal demo password does not satisfy the new mixed-case/symbol
+policy, and cPanel WAF rejects a synthetic `role=administrator` form field with
+HTTP 406. The retained script now derives a compliant test-only password, leaves
+the adversarial role check to Laravel tests and still requires `/admin` to return
+403 after normal registration. Final account creation is pending because the host
+subsequently stopped accepting connections from this machine on both the staging
+subdomain and main Toolkit site.
+
+**Verified by:** Bash syntax; Campus commit `3596b87` with 66 tests and 262
+assertions; production asset build; desktop/mobile browser review; hosted
+registration page HTTP 200; staging readiness pass; rollback retained at
+`rollbacks/campus-test-pre-2026.09.02.3`.
+**Follow-ups:** retry the bounded hosted account acceptance after the host/IP path
+recovers; keep production sign-up closed until privacy and verified-mail gates are
+approved.
+
+## 2026-09-02 — Reconcile the deployed Campus staging readiness gate
+**Area:** Virtual Campus · cPanel · readiness · non-destructive release
+**Environments:** `campus-test.toolkitafrica.ac.ke` staging ✅ · production unchanged
+**Commit(s):** Campus `300fcff`; deployment script in this commit
+
+Deployed the revised secret-safe Campus readiness command without touching the
+database or accepted test records. The first run exposed the missing Laravel
+public-storage link; release `2026.09.02.2` created it. The hosted command now
+reports the explicit LiveKit rehearsal as staging-ready while preserving the
+statement that production captions remain blocked. Retained the previous remote
+file and deployment log under `rollbacks/campus-test-pre-2026.09.02.2` and
+removed the temporary cron after verification.
+
+**Verified by:** hosted `campus:readiness --json` returned `ready: true`, the
+production-caption warning remained present, HTTPS login retained HSTS and the
+public route returned 200.
+**Follow-ups:** complete human mobile/constrained-network testing and provide
+the direct owner inputs listed in the Campus owner tracker before production.
+
 ## 2026-09-02 — Extend the finalized OKR baseline to 26 May
 **Area:** portfolio governance · OKRs · historical evidence
 **Environments:** documentation and local Report System register; no deployment

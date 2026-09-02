@@ -1,7 +1,7 @@
 # Toolkit OKRs — 26 May 2026 to July 2027
 
 **Prepared:** 31 August 2026  
-**Revised:** 2 September 2026  
+**Revised:** 2 September 2026
 **Scope:** Website, Reception, Report System, Smart Lecturer, Virtual Campus,
 Chat-bot, security, deployment operations and the poster/communications library  
 **Status:** Finalized portfolio baseline; period starts 26 May 2026 and evidence
