@@ -7,8 +7,8 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ## 2026-09-14 — Hide Kakuma from the public application form
 **Area:** website admissions
-**Environments:** local verified ✅ · demo and production not yet deployed
-**Commit(s):** this commit
+**Environments:** local ✅ · demo ✅ · production ✅
+**Commit(s):** `9919265`
 
 Removed Kakuma from the campus choices shown by the public application form;
 because courses are loaded only after a campus selection, Kakuma-related courses
@@ -18,10 +18,11 @@ Mzizi, cached source records, submitted applications, or the relay payload.
 
 **Verified by:** PHP and JavaScript syntax checks; focused option-filter checks for
 mixed case, unrelated campuses, missing school lists, and preservation of the
-original cached response; inspected the course-loading and submission paths to
-confirm they remain unchanged.
-**Follow-ups:** deploy and verify on demo first, then production; do not submit a
-test application on production.
+original cached response; guarded byte-identity deployments to demo and production;
+real HTTP 200 public-options requests returned only Mombasa and Nairobi; browser
+screenshots on both environments visibly confirmed Kakuma absent from the selector.
+No application was submitted during verification.
+**Follow-ups:** none.
 
 ---
 
