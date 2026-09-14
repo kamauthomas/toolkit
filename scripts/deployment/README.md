@@ -26,6 +26,14 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-hide-kakuma-2026.09.14.1.sh` applies the presentation-only
+application fix that removes Kakuma from the public campus selector while
+leaving Mzizi, the raw transient catalogue and submitted records unchanged. It
+patches fetched remote files with zero fuzz, uploads `functions.php` last to
+trigger the cache purge, verifies byte identity, and makes a real public options
+request that fails if any Kakuma-labelled campus remains. Run demo first and
+production second; never submit a production test application.
+
 `releases/deploy-footprint-poster-2026.08.21.2.sh` is the corrective Footprint
 release requested after the first redesign proved too elaborate. It applies the
 small `2026.08.21.1..2026.08.21.2` patch to fetched live files, rejects remnants

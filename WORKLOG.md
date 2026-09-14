@@ -5,6 +5,26 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-14 — Hide Kakuma from the public application form
+**Area:** website admissions
+**Environments:** local verified ✅ · demo and production not yet deployed
+**Commit(s):** this commit
+
+Removed Kakuma from the campus choices shown by the public application form;
+because courses are loaded only after a campus selection, Kakuma-related courses
+are no longer exposed through the normal application journey. The change filters
+only outgoing form options (including already-cached responses) and does not edit
+Mzizi, cached source records, submitted applications, or the relay payload.
+
+**Verified by:** PHP and JavaScript syntax checks; focused option-filter checks for
+mixed case, unrelated campuses, missing school lists, and preservation of the
+original cached response; inspected the course-loading and submission paths to
+confirm they remain unchanged.
+**Follow-ups:** deploy and verify on demo first, then production; do not submit a
+test application on production.
+
+---
+
 ## 2026-09-02 — Deploy bounded student sign-up to Campus staging
 **Area:** Virtual Campus · cPanel deployment · acceptance automation
 **Environments:** local verified ✅ · temporary staging page/readiness ✅ · hosted account acceptance pending host recovery

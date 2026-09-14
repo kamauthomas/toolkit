@@ -564,6 +564,21 @@ function toolkit_application_source_items( $items ) {
 	}, $sources );
 }
 
+/**
+ * Keep Kakuma out of the public application selector without changing the
+ * upstream Mzizi catalogue, cached source data, or existing applications.
+ */
+function toolkit_application_visible_options( array $options ) {
+	if ( empty( $options['schools'] ) || ! is_array( $options['schools'] ) ) {
+		return $options;
+	}
+	$options['schools'] = array_values( array_filter( $options['schools'], function( $school ) {
+		$label = is_array( $school ) ? (string) ( $school['label'] ?? '' ) : '';
+		return false === stripos( $label, 'kakuma' );
+	} ) );
+	return $options;
+}
+
 function toolkit_application_counties() {
 	$names = array( 'BARINGO', 'BOMET', 'BUNGOMA', 'BUSIA', 'ELGEYO-MARAKWET', 'EMBU', 'GARISSA', 'HOMA BAY', 'ISIOLO', 'KAJIADO', 'KAKAMEGA', 'KERICHO', 'KIAMBU', 'KILIFI', 'KIRINYAGA', 'KISII', 'KISUMU', 'KITUI', 'KWALE', 'LAIKIPIA', 'LAMU', 'MACHAKOS', 'MAKUENI', 'MANDERA', 'MARSABIT', 'MERU', 'MIGORI', 'MOMBASA', "MURANG'A", 'NAIROBI', 'NAKURU', 'NANDI', 'NAROK', 'NYAMIRA', 'NYANDARUA', 'NYERI', 'SAMBURU', 'SIAYA', 'TAITA-TAVETA', 'TANA RIVER', 'THARAKA-NITHI', 'TRANS-NZOIA', 'TURKANA', 'UASIN GISHU', 'VIHIGA', 'WAJIR', 'WEST POKOT' );
 	return array_map( function( $name ) {
@@ -599,7 +614,7 @@ function toolkit_application_options( WP_REST_Request $request ) {
 	 */
 	$cached = get_transient( 'toolkit_mzizi_options' );
 	if ( is_array( $cached ) ) {
-		return rest_ensure_response( $cached );
+		return rest_ensure_response( toolkit_application_visible_options( $cached ) );
 	}
 	$cookies = toolkit_mzizi_session();
 	if ( is_wp_error( $cookies ) ) {
@@ -618,7 +633,7 @@ function toolkit_application_options( WP_REST_Request $request ) {
 	if ( ! empty( $response['schools'] ) ) {
 		set_transient( 'toolkit_mzizi_options', $response, toolkit_application_catalog_cache_ttl() );
 	}
-	return rest_ensure_response( $response );
+	return rest_ensure_response( toolkit_application_visible_options( $response ) );
 }
 
 /*

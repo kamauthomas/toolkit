@@ -102,7 +102,12 @@
 
   function loadOptions() {
     return api(config.optionsEndpoint).then(function (data) {
-      fillSelect(schoolSelect, data.schools, 'Select campus');
+      /* Keep the UI safe if an intermediary briefly serves an older cached
+       * options response while the server-side visibility filter rolls out. */
+      var visibleSchools = (data.schools || []).filter(function (school) {
+        return String(school.label || '').toLowerCase().indexOf('kakuma') === -1;
+      });
+      fillSelect(schoolSelect, visibleSchools, 'Select campus');
       fillSelect(countySelect, data.counties, 'Select county');
       fillSelect(sourceSelect, data.sources, 'Select source');
     }).catch(function (error) {
