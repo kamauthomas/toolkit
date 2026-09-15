@@ -63,6 +63,21 @@ while ( have_posts() ) :
 	if ( ! $standfirst ) {
 		$standfirst = wp_trim_words( wp_strip_all_tags( get_the_content() ), 30 );
 	}
+	$story_context    = strtolower( $story_title . ' ' . $standfirst . ' ' . implode( ' ', wp_list_pluck( $categories, 'name' ) ) );
+	$is_welding_story = (bool) preg_match( '/\b(?:weld|welder|welders|welding|mig|mag)\b/i', $story_context );
+	$story_cta        = $is_welding_story
+		? array(
+			'heading' => 'Turn welding insight into practical training',
+			'copy'    => 'Explore Toolkit’s MIG/MAG welding pathway in Kikuyu, compare VR-supported practice and Recognition of Prior Learning, then confirm current course details with Admissions.',
+			'label'   => 'Explore MIG/MAG welding training',
+			'url'     => home_url( '/our-ventures/construction-sector-skills/' ),
+		)
+		: array(
+			'heading' => 'Turn insight into action',
+			'copy'    => 'Explore practical courses and current opportunities at The Toolkit for Skills and Innovation.',
+			'label'   => 'Explore courses',
+			'url'     => home_url( '/our-ventures/' ),
+		);
 	$related       = new WP_Query(
 		array(
 			'post_type'           => 'post',
@@ -137,7 +152,7 @@ while ( have_posts() ) :
 			</section>
 		<?php endif; wp_reset_postdata(); ?>
 
-		<section class="toolkit-institutional-cta"><div><h2>Turn insight into action</h2><p>Explore practical courses and current opportunities at The Toolkit for Skills and Innovation.</p></div><a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Explore courses <i class="fas fa-arrow-right" aria-hidden="true"></i></a></section>
+		<section class="toolkit-institutional-cta"><div><h2><?php echo esc_html( $story_cta['heading'] ); ?></h2><p><?php echo esc_html( $story_cta['copy'] ); ?></p></div><a class="toolkit-btn toolkit-btn--primary" href="<?php echo esc_url( $story_cta['url'] ); ?>"><?php echo esc_html( $story_cta['label'] ); ?> <i class="fas fa-arrow-right" aria-hidden="true"></i></a></section>
 	</main>
 	<?php
 endwhile;

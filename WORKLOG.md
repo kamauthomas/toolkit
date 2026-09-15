@@ -5,6 +5,25 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-15 — Connect welding evidence articles to the course hub
+**Area:** website SEO · internal linking · welding content
+**Environments:** local ✅ · not deployed
+**Commit(s):** this commit
+
+Welding-related articles now end with a topic-specific call to action linking
+back to the canonical MIG/MAG welding hub instead of the generic course
+directory. The detection uses the story title, standfirst and category names,
+so existing first-hand welding evidence strengthens the intended commercial
+page without adding keyword-only posts or changing unrelated stories.
+
+**Verified by:** PHP lint on `single.php` and `functions.php`; focused regex
+checks for MIG/MAG/welding and unrelated story contexts; `git diff --check`.
+**Follow-ups:** verify the contextual CTA on representative demo articles before
+production deployment, then improve the two strongest welding articles with
+trainer-reviewed original detail and reciprocal links.
+
+---
+
 ## 2026-09-15 — Start evidence-led welding SEO remediation
 **Area:** website SEO · welding content · AI/search discovery
 **Environments:** local ✅ · not deployed
