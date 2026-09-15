@@ -5,6 +5,37 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-15 — Start evidence-led welding SEO remediation
+**Area:** website SEO · welding content · AI/search discovery
+**Environments:** local ✅ · not deployed
+**Commit(s):** this commit
+
+Compared the September forensic audit with the July competitive audit and
+roadmap, verified the current production metadata/index state, and created one
+prioritized remediation map plus a claim-controlled welding fact register. The
+first implementation slice removes a live course-fee contradiction, gives the
+primary welding hub a Kenya-specific H1 and substantially deeper MIG/MAG,
+pathway, evidence and admissions content, adds descriptive links to the distinct
+VR and RPL routes, and expands the optional AI-readable reference map without
+treating `llms.txt` as a Google ranking mechanism.
+
+**Verified by:** PHP lint on `functions.php`, `inc/course-catalog.php` and
+`template-parts/pages/course-detail.php`; `git diff --check`; JSON validation;
+live HTTP inspection of robots, sitemap, AI guides, the welding hub and legacy
+domain; serial public SEO audit passed all 13 priority URLs. A separate
+six-worker audit found 132 transport timeouts among 179 sitemap URLs, while
+sampled legacy-domain URLs returned HTTP 500. The supplied SEO Site Checkup
+archive was retrieved and its 9 failures and 4 warnings were triaged against the
+site implementation.
+
+**Follow-ups:** deploy the patch to demo and visually validate desktop/mobile;
+obtain Admissions, Finance, Compliance and Head of Welding approval for pending
+facts; fix the legacy domain at hosting level; diagnose concurrent request
+timeouts; reproduce homepage CLS/LCP in a browser trace; then improve the
+strongest existing welding evidence articles before publishing new material.
+
+---
+
 ## 2026-09-14 — Hide Kakuma from the public application form
 **Area:** website admissions
 **Environments:** local ✅ · demo ✅ · production ✅

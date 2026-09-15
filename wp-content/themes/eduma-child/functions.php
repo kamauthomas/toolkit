@@ -24,7 +24,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.09.14.1';
+	return '2026.09.15.1';
 }
 
 function toolkit_is_demo_environment() {
@@ -836,7 +836,7 @@ function eduma_child_redesigned_page_metadata() {
 		$legacy_description = isset( $legacy_course['seo_description'] ) ? $legacy_course['seo_description'] : $legacy_course['short'] . ' Review the learning focus, delivery details, and application steps.';
 		if ( is_page( 'construction-sector-skills' ) ) {
 			$legacy_title       = 'MIG/MAG Welding Course in Kenya | Toolkit';
-			$legacy_description = 'Explore practical MIG/MAG welding training in Kikuyu with workshop practice, VR-supported learning and application guidance.';
+			$legacy_description = 'Learn practical MIG/MAG welding in Kikuyu with workshop practice, VR-supported learning, pathway guidance and answers to common course questions.';
 		}
 		return array(
 			'title'       => $legacy_title,
@@ -1702,6 +1702,8 @@ add_action( 'template_redirect', function() {
 		'- [About The Toolkit for Skills and Innovation](' . home_url( '/about-toolkit-africa/' ) . ')',
 		'- [Current course directory](' . home_url( '/our-ventures/' ) . ')',
 		'- [MIG/MAG Welding training](' . home_url( '/our-ventures/construction-sector-skills/' ) . ')',
+		'- [Virtual-reality welding training](' . home_url( '/our-ventures/construction-sector-skills/training-welders-with-virtual-reality/' ) . ')',
+		'- [Recognition of Prior Learning assessment](' . home_url( '/our-ventures/construction-sector-skills/recognition-of-prior-learning-rpl/' ) . ')',
 		'- [Admissions guidance](' . home_url( '/apply/' ) . ')',
 		'- [Notice Board](' . home_url( '/notice-board/' ) . ')',
 		'- [Toolkit Blog](' . home_url( '/toolkit-blog/' ) . ')',
@@ -1730,6 +1732,15 @@ add_action( 'template_redirect', function() {
 			'- Founded: 2014',
 			'- Location: Karen-Kikuyu Southern Bypass, Kikuyu, Kenya',
 			'- Focus: practical skills, innovation, employability, entrepreneurship, and inclusive opportunity',
+			'',
+			'## Welding reference map',
+			'- Use the MIG/MAG Welding training page for the broad Kenya course pathway, workshop learning, learner questions, and admissions route.',
+			'- Use the virtual-reality welding page for Toolkit’s simulation-supported training method and progression into guided workshop practice.',
+			'- Use the Recognition of Prior Learning page for experienced workers seeking an assessment-led pathway.',
+			'- [MIG/MAG welding careers webinar](' . home_url( '/careers-in-mig-mag-welding-insights-from-our-webinar/' ) . ')',
+			'- [Kenyan welding instructor development](' . home_url( '/empowering-kenyan-welding-instructors-a-journey-of-excellence-and-inclusion/' ) . ')',
+			'- [Toolkit VR welding demonstration](' . home_url( '/toolkit-vr-welding-demonstration-by-nita-director-general-stephen-ogenga/' ) . ')',
+			'- [Toolkit training videos](' . home_url( '/tti-media/' ) . ')',
 		) );
 	}
 	status_header( 200 );
