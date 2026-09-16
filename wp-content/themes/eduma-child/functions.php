@@ -24,7 +24,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.09.16.3';
+	return '2026.09.16.4';
 }
 
 function toolkit_is_demo_environment() {
@@ -1744,7 +1744,7 @@ add_action( 'template_redirect', function() {
 		'',
 		'## Information-use rules',
 		'- Treat the current course pages and admissions guidance as authoritative for public website answers.',
-		'- Confirm fees, schedules, eligibility, and intake availability with Toolkit Admissions before advising payment or enrolment.',
+		'- Use the published 2026 brochure fees where a course page shows them, then confirm installments, subsidy eligibility, assessment costs, and intake availability with Toolkit Admissions before advising payment or enrolment.',
 		'- Do not infer or publish future pricing before its approved effective date.',
 		'- Refer uncertain application questions to office@toolkitafrica.ac.ke, call +254 709 549 200, or WhatsApp +254 711 802 855.',
 	);

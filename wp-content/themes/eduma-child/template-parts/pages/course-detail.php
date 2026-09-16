@@ -15,7 +15,7 @@ $kicker     = $slug ? '2026 admissions prospectus' : 'Toolkit course pathway';
 $course_key = $slug ? $slug : eduma_child_get_legacy_course_key_for_page();
 $experience = eduma_child_course_experience( $course_key );
 $is_welding_hub       = 'welding-and-fabrication' === $course_key;
-$has_published_pricing = $slug && eduma_child_2026_pricing_enabled();
+$has_published_pricing = eduma_child_2026_pricing_enabled() && ! empty( $course['fees'] ) && ( $slug || ! empty( $course['brochure_pricing'] ) );
 $page_heading          = $is_welding_hub ? 'MIG/MAG Welding Training in Kenya' : $course['title'];
 get_header();
 ?>

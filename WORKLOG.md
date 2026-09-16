@@ -5,6 +5,32 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-16 — Publish approved brochure fees on legacy course hubs
+**Area:** website content · admissions pricing · SEO
+**Environments:** local ✅ · deployment pending
+**Commit(s):** this commit
+
+Confirmed the approved 7 July 2026 Toolkit brochure against the current 15-course
+catalogue, including visual checks of its price tables. The catalogue prices were
+already correct, but the older welding, renewable-energy, organic-farming and
+digital-skills URLs still hid them behind a route-only condition; those four hubs
+now carry explicit brochure-backed fee records and can display them under the
+existing pricing feature flag.
+
+Updated the welding fact register and AI guidance to distinguish published fees
+from conditions that Admissions must still confirm, including installments,
+subsidy eligibility, assessment costs and intake availability. Unpriced services
+and pathways remain unchanged rather than receiving inferred prices.
+
+**Verified by:** source-PDF metadata and SHA-256; extracted and visually checked
+brochure price tables; direct comparison with all current catalogue fee fields;
+PHP syntax checks; focused source assertions; and `git diff --check`.
+**Follow-ups:** deploy demo-first, verify all four legacy hubs and an unpriced
+control page, visually review desktop/mobile, then promote the identical payload
+to production if accepted.
+
+---
+
 ## 2026-09-16 — Strengthen the welding evidence cluster
 **Area:** website SEO · welding content · internal linking
 **Environments:** local ✅ · demo ✅ · production ✅

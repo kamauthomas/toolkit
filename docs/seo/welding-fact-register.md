@@ -17,8 +17,8 @@ Only `verified` fields may be published as factual course claims. `Pending` mean
 | Contact hours | not supplied | pending | Head of Welding | Provide theory, simulation and workshop hours |
 | Industry attachment | three months | pending | Admissions + Welding | Confirm availability and whether it applies to every learner/pathway |
 | Intake dates | January, April, July and October | pending | Admissions | Confirm next open intake and application deadline |
-| Standard fee | KES 176,276 | pending | Admissions + Finance | Approve current effective price and inclusions |
-| Subsidised fee | KES 120,962 | pending | Admissions + Finance | Define eligibility, availability and effective period |
+| Standard fee | KES 176,276 | verified | Management | Approved 7 July 2026 admissions brochure; confirmed as the correct website fee on 16 September 2026 |
+| Subsidised fee | KES 120,962 | verified | Management | Approved 7 July 2026 admissions brochure; eligibility and availability still require Admissions confirmation |
 | Included costs | not supplied | pending | Admissions + Finance | List tuition, materials, PPE, assessment and attachment costs |
 | Entry requirement | KCPE or KCSE certificate | pending | Admissions | Confirm minimum level and required documents |
 | Qualification awarded | Advanced Welding Skills Certificate with VR | pending | Compliance + Welding | Confirm exact award wording and issuing body |
@@ -36,6 +36,6 @@ Only `verified` fields may be published as factual course claims. `Pending` mean
 
 - Do not infer accreditation from membership or partnership.
 - Do not use `KEBS`, `NITA`, `IIW` or another body as interchangeable trainer, assessor, examiner, accreditor or certificate issuer.
-- Do not publish a fee without its effective date, inclusions and funding conditions.
+- Attribute published prices to the approved 7 July 2026 brochure and direct applicants to Admissions for installments, subsidy eligibility, assessment costs, and current intake availability.
 - Do not promise placement, certification or employment.
 - Keep visible text, metadata, schema, brochures, chatbot answers and application choices aligned.
