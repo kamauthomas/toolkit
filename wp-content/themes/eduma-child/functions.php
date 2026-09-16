@@ -24,7 +24,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.09.16.1';
+	return '2026.09.16.2';
 }
 
 function toolkit_is_demo_environment() {
@@ -1666,6 +1666,30 @@ add_action( 'wp_head', function() {
 }, 1000 );
 
 /* === AI DISCOVERY: concise and expanded machine-readable site guides === */
+add_filter( 'robots_txt', function( $output, $public ) {
+	$host = strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
+	if ( 'toolkitafrica.ac.ke' !== $host ) {
+		return $output;
+	}
+
+	$schema_path = '/wp-json/yoast/v1/schema-aggregator/';
+	$allow_line  = 'Allow: ' . $schema_path;
+	if ( false === strpos( $output, $allow_line ) ) {
+		$count  = 0;
+		$output = preg_replace( '/(User-agent:\s*\*\s*\R)/i', '$1' . $allow_line . "\n", $output, 1, $count );
+		if ( 0 === $count ) {
+			$output = "User-agent: *\n" . $allow_line . "\n\n" . ltrim( $output );
+		}
+	}
+
+	$schema_map = 'Sitemap: ' . home_url( $schema_path . 'get-xml' );
+	if ( false === strpos( $output, $schema_map ) ) {
+		$output = rtrim( $output ) . "\n" . $schema_map . "\n";
+	}
+
+	return $output;
+}, PHP_INT_MAX, 2 );
+
 add_action( 'wp_head', function() {
 	if ( eduma_child_redesign_enabled() ) {
 		printf( '<link rel="alternate" type="text/plain" href="%s" title="The Toolkit for Skills and Innovation AI information">' . "\n", esc_url( home_url( '/llms.txt' ) ) );
