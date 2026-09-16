@@ -5,6 +5,30 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-16 — Keep course decisions and actions visible while scrolling
+**Area:** course UX · admissions conversion · mobile hero
+**Environments:** local ✅ · deployment pending
+**Commit(s):** this commit
+
+Added an in-flow course action dock after every course hero. It becomes sticky at
+the top only after users reach it, keeps the current course, primary fee or
+schedule, details anchor and Apply action available through long pages, and
+collapses to a compact three-part row on mobile instead of competing with the
+existing bottom-right WhatsApp and help controls.
+
+The site sweep also found the homepage mobile video badge sharing that
+bottom-right control zone. Moved the badge to the left at the mobile breakpoint,
+without changing desktop composition or the deferred video-loading behaviour.
+
+**Verified by:** desktop/mobile screenshots of the homepage, course directory,
+course hero and price sections; browser geometry at the top and after scroll;
+PHP syntax; CSS/markup source assertions; and `git diff --check`.
+**Follow-ups:** deploy demo-first and verify the dock before and after its sticky
+threshold at desktop and mobile sizes; test the details anchor and Apply URL;
+then promote only if it does not obscure page content or support controls.
+
+---
+
 ## 2026-09-16 — Distinguish solar and welding upskilling fees
 **Area:** website content · admissions pricing
 **Environments:** local ✅ · demo pending · production pending

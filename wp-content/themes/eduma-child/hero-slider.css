@@ -643,7 +643,8 @@
   .hero-slider__video-badge {
     padding: 8px 12px;
     font-size: 12px;
-    right: 20px;
+    left: 20px;
+    right: auto;
     bottom: 76px;
     max-width: calc(100% - 40px);
   }
