@@ -26,6 +26,20 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-agentic-schema-2026.09.16.2.sh` applies the production-host-only
+robots rule that makes Yoast's schema aggregation endpoint discoverable without
+opening the rest of the WordPress REST API. It patches and uploads only
+`functions.php`, verifies byte identity and the release header, requires demo's
+crawler policy to stay byte-identical, and requires production to retain the
+general `/wp-json/` block while adding the narrow Allow and schemamap lines.
+
+`releases/deploy-seo-performance-2026.09.16.1.sh` promotes the welding authority,
+contextual story links and responsive/deferred homepage hero release. It applies
+the pinned three-commit range to fetched live files with zero fuzz, validates
+the complete payload before creating a rollback, uploads `functions.php` last,
+and verifies file identity plus homepage, welding, evidence-story and AI-guide
+routes. Run demo first and complete desktop/mobile visual review before production.
+
 `releases/deploy-hide-kakuma-2026.09.14.1.sh` applies the presentation-only
 application fix that removes Kakuma from the public campus selector while
 leaving Mzizi, the raw transient catalogue and submitted records unchanged. It

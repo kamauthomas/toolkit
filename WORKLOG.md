@@ -7,7 +7,7 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ## 2026-09-16 — Make the agentic schema map discoverable
 **Area:** website SEO · AI/search discovery · robots policy
-**Environments:** local ✅ · Yoast production setting ✅ · theme deployment pending
+**Environments:** local ✅ · demo ✅ · production ✅ · Yoast setting ✅
 **Commit(s):** this commit
 
 Enabled Yoast's opt-in Schema aggregation endpoint after confirming that the
@@ -22,18 +22,19 @@ without opening the rest of `/wp-json/`. Bumped the theme release to
 `2026.09.16.2` so the production cache transition is explicit.
 
 **Verified by:** public HTTP 200 response from Yoast's XML schemamap; persisted
-Yoast toggle state after a fresh settings reload; PHP syntax check; and focused
-source checks for the production-host guard, narrow REST allow path, and schema
-sitemap declaration.
-**Follow-ups:** deploy to demo first, confirm its crawler policy is unchanged,
-then deploy to production and verify both the narrow allow rule and schemamap
-declaration in the live `robots.txt`.
+Yoast toggle state after a fresh settings reload; PHP syntax; demo-first and
+production byte-identity deployments with separate rollbacks; unchanged demo
+crawler policy; production release header `2026.09.16.2`; and live production
+`robots.txt` retaining the broad REST block while exposing only the aggregator
+path and its schemamap.
+**Follow-ups:** monitor schema endpoint use and align the Yoast organization/site
+names after the legal/trading-name owner confirms the authoritative wording.
 
 ---
 
 ## 2026-09-16 — Remove the reproduced mobile hero LCP bottleneck
 **Area:** website SEO · homepage performance · Yoast review
-**Environments:** local ✅ · not deployed
+**Environments:** local ✅ · demo ✅ · production ✅
 **Commit(s):** this commit
 
 Reproduced the homepage slowdown with a throttled mobile trace and found that
@@ -44,23 +45,25 @@ decorative background and unused legacy assets, and reduces the combined mobile
 hero files from 400,016 to 278,126 bytes without changing the visible copy.
 
 Documented the retained Yoast dashboard baseline and a priority recommendation
-queue. The current admin review could not be completed because the saved login
-had expired; no credential was entered or retrieved.
+queue. A subsequent human-authenticated review confirmed zero serious Yoast
+problems, one default-title notification, current analysis counts and the active
+technical features without retrieving or entering credentials.
 
 **Verified by:** PHP lint on `functions.php`, `front-page.php` and
 `inc/hero-slides.php`; `node --check` on `hero-slider.js`; image-dimension and
 size checks; `git diff --check`; and a sandboxed mobile browser fixture that kept
 slide one active with zero fixture CLS, left slides two and three without `src`,
-and loaded the requested slide successfully through manual navigation.
-**Follow-ups:** deploy to demo, visually compare desktop/mobile, run a fresh
-public trace, then deploy to production if accepted; complete the current Yoast
-Site Representation and content-score review after a human signs into wp-admin.
+and loaded the requested slide successfully through manual navigation; guarded
+demo/production byte-identity deployment; desktop/mobile visual review; and a
+demo mobile trace recording `0.0016` CLS, approximately `2.6 s` LCP, one mobile
+hero transfer and no retired Sina/Owl scripts.
+**Follow-ups:** collect field performance data after the release has real traffic.
 
 ---
 
 ## 2026-09-15 — Connect welding evidence articles to the course hub
 **Area:** website SEO · internal linking · welding content
-**Environments:** local ✅ · not deployed
+**Environments:** local ✅ · demo ✅ · production ✅
 **Commit(s):** this commit
 
 Welding-related articles now end with a topic-specific call to action linking
@@ -79,7 +82,7 @@ trainer-reviewed original detail and reciprocal links.
 
 ## 2026-09-15 — Start evidence-led welding SEO remediation
 **Area:** website SEO · welding content · AI/search discovery
-**Environments:** local ✅ · not deployed
+**Environments:** local ✅ · demo ✅ · production ✅
 **Commit(s):** this commit
 
 Compared the September forensic audit with the July competitive audit and
