@@ -5,6 +5,33 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-16 — Strengthen the welding evidence cluster
+**Area:** website SEO · welding content · internal linking
+**Environments:** local ✅ · deployment pending
+**Commit(s):** this commit
+
+Current search comparisons still did not surface Toolkit for the tested
+high-intent MIG/MAG and welding-course queries. Rather than publish another
+generic article, improved two existing first-hand evidence pages: the Kakuma VR
+welding story and the Kenyan welding-instructor programme now have concise,
+intent-specific titles and descriptions based only on their published facts.
+
+Welding stories now select related reading from a curated welding evidence set
+instead of arbitrary same-category posts. The section identifies itself as
+`More welding insights` and links to the canonical MIG/MAG training hub, creating
+a clearer reciprocal topic cluster around the commercial page. Theme release
+`2026.09.16.3` activates the metadata and cache transition.
+
+**Verified by:** PHP syntax checks on `functions.php` and `single.php`; focused
+source assertions for both metadata records, all four evidence slugs and the
+welding-specific hub link; and `git diff --check`.
+**Follow-ups:** deploy demo-first, visually inspect representative welding and
+non-welding stories, then promote to production if the related-story scope and
+metadata are correct. Obtain approved duration, fee, entry and assessment facts,
+which current competing results expose and Toolkit still cannot state.
+
+---
+
 ## 2026-09-16 — Make the agentic schema map discoverable
 **Area:** website SEO · AI/search discovery · robots policy
 **Environments:** local ✅ · demo ✅ · production ✅ · Yoast setting ✅

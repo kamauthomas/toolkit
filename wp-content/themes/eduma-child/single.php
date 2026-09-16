@@ -78,16 +78,28 @@ while ( have_posts() ) :
 			'label'   => 'Explore courses',
 			'url'     => home_url( '/our-ventures/' ),
 		);
-	$related       = new WP_Query(
-		array(
+	$related_args = array(
 			'post_type'           => 'post',
 			'post_status'         => 'publish',
 			'posts_per_page'      => 3,
 			'post__not_in'        => array( $post_id ),
 			'ignore_sticky_posts' => true,
 			'category__in'        => wp_get_post_categories( $post_id ),
-		)
-	);
+		);
+	if ( $is_welding_story ) {
+		unset( $related_args['category__in'] );
+		$related_args['post_name__in'] = array(
+			'careers-in-mig-mag-welding-insights-from-our-webinar',
+			'kakuma-refugee-camp-gets-top-technology-training-welders-with-virtual-reality-simulators',
+			'empowering-kenyan-welding-instructors-a-journey-of-excellence-and-inclusion',
+			'toolkit-makes-history-monday-5-february-2024-statement-on-skills-in-advanced-welding-at-radisson-blu-presided-by-president-ruto-and-polish-president-duda',
+		);
+		$related_args['orderby'] = 'post_name__in';
+	}
+	$related         = new WP_Query( $related_args );
+	$related_heading = $is_welding_story ? 'More welding insights' : 'More from Toolkit';
+	$related_url     = $is_welding_story ? home_url( '/our-ventures/construction-sector-skills/' ) : $blog_url;
+	$related_label   = $is_welding_story ? 'Explore welding training' : 'View all stories';
 	?>
 	<?php if ( $preview ) : $hero_image = $preview['images'][0]; endif; ?>
 	<main id="main-content" class="toolkit-page toolkit-story-page <?php echo esc_attr( 'toolkit-story-theme--' . $story_theme ); ?>">
@@ -140,7 +152,7 @@ while ( have_posts() ) :
 
 		<?php if ( $related->have_posts() ) : ?>
 			<section class="toolkit-story-related toolkit-section" aria-labelledby="toolkit-related-title">
-				<div class="toolkit-story-related__heading"><div><p class="toolkit-kicker">Continue reading</p><h2 id="toolkit-related-title">More from Toolkit</h2></div><a href="<?php echo esc_url( $blog_url ); ?>">View all stories <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+				<div class="toolkit-story-related__heading"><div><p class="toolkit-kicker">Continue reading</p><h2 id="toolkit-related-title"><?php echo esc_html( $related_heading ); ?></h2></div><a href="<?php echo esc_url( $related_url ); ?>"><?php echo esc_html( $related_label ); ?> <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
 				<div class="toolkit-story-related__grid">
 					<?php while ( $related->have_posts() ) : $related->the_post(); ?>
 						<?php

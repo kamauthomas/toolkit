@@ -24,7 +24,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.09.16.2';
+	return '2026.09.16.3';
 }
 
 function toolkit_is_demo_environment() {
@@ -685,6 +685,14 @@ function toolkit_story_seo_copy( $post_id ) {
 		'careers-in-mig-mag-welding-insights-from-our-webinar' => array(
 			'title'       => 'MIG/MAG Welding Careers Webinar | Toolkit',
 			'description' => 'Explore career pathways, industry applications and practical insights discussed during Toolkit’s MIG/MAG welding careers webinar.',
+		),
+		'kakuma-refugee-camp-gets-top-technology-training-welders-with-virtual-reality-simulators' => array(
+			'title'       => 'VR Welding Training in Kakuma | Toolkit',
+			'description' => 'See how Toolkit Foundation and GIZ introduced VR-supported MIG welding practice for refugee and host-community youth in Kakuma before workshop training.',
+		),
+		'empowering-kenyan-welding-instructors-a-journey-of-excellence-and-inclusion' => array(
+			'title'       => 'Welding Instructor Training in Kenya | Toolkit',
+			'description' => 'Toolkit, GIZ and Dig in Vision combined virtual-reality and workshop practice in a 40-hour training programme for Kenyan welding instructors.',
 		),
 		'toolkit-shines-with-tujiajiri-mentorship-program-for-solar-energy-trainees' => array(
 			'title'       => 'Solar Energy Trainee Mentorship | Toolkit',
