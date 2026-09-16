@@ -7,7 +7,7 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ## 2026-09-16 — Strengthen the welding evidence cluster
 **Area:** website SEO · welding content · internal linking
-**Environments:** local ✅ · deployment pending
+**Environments:** local ✅ · demo ✅ · production ✅
 **Commit(s):** this commit
 
 Current search comparisons still did not surface Toolkit for the tested
@@ -24,11 +24,14 @@ a clearer reciprocal topic cluster around the commercial page. Theme release
 
 **Verified by:** PHP syntax checks on `functions.php` and `single.php`; focused
 source assertions for both metadata records, all four evidence slugs and the
-welding-specific hub link; and `git diff --check`.
-**Follow-ups:** deploy demo-first, visually inspect representative welding and
-non-welding stories, then promote to production if the related-story scope and
-metadata are correct. Obtain approved duration, fee, entry and assessment facts,
-which current competing results expose and Toolkit still cannot state.
+welding-specific hub link; `git diff --check`; guarded demo-first and production
+deployments with separate rollback snapshots and byte-identity verification;
+four HTTP 200 smoke routes; and fresh sandboxed-browser visual review of desktop
+and mobile welding pages plus a non-welding control.
+**Follow-ups:** obtain approved duration, fee, entry and assessment facts, which
+current competing results expose and Toolkit still cannot state. Connect the
+organization-owned Google account to Site Kit/Search Console so query, indexing
+and position changes can be measured rather than inferred from public searches.
 
 ---
 

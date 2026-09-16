@@ -26,6 +26,14 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-welding-cluster-2026.09.16.3.sh` promotes the curated welding
+evidence cluster. It patches only `single.php` and `functions.php`, verifies the
+two priority story titles and descriptions, confirms the welding-specific
+related-reading treatment does not leak into a non-welding story, and requires
+all four smoke routes to return HTTP 200. The release was visually reviewed on
+demo at desktop and mobile sizes before the byte-identical payload was promoted
+to production.
+
 `releases/deploy-agentic-schema-2026.09.16.2.sh` applies the production-host-only
 robots rule that makes Yoast's schema aggregation endpoint discoverable without
 opening the rest of the WordPress REST API. It patches and uploads only
