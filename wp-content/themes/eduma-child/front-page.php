@@ -24,8 +24,20 @@ $slides = eduma_child_get_hero_slides();
 			 aria-roledescription="slide"
 			 aria-label="Slide <?php echo esc_attr( $slide_num ); ?> of <?php echo count( $slides ); ?>"
 			 aria-hidden="<?php echo $is_first ? 'false' : 'true'; ?>"
-			 data-slide="<?php echo esc_attr( $slide_num ); ?>"
-			 style="--hero-image: url('<?php echo esc_url( $slide['image'] ); ?>'); --hero-image-mobile: url('<?php echo esc_url( $slide['image_mobile'] ); ?>');">
+			 data-slide="<?php echo esc_attr( $slide_num ); ?>">
+			<picture class="hero-slider__media" aria-hidden="true">
+				<source media="(max-width: 767px)"
+					<?php echo $is_first ? 'srcset="' . esc_url( $slide['image_mobile'] ) . '"' : 'data-srcset="' . esc_url( $slide['image_mobile'] ) . '"'; ?>
+					width="<?php echo esc_attr( $slide['mobile_width'] ); ?>"
+					height="<?php echo esc_attr( $slide['mobile_height'] ); ?>">
+				<img class="hero-slider__image"
+					<?php echo $is_first ? 'src="' . esc_url( $slide['image'] ) . '"' : 'data-src="' . esc_url( $slide['image'] ) . '"'; ?>
+					width="<?php echo esc_attr( $slide['image_width'] ); ?>"
+					height="<?php echo esc_attr( $slide['image_height'] ); ?>"
+					alt=""
+					decoding="async"
+					<?php echo $is_first ? 'fetchpriority="high"' : ''; ?>>
+			</picture>
 			<div class="hero-slider__overlay"></div>
 			<div class="hero-slider__content">
 				<span class="hero-slider__eyebrow"><?php echo esc_html( $slide['eyebrow'] ); ?></span>

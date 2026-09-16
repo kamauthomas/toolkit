@@ -24,6 +24,39 @@
   var isPaused = false;
   var interval = null;
   var autoplayDelay = 6000;
+  var autoplayMedia = window.matchMedia('(min-width: 768px)');
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function prepareSlide(index, callback) {
+    var slide = slides[index];
+    var image = slide ? slide.querySelector('.hero-slider__image') : null;
+    var sources = slide ? slide.querySelectorAll('source[data-srcset]') : [];
+    var pendingSource = image ? image.getAttribute('data-src') : '';
+
+    for (var s = 0; s < sources.length; s++) {
+      sources[s].setAttribute('srcset', sources[s].getAttribute('data-srcset'));
+      sources[s].removeAttribute('data-srcset');
+    }
+
+    if (!image || !pendingSource) {
+      callback();
+      return;
+    }
+
+    var settled = false;
+    var finish = function () {
+      if (settled) return;
+      settled = true;
+      image.removeEventListener('load', finish);
+      image.removeEventListener('error', finish);
+      callback();
+    };
+    image.addEventListener('load', finish);
+    image.addEventListener('error', finish);
+    image.setAttribute('src', pendingSource);
+    image.removeAttribute('data-src');
+    if (image.complete) window.setTimeout(finish, 0);
+  }
 
   function updateSlide(index) {
     if (isAnimating) return;
@@ -56,7 +89,7 @@
     if (isAnimating) return;
     if (index < 0) index = slideCount - 1;
     if (index >= slideCount) index = 0;
-    updateSlide(index);
+    prepareSlide(index, function () { updateSlide(index); });
   }
 
   function nextSlide() {
@@ -69,7 +102,7 @@
 
   function startAutoplay() {
     if (interval) clearInterval(interval);
-    if (isPaused) return;
+    if (isPaused || !autoplayMedia.matches || reducedMotion.matches || slideCount < 2) return;
     interval = setInterval(nextSlide, autoplayDelay);
   }
 
@@ -139,6 +172,13 @@
   slider.addEventListener('focusout', function () {
     if (!isPaused) startAutoplay();
   });
+
+  var handleAutoplayPreference = function () {
+    if (autoplayMedia.matches && !reducedMotion.matches && !isPaused) startAutoplay();
+    else stopAutoplay();
+  };
+  if (autoplayMedia.addEventListener) autoplayMedia.addEventListener('change', handleAutoplayPreference);
+  if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', handleAutoplayPreference);
 
   /* Keyboard */
   slider.addEventListener('keydown', function (e) {
@@ -243,6 +283,7 @@
     });
   }
 
-  /* Start */
-  startAutoplay();
+  /* Wait until the initial document and LCP image have settled before autoplay. */
+  if (document.readyState === 'complete') startAutoplay();
+  else window.addEventListener('load', startAutoplay, { once: true });
 })();

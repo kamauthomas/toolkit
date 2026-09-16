@@ -2126,9 +2126,7 @@ body.home .elementor-element-81bf8ec .sina-banner-slider {
   justify-content: center;
   padding: 28px 24px;
   border-radius: var(--brand-border-radius, 6px);
-  background:
-    linear-gradient(rgba(247, 247, 247, 0.9), rgba(247, 247, 247, 0.9)),
-    url("/wp-content/uploads/2023/09/iskill-banner-04.jpg") center/cover no-repeat;
+  background: #f7f7f7;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
 }
 

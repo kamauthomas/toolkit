@@ -5,6 +5,33 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-16 — Remove the reproduced mobile hero LCP bottleneck
+**Area:** website SEO · homepage performance · Yoast review
+**Environments:** local ✅ · not deployed
+**Commit(s):** this commit
+
+Reproduced the homepage slowdown with a throttled mobile trace and found that
+carousel autoplay replaced the preloaded first hero with slide two before LCP
+settled. The homepage now renders an explicit responsive hero image, defers later
+slides until requested, disables mobile/reduced-motion autoplay, removes a 260 KB
+decorative background and unused legacy assets, and reduces the combined mobile
+hero files from 400,016 to 278,126 bytes without changing the visible copy.
+
+Documented the retained Yoast dashboard baseline and a priority recommendation
+queue. The current admin review could not be completed because the saved login
+had expired; no credential was entered or retrieved.
+
+**Verified by:** PHP lint on `functions.php`, `front-page.php` and
+`inc/hero-slides.php`; `node --check` on `hero-slider.js`; image-dimension and
+size checks; `git diff --check`; and a sandboxed mobile browser fixture that kept
+slide one active with zero fixture CLS, left slides two and three without `src`,
+and loaded the requested slide successfully through manual navigation.
+**Follow-ups:** deploy to demo, visually compare desktop/mobile, run a fresh
+public trace, then deploy to production if accepted; complete the current Yoast
+Site Representation and content-score review after a human signs into wp-admin.
+
+---
+
 ## 2026-09-15 — Connect welding evidence articles to the course hub
 **Area:** website SEO · internal linking · welding content
 **Environments:** local ✅ · not deployed

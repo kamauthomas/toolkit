@@ -24,7 +24,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.09.15.2';
+	return '2026.09.16.1';
 }
 
 function toolkit_is_demo_environment() {
@@ -1792,6 +1792,10 @@ add_action( 'wp_enqueue_scripts', function() {
 		'sina-widgets',
 		'inf-font-awesome',
 		'owl-carousel',
+		'thim-font-icon',
+		'flaticon',
+		'font-pe-icon-7',
+		'ionicons',
 		'bdpp-public-style',
 		'lvca-animate-styles',
 		'lvca-frontend-styles',
@@ -1907,7 +1911,7 @@ add_action( 'wp_footer', function() {
 		return;
 	}
 
-	foreach ( array( 'thim-ekit-frontend', 'thim-ekit-widgets', 'elementor-webpack-runtime', 'elementor-frontend-modules', 'elementor-frontend', 'swiper', 'wp-api-fetch', 'wp-url', 'wp-hooks', 'wp-i18n' ) as $handle ) {
+	foreach ( array( 'thim-ekit-frontend', 'thim-ekit-widgets', 'elementor-webpack-runtime', 'elementor-frontend-modules', 'elementor-frontend', 'swiper', 'wp-api-fetch', 'wp-url', 'wp-hooks', 'wp-i18n', 'jquery-owl', 'sina-tooltip', 'sina-widgets' ) as $handle ) {
 		wp_dequeue_script( $handle );
 	}
 }, 19 );
