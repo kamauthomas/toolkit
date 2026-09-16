@@ -7,8 +7,8 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ## 2026-09-16 — Keep course decisions and actions visible while scrolling
 **Area:** course UX · admissions conversion · mobile hero
-**Environments:** local ✅ · deployment pending
-**Commit(s):** this commit
+**Environments:** local ✅ · demo ✅ · production ✅
+**Commit(s):** f3b6395
 
 Added an in-flow course action dock after every course hero. It becomes sticky at
 the top only after users reach it, keeps the current course, primary fee or
@@ -20,19 +20,23 @@ The site sweep also found the homepage mobile video badge sharing that
 bottom-right control zone. Moved the badge to the left at the mobile breakpoint,
 without changing desktop composition or the deferred video-loading behaviour.
 
-**Verified by:** desktop/mobile screenshots of the homepage, course directory,
-course hero and price sections; browser geometry at the top and after scroll;
-PHP syntax; CSS/markup source assertions; and `git diff --check`.
-**Follow-ups:** deploy demo-first and verify the dock before and after its sticky
-threshold at desktop and mobile sizes; test the details anchor and Apply URL;
-then promote only if it does not obscure page content or support controls.
+**Verified by:** PHP syntax, CSS balance and focused source checks; guarded
+zero-fuzz demo-first deployment with separate demo/production rollbacks and
+byte-identity verification; five HTTP 200 smoke routes in each environment;
+desktop/mobile screenshots before and after the sticky threshold; browser
+geometry confirming a 68px mobile dock at `top: 0`, a clear details target and
+no overlap with WhatsApp/help; a valid course-specific Apply URL without
+submitting the form; and a final production mobile visual check.
+**Follow-ups:** measure Apply and enquiry interactions once analytics ownership
+is confirmed; shorten only course titles that still truncate ambiguously in the
+compact mobile row.
 
 ---
 
 ## 2026-09-16 — Distinguish solar and welding upskilling fees
 **Area:** website content · admissions pricing
-**Environments:** local ✅ · demo pending · production pending
-**Commit(s):** this commit
+**Environments:** local ✅ · demo ✅ · production ✅
+**Commit(s):** 93cea4d
 
 Clarified the approved brochure pricing before production promotion. Solar
 Upskilling is KES 30,684, while Advanced Welding Upskilling is KES 66,300
@@ -40,16 +44,19 @@ standard or KES 30,684 subsidised; these are now labelled separately from the
 full solar and welding programme prices on their legacy course hubs.
 
 **Verified by:** direct comparison with pages 9 and 12 of the approved 7 July
-2026 brochure; PHP syntax; focused catalogue assertions; and `git diff --check`.
-**Follow-ups:** deploy the correction to demo, visually confirm both labels, and
-only then promote the complete brochure-pricing release to production.
+2026 brochure; PHP syntax and focused catalogue assertions; guarded demo-first
+deployment; desktop/mobile visual confirmation of both labels; four priced hubs
+plus an unpriced RPL control; six HTTP 200 routes per environment; separate
+rollbacks; and byte-identical production verification.
+**Follow-ups:** Admissions still needs to confirm installment terms, subsidy
+eligibility, assessment charges and intake availability.
 
 ---
 
 ## 2026-09-16 — Publish approved brochure fees on legacy course hubs
 **Area:** website content · admissions pricing · SEO
-**Environments:** local ✅ · deployment pending
-**Commit(s):** this commit
+**Environments:** local ✅ · demo ✅ · production ✅
+**Commit(s):** a819514 · 93cea4d
 
 Confirmed the approved 7 July 2026 Toolkit brochure against the current 15-course
 catalogue, including visual checks of its price tables. The catalogue prices were
@@ -65,10 +72,12 @@ and pathways remain unchanged rather than receiving inferred prices.
 
 **Verified by:** source-PDF metadata and SHA-256; extracted and visually checked
 brochure price tables; direct comparison with all current catalogue fee fields;
-PHP syntax checks; focused source assertions; and `git diff --check`.
-**Follow-ups:** deploy demo-first, verify all four legacy hubs and an unpriced
-control page, visually review desktop/mobile, then promote the identical payload
-to production if accepted.
+PHP syntax and focused source assertions; guarded demo-first deployment;
+desktop/mobile visual review of welding and solar prices; four priced hubs plus
+an unpriced RPL control; six HTTP 200 routes per environment; separate rollback
+snapshots; and byte-identical production verification.
+**Follow-ups:** retain the approved brochure as the price source of truth and do
+not infer prices for services or pathways that it does not price.
 
 ---
 

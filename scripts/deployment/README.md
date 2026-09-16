@@ -26,6 +26,22 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-course-action-dock-2026.09.16.6.sh` promotes the in-flow sticky
+course action dock and the homepage mobile video-badge collision fix. It patches
+only the shared course template, its two stylesheets and `functions.php`, checks
+PHP and CSS structure, verifies four representative course routes plus the
+homepage, and uploads `functions.php` last. The release was visually reviewed
+before and after its sticky threshold on desktop and mobile demo, then promoted
+byte-identically to production without submitting an application.
+
+`releases/deploy-legacy-course-pricing-2026.09.16.5.sh` publishes the approved
+7 July 2026 brochure fees on four legacy course hubs while keeping RPL as an
+explicit unpriced control. It uses each environment's pinned live baseline,
+applies the pricing patch with zero fuzz, validates the distinct welding and
+solar upskilling amounts, checks six public routes and the release header, and
+requires byte identity. Welding and solar fee blocks were visually reviewed at
+desktop and mobile sizes on demo before production promotion.
+
 `releases/deploy-welding-cluster-2026.09.16.3.sh` promotes the curated welding
 evidence cluster. It patches only `single.php` and `functions.php`, verifies the
 two priority story titles and descriptions, confirms the welding-specific
