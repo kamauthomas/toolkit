@@ -19,6 +19,8 @@ Only `verified` fields may be published as factual course claims. `Pending` mean
 | Intake dates | January, April, July and October | pending | Admissions | Confirm next open intake and application deadline |
 | Standard fee | KES 176,276 | verified | Management | Approved 7 July 2026 admissions brochure; confirmed as the correct website fee on 16 September 2026 |
 | Subsidised fee | KES 120,962 | verified | Management | Approved 7 July 2026 admissions brochure; eligibility and availability still require Admissions confirmation |
+| Upskilling standard fee | KES 66,300 | verified | Management | Approved 7 July 2026 admissions brochure; applies to Advanced Welding Upskilling, not the full programme |
+| Upskilling subsidised fee | KES 30,684 | verified | Management | Approved 7 July 2026 admissions brochure; eligibility and availability still require Admissions confirmation |
 | Included costs | not supplied | pending | Admissions + Finance | List tuition, materials, PPE, assessment and attachment costs |
 | Entry requirement | KCPE or KCSE certificate | pending | Admissions | Confirm minimum level and required documents |
 | Qualification awarded | Advanced Welding Skills Certificate with VR | pending | Compliance + Welding | Confirm exact award wording and issuing body |

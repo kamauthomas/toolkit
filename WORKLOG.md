@@ -5,6 +5,23 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-16 — Distinguish solar and welding upskilling fees
+**Area:** website content · admissions pricing
+**Environments:** local ✅ · demo pending · production pending
+**Commit(s):** this commit
+
+Clarified the approved brochure pricing before production promotion. Solar
+Upskilling is KES 30,684, while Advanced Welding Upskilling is KES 66,300
+standard or KES 30,684 subsidised; these are now labelled separately from the
+full solar and welding programme prices on their legacy course hubs.
+
+**Verified by:** direct comparison with pages 9 and 12 of the approved 7 July
+2026 brochure; PHP syntax; focused catalogue assertions; and `git diff --check`.
+**Follow-ups:** deploy the correction to demo, visually confirm both labels, and
+only then promote the complete brochure-pricing release to production.
+
+---
+
 ## 2026-09-16 — Publish approved brochure fees on legacy course hubs
 **Area:** website content · admissions pricing · SEO
 **Environments:** local ✅ · deployment pending
