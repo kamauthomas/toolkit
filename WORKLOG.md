@@ -7,18 +7,20 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ## 2026-09-21 — Remove four former staff profiles from About Us
 **Area:** website content · staff directory
-**Environments:** local ✅ · demo/production pending
-**Commit(s):** this commit
+**Environments:** local ✅ · demo ✅ · production ✅
+**Commit(s):** 34546d8
 
 Removed the About Us team cards, portrait references, roles and biographies for
 Beatrice Mutinda, Esther Liberatta, Gladwell Mumbi and Lucy Wanjiru. The source
 portrait files remain packaged for safe rollback but are no longer requested or
 displayed by the page.
 
-**Verified by:** PHP syntax checks and focused source assertions; hosted
-environment verification pending the required demo-first release.
-**Follow-ups:** deploy to demo, verify the public About Us page, then promote the
-same payload to production and update this entry with the release evidence.
+**Verified by:** PHP syntax and focused source assertions; guarded zero-fuzz
+demo-first deployment; HTTP 200 checks of `/about-toolkit-africa/` in both
+environments; absence checks for all four names and portrait references;
+retained-profile controls; release-header `2026.09.21.1`; separate demo and
+production rollbacks; and byte-identical remote-file verification.
+**Follow-ups:** none.
 
 ---
 
