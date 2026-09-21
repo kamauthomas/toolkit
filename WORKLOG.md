@@ -5,6 +5,23 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-21 — Remove four former staff profiles from About Us
+**Area:** website content · staff directory
+**Environments:** local ✅ · demo/production pending
+**Commit(s):** this commit
+
+Removed the About Us team cards, portrait references, roles and biographies for
+Beatrice Mutinda, Esther Liberatta, Gladwell Mumbi and Lucy Wanjiru. The source
+portrait files remain packaged for safe rollback but are no longer requested or
+displayed by the page.
+
+**Verified by:** PHP syntax checks and focused source assertions; hosted
+environment verification pending the required demo-first release.
+**Follow-ups:** deploy to demo, verify the public About Us page, then promote the
+same payload to production and update this entry with the release evidence.
+
+---
+
 ## 2026-09-16 — Keep course decisions and actions visible while scrolling
 **Area:** course UX · admissions conversion · mobile hero
 **Environments:** local ✅ · demo ✅ · production ✅

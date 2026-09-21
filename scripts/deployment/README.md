@@ -26,6 +26,12 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-about-team-cleanup-2026.09.21.1.sh` removes four requested
+staff cards from the About Us team grid. It patches the fetched live template
+and release file with zero fuzz, activates `functions.php` last, requires byte
+identity, and verifies that the four names and portrait references are absent
+while retained team members still render. Run demo first and production second.
+
 `releases/deploy-course-action-dock-2026.09.16.6.sh` promotes the in-flow sticky
 course action dock and the homepage mobile video-badge collision fix. It patches
 only the shared course template, its two stylesheets and `functions.php`, checks

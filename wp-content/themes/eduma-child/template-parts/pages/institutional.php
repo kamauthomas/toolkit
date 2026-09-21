@@ -89,16 +89,12 @@ $team = array(
 	array( 'name' => 'Daniel Omondi', 'role' => 'Head of Welding', 'image' => 'daniel-omondi.jpg', 'bio' => 'Daniel brings mechanical-engineering and welding experience to the leadership of Toolkit’s practical welding programmes.' ),
 	array( 'name' => 'Silvester Kibet', 'role' => 'Job Linkage Officer', 'image' => 'silvester-kibet.jpg', 'bio' => 'Silvester supports learners as they prepare for and connect with employment opportunities.' ),
 	array( 'name' => 'Muthomi Murage', 'role' => 'Job Linkage Officer', 'image' => 'muthomi-murage.jpg', 'bio' => 'Muthomi supports digital technology and learner pathways into work.' ),
-	array( 'name' => 'Beatrice Mutinda', 'role' => 'Job Linkage Officer', 'image' => 'beatrice-mutinda.jpg', 'bio' => 'Beatrice brings an ICT technical-training background to learner and job-linkage support.' ),
 	array( 'name' => 'Michael Ndwiga', 'role' => 'Trainer', 'image' => 'michael-ndwiga.jpg', 'bio' => 'Michael serves as a welding instructor within Toolkit’s practical training team.' ),
 	array( 'name' => 'Josephine Kemunto', 'role' => 'Workshop Assistant', 'image' => 'josephine-kemunto.jpg', 'bio' => 'Josephine supports learners and trainers in the day-to-day operation of Toolkit workshops.' ),
 	array( 'name' => 'Robert Chemitei', 'role' => 'Trainer', 'image' => 'robert-chemitei.jpg', 'bio' => 'Robert is an ICT practitioner and trainer who supports practical technology learning.' ),
-	array( 'name' => 'Esther Liberatta', 'role' => 'Trainer', 'image' => 'esther-liberatta.jpg', 'bio' => 'Esther teaches entrepreneurship and helps learners develop practical enterprise skills.' ),
 	array( 'name' => 'Doreen Kiriinya', 'role' => 'Accountant', 'image' => 'doreen-kiriinya.jpg', 'bio' => 'Doreen supports Toolkit’s financial operations and programme accountability.' ),
 	array( 'name' => 'Phylis Kibet', 'role' => 'Logistics Officer', 'image' => 'phylis-kibet.jpg', 'bio' => 'Phylis coordinates transport and logistics that support Toolkit activities.' ),
-	array( 'name' => 'Gladwell Mumbi', 'role' => 'Communication Associate', 'image' => 'gladwell-mumbi.jpg', 'bio' => 'Gladwell supports Toolkit’s communication, marketing and engagement work.' ),
 	array( 'name' => 'Lucy Muthoni', 'role' => 'Customer Service Associate', 'image' => 'lucy-muthoni.jpg', 'bio' => 'Lucy supports front-desk services and assists learners, visitors and customers.' ),
-	array( 'name' => 'Lucy Wanjiru', 'role' => 'Customer Service Associate', 'image' => 'lucy-wanjiru.jpg', 'bio' => 'Lucy supports front-desk services, customer care and learner enquiries.' ),
 );
 ?>
 <main id="main-content" class="toolkit-page toolkit-institutional-page">
