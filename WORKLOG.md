@@ -7,7 +7,7 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ## 2026-09-22 — Add the verified Toolkit location map to Contact
 **Area:** website content · contact page · visitor directions
-**Environments:** local ✅ · not deployed
+**Environments:** local ✅ · demo ✅ · production ✅
 **Commit(s):** 48a946b
 
 Replaced the broad place-name directions link with the established Toolkit map
@@ -17,10 +17,11 @@ No. 7219 Karen-Kikuyu Highway location. The same centre point now anchors the
 disabled-by-default Reception geofence configuration.
 
 **Verified by:** matching the indexed Toolkit contact address to the organization
-map listing, PHP syntax, theme source assertions and reception regression tests.
-**Follow-ups:** deploy to demo, visually verify the pin and responsive embed,
-then physically test the 100 m reception boundary before enabling automatic
-checkout or promoting either change to production.
+map listing, PHP syntax and theme source assertions; guarded demo-first rollout;
+HTTP 200 and release-header checks; rendered address, exact coordinate and embed
+markers; separate demo/production rollbacks; and byte-identical remote files.
+**Follow-ups:** physically test the Reception 100 m boundary before enabling
+automatic checkout; the public map itself is live in both environments.
 
 ---
 

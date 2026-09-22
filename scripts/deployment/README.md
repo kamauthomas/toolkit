@@ -26,6 +26,18 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-contact-map-2026.09.22.1.sh` publishes the verified Toolkit
+map pin and Thogoto address on the Contact page. It patches the fetched live
+Contact template and release file with zero fuzz, activates `functions.php`
+last, requires byte identity, and verifies the rendered address, coordinate,
+embed, route and release header. Run demo first and production second.
+
+`reception/deploy-reception-2026.09.22.1.sh` publishes retained QR-draft
+management, responsive staff/settings screens and privacy-minimised location
+checkout metadata. It requires the last reception release as its remote
+baseline, applies the migration, verifies every uploaded byte and keeps the
+geofence disabled until physical boundary acceptance.
+
 `releases/deploy-about-team-cleanup-2026.09.21.1.sh` removes four requested
 staff cards from the About Us team grid. It patches the fetched live template
 and release file with zero fuzz, activates `functions.php` last, requires byte
