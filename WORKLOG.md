@@ -8,7 +8,7 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 ## 2026-09-22 — Add the verified Toolkit location map to Contact
 **Area:** website content · contact page · visitor directions
 **Environments:** local ✅ · not deployed
-**Commit(s):** pending
+**Commit(s):** 48a946b
 
 Replaced the broad place-name directions link with the established Toolkit map
 pin at `-1.2704916, 36.6644851`, added a responsive lazy-loaded Google map to
