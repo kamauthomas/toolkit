@@ -26,6 +26,12 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-toolkit-in-brief-style-2026.09.22.2.sh` restores the responsive
+institutional styling on the nested Toolkit in Brief page. It applies a zero-fuzz
+one-file patch, activates the cache-busting release, requires byte identity and
+verifies the stylesheet, modern-surface class, page sections, release header and
+parent About route. Run demo first and production second.
+
 `releases/deploy-contact-map-2026.09.22.1.sh` publishes the verified Toolkit
 map pin and Thogoto address on the Contact page. It patches the fetched live
 Contact template and release file with zero fuzz, activates `functions.php`

@@ -7,7 +7,7 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ## 2026-09-22 — Restore Toolkit in Brief page styling
 **Area:** website UI · institutional pages · regression repair
-**Environments:** local ✅ · not deployed
+**Environments:** local ✅ · demo ✅ · production ✅
 **Commit(s):** this commit
 
 Added the nested Toolkit in Brief page to every theme-owned page allowlist so
@@ -15,9 +15,12 @@ its institutional template receives the same responsive stylesheet, modern
 surface treatment and plugin cleanup as the working About page. Bumped the theme
 release to invalidate cached unstyled output.
 
-**Verified by:** PHP syntax and focused allowlist/release assertions.
-**Follow-ups:** deploy demo first, compare desktop/mobile rendering with About,
-then promote the same one-file payload to production.
+**Verified by:** PHP syntax and focused allowlist/release assertions; guarded
+demo-first deployment; HTTP 200, versioned stylesheet, modern-surface class and
+parent About controls; byte-identical remote files; desktop and 390 px mobile
+Firefox screenshots in both environments; and LiteSpeed cache hit checks.
+**Follow-ups:** centralize theme-owned page registration before expanding page
+or story management through Toolkit Control.
 
 ---
 
