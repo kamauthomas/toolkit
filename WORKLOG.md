@@ -5,6 +5,22 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-22 — Restore Toolkit in Brief page styling
+**Area:** website UI · institutional pages · regression repair
+**Environments:** local ✅ · not deployed
+**Commit(s):** this commit
+
+Added the nested Toolkit in Brief page to every theme-owned page allowlist so
+its institutional template receives the same responsive stylesheet, modern
+surface treatment and plugin cleanup as the working About page. Bumped the theme
+release to invalidate cached unstyled output.
+
+**Verified by:** PHP syntax and focused allowlist/release assertions.
+**Follow-ups:** deploy demo first, compare desktop/mobile rendering with About,
+then promote the same one-file payload to production.
+
+---
+
 ## 2026-09-22 — Add the verified Toolkit location map to Contact
 **Area:** website content · contact page · visitor directions
 **Environments:** local ✅ · demo ✅ · production ✅
