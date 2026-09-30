@@ -5,6 +5,23 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-30 — Produce the QR change report PDF
+**Area:** documentation · communications handover
+**Environments:** local artifact only; no website deployment
+**Commit(s):** this commit
+
+Produced a two-page A4 PDF covering the application QR, untracked Lnk.Bio QR,
+Toolkit Control additions, and transition from the legacy Canva-hosted socials
+entry point. Includes both scannable QR codes, download links, deployment checks
+and the distinction between new artwork and previously printed legacy codes.
+The Canva background is based on the project owner's description.
+
+**Verified by:** two-page PDF metadata/text extraction; visual review of both
+pages; independent decoding of both QR codes from the rendered PDF.
+**Follow-ups:** hand over the PDF for communications use; no deployment needed.
+
+---
+
 ## 2026-09-30 — Add an untracked Toolkit Lnk.Bio QR
 **Area:** QR assets · Toolkit Control
 **Environments:** local ✅ · demo ✅ · production ✅
