@@ -1,0 +1,84 @@
+diff --git a/wp-content/themes/eduma-child/assets/js/toolkit-metrics.js b/wp-content/themes/eduma-child/assets/js/toolkit-metrics.js
+index 54d475e..77cd75a 100644
+--- a/wp-content/themes/eduma-child/assets/js/toolkit-metrics.js
++++ b/wp-content/themes/eduma-child/assets/js/toolkit-metrics.js
+@@ -17,6 +17,21 @@
+     }
+   }
+ 
++  // Keep QR arrivals separate from page views: a visitor may have opened the form earlier.
++  var arrival = new URLSearchParams(window.location.search);
++  if (path === '/apply/' && arrival.get('utm_source') === 'application_qr' && arrival.get('utm_medium') === 'qr') {
++    var qrKey = 'toolkit-application-qr';
++    try {
++      if (!sessionStorage.getItem(qrKey)) {
++        send('interaction', 1, 'application_qr_scan');
++        sessionStorage.setItem(qrKey, '1');
++      }
++    } catch (ignore) {
++      // Restricted storage must not prevent the form or arrival metric from working.
++      send('interaction', 1, 'application_qr_scan');
++    }
++  }
++
+   var viewKey = 'toolkit-view:' + path;
+   if (!sessionStorage.getItem(viewKey)) {
+     send('page_view', 1);
+diff --git a/wp-content/themes/eduma-child/functions.php b/wp-content/themes/eduma-child/functions.php
+index bbcbffc..d02e923 100644
+--- a/wp-content/themes/eduma-child/functions.php
++++ b/wp-content/themes/eduma-child/functions.php
+@@ -24,7 +24,7 @@ function toolkit_editorial_story_preview() {
+  * URLs and triggers one server-side object/page-cache purge per environment.
+  */
+ function toolkit_theme_release() {
+-	return '2026.09.22.2';
++	return '2026.09.30.1';
+ }
+ 
+ function toolkit_is_demo_environment() {
+diff --git a/wp-content/themes/eduma-child/inc/site-metrics.php b/wp-content/themes/eduma-child/inc/site-metrics.php
+index 20bbbc4..b1e32ae 100644
+--- a/wp-content/themes/eduma-child/inc/site-metrics.php
++++ b/wp-content/themes/eduma-child/inc/site-metrics.php
+@@ -165,6 +165,18 @@ function toolkit_metrics_summary( $days = 30 ) {
+ 	return array( 'since' => $since, 'rows' => $rows ?: array() );
+ }
+ 
++/** QR-link openings use the same daily aggregate storage as other interactions. */
++function toolkit_application_qr_scans( $days = 30 ) {
++	global $wpdb;
++	toolkit_metrics_install_storage();
++	$table = toolkit_metrics_table_name();
++	$since = $days ? gmdate( 'Y-m-d', strtotime( '-' . max( 0, $days - 1 ) . ' days' ) ) : '1970-01-01';
++	return (int) $wpdb->get_var( $wpdb->prepare(
++		"SELECT COALESCE(SUM(metric_count),0) FROM {$table} WHERE path=%s AND event=%s AND metric_date >= %s",
++		'/apply/', 'interaction:application_qr_scan', $since
++	) );
++}
++
+ function toolkit_dashboard_counts() {
+ 	global $wpdb;
+ 	$app_table = function_exists( 'toolkit_application_table_name' ) ? toolkit_application_table_name() : '';
+@@ -193,8 +205,13 @@ function toolkit_render_metrics_page() {
+ 	printf( '<a href="%s"><span>New enquiries</span><strong>%s</strong><small>Open visitor requests</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-enquiries' ) ), number_format_i18n( $counts['enquiries'] ) );
+ 	printf( '<a href="%s"><span>Restricted reports</span><strong>%s</strong><small>New speak-up items</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-speak-up' ) ), number_format_i18n( $counts['speak_up'] ) );
+ 	printf( '<a href="%s"><span>30-day page views</span><strong>%s</strong><small>Aggregate first-party metric</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-analytics' ) ), number_format_i18n( $views ) );
++	printf( '<a href="%s"><span>Application QR scans</span><strong>%s</strong><small>QR-link openings in 30 days</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-analytics' ) ), number_format_i18n( toolkit_application_qr_scans( 30 ) ) );
++	printf( '<a href="%s"><span>All-time application QR scans</span><strong>%s</strong><small>Recorded QR-link openings</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-analytics&range=all' ) ), number_format_i18n( toolkit_application_qr_scans( 0 ) ) );
+ 	printf( '<a href="%s"><span>Top path</span><strong class="toolkit-admin__path">%s</strong><small>Most viewed in 30 days</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-analytics' ) ), esc_html( $top ) );
+ 	echo '</section><section class="toolkit-admin__grid">';
++	$qr_image = get_stylesheet_directory_uri() . '/assets/images/application-qr.png';
++	$qr_url   = 'https://toolkitafrica.ac.ke/apply/?utm_source=application_qr&utm_medium=qr&utm_campaign=admissions';
++	echo '<section class="toolkit-admin__panel"><h2>Application QR code</h2><img src="' . esc_url( $qr_image ) . '" alt="QR code for the Toolkit application form" width="220" height="220"><p><a class="button" href="' . esc_url( $qr_image ) . '" download="toolkit-application-qr.png">Download QR PNG</a> <a class="button" href="' . esc_url( get_stylesheet_directory_uri() . '/assets/images/application-qr.svg' ) . '" download="toolkit-application-qr.svg">Download print SVG</a></p><p>Opens the <a href="' . esc_url( $qr_url ) . '">live Toolkit application form</a>. The QR image always points to production.</p><p>Counts represent tagged form openings, once per browser session. Refreshes in the same session are excluded when browser storage is available. Do Not Track and blocked analytics are excluded; scans that do not open the page cannot be measured.</p></section>';
+ 	echo '<form class="toolkit-admin__panel" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="toolkit_save_controls">';
+ 	wp_nonce_field( 'toolkit_save_controls' );
+ 	echo '<div class="toolkit-admin__panel-heading"><div><small>Controlled rollout</small><h2>Release controls</h2></div><span class="toolkit-pill">' . esc_html( toolkit_theme_release() ) . '</span></div><p>Constants in <code>wp-config.php</code> take priority over these settings.</p>';
+@@ -225,6 +242,7 @@ function toolkit_render_analytics_page() {
+ 	echo '</form><section class="toolkit-admin__stats">';
+ 	printf( '<span class="toolkit-admin__stat"><span>Page views</span><strong>%s</strong><small>Selected period</small></span>', number_format_i18n( $views ) );
+ 	printf( '<span class="toolkit-admin__stat"><span>Interactions</span><strong>%s</strong><small>Actions and outbound clicks</small></span>', number_format_i18n( $actions ) );
++	printf( '<span class="toolkit-admin__stat"><span>Application QR scans</span><strong>%s</strong><small>QR-link openings in selected period</small></span>', number_format_i18n( toolkit_application_qr_scans( $days ) ) );
+ 	printf( '<span class="toolkit-admin__stat"><span>Tracked paths</span><strong>%s</strong><small>Distinct site destinations</small></span>', number_format_i18n( count( $summary['rows'] ) ) );
+ 	printf( '<span class="toolkit-admin__stat"><span>Retention</span><strong>All time</strong><small>No automatic aggregate deletion</small></span>' );
+ 	echo '</section><section class="toolkit-admin__panel"><div class="toolkit-admin__panel-heading"><div><small>Page-level detail</small><h2>Content and journey performance</h2></div><span class="toolkit-pill">Since ' . esc_html( $summary['since'] ) . '</span></div><div class="toolkit-admin__table-wrap"><table class="widefat striped toolkit-admin__table"><thead><tr><th>Page</th><th>Views</th><th>Interactions</th><th>Avg. engaged</th><th>Max scroll</th><th>Avg. load</th></tr></thead><tbody>';

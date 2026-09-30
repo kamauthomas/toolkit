@@ -17,6 +17,21 @@
     }
   }
 
+  // Keep QR arrivals separate from page views: a visitor may have opened the form earlier.
+  var arrival = new URLSearchParams(window.location.search);
+  if (path === '/apply/' && arrival.get('utm_source') === 'application_qr' && arrival.get('utm_medium') === 'qr') {
+    var qrKey = 'toolkit-application-qr';
+    try {
+      if (!sessionStorage.getItem(qrKey)) {
+        send('interaction', 1, 'application_qr_scan');
+        sessionStorage.setItem(qrKey, '1');
+      }
+    } catch (ignore) {
+      // Restricted storage must not prevent the form or arrival metric from working.
+      send('interaction', 1, 'application_qr_scan');
+    }
+  }
+
   var viewKey = 'toolkit-view:' + path;
   if (!sessionStorage.getItem(viewKey)) {
     send('page_view', 1);

@@ -26,6 +26,11 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-application-qr-2026.09.30.1.sh` applies a zero-fuzz patch to
+fetched live metrics/release files, uploads the QR PNG/SVG, preserves rollback
+copies, verifies byte identity and public form/asset routes, and activates
+`functions.php` last. Run demo first, verify collection there, then production.
+
 `releases/deploy-toolkit-in-brief-style-2026.09.22.2.sh` restores the responsive
 institutional styling on the nested Toolkit in Brief page. It applies a zero-fuzz
 one-file patch, activates the cache-busting release, requires byte identity and

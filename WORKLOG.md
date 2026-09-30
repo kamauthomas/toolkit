@@ -5,6 +5,29 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-30 — Add the live application QR and scan counters
+**Area:** admissions · QR assets · Toolkit Control analytics
+**Environments:** local ✅ · demo ✅ · production ✅
+**Commit(s):** this commit
+
+Created printable PNG/SVG QR codes for the verified live custom Toolkit form at
+`/apply/`, tagged for admissions QR arrivals. Added 30-day/all-time QR counters,
+downloads in Toolkit Control, and a selected-period counter in Site analytics.
+The existing admissions/Mzizi integration is unchanged. Counts are browser-
+reported tagged openings, once per session, with Do Not Track respected.
+
+**Verified by:** live homepage/application markup; PHP/JS/shell syntax; focused
+QR attribution, refresh deduplication, prior-visit and Do Not Track checks;
+independent QR decoding at 980/220 px; local dashboard/analytics render checks;
+demo collector 204 and originless 403; demo-first release `2026.09.30.1`;
+byte-identical remote files/assets, bare and uncached Apply HTTP 200, release
+headers and public JavaScript in both environments. One synthetic scan event
+was sent to demo only; no application was submitted.
+**Follow-ups:** staff should check the authenticated dashboard and scan a printed
+sample before mass printing. No production test scan events were injected.
+
+---
+
 ## 2026-09-22 — Restore Toolkit in Brief page styling
 **Area:** website UI · institutional pages · regression repair
 **Environments:** local ✅ · demo ✅ · production ✅

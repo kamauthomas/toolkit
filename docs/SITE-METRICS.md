@@ -16,11 +16,11 @@ It does not store raw IP addresses, cookies, names, email addresses, full referr
 
 ## Dashboard
 
-Administrators can open **Tools > Toolkit Metrics** in WordPress. The dashboard summarizes the previous 30 days by page. Raw aggregates are retained for 90 days.
+Administrators can open **Toolkit Control > Site analytics** in WordPress. The dashboard supports 30/90/365-day and all-time windows. Daily aggregates are retained indefinitely. Application QR counters and downloads are described in [APPLICATION-QR.md](APPLICATION-QR.md).
 
 ## Operations
 
-Metrics are enabled whenever the redesign switch is enabled. The collection endpoint is `/wp-json/toolkit/v1/metrics`. Data is stored in the `toolkit_site_metrics` WordPress option, allowing it to move with the database backup.
+Metrics are enabled whenever the redesign switch is enabled. The collection endpoint is `/wp-json/toolkit/v1/metrics`. Data is stored in the WordPress `toolkit_metrics_daily` table (with the installation-specific prefix). Earlier option-based aggregates are migrated non-destructively.
 
 Before switching the main domain, confirm the redesign switch and REST endpoint on that host. The demo and main installations keep separate aggregates unless their databases are deliberately synchronized.
 
