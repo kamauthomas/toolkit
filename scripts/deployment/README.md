@@ -26,6 +26,10 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-link-bio-qr-2026.09.30.2.sh` adds the untracked Lnk.Bio QR
+PNG/SVG and its Toolkit Control download panel with an anchored patch. Run demo
+first and production second; the existing application collector is untouched.
+
 `releases/deploy-application-qr-2026.09.30.1.sh` applies a zero-fuzz patch to
 fetched live metrics/release files, uploads the QR PNG/SVG, preserves rollback
 copies, verifies byte identity and public form/asset routes, and activates

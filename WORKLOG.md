@@ -5,6 +5,25 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-09-30 — Add an untracked Toolkit Lnk.Bio QR
+**Area:** QR assets · Toolkit Control
+**Environments:** local ✅ · demo ✅ · production ✅
+**Commit(s):** this commit
+
+Created PNG/SVG QR codes encoding exactly `https://lnk.bio/The_Toolkit_Africa`,
+with no tracking parameters or Toolkit redirect. Added a separate preview and
+PNG/SVG downloads to Toolkit Control. Existing application scan metrics remain.
+
+**Verified by:** PHP/shell syntax; independent QR decoding at 888/220 px;
+local dashboard rendering; existing application tracking regression checks;
+demo-first release `2026.09.30.2`; byte-identical code/assets, QR downloads and
+bare/uncached Apply HTTP 200, correct release headers on demo and production.
+**Follow-ups:** check the dashboard and phone-scan a printed sample. Lnk.Bio
+returned Cloudflare HTTP 403 to the automated destination check; the encoded
+URL is exact, but the destination needs a normal browser check.
+
+---
+
 ## 2026-09-30 — Add the live application QR and scan counters
 **Area:** admissions · QR assets · Toolkit Control analytics
 **Environments:** local ✅ · demo ✅ · production ✅
