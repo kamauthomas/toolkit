@@ -2,13 +2,16 @@
 
 **Summary:** Applied the revised September 2026 Kikuyu Campus poster fees to the
 Toolkit course catalogue and legacy course pages, following source verification
-and demo-first deployment.
+and demo-first deployment. Also produced verified PNG/SVG QR assets for the
+supplied Canva link.
 
 | Task | Time spent | Status |
 |---|---|---|
 | Extract and visually verify all tuition and exam amounts; preserve source image and mapping record | Not separately logged | Completed |
 | Update programme/legacy fees, welding categories, exam-fee display, changed durations and source wording; test public rendering and pricing-off controls | Not separately logged | Completed |
 | Deploy demo, check desktop/mobile layouts and all pricing routes, then promote and verify production | Not separately logged | Completed |
+
+| Create PNG/SVG QR for the supplied Canva link and independently decode it | Not separately logged | Completed |
 
 **Challenges:** Transient cPanel request timeouts were retried. A browser
 verification approval review timed out; the permitted retry succeeded.
@@ -34,4 +37,5 @@ materials.
 addressed; 15 programme fee cards checked; 5 welding upskilling categories and
 5 separate exam rates published; 2 environment deployments; 46 route checks
 per environment (92 total); 8 demo desktop/mobile section renders reviewed;
-release 2026.10.01.1 verified in production.
+release 2026.10.01.1 verified in production; 2 additional Canva-link QR assets
+created and decoded locally.

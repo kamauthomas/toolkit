@@ -5,6 +5,20 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-10-01 — Create a QR for the supplied Canva link
+**Area:** communications · QR assets
+**Environments:** local downloadable assets; no website deployment requested
+**Commit(s):** this commit
+
+Created PNG and white-background print SVG QR codes for exactly
+`https://canva.link/hndn85fj1vl72os`. Added no tracking or redirect.
+
+**Verified by:** independent ZBar decoding of full-size and 220 px PNGs to the
+exact supplied URL.
+**Follow-ups:** none for asset creation; retain the white border in print layouts.
+
+---
+
 ## 2026-10-01 — Apply the revised September course fees
 **Area:** course catalogue · admissions pricing · website content
 **Environments:** local ✅ · demo ✅ · production ✅
