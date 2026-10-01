@@ -26,6 +26,13 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-revised-september-pricing-2026.10.01.1.sh` publishes the user-
+supplied revised September 2026 tuition and separate exam rates. It patches
+fetched live files with zero fuzz, preserves rollbacks, verifies byte identity,
+and checks 23 public routes in both bare and uncached forms. Run demo first,
+review desktop/mobile prices, then production. Source and mapping decisions are
+in `docs/pricing/REVISED-SEPTEMBER-2026.md`.
+
 `releases/deploy-link-bio-qr-2026.09.30.2.sh` adds the untracked Lnk.Bio QR
 PNG/SVG and its Toolkit Control download panel with an anchored patch. Run demo
 first and production second; the existing application collector is untouched.

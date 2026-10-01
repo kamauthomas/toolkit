@@ -1,5 +1,27 @@
 <?php
 
+/** Revised September 2026 poster: each welding upskilling category lasts one month. */
+function eduma_child_welding_upskilling_fees() {
+	return array(
+		'On-campus'                    => 'KES 55,017',
+		'Industry (Nairobi Metropolitan)' => 'KES 34,375',
+		'Industry (Upcountry)'         => 'KES 39,575',
+		'TVET (Nairobi Metropolitan)'  => 'KES 39,315',
+		'TVET (Upcountry)'             => 'KES 44,515',
+	);
+}
+
+/** Exam fees are listed separately; the applicable assessment is confirmed by Admissions. */
+function eduma_child_published_exam_fees() {
+	return array(
+		'Grade I'   => 'KES 9,950',
+		'Grade II'  => 'KES 8,050',
+		'Grade III' => 'KES 6,750',
+		'Solar T1'  => 'KES 7,050',
+		'Solar T2'  => 'KES 8,450',
+	);
+}
+
 function eduma_child_2026_course_catalog() {
 	$assets = get_stylesheet_directory_uri() . '/assets/images/courses/';
 	$graduation = get_stylesheet_directory_uri() . '/assets/images/graduation/';
@@ -8,43 +30,43 @@ function eduma_child_2026_course_catalog() {
 		'electrical-installation' => array(
 			'title' => 'Electrical Installation', 'short' => 'Build practical installation, wiring, safety, and testing skills for the electrical trade.',
 			'image' => $assets . 'electrical-installation.webp', 'icon' => 'fa-bolt', 'qualification' => 'Electrical Installation Skills Certificate', 'examining' => 'NITA Trade Test',
-			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 150,000 standard; KES 120,962 subsidised', 'intakes' => 'January, April, July and October',
+			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 120,962', 'intakes' => 'January, April, July and October',
 			'outcomes' => array( 'Electrical safety and tools', 'Domestic and commercial wiring', 'Installation testing', 'Industry attachment' ),
 		),
 		'solar-pv-installer' => array(
 			'title' => 'Solar PV Installer', 'short' => 'Build practical skills for safe solar photovoltaic system installation, testing, and maintenance.',
 			'image' => $assets . 'solar-pv-installer.webp', 'icon' => 'fa-solar-panel', 'qualification' => 'Solar PV Installer Skills Certificate', 'examining' => 'NITA Solar PV Assessment or Solar T1',
-			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 150,000 standard; KES 120,962 subsidised', 'intakes' => 'January, April, July and October',
+			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 120,962', 'intakes' => 'January, April, July and October',
 			'outcomes' => array( 'Solar PV system fundamentals', 'Safe installation practice', 'Testing and maintenance', 'Industry attachment' ),
 		),
 		'solar-electrician' => array(
 			'title' => 'Solar Electrician', 'short' => 'Develop electrical and renewable-energy skills for solar installations and related technical work.',
 			'image' => $assets . 'solar-electrician.webp', 'icon' => 'fa-bolt', 'qualification' => 'Solar Electrician Skills Certificate', 'examining' => 'NITA Wireman Grade III or Solar T1',
-			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 150,000 standard; KES 120,962 subsidised', 'intakes' => 'January, April, July and October',
+			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 120,962', 'intakes' => 'January, April, July and October',
 			'outcomes' => array( 'Electrical safety', 'Solar system wiring', 'Testing and fault finding', 'Industry attachment' ),
 		),
 		'solar-upskilling' => array(
 			'title' => 'Solar Upskilling', 'short' => 'A focused fast-track pathway for learners with prior electrical experience.',
 			'image' => $assets . 'solar-upskilling.webp', 'icon' => 'fa-tools', 'qualification' => 'Solar Upskilling Certificate', 'examining' => 'Toolkit or applicable NITA assessment',
-			'duration' => '10 days', 'entry' => 'Prior electrical experience', 'fees' => 'KES 30,684', 'intakes' => 'Monthly',
+			'duration' => '15 days', 'entry' => 'Prior electrical experience', 'fees' => 'KES 30,684', 'intakes' => 'Monthly',
 			'outcomes' => array( 'Solar system review', 'Installation practice', 'Testing and commissioning', 'Current industry practice' ),
 		),
 		'advanced-welding-vr' => array(
 			'title' => 'Advanced MIG/MAG Welding with VR', 'short' => 'Develop advanced MIG/MAG welding skills through workshop practice, simulation, and industry placement.',
 			'image' => $assets . 'advanced-welding-vr.webp', 'icon' => 'fa-fire', 'qualification' => 'Advanced Welding Skills Certificate with VR', 'examining' => 'KEBS, NITA or IIW',
-			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 176,276 standard; KES 120,962 subsidised', 'intakes' => 'January, April, July and October',
+			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'KCPE or KCSE certificate', 'fees' => 'KES 127,895', 'intakes' => 'January, April, July and October',
 			'outcomes' => array( 'Workshop safety', 'Advanced welding techniques', 'VR-supported practice', 'Quality control and industry attachment' ),
 		),
 		'advanced-welding-upskilling' => array(
 			'title' => 'Advanced Welding Upskilling with VR', 'short' => 'Advance existing welding skills through VR-supported practice and modern fabrication methods.',
 			'image' => $assets . 'advanced-welding-upskilling.webp', 'icon' => 'fa-vr-cardboard', 'qualification' => 'Advanced Welding Upskilling Certificate with VR', 'examining' => 'KEBS, NITA or International Institute of Welding (IIW)',
-			'duration' => '6 months: 3 months of on-site training and 3 months in industry', 'entry' => 'Prior welding training or relevant industry experience', 'fees' => 'KES 66,300 standard; KES 30,684 subsidised', 'intakes' => 'Monthly',
+			'duration' => '1 month', 'entry' => 'Prior welding training or relevant industry experience', 'fees' => 'KES 34,375 to KES 55,017, depending on category', 'fee_options' => eduma_child_welding_upskilling_fees(), 'intakes' => 'Monthly',
 			'outcomes' => array( 'Advanced welding control', 'VR-supported practice', 'Fabrication methods', 'Workshop progression' ),
 		),
 		'smart-agriculture' => array(
 			'title' => 'Smart Agriculture', 'short' => 'Learn climate-smart production methods and practical enterprise skills for resilient agriculture.',
 			'image' => $assets . 'smart-agriculture.webp', 'icon' => 'fa-seedling', 'qualification' => 'Climate Smart Agriculture Certificate', 'examining' => 'NITA',
-			'duration' => '6 months; specialist short courses run for 1 to 2 days', 'entry' => 'KCPE or KCSE certificate; short courses are open entry', 'fees' => 'KES 73,586 including examination; short courses from KES 4,000', 'intakes' => 'January, April, July and October; short courses monthly',
+			'duration' => '6 months; specialist short courses run for 1 to 2 days', 'entry' => 'KCPE or KCSE certificate; short courses are open entry', 'fees' => 'KES 73,568; short courses from KES 4,000', 'intakes' => 'January, April, July and October; short courses monthly',
 			'outcomes' => array( 'Climate-smart production', 'Resource-efficient farming', 'Farm enterprise skills', 'Applied field learning' ),
 		),
 		'entrepreneurship' => array(
@@ -59,12 +81,12 @@ function eduma_child_2026_course_catalog() {
 			'duration' => '2 weeks to 6 months', 'entry' => 'Open entry for most courses', 'fees' => 'KES 18,000 to KES 65,000, depending on course', 'intakes' => 'Monthly',
 			'outcomes' => array( 'Digital literacy', 'Productivity and online work', 'Cyber security foundations', 'AI and automation foundations' ),
 		),
-		'french-a1' => eduma_child_language_course( $graduation . 'deborah-img-20251028-wa0103-jpg.webp', 'French A1', 'Beginner', '3 months', 'Alliance Française', 'KES 35,000', 'French A1–A2 package: KES 65,000; A1–B1 package: KES 105,000' ),
-		'french-a2' => eduma_child_language_course( $graduation . 'jesse-kihanya-img-20251028-wa0094-jpg.webp', 'French A2', 'Elementary', '3 months', 'Alliance Française', 'KES 35,000', 'French A1–A2 package: KES 65,000; A1–B1 package: KES 105,000' ),
-		'french-b1' => eduma_child_language_course( $graduation . 'kmm-2071-jpg.webp', 'French B1', 'Intermediate', '4 months', 'Alliance Française', 'KES 45,000', 'French A1–B1 package: KES 105,000' ),
-		'german-a1' => eduma_child_language_course( $graduation . 'kmm-2122-jpg.webp', 'German A1', 'Beginner', '3 months', 'Goethe-Institut', 'KES 40,000', 'German A1–A2 package: KES 75,000; A1–B1 package: KES 120,000' ),
-		'german-a2' => eduma_child_language_course( $graduation . 'kmm-2134-jpg.webp', 'German A2', 'Elementary', '3 months', 'Goethe-Institut', 'KES 40,000', 'German A1–A2 package: KES 75,000; A1–B1 package: KES 120,000' ),
-		'german-b1' => eduma_child_language_course( $graduation . 'kmm-2136-jpg.webp', 'German B1', 'Intermediate', '4 months', 'Goethe-Institut', 'KES 50,000', 'German A1–B1 package: KES 120,000' ),
+		'french-a1' => eduma_child_language_course( $graduation . 'deborah-img-20251028-wa0103-jpg.webp', 'French A1', 'Beginner', '3 months', 'Alliance Française', 'KES 35,000 per level', '' ),
+		'french-a2' => eduma_child_language_course( $graduation . 'jesse-kihanya-img-20251028-wa0094-jpg.webp', 'French A2', 'Elementary', '3 months', 'Alliance Française', 'KES 35,000 per level', '' ),
+		'french-b1' => eduma_child_language_course( $graduation . 'kmm-2071-jpg.webp', 'French B1', 'Intermediate', '3 months', 'Alliance Française', 'KES 35,000 per level', '' ),
+		'german-a1' => eduma_child_language_course( $graduation . 'kmm-2122-jpg.webp', 'German A1', 'Beginner', '3 months', 'Goethe-Institut', 'KES 35,000 per level', '' ),
+		'german-a2' => eduma_child_language_course( $graduation . 'kmm-2134-jpg.webp', 'German A2', 'Elementary', '3 months', 'Goethe-Institut', 'KES 35,000 per level', '' ),
+		'german-b1' => eduma_child_language_course( $graduation . 'kmm-2136-jpg.webp', 'German B1', 'Intermediate', '3 months', 'Goethe-Institut', 'KES 35,000 per level', '' ),
 	);
 }
 
@@ -80,9 +102,9 @@ function eduma_child_language_course( $image, $title, $level, $duration, $examin
 function eduma_child_legacy_course_catalog() {
 	$assets = get_stylesheet_directory_uri() . '/assets/images/courses/';
 	return array(
-		'welding-and-fabrication' => array( 'title' => 'MIG/MAG Welding', 'short' => 'Learn practical MIG/MAG welding in Kikuyu through instructor-led workshop practice, VR-supported learning and weld-quality feedback.', 'seo_title' => 'MIG/MAG Welding Training in Kenya | The Toolkit for Skills and Innovation', 'seo_description' => 'Study practical MIG/MAG welding at The Toolkit for Skills and Innovation in Kikuyu, Kenya, through guided workshop training, VR-supported learning, and instructor feedback.', 'image' => $assets . 'welding.jpg', 'icon' => 'fa-fire', 'url' => home_url( '/our-ventures/construction-sector-skills/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions', 'qualification' => 'Practical MIG/MAG welding training', 'examining' => 'Confirmed for the selected pathway', 'entry' => 'Admissions will advise based on the selected level', 'fees' => 'KES 176,276 standard; KES 120,962 subsidised', 'pricing_note' => 'Advanced Welding Upskilling: KES 66,300 standard; KES 30,684 subsidised', 'brochure_pricing' => true, 'outcomes' => array( 'Workshop safety', 'MIG/MAG process setup', 'Weld technique and control', 'Quality-aware practical work' ) ),
-		'renewable-energy' => array( 'title' => 'Renewable Energy', 'seo_title' => 'Solar Installation Training in Kenya | Toolkit', 'seo_description' => 'Build practical solar installation foundations in Kikuyu, Kenya, including system principles, safe installation practice, testing and maintenance awareness.', 'short' => 'Build technical foundations for solar and emerging green-skills opportunities.', 'image' => $assets . 'solar.jpg', 'icon' => 'fa-solar-panel', 'url' => home_url( '/our-ventures/renewable-energy/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions', 'qualification' => 'Renewable energy skills training', 'examining' => 'Confirmed for the selected pathway', 'entry' => 'Admissions will advise based on the selected level', 'fees' => 'KES 150,000 standard; KES 120,962 subsidised', 'pricing_note' => 'Solar Upskilling: KES 30,684', 'brochure_pricing' => true, 'outcomes' => array( 'Solar energy fundamentals', 'Safe installation practice', 'System testing', 'Green-skills career awareness' ) ),
-		'organic-farming-skills' => array( 'title' => 'Organic Farming Skills', 'seo_title' => 'Organic Farming Training in Kenya | Toolkit', 'seo_description' => 'Learn practical organic farming in Kikuyu, Kenya, with applied training in soil care, crop planning, sustainable production and agricultural enterprise.', 'short' => 'Learn practical and sustainable approaches to agriculture and enterprise.', 'image' => $assets . 'experiences/organic-farm.jpg', 'icon' => 'fa-seedling', 'url' => home_url( '/our-ventures/organic-farming-skills/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions', 'qualification' => 'Practical organic farming skills training', 'examining' => 'Confirmed for the selected pathway', 'entry' => 'Contact admissions for current requirements', 'fees' => 'KES 73,586 including examination; short courses from KES 4,000', 'brochure_pricing' => true, 'outcomes' => array( 'Sustainable crop production', 'Soil and resource care', 'Farm planning', 'Agricultural enterprise skills' ) ),
+		'welding-and-fabrication' => array( 'title' => 'MIG/MAG Welding', 'short' => 'Learn practical MIG/MAG welding in Kikuyu through instructor-led workshop practice, VR-supported learning and weld-quality feedback.', 'seo_title' => 'MIG/MAG Welding Training in Kenya | The Toolkit for Skills and Innovation', 'seo_description' => 'Study practical MIG/MAG welding at The Toolkit for Skills and Innovation in Kikuyu, Kenya, through guided workshop training, VR-supported learning, and instructor feedback.', 'image' => $assets . 'welding.jpg', 'icon' => 'fa-fire', 'url' => home_url( '/our-ventures/construction-sector-skills/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions', 'qualification' => 'Practical MIG/MAG welding training', 'examining' => 'Confirmed for the selected pathway', 'entry' => 'Admissions will advise based on the selected level', 'fees' => 'KES 127,895', 'pricing_note' => 'Welding upskilling: KES 34,375 to KES 55,017; see delivery categories below.', 'fee_options' => eduma_child_welding_upskilling_fees(), 'brochure_pricing' => true, 'outcomes' => array( 'Workshop safety', 'MIG/MAG process setup', 'Weld technique and control', 'Quality-aware practical work' ) ),
+		'renewable-energy' => array( 'title' => 'Renewable Energy', 'seo_title' => 'Solar Installation Training in Kenya | Toolkit', 'seo_description' => 'Build practical solar installation foundations in Kikuyu, Kenya, including system principles, safe installation practice, testing and maintenance awareness.', 'short' => 'Build technical foundations for solar and emerging green-skills opportunities.', 'image' => $assets . 'solar.jpg', 'icon' => 'fa-solar-panel', 'url' => home_url( '/our-ventures/renewable-energy/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions', 'qualification' => 'Renewable energy skills training', 'examining' => 'Confirmed for the selected pathway', 'entry' => 'Admissions will advise based on the selected level', 'fees' => 'KES 120,962', 'pricing_note' => 'Solar upskilling: KES 30,684 for 15 days', 'brochure_pricing' => true, 'outcomes' => array( 'Solar energy fundamentals', 'Safe installation practice', 'System testing', 'Green-skills career awareness' ) ),
+		'organic-farming-skills' => array( 'title' => 'Organic Farming Skills', 'seo_title' => 'Organic Farming Training in Kenya | Toolkit', 'seo_description' => 'Learn practical organic farming in Kikuyu, Kenya, with applied training in soil care, crop planning, sustainable production and agricultural enterprise.', 'short' => 'Learn practical and sustainable approaches to agriculture and enterprise.', 'image' => $assets . 'experiences/organic-farm.jpg', 'icon' => 'fa-seedling', 'url' => home_url( '/our-ventures/organic-farming-skills/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions', 'qualification' => 'Practical organic farming skills training', 'examining' => 'Confirmed for the selected pathway', 'entry' => 'Contact admissions for current requirements', 'fees' => 'KES 73,568; short courses from KES 4,000', 'brochure_pricing' => true, 'outcomes' => array( 'Sustainable crop production', 'Soil and resource care', 'Farm planning', 'Agricultural enterprise skills' ) ),
 		'digital-skills-online-jobs' => array( 'title' => 'Digital Skills', 'short' => 'Strengthen practical digital capability for changing work and entrepreneurship.', 'image' => $assets . 'digital.jpg', 'icon' => 'fa-laptop-code', 'url' => home_url( '/our-ventures/access-online-jobs/' ), 'duration' => 'Contact admissions for the current schedule', 'intakes' => 'Confirmed by admissions', 'qualification' => 'Practical digital skills training', 'examining' => 'Confirmed for the selected pathway', 'entry' => 'Contact admissions for current requirements', 'fees' => 'KES 18,000 to KES 65,000, depending on course', 'brochure_pricing' => true, 'outcomes' => array( 'Digital literacy', 'Productivity tools', 'Online work readiness', 'Digital enterprise foundations' ) ),
 		'recognition-prior-learning' => array( 'title' => 'Recognition of Prior Learning', 'seo_title' => 'Recognition of Prior Learning Assessment Kenya | Toolkit', 'seo_description' => 'Explore a Recognition of Prior Learning pathway in Kenya for documenting existing trade skills, preparing evidence and progressing toward assessment.', 'short' => 'Turn existing skills and experience into recognised progression pathways.', 'image' => $assets . 'welding.jpg', 'icon' => 'fa-award', 'url' => home_url( '/our-ventures/construction-sector-skills/recognition-of-prior-learning-rpl/' ), 'duration' => 'Assessment-led pathway', 'intakes' => 'Confirmed by admissions', 'qualification' => 'Recognition of Prior Learning assessment', 'examining' => 'Confirmed for the selected trade', 'entry' => 'Relevant existing skills or work experience', 'outcomes' => array( 'Skills evidence preparation', 'Competency assessment', 'Gap identification', 'Progression guidance' ) ),
 		'consultancy-research' => array( 'title' => 'Consultancy and Research', 'seo_title' => 'Workforce Training Research and Consultancy Kenya | Toolkit', 'seo_description' => 'Partner with Toolkit in Kenya on workforce research, training-needs analysis, practical programme design, implementation support and learning reviews.', 'short' => 'Access practical support for workforce development, training, and research needs.', 'image' => $assets . 'entrepreneurship.jpg', 'icon' => 'fa-chart-line', 'url' => home_url( '/our-ventures/tti-consultancy-and-research/' ), 'duration' => 'Engagement-based', 'intakes' => 'Contact the Toolkit team', 'qualification' => 'Custom institutional engagement', 'examining' => 'Not applicable', 'entry' => 'Designed around the partner brief', 'outcomes' => array( 'Training needs analysis', 'Workforce programme design', 'Applied research', 'Implementation support' ) ),

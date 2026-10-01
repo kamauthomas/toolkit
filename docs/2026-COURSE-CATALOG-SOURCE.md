@@ -1,5 +1,7 @@
 # 2026 course catalogue and pricing source
 
+**Current pricing:** the [revised September 2026 poster](pricing/REVISED-SEPTEMBER-2026.md) supersedes the July brochure for tuition, exam fees and specified durations. The course structure below remains the existing catalogue.
+
 The website catalogue update is sourced from `docs/7th July 2026 The Toolkit brochure.pdf` (24 pages, dated 7 July 2026).
 
 ## Explicitly named pathways published separately

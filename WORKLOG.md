@@ -5,6 +5,33 @@ change itself. Format and rules: see `../AGENTS.md` §1.
 
 ---
 
+## 2026-10-01 — Apply the revised September course fees
+**Area:** course catalogue · admissions pricing · website content
+**Environments:** local ✅ · demo ✅ · production ✅
+**Commit(s):** this commit
+
+Transcribed and checked the user-supplied revised September 2026 Kikuyu Campus
+poster, then updated modern programmes and legacy hubs. Published the five
+welding upskilling categories and separate exam fees; corrected Smart
+Agriculture to KES 73,568, language levels to KES 35,000, and changed durations.
+Removed superseded July standard/subsidised and language-package rates.
+
+**Verified by:** two visual source checks; PHP syntax; source-based amount,
+category, duration and legacy mapping assertions; real-template rendering and
+pricing-off checks. Source image and transcription are retained in docs/pricing.
+Release `2026.10.01.1` deployed demo first, then production. Five patched files
+were verified byte-identically; 23 routes per environment passed in bare and
+uncached forms (46 checks each). Verified all 15 course cards, legacy hubs,
+welding categories, exam rates, current source labels, RPL remaining unpriced,
+Apply and llms controls, and release headers. Demo desktop/390 px mobile renders
+of welding, exams, French B1 and agriculture were checked with no horizontal
+overflow. Screenshots and public-page verification copies are in each rollback.
+No production application was submitted.
+**Follow-ups:** Admissions can use the retained source/transcription for normal
+fee-quotation review; no release work remains outstanding.
+
+---
+
 ## 2026-09-30 — Produce the QR change report PDF
 **Area:** documentation · communications handover
 **Environments:** local artifact only; no website deployment
