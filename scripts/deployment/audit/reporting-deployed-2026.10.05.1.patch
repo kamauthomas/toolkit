@@ -1,0 +1,379 @@
+--- a/app.py
++++ b/app.py
+@@ -476,6 +476,89 @@
+         return {}
+ 
+ 
++REPORT_ACTIVITY_METRICS = {
++    "meetings": ("meetings_held", "meetings_attended", "meetings_coordinated"),
++    "admissions": ("applications_processed", "interviews_scheduled"),
++    "marketing": ("leads_generated", "outreach_updates", "facebook_posts", "instagram_posts", "tiktok_videos"),
++    "leads_generated": ("leads_generated",),
++    "applications_processed": ("applications_processed",),
++    "interviews_scheduled": ("interviews_scheduled",),
++    "calls_made": ("calls_made",),
++}
++
++
++def report_filter_values():
++    date_from = clean_text(request.args.get("date_from"), 10)
++    date_to = clean_text(request.args.get("date_to"), 10)
++    department = clean_text(request.args.get("department"), 100)
++    status = clean_text(request.args.get("status"), 20)
++    employee_id = clean_text(request.args.get("employee_id"), 20)
++    activity = clean_text(request.args.get("activity"), 40)
++    if activity not in REPORT_ACTIVITY_METRICS:
++        activity = ""
++    if date_from and not parse_report_date(date_from):
++        date_from = ""
++    if date_to and not parse_report_date(date_to):
++        date_to = ""
++    if department not in DEPARTMENTS:
++        department = ""
++    if status not in ("submitted", "reviewed", "approved"):
++        status = ""
++    if not employee_id.isdigit():
++        employee_id = ""
++    return {
++        "date_from": date_from,
++        "date_to": date_to,
++        "department": department,
++        "status": status,
++        "employee_id": employee_id,
++        "activity": activity,
++    }
++
++
++def apply_report_filters(rows, filters):
++    filtered = []
++    for row in rows:
++        if filters["date_from"] and row["report_date"] < filters["date_from"]:
++            continue
++        if filters["date_to"] and row["report_date"] > filters["date_to"]:
++            continue
++        if filters["department"] and row["department"] != filters["department"]:
++            continue
++        if filters["status"] and row["status"] != filters["status"]:
++            continue
++        if filters["employee_id"] and str(row["user_id"]) != filters["employee_id"]:
++            continue
++        activity = filters.get("activity", "")
++        if activity and not any(metric_int(safe_metrics(row).get(key)) > 0 for key in REPORT_ACTIVITY_METRICS[activity]):
++            continue
++        filtered.append(row)
++    return filtered
++
++
++def visible_active_staff(db):
++    fields = "users.id, users.full_name, users.department, users.role"
++    conditions = "users.deleted_at IS NULL AND users.is_active = 1 AND " + hide_shadow_sql()
++    if g.user["role"] in EXECUTIVE_ROLES:
++        return db.execute(f"SELECT {fields} FROM users WHERE {conditions} ORDER BY users.full_name").fetchall()
++    if g.user["role"] == "admin":
++        return db.execute(
++            f"""SELECT DISTINCT {fields} FROM users
++                JOIN report_access ON report_access.employee_id = users.id
++                WHERE report_access.admin_id = ? AND {conditions} ORDER BY users.full_name""",
++            (g.user["id"],),
++        ).fetchall()
++    return db.execute(f"SELECT {fields} FROM users WHERE users.id = ? AND {conditions}", (g.user["id"],)).fetchall()
++
++
++def get_visible_staff_count(db):
++    return len(visible_active_staff(db))
++
++
++def dashboard_drilldown(filters, archived=0, **changes):
++    return url_for("dashboard", archived=archived, _anchor="reports", **{**filters, **changes})
++
++
+ def build_dashboard_insights(reports, staff_count=0):
+     status_counts = {"submitted": 0, "reviewed": 0, "approved": 0}
+     department_counts = {}
+@@ -559,27 +642,9 @@
+     }
+ 
+ 
+-def get_visible_staff_count(db):
+-    if g.user["role"] in EXECUTIVE_ROLES:
+-        row = db.execute("SELECT COUNT(*) AS c FROM users WHERE deleted_at IS NULL AND is_active = 1 AND " + hide_shadow_sql()).fetchone()
+-        return row["c"] if row else 0
+-    if g.user["role"] == "admin":
+-        row = db.execute(
+-            """
+-            SELECT COUNT(DISTINCT users.id) AS c
+-            FROM users
+-            JOIN report_access ON report_access.employee_id = users.id
+-            WHERE report_access.admin_id = ? AND users.deleted_at IS NULL AND users.is_active = 1
+-            """,
+-            (g.user["id"],),
+-        ).fetchone()
+-        return row["c"] if row else 0
+-    return 1
+-
+-
+ def expansion_modules(insights=None):
+     insights = insights or {}
+-    return [
++    cards = [
+         {
+             "title": "Admissions",
+             "summary": "Verification queue, officer ownership, intake status, and admissions trend visibility.",
+@@ -616,6 +681,11 @@
+             "status": "Repository pending",
+         },
+     ]
++
++    destinations = {"Admissions": {"activity": "applications_processed"}, "Monthly Intake": {"activity": "admissions"}, "Marketing Reports": {"activity": "marketing"}, "Incentives": {"status": "approved"}, "Minutes": {"activity": "meetings"}}
++    for card in cards:
++        card["url"] = dashboard_drilldown(report_filter_values(), **destinations[card["title"]])
++    return cards
+ 
+ 
+ def create_notification(user_id, kind, title, body="", link="", actor_id=None):
+@@ -1877,6 +1947,8 @@
+             """,
+             (show_archived,),
+         ).fetchall()
++    filters = report_filter_values()
++    reports = apply_report_filters(reports, filters)
+     # Stats cover every role-scoped report (no truncation), so "Total Reports"
+     # and every derived rate are accurate; the rendered list is capped for size.
+     insights = build_dashboard_insights(reports, get_visible_staff_count(db))
+@@ -1887,7 +1959,15 @@
+         show_archived=bool(show_archived),
+         insights=insights,
+         modules=modules,
++        filters=filters,
++        drilldown=lambda **changes: dashboard_drilldown(filters, show_archived, **changes),
+     )
++
++
++@app.route("/staff")
++@login_required
++def active_staff():
++    return render_template("active_staff.html", staff=visible_active_staff(get_db()))
+ 
+ 
+ @app.route("/modules")
+@@ -1923,7 +2003,7 @@
+             """
+         ).fetchall()
+     insights = build_dashboard_insights(reports, get_visible_staff_count(db))
+-    return render_template("modules.html", modules=expansion_modules(insights), insights=insights)
++    return render_template("modules.html", modules=expansion_modules(insights), insights=insights, drilldown=lambda **changes: dashboard_drilldown(report_filter_values(), **changes))
+ 
+ @app.route("/principal")
+ @principal_required
+@@ -2499,6 +2579,7 @@
+             f"SELECT reports.*, users.full_name FROM reports JOIN users ON users.id = reports.user_id WHERE {archived_expr} = 0 AND {hide_shadow_sql('users')} ORDER BY reports.report_date DESC"
+         ).fetchall()
+ 
++    rows = apply_report_filters(rows, report_filter_values())
+     output = io.StringIO()
+     writer = csv.writer(output)
+     writer.writerow(["Date", "Employee", "Department", "Position", "Branch", "Summary", "Status", "Submitted At"])
+--- a/templates/dashboard.html
++++ b/templates/dashboard.html
+@@ -23,7 +23,7 @@
+ </header>
+ 
+ <section class="stat-cards">
+-  <div class="stat-card glass primary-card">
++  <a href="{{ drilldown() }}" class="stat-card glass primary-card">
+     <div class="stat-card-header">
+       <span class="label-card">Total Reports</span>
+       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+@@ -35,47 +35,47 @@
+     <svg class="sparkline" viewBox="0 0 100 30" preserveAspectRatio="none">
+       <polyline points="0,28 20,22 40,24 60,14 80,18 100,8" fill="none" stroke="var(--accent)" stroke-width="2"/>
+     </svg>
+-  </div>
+-  <div class="stat-card glass">
++  </a>
++  <a href="{{ drilldown(status='submitted') }}" class="stat-card glass">
+     <div class="stat-card-header">
+       <span class="label-card">Pending Review</span>
+       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+     </div>
+     <span class="text-stat pending">{{ insights.pending_review }}</span>
+     <span class="label-card" style="font-weight:500;text-transform:none;letter-spacing:0;font-size:0.72rem">Submitted reports awaiting oversight</span>
+-  </div>
+-  <div class="stat-card glass">
+-    <div class="stat-card-header">
+-      <span class="label-card">Verified / Approved</span>
++  </a>
++  <a href="{{ drilldown(status='approved') }}" class="stat-card glass">
++    <div class="stat-card-header">
++      <span class="label-card">Approved</span>
+       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+     </div>
+     <span class="text-stat approved">{{ insights.approved }}</span>
+     <span class="label-card" style="font-weight:500;text-transform:none;letter-spacing:0;font-size:0.72rem">{{ insights.approval_rate }}% approval rate</span>
+-  </div>
+-  <div class="stat-card glass">
++  </a>
++  <a href="{{ drilldown(activity='admissions') }}" class="stat-card glass">
+     <div class="stat-card-header">
+       <span class="label-card">Admissions Signals</span>
+       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+     </div>
+     <span class="text-stat zero">{{ insights.admissions_activity }}</span>
+     <span class="label-card" style="font-weight:500;text-transform:none;letter-spacing:0;font-size:0.72rem">Applications processed and interviews scheduled</span>
+-  </div>
+-  <div class="stat-card glass">
++  </a>
++  <a href="{{ drilldown(activity='marketing') }}" class="stat-card glass">
+     <div class="stat-card-header">
+       <span class="label-card">Marketing Activity</span>
+       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+     </div>
+     <span class="text-stat zero">{{ insights.marketing_activity }}</span>
+     <span class="label-card" style="font-weight:500;text-transform:none;letter-spacing:0;font-size:0.72rem">Leads, outreach, and social activity</span>
+-  </div>
+-  <div class="stat-card glass">
++  </a>
++  <a href="{{ url_for('active_staff') }}" class="stat-card glass">
+     <div class="stat-card-header">
+       <span class="label-card">Active Staff</span>
+       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+     </div>
+     <span class="text-stat accent">{{ insights.staff_count }}</span>
+     <span class="label-card" style="font-weight:500;text-transform:none;letter-spacing:0;font-size:0.72rem">Visible active users under this role</span>
+-  </div>
++  </a>
+ </section>
+ 
+ <section class="content-grid">
+@@ -209,7 +209,7 @@
+   </div>
+   <div class="module-grid">
+     {% for module in modules %}
+-      <article class="module-card">
++      <a class="module-card" href="{{ module.url }}">
+         <div>
+           <span class="module-status">{{ module.status }}</span>
+           <h3>{{ module.title }}</h3>
+@@ -219,22 +219,27 @@
+           <strong>{{ module.metric }}</strong>
+           <span>{{ module.label }}</span>
+         </div>
+-      </article>
++      </a>
+     {% endfor %}
+   </div>
+ </section>
+ 
+-<section class="card table-card">
++<section class="card table-card" id="reports">
+   <div class="inline-head" style="padding: 22px 22px 16px; border-bottom: 1px solid rgba(0,0,0,0.06)">
+     <div>
+       <p class="eyebrow">Reports repository</p>
+       <h2 style="margin:2px 0 0">{% if g.user.role == 'employee' %}My reports{% else %}Visible reports{% endif %}</h2>
+     </div>
+-    <a class="btn-glass small-button" href="{{ url_for('export_csv') }}">
++    <a class="btn-glass small-button" href="{{ url_for('export_csv', **filters) }}">
+       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+       Export CSV
+     </a>
+   </div>
++<form method="get" class="report-filter-bar">
++<label>From<input type="date" name="date_from" value="{{ filters.date_from }}"></label><label>To<input type="date" name="date_to" value="{{ filters.date_to }}"></label>
++<label>Status<select name="status"><option value="">All states</option>{% for status in ('submitted','reviewed','approved') %}<option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status|title }}</option>{% endfor %}</select></label>
++<label>Activity<select name="activity"><option value="">All activity</option>{% for key in ('admissions','marketing','leads_generated','applications_processed','interviews_scheduled','calls_made','meetings') %}<option value="{{ key }}" {% if filters.activity == key %}selected{% endif %}>{{ key|replace('_',' ')|title }}</option>{% endfor %}</select></label>
++<input type="hidden" name="employee_id" value="{{ filters.employee_id }}"><input type="hidden" name="department" value="{{ filters.department }}"><button class="primary small-button" type="submit">Apply filters</button><a class="secondary small-button" href="{{ url_for('dashboard') }}">Clear</a></form>
+   {% if reports %}
+     <div class="table-wrap">
+       <table>
+--- a/templates/modules.html
++++ b/templates/modules.html
+@@ -4,7 +4,7 @@
+   <div>
+     <p class="eyebrow">System expansion</p>
+     <h1>Operations module map</h1>
+-    <p class="lead">A practical view of the admissions, intake, marketing, incentives, minutes, and analytics modules planned for the reporting platform.</p>
++    <p class="lead">Explore admissions, marketing and meeting signals recorded in daily reports. Cards open supporting reports; planned operational workflows remain marked below.</p>
+   </div>
+   <div class="hero-metric-stack">
+     <span><strong>{{ insights.total_reports }}</strong> reports</span>
+@@ -15,7 +15,7 @@
+ 
+ <section class="module-board">
+   {% for module in modules %}
+-    <article class="module-card large">
++    <a class="module-card large" href="{{ module.url }}">
+       <div>
+         <span class="module-status">{{ module.status }}</span>
+         <h2>{{ module.title }}</h2>
+@@ -25,7 +25,7 @@
+         <strong>{{ module.metric }}</strong>
+         <span>{{ module.label }}</span>
+       </div>
+-    </article>
++    </a>
+   {% endfor %}
+ </section>
+ 
+@@ -50,10 +50,10 @@
+     <p class="eyebrow">Analytics</p>
+     <h2>Report signals</h2>
+     <div class="rank-list">
+-      <div><span>Leads generated</span><strong>{{ insights.leads_generated }}</strong></div>
+-      <div><span>Applications processed</span><strong>{{ insights.applications_processed }}</strong></div>
+-      <div><span>Interviews scheduled</span><strong>{{ insights.interviews_scheduled }}</strong></div>
+-      <div><span>Calls made</span><strong>{{ insights.calls_made }}</strong></div>
++      <a href="{{ drilldown(activity='leads_generated') }}"><span>Leads generated</span><strong>{{ insights.leads_generated }}</strong></a>
++      <a href="{{ drilldown(activity='applications_processed') }}"><span>Applications processed</span><strong>{{ insights.applications_processed }}</strong></a>
++      <a href="{{ drilldown(activity='interviews_scheduled') }}"><span>Interviews scheduled</span><strong>{{ insights.interviews_scheduled }}</strong></a>
++      <a href="{{ drilldown(activity='calls_made') }}"><span>Calls made</span><strong>{{ insights.calls_made }}</strong></a>
+     </div>
+   </div>
+   <div class="glass-panel">
+--- a/templates/active_staff.html
++++ b/templates/active_staff.html
+@@ -0,0 +1,7 @@
++{% extends "base.html" %}
++{% block content %}
++<header class="topbar glass-heavy"><div><p class="page-eyebrow">{{ g.user.role|capitalize }} workspace</p><h1 class="page-title">Active staff</h1><p class="page-subtitle">{{ staff|length }} active accounts within your reporting access.</p></div><a class="btn-glass" href="{{ url_for('dashboard') }}">Dashboard</a></header>
++<section class="card table-card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Department</th><th>Role</th></tr></thead><tbody>
++{% for person in staff %}<tr><td>{{ person.full_name }}</td><td>{{ person.department }}</td><td>{{ person.role|title }}</td></tr>{% else %}<tr><td colspan="3">No active staff in your access scope.</td></tr>{% endfor %}
++</tbody></table></div></section>
++{% endblock %}
+--- a/static/styles.css
++++ b/static/styles.css
+@@ -521,7 +521,7 @@
+   position: relative; overflow: hidden;
+   transition: transform 200ms ease, box-shadow 200ms ease;
+ }
+-.stat-card:hover {
++.stat-card[href]:hover {
+   transform: translateY(-3px);
+   box-shadow:
+     0 12px 32px rgba(60,90,60,0.15),
+@@ -1180,7 +1180,7 @@
+   transition: transform var(--transition), box-shadow var(--transition);
+ }
+ 
+-.module-card:hover {
++.module-card[href]:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 8px 32px rgba(60,90,60,0.15), 0 1px 0 rgba(255,255,255,0.95) inset;
+ }
+@@ -2176,3 +2176,17 @@
+   gap: 8px;
+   flex-shrink: 0;
+ }
++
++/* Card drilldowns remain native keyboard-accessible links. */
++a.stat-card, a.module-card, .rank-list > a {
++  color: inherit;
++  text-decoration: none;
++}
++a.stat-card:focus-visible, a.module-card:focus-visible, .rank-list > a:focus-visible {
++  outline: 3px solid var(--accent);
++  outline-offset: 4px;
++}
++.rank-list > a { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; }
++.rank-list > a:hover { text-decoration: underline; }
++
++.report-filter-bar { display:flex; flex-wrap:wrap; gap:12px; padding:18px 22px; align-items:end; }

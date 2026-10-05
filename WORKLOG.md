@@ -1,3 +1,13 @@
+## 2026-10-05 — Verify and deploy system audit corrections
+**Area:** admissions form · testimonials · cross-system audit evidence
+**Environments:** website demo ✅ · production ✅; Reception demo/production and private Reporting staging verified
+**Commit(s):** this commit (see Git history)
+
+Verified the supplied eight findings before making focused changes. Website contact validation now blocks invalid/mismatched international contacts with Kenya as default, incomplete email domains and forward-step bypasses; testimonial controls activate correctly sized players on their actual page. Completed the illustrated remediation report and daily handover under the private `reports/system-audit-2026-10-05/` directory; Reception's staff redesign and administrator record restrictions and Reporting's deployed-version drilldowns are recorded in their repositories.
+
+**Verified by:** website release 2026.10.05.4 on public routes, 11 affected byte-matched production files, production browser checks with no application submission, 524 adapter checks and 759 browser formatter checks per system and existing QR/pricing regressions. The cross-system register contains 66 deployed file hashes; protected screen evidence is explicitly synthetic, generated from deployed source. Report rendering and source evidence are retained privately.
+**Follow-ups:** OTP lacks an email/SMS provider. The latest staff check has six active accounts, one approved legacy mailbox and zero disallowed emails; signed-in staff acceptance remains outstanding. Honeypot work is deferred. No daily report was submitted under another person's account.
+
 # Worklog — Toolkit WordPress site
 
 Newest first. One entry per meaningful change, written in the same commit as the

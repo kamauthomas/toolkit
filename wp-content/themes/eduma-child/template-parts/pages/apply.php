@@ -44,10 +44,10 @@ $course_key = isset( $_GET['course'] ) ? sanitize_key( wp_unslash( $_GET['course
 			</div></fieldset>
 
 			<fieldset data-step-panel="1" hidden><legend class="screen-reader-text">Contact details</legend><div class="application-grid application-grid--2">
-				<label>Email address <b>*</b><input type="email" name="email" autocomplete="email" required></label>
+				<label>Email address <b>*</b><input type="email" name="email" autocomplete="email" maxlength="160" required></label>
 				<label>County of residence <b>*</b><select name="county" autocomplete="address-level1" required><option value="">Loading counties…</option></select></label>
-				<label>Primary phone <b>*</b><input type="tel" name="primary_phone" autocomplete="tel" placeholder="+254 7xx xxx xxx" required></label>
-				<label>Secondary or guardian phone <b>*</b><input type="tel" name="secondary_phone" placeholder="+254 7xx xxx xxx" required></label>
+				<label>Primary phone <b>*</b><span class="toolkit-phone-control"><select name="primary_phone_country" aria-label="Primary phone country and calling code" required><?php foreach ( \Toolkit\Contacts\PhoneNumbers::countries() as $phone_country => $phone_metadata ) : ?><option value="<?php echo esc_attr( $phone_country ); ?>" <?php selected( 'KE', $phone_country ); ?>><?php echo esc_html( $phone_metadata['flag'] . ' ' . $phone_metadata['name'] . ' (+' . $phone_metadata['code'] . ')' ); ?></option><?php endforeach; ?></select><input type="tel" name="primary_phone" aria-label="Primary phone" data-international-phone autocomplete="tel" maxlength="40" required></span></label>
+				<label>Secondary or guardian phone <b>*</b><span class="toolkit-phone-control"><select name="secondary_phone_country" aria-label="Secondary or guardian phone country and calling code" required><?php foreach ( \Toolkit\Contacts\PhoneNumbers::countries() as $phone_country => $phone_metadata ) : ?><option value="<?php echo esc_attr( $phone_country ); ?>" <?php selected( 'KE', $phone_country ); ?>><?php echo esc_html( $phone_metadata['flag'] . ' ' . $phone_metadata['name'] . ' (+' . $phone_metadata['code'] . ')' ); ?></option><?php endforeach; ?></select><input type="tel" name="secondary_phone" aria-label="Secondary or guardian phone" data-international-phone autocomplete="tel" maxlength="40" required></span></label>
 			</div></fieldset>
 
 			<fieldset data-step-panel="2" hidden><legend class="screen-reader-text">Course selection</legend><div class="application-grid application-grid--2">

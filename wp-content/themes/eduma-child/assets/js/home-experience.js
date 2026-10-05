@@ -27,14 +27,19 @@
   }
 
   document.querySelectorAll('.toolkit-video-facade').forEach(function (facade) {
-    facade.addEventListener('click', function () {
+    facade.addEventListener('click', function (event) {
       var videoId = facade.getAttribute('data-video-id');
+      if (!/^[A-Za-z0-9_-]{11}$/.test(videoId || '')) return;
+      event.preventDefault();
       var iframe = document.createElement('iframe');
       iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&rel=0';
-      iframe.title = facade.getAttribute('aria-label').replace(/^Play /, '');
+      iframe.title = (facade.getAttribute('aria-label') || 'Toolkit testimonial').replace(/^Play /, '');
       iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
       iframe.allowFullscreen = true;
+      iframe.style.cssText = 'display:block;width:100%;height:100%;min-height:360px;border:0';
+      iframe.setAttribute('tabindex', '0');
       facade.replaceWith(iframe);
+      iframe.focus();
     });
   });
 

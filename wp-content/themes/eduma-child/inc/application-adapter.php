@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/PhoneNumbers.php';
 /**
  * Server-side adapter for Toolkit's public Mzizi application services.
  * Applicant data is validated, stored locally, then forwarded to Mzizi when
@@ -727,6 +728,15 @@ function toolkit_application_verify_turnstile( $token ) {
 	return is_array( $data ) && ! empty( $data['success'] );
 }
 
+/** Normalize selected-country contacts to E.164; no subscriber ownership claim. */
+function toolkit_application_normalize_mobile( $value, $country = 'KE' ) {
+    return \Toolkit\Contacts\PhoneNumbers::normalize( $value, $country );
+}
+
+function toolkit_application_qualified_email( $value ) {
+	return is_string( $value ) && strlen( $value ) <= 160 && is_email( $value ) && preg_match( '/^[^\s@]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,63}$/D', $value );
+}
+
 function toolkit_application_submit( WP_REST_Request $request ) {
 	$guard = toolkit_application_request_guard( $request, 5 );
 	if ( is_wp_error( $guard ) ) {
@@ -743,11 +753,14 @@ function toolkit_application_submit( WP_REST_Request $request ) {
 
 	$required = array( 'first_name', 'surname', 'email', 'primary_phone', 'secondary_phone', 'school_id', 'course_id', 'intake_id', 'county', 'gender', 'consent' );
 	foreach ( $required as $field ) {
-		if ( empty( $data[ $field ] ) ) {
+		if ( empty( $data[ $field ] ) || ! is_scalar( $data[ $field ] ) ) {
 			return new WP_Error( 'missing_field', 'Please complete all required fields.', array( 'status' => 422 ) );
 		}
 	}
-	if ( ! is_email( $data['email'] ) ) {
+	if ( is_string( $data['email'] ) ) {
+		$data['email'] = strtolower( trim( $data['email'] ) );
+	}
+	if ( ! toolkit_application_qualified_email( $data['email'] ) ) {
 		return new WP_Error( 'invalid_email', 'Enter a valid email address.', array( 'status' => 422 ) );
 	}
 	if ( ! in_array( (string) $data['gender'], array( 'F', 'M', 'I' ), true ) ) {
@@ -768,9 +781,13 @@ function toolkit_application_submit( WP_REST_Request $request ) {
 		return new WP_Error( 'invalid_county', 'Select a valid county.', array( 'status' => 422 ) );
 	}
 	foreach ( array( 'primary_phone', 'secondary_phone' ) as $phone_field ) {
-		if ( ! preg_match( '/^\+?[0-9]{9,15}$/', preg_replace( '/[^0-9+]/', '', (string) $data[ $phone_field ] ) ) ) {
-			return new WP_Error( 'invalid_phone', 'Enter valid primary and secondary phone numbers.', array( 'status' => 422 ) );
+		$country = $data[ $phone_field . '_country' ] ?? ( \Toolkit\Contacts\PhoneNumbers::countryFor( $data[ $phone_field ] ) ?? 'KE' );
+		$normalized_phone = toolkit_application_normalize_mobile( $data[ $phone_field ], $country );
+		if ( null === $normalized_phone ) {
+			return new WP_Error( 'invalid_phone', 'Enter valid phone numbers for the selected countries. Kenya (+254) is the default.', array( 'status' => 422 ) );
 		}
+		$data[ $phone_field ] = $normalized_phone;
+		$data[ $phone_field . '_country' ] = strtoupper( trim( $country ) );
 	}
 	$stored = toolkit_application_store( $data );
 	if ( is_wp_error( $stored ) ) {

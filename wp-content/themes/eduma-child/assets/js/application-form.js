@@ -148,9 +148,51 @@
     return Array.prototype.slice.call(panel.querySelectorAll('input, select, textarea'));
   }
 
+  function validateContact(field) {
+    var value = field.value.trim();
+    var error = '';
+    if (field.name === 'email') {
+      if (value && (value.length > 160 || !/^[^\s@]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,63}$/.test(value))) {
+        error = 'Enter a complete email address such as name@example.com.';
+      }
+    } else if (field.name === 'primary_phone' || field.name === 'secondary_phone') {
+      error = window.ToolkitPhone.validate(field).message;
+    } else {
+      return;
+    }
+    field.setCustomValidity(error);
+    field.setAttribute('aria-invalid', error ? 'true' : 'false');
+    var help = document.getElementById('application-error-' + field.name);
+    if (!help) {
+      help = document.createElement('small');
+      help.id = 'application-error-' + field.name;
+      help.className = 'application-field-error';
+      help.setAttribute('aria-live', 'polite');
+      field.insertAdjacentElement('afterend', help);
+      field.setAttribute('aria-describedby', help.id);
+    }
+    help.textContent = error;
+  }
+
+  ['email', 'primary_phone', 'secondary_phone'].forEach(function (name) {
+    var field = form.elements[name];
+    field.addEventListener('input', function () { validateContact(field); });
+    field.addEventListener('blur', function () { validateContact(field); });
+    field.addEventListener('toolkit-phone-change', function () { validateContact(field); });
+  });
+
+  function validateThrough(index) {
+    for (var step = 0; step <= index; step++) {
+      if (!validateStep(step)) return false;
+    }
+    return true;
+  }
+
   function validateStep(index) {
+    fieldsIn(panels[index]).forEach(validateContact);
     var invalid = fieldsIn(panels[index]).find(function (field) { return !field.checkValidity(); });
     if (invalid) {
+      setStep(index, false);
       invalid.reportValidity();
       invalid.focus();
       return false;
@@ -216,15 +258,15 @@
     document.getElementById('toolkit-course-duration').textContent = 'Confirmed by Admissions';
   }
 
-  nextButton.addEventListener('click', function () { if (validateStep(currentStep)) setStep(currentStep + 1); });
+  nextButton.addEventListener('click', function () { if (validateThrough(currentStep)) setStep(currentStep + 1); });
   previousButton.addEventListener('click', function () { setStep(currentStep - 1); });
-  stepButtons.forEach(function (button, index) { button.addEventListener('click', function () { if (index < currentStep || validateStep(currentStep)) setStep(index); }); });
+  stepButtons.forEach(function (button, index) { button.addEventListener('click', function () { if (index < currentStep || validateThrough(index - 1)) setStep(index); }); });
   schoolSelect.addEventListener('change', loadCourses);
   courseSelect.addEventListener('change', loadIntakes);
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();
-    if (!validateStep(currentStep)) return;
+    if (!validateThrough(panels.length - 1)) return;
     var payload = {};
     new FormData(form).forEach(function (value, key) { payload[key] = value; });
     payload.school_name = selectedText('school_id');
@@ -235,6 +277,7 @@
     api(config.endpoint, payload).then(function (result) {
       showMessage(result.message || 'Application submitted successfully.', 'is-success');
       form.reset();
+      ['email', 'primary_phone', 'secondary_phone'].forEach(function (name) { validateContact(form.elements[name]); });
       setStep(0, false);
       if (window.turnstile) window.turnstile.reset();
       /* Keep the confirmation (with its reference) in view, then clear it. */

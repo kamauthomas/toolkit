@@ -24,7 +24,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.10.01.1';
+	return '2026.10.05.4';
 }
 
 function toolkit_is_demo_environment() {
@@ -250,6 +250,9 @@ function thim_child_enqueue_styles() {
 
 		$js_ver = toolkit_asset_version( get_stylesheet_directory() . '/hero-slider.js' );
 		wp_enqueue_script( 'eduma-child-hero-slider', get_stylesheet_directory_uri() . '/hero-slider.js', array(), $js_ver, true );
+	}
+
+	if ( eduma_child_redesign_enabled() && ( is_front_page() || 'testimonials' === get_query_var( 'toolkit_showcase' ) ) ) {
 		$experience_path = get_stylesheet_directory() . '/assets/js/home-experience.js';
 		wp_enqueue_script( 'toolkit-home-experience', get_stylesheet_directory_uri() . '/assets/js/home-experience.js', array(), toolkit_asset_version( $experience_path ), true );
 	}
@@ -267,7 +270,10 @@ function thim_child_enqueue_styles() {
 		if ( $captcha_site_key ) {
 			wp_enqueue_script( 'cloudflare-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', array(), null, true );
 		}
-		wp_enqueue_script( 'toolkit-application-form', get_stylesheet_directory_uri() . '/assets/js/application-form.js', array(), toolkit_asset_version( $application_path ), true );
+		wp_enqueue_style( 'toolkit-phone-input', get_stylesheet_directory_uri() . '/assets/css/phone-input.css', array(), toolkit_asset_version( get_stylesheet_directory() . '/assets/css/phone-input.css' ) );
+		wp_enqueue_script( 'toolkit-phone-countries', get_stylesheet_directory_uri() . '/assets/js/phone-countries.js', array(), toolkit_asset_version( get_stylesheet_directory() . '/assets/js/phone-countries.js' ), true );
+		wp_enqueue_script( 'toolkit-phone-input', get_stylesheet_directory_uri() . '/assets/js/phone-input.js', array( 'toolkit-phone-countries' ), toolkit_asset_version( get_stylesheet_directory() . '/assets/js/phone-input.js' ), true );
+		wp_enqueue_script( 'toolkit-application-form', get_stylesheet_directory_uri() . '/assets/js/application-form.js', array( 'toolkit-phone-input' ), toolkit_asset_version( $application_path ), true );
 		wp_localize_script( 'toolkit-application-form', 'toolkitApplication', array(
 			'endpoint'          => esc_url_raw( rest_url( 'toolkit/v1/application/submit' ) ),
 			'optionsEndpoint'   => esc_url_raw( rest_url( 'toolkit/v1/application/options' ) ),

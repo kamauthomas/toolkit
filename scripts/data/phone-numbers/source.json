@@ -1,0 +1,5 @@
+{
+  "source": "https://github.com/google/libphonenumber/blob/master/resources/PhoneNumberMetadata.xml",
+  "source_sha256": "2fa0728c949aa59ee4d95bd68ff6398988b3ef4069d70965cc1ae080b7236e5c",
+  "territories": 245
+}
