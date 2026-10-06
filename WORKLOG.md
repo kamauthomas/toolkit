@@ -1,3 +1,15 @@
+## 2026-10-06 — Bundle the unique Toolkit posters
+**Area:** communications · poster collection · local inventory tooling
+**Environments:** local archive only; no deployment needed
+**Commit(s):** this commit (see Git history)
+
+Reviewed poster artwork in `~/Documents` and the parent project's `imgs/`, including editable sources, and created one private ZIP with 108 distinct poster images grouped by theme. Removed 59 repeat/equivalent source representations and excluded 64 non-poster assets or empty files. Meaningful artwork/content variants remain distinct; nine designs found only in XCF were exported at native size, and two screenshot/printed-poster references are clearly labelled.
+
+Added a bundler that consumes an explicit visual-review selection, verifies source/payload hashes and rejects repeated binary or decoded pixel content. The ZIP includes a file index and repeat-source mapping; the private source review, verification record and ready-to-paste daily draft are under `reports/poster-collection-2026-10-06/`. No originals were moved, deleted or modified.
+
+**Verified by:** 231 reviewed source hashes unchanged; ZIP CRC and member/payload SHA-256 checks passed; all 108 images decoded successfully with unique bytes/pixels/names. GIMP rendered all 55 editable sources for visual comparison; only nine otherwise unrepresented designs were packaged. Final archive size: 252,134,107 bytes.
+**Follow-ups:** staff enter actual task duration and submit the provided daily draft under their own account. No daily report was submitted automatically.
+
 ## 2026-10-05 — Verify and deploy system audit corrections
 **Area:** admissions form · testimonials · cross-system audit evidence
 **Environments:** website demo ✅ · production ✅; Reception demo/production and private Reporting staging verified
