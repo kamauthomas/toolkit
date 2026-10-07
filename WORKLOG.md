@@ -1,3 +1,15 @@
+## 2026-10-07 — Revise the management report and repair LibreOffice startup
+**Area:** management reporting · desktop support
+**Environments:** local desktop and private documents; no website deployment needed
+**Commit(s):** this commit (see Git history)
+
+Removed only the first two paragraphs under Items requiring attention from Thomas's management update and regenerated its Word/PDF copies. The two remaining graduation paragraphs and author attribution are preserved.
+
+Confirmed LibreOffice was waiting at a warning about a profile lock belonging to the computer's previous hostname. Backed up the complete settings/recovery profile, closed the startup warning normally, checked that LibreOffice had exited and removed only the byte-matched stale profile lock. Reopened the revised report successfully without resetting settings or disabling locking.
+
+**Verified by:** Markdown/Word paragraph equality, PDF text and page review, Thomas author metadata; LibreOffice's loaded report window/document, absence of startup alerts and replacement lock using the current hostname. Private backups, evidence and a daily-report addendum are under `reports/libreoffice-repair-2026-10-07/`; document checks are under `reports/management-update-2026-10-07/`.
+**Follow-ups:** staff enter actual time and file the provided daily draft themselves. The backup is retained privately; no report was submitted automatically.
+
 ## 2026-10-07 — Prepare Thomas's management update and publish controlled graduation announcement
 **Area:** management reporting · website announcement · graduation
 **Environments:** demo ✅ · production ✅; management documents retained privately
