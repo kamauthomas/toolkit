@@ -1,3 +1,13 @@
+## 2026-10-07 — Prevent recurring LibreOffice startup locks after hostname rotation
+**Area:** desktop support · local maintenance tooling
+**Environments:** installed on the local user desktop; no website deployment needed
+**Commit(s):** this commit (see Git history)
+
+Confirmed the boot-recovery script generates a new hostname on every reboot. Added and installed a per-user login check plus guarded LibreOffice desktop launches that archive only a confirmed previous-boot local profile lock before opening the application. Preserved current/active locks, settings, recovery files, document locks, hostname rotation and Writer's existing rendering workaround; installation backups and a reversible installer are retained.
+
+**Verified by:** 15 regression checks; seven installed desktop entries and 18 launch commands validated/resolved through Gio; live Writer desktop launch, byte-identical active profile lock and concurrent-launch protection; real isolated LibreOffice PDF conversion after simulated prior-boot/hostname cleanup with exact lock backup and recovery preservation. An initial sandbox-limited conversion was retried successfully with a disposable profile on the host. No actual reboot was performed. Private evidence and daily-report addendum: `reports/libreoffice-repair-2026-10-07/recurrence/`.
+**Follow-ups:** check normal opening after the next planned reboot; staff enter actual task time and submit the draft themselves. Explicit system-binary launches before desktop login bypass the user guard; normal login and desktop launch paths are covered.
+
 ## 2026-10-07 — Revise the management report and repair LibreOffice startup
 **Area:** management reporting · desktop support
 **Environments:** local desktop and private documents; no website deployment needed
