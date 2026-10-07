@@ -1,0 +1,4 @@
+# Calendar downloads retain the CRLF endings required by iCalendar.
+wp-content/themes/eduma-child/assets/calendar/*.ics -text whitespace=cr-at-eol
+# Unified patch context includes prefix spaces before original indentation.
+scripts/deployment/releases/graduation-announcement-*.patch -whitespace

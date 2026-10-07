@@ -1,3 +1,15 @@
+## 2026-10-07 — Prepare Thomas's management update and publish controlled graduation announcement
+**Area:** management reporting · website announcement · graduation
+**Environments:** demo ✅ · production ✅; management documents retained privately
+**Commit(s):** this commit (see Git history)
+
+Prepared a management report credited to Thomas, covering recent system improvements and the unique poster collection in plain language, with PDF/Word copies and a daily handover. Published the supplied Class of 2026 announcement using Toolkit's unchanged official logo and graduation archive photograph, the supplied 22 October event details, a calendar download and a matching graduation-page date.
+
+Normal reminders have a 24-hour limit. The final week shortens this to six hours and the final two days to two hours; active visits remain limited to one announcement, renewed across page navigation and ending after 30 idle minutes. Registration, contact and Speak Up flows are excluded. Native dismissal, keyboard focus containment, blocked-storage fallback and expiry at 1pm Nairobi on ceremony day are handled; display timestamps contain no personal identifiers. Demo testing corrected inherited Eduma centering/button styles and keyboard focus before production promotion.
+
+**Verified by:** release 2026.10.07.3; seven byte-matched deployed files per environment, unchanged logo/photo hashes and five public routes plus ten ordinary bare-URL checks; 20 public browser checks each on demo and production, including 320/390px containment, navigation suppression, calendar and synthetic future-clock reminder/expiry boundaries; 26 repeat-rule scenarios and eight route-gate checks. No application or contact form was submitted. Management report attribution, text and rendered pages were reviewed. Private evidence is under `reports/graduation-popup-2026-10-07/` and `reports/management-update-2026-10-07/`; recovery files remain outside the webroot.
+**Follow-ups:** staff enter actual task time and submit the daily draft under their own account. Earlier audit follow-ups (approved email/SMS providers and signed-in staff acceptance) remain stated in Thomas's report. No report was filed automatically.
+
 ## 2026-10-06 — Bundle the unique Toolkit posters
 **Area:** communications · poster collection · local inventory tooling
 **Environments:** local archive only; no deployment needed

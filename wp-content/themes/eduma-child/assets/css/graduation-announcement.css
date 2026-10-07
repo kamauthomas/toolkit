@@ -1,0 +1,91 @@
+.toolkit-graduation {
+  position: fixed; inset: 0; margin: auto; height: fit-content;
+  padding: 0; border: 0; border-radius: 22px; width: min(1120px, calc(100vw - 40px));
+  max-width: none; max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px);
+  overflow: auto; color: #152b48; background: #fff;
+  box-shadow: 0 24px 90px #0005; font-family: Arial, Helvetica, sans-serif;
+}
+.toolkit-graduation:not([open]) { display: none; }
+.toolkit-graduation::backdrop { background: #101d20b8; backdrop-filter: blur(5px); }
+.toolkit-graduation *, .toolkit-graduation *::before, .toolkit-graduation *::after { box-sizing: border-box; }
+.toolkit-graduation__poster { position: relative; isolation: isolate; padding: 30px 36px 36px; overflow: hidden; }
+.toolkit-graduation__photo { position: absolute; z-index: -3; width: 62%; height: 100%; right: 0; top: 0; object-fit: cover; object-position: 62% center; }
+.toolkit-graduation__wash { position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg, #fff 34%, #fffc 48%, #fff0 69%), linear-gradient(0deg, #fff 1%, #fff0 46%, #fffd 98%); }
+.toolkit-graduation__brand { display: flex; gap: 16px; align-items: center; max-width: 800px; padding-right: 45px; margin-bottom: 20px; }
+.toolkit-graduation__brand img { width: 90px; height: 65px; object-fit: contain; flex: 0 0 auto; }
+.toolkit-graduation__brand strong { display: block; font-size: 24px; line-height: 1.2; color: #777e1c; }
+.toolkit-graduation__brand p { margin: 6px 0 0; font-size: 14px; line-height: 1.4; }
+.toolkit-graduation__brand div::after { content: ''; display: block; width: 48px; height: 3px; background: #ff6600; margin-top: 10px; }
+.toolkit-graduation .toolkit-graduation__dismiss { position: absolute; z-index: 2; top: 14px; right: 14px; padding: 0; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #fff; color: #152b48; font: 36px/1 Arial, sans-serif; box-shadow: 0 3px 15px #152b4826; }
+.toolkit-graduation__copy { width: 60%; }
+.toolkit-graduation__class { display: flex; align-items: center; gap: 12px; margin: 0; color: #7a821d; font: italic 600 42px/1.1 Georgia, serif; }
+.toolkit-graduation__class svg { width: 82px; height: 62px; color: #006a68; }
+.toolkit-graduation h2 { margin: 0; font-family: Arial, Helvetica, sans-serif; font-weight: 900; line-height: .98; }
+.toolkit-graduation__year { display: block; font-size: clamp(78px, 9vw, 126px); letter-spacing: -7px; color: #7a821d; }
+.toolkit-graduation__heading { display: block; margin-top: 3px; font-size: clamp(38px, 5.3vw, 69px); letter-spacing: -2px; text-transform: uppercase; color: #ef5900; }
+.toolkit-graduation__ceremony { display: block; margin: 3px 0 16px 65px; font: italic 600 54px/1.05 Georgia, serif; color: #ef5900; }
+#toolkit-graduation-intro { margin: 0 0 24px; max-width: 465px; font-size: 19px; line-height: 1.4; }
+.toolkit-graduation__bottom { position: relative; z-index: 1; }
+.toolkit-graduation__details { display: grid; grid-template-columns: 1fr .77fr 1.35fr; gap: 16px; width: 82%; margin: 0 0 22px; padding: 15px 8px 13px; border-radius: 14px; background: #ffffffed; }
+.toolkit-graduation__details > div { display: flex; gap: 12px; align-items: flex-start; }
+.toolkit-graduation__details > div + div { border-left: 1px solid #adb461; padding-left: 16px; }
+.toolkit-graduation__details dt { color: #777e1c; text-transform: uppercase; font-size: 14px; font-weight: 800; line-height: 1.3; margin: 0 0 5px; }
+.toolkit-graduation__details dd { font-weight: 700; font-size: 16px; line-height: 1.35; margin: 0; }
+.toolkit-graduation__details dd span { display: block; font-weight: 400; font-size: 14px; margin-top: 3px; }
+.toolkit-graduation__date { color: #c44b00; }
+.toolkit-graduation__icon { display: grid; place-items: center; flex: 0 0 46px; height: 46px; border-radius: 50%; background: #7a821d; color: #fff; font-size: 23px; }
+.toolkit-graduation__icon svg, .toolkit-graduation__save svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.toolkit-graduation__actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.toolkit-graduation__actions a, .toolkit-graduation__actions button { min-height: 54px; display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 23px; border-radius: 16px; font: 700 18px/1.2 Arial, sans-serif; text-decoration: none; }
+.toolkit-graduation__save { background: #ff6600; border: 2px solid #ff6600; color: #fff; text-transform: uppercase; }
+.toolkit-graduation__save span { font-size: 30px; line-height: 20px; }
+.toolkit-graduation .toolkit-graduation__close { background: #fff; border: 2px solid #006a68; color: #006a68; min-width: 145px; text-transform: uppercase; }
+.toolkit-graduation__actions .toolkit-graduation__more { color: #006a68; background: #ffffffed; padding: 12px; font-size: 14px; border-radius: 6px; }
+.toolkit-graduation button, .toolkit-graduation a, .toolkit-graduation button *, .toolkit-graduation a * { cursor: pointer; }
+.toolkit-graduation__dismiss:hover, .toolkit-graduation__close:hover { background: #eaf4f2; color: #004f4e; }
+.toolkit-graduation__save:hover { background: #cf4d00; border-color: #cf4d00; color: #fff; }
+.toolkit-graduation__more:hover { text-decoration: underline; }
+.toolkit-graduation :focus-visible { outline: 3px solid #152b48; outline-offset: 3px; }
+.toolkit-graduation__ribbon { position: absolute; z-index: 0; right: -80px; bottom: -165px; width: 520px; height: 280px; border: 28px solid #ff6600; border-radius: 50%; background: #006a68; transform: rotate(-20deg); box-shadow: 0 -20px 0 10px #969e2a; pointer-events: none; }
+html.toolkit-graduation-open { overflow: hidden; }
+@media (max-width: 900px) {
+  .toolkit-graduation__poster { padding: 24px; }
+  .toolkit-graduation__brand strong { font-size: 20px; }
+  .toolkit-graduation__brand p { max-width: 470px; }
+  .toolkit-graduation__copy { width: 67%; }
+  .toolkit-graduation__heading { font-size: 45px; }
+  .toolkit-graduation__details { width: 100%; grid-template-columns: 1fr .7fr 1.3fr; gap: 10px; }
+  .toolkit-graduation__details > div { gap: 8px; }
+  .toolkit-graduation__details > div + div { padding-left: 10px; }
+  .toolkit-graduation__icon { flex-basis: 36px; height: 36px; font-size: 18px; }
+}
+@media (max-width: 640px) {
+  .toolkit-graduation { width: calc(100vw - 24px); max-height: calc(100dvh - 24px); border-radius: 16px; }
+  .toolkit-graduation__poster { padding: 20px 18px 24px; }
+  .toolkit-graduation__brand { gap: 10px; padding-right: 28px; margin-bottom: 16px; }
+  .toolkit-graduation__brand img { width: 55px; height: 40px; }
+  .toolkit-graduation__brand strong { font-size: 16px; }
+  .toolkit-graduation__brand p { font-size: 11px; }
+  .toolkit-graduation__brand div::after { margin-top: 7px; }
+  .toolkit-graduation .toolkit-graduation__dismiss { top: 7px; right: 7px; width: 34px; height: 34px; font-size: 28px; }
+  .toolkit-graduation__photo { position: relative; z-index: 0; display: block; width: 100%; height: 190px; border-radius: 12px; object-position: center 43%; margin: 0 0 16px; }
+  .toolkit-graduation__wash { display: none; }
+  .toolkit-graduation__brand { position: relative; }
+  .toolkit-graduation__copy { width: 100%; }
+  .toolkit-graduation__class { font-size: 30px; }
+  .toolkit-graduation__class svg { width: 58px; height: 43px; }
+  .toolkit-graduation__year { font-size: 85px; letter-spacing: -4px; }
+  .toolkit-graduation__heading { font-size: clamp(31px, 9vw, 48px); letter-spacing: -1px; }
+  .toolkit-graduation__ceremony { font-size: 37px; margin: 6px 0 14px 25px; }
+  #toolkit-graduation-intro { font-size: 15px; margin-bottom: 16px; }
+  .toolkit-graduation__details { grid-template-columns: 1fr 1fr; padding: 12px 0; row-gap: 16px; margin-bottom: 15px; }
+  .toolkit-graduation__details > div:nth-child(3) { grid-column: 1 / -1; border-left: 0; padding-left: 0; }
+  .toolkit-graduation__details dd { font-size: 14px; }
+  .toolkit-graduation__details dt { font-size: 12px; }
+  .toolkit-graduation__details dd span { font-size: 13px; }
+  .toolkit-graduation__actions { gap: 10px; }
+  .toolkit-graduation__actions a, .toolkit-graduation__actions button { padding: 12px 16px; font-size: 15px; border-radius: 12px; }
+  .toolkit-graduation__save { flex: 1; }
+  .toolkit-graduation .toolkit-graduation__close { min-width: 82px; }
+  .toolkit-graduation__ribbon { opacity: .18; bottom: -225px; right: -270px; }
+}

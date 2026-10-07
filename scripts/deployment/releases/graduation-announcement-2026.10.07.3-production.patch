@@ -1,0 +1,30 @@
+--- a/wp-content/themes/eduma-child/functions.php
++++ b/wp-content/themes/eduma-child/functions.php
+@@ -9,6 +9,7 @@
+ require_once get_stylesheet_directory() . '/inc/mosiria-story.php';
+ require_once get_stylesheet_directory() . '/inc/youtube-feed.php';
+ require_once get_stylesheet_directory() . '/inc/supplied-stories.php';
++require_once get_stylesheet_directory() . '/inc/graduation-announcement.php';
+ 
+ function toolkit_editorial_story_preview() {
+ 	$story = toolkit_cultural_week_preview();
+@@ -24,7 +25,7 @@
+  * URLs and triggers one server-side object/page-cache purge per environment.
+  */
+ function toolkit_theme_release() {
+-	return '2026.10.05.4';
++	return '2026.10.07.3';
+ }
+ 
+ function toolkit_is_demo_environment() {
+--- a/wp-content/themes/eduma-child/template-parts/pages/graduation.php
++++ b/wp-content/themes/eduma-child/template-parts/pages/graduation.php
+@@ -28,7 +28,7 @@
+ 		<figure><img src="<?php echo esc_url( $base . 'kmm-2071-jpg.webp' ); ?>" width="1800" height="1153" alt="Toolkit graduates sharing a joyful moment during a graduation ceremony"><figcaption><strong>A shared milestone</strong><span>Skills • Achievement • Progression</span></figcaption></figure>
+ 	</section>
+ 
+-	<section class="graduation-date toolkit-section" aria-labelledby="graduation-date-title"><span aria-hidden="true"><i class="fas fa-calendar-check"></i></span><div><p class="toolkit-kicker">Next ceremony</p><h2 id="graduation-date-title">Graduation date announcement pending</h2><p>The confirmed date, programme and attendance guidance will be published here and on the <a href="<?php echo esc_url( home_url( '/notice-board/' ) ); ?>">Toolkit Notice Board</a> after institutional approval.</p></div><a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact Toolkit <i class="fas fa-arrow-right" aria-hidden="true"></i></a></section>
++	<section class="graduation-date toolkit-section" aria-labelledby="graduation-date-title"><span aria-hidden="true"><i class="fas fa-calendar-check"></i></span><div><p class="toolkit-kicker">Class of 2026</p><h2 id="graduation-date-title">Thursday, 22 October 2026</h2><p>9:00 AM–1:00 PM at The Toolkit Skills &amp; Innovation HUB, Karen–Kikuyu Highway (Southern Bypass), Kikuyu.</p></div><a href="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/calendar/toolkit-graduation-2026.ics' ); ?>" download="toolkit-graduation-2026.ics">Save the date <i class="fas fa-calendar-plus" aria-hidden="true"></i></a></section>
+ 
+ 	<section class="graduation-meaning toolkit-section" aria-labelledby="graduation-meaning-title"><div><p class="toolkit-kicker">A record of progress</p><h2 id="graduation-meaning-title">Where practical learning becomes achievement</h2><p>Each graduation moment represents hours of guided practice, assessment preparation, problem-solving and persistence. The ceremony brings learners, trainers, families and partners together to recognise that work.</p><p>Toolkit’s graduation story spans different pathways and learner journeys. The photographs below preserve the scale of the celebration while keeping the focus on the people whose effort made it possible.</p></div><ol><li><span>01</span><div><h3>Skills built</h3><p>Practical competence developed through workshop-led and applied learning.</p></div></li><li><span>02</span><div><h3>Progress recognised</h3><p>Completion and achievement acknowledged within the applicable learning pathway.</p></div></li><li><span>03</span><div><h3>Next steps opened</h3><p>Graduates prepare to pursue work, enterprise, further learning or skills recognition.</p></div></li></ol></section>
+ 

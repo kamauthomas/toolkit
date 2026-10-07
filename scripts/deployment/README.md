@@ -26,6 +26,19 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-graduation-announcement-2026.10.07.3.sh` publishes the supplied
+22 October Class of 2026 announcement. It checks the inspected environment's
+baseline, applies its focused patch without fuzz, preserves recovery files and
+activates the release after uploading dependencies. Run demo first, complete
+`scripts/tests/graduation-announcement-browser.py` acceptance in an isolated
+browser, then production. It verifies seven files, five public routes, the
+unchanged official logo/photo and the calendar download. Normal display is
+limited to once per 24 hours, shortened to six hours in the final week and two
+hours in the final two days; active visits suppress page-change repeats. The
+announcement expires at 1pm Nairobi on 22 October and excludes registration,
+contact and Speak Up flows. The `TOOLKIT_GRADUATION_ANNOUNCEMENT_ENABLED` constant
+or `toolkit_graduation_announcement_enabled` option can disable it.
+
 `releases/deploy-revised-september-pricing-2026.10.01.1.sh` publishes the user-
 supplied revised September 2026 tuition and separate exam rates. It patches
 fetched live files with zero fuzz, preserves rollbacks, verifies byte identity,

@@ -1,0 +1,11 @@
+--- a/wp-content/themes/eduma-child/functions.php
++++ b/wp-content/themes/eduma-child/functions.php
+@@ -25,7 +25,7 @@
+  * URLs and triggers one server-side object/page-cache purge per environment.
+  */
+ function toolkit_theme_release() {
+-	return '2026.10.07.2';
++	return '2026.10.07.3';
+ }
+ 
+ function toolkit_is_demo_environment() {
