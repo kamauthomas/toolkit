@@ -1,3 +1,13 @@
+## 2026-10-13 — Prepare Q4 ICT and Digital Support OKRs
+**Area:** quarterly planning · reporting · continuous communications support
+**Environments:** local documents only; not deployed because this is a planning handover
+**Commit(s):** this commit (see Git history)
+
+Prepared six Q4 2026 objectives and 25 key results using the supplied Excel template, recent worklogs, system audits and owner trackers. The plan covers existing systems, pending requirements and improvement areas, with poster creation described as continuous assigned work. Provided matching Excel, Word and PDF copies, supporting baseline notes and a ready-to-paste daily report under `docs/q4-2026/`.
+
+**Verified by:** exact comparison of all 25 Excel/Word rows; complete text checks on both rendered PDF exports; visual review of all three Word PDF pages and the spreadsheet first page; original template logo retained byte-for-byte. Conversion and text-extraction retries are recorded honestly in `docs/q4-2026/VALIDATION.md`.
+**Follow-ups:** management confirms the individual owner, adopts targets and resolves listed dependencies; staff enter actual time and submit the daily draft themselves. No operational system changes or deployment were made.
+
 ## 2026-10-07 — Prevent recurring LibreOffice startup locks after hostname rotation
 **Area:** desktop support · local maintenance tooling
 **Environments:** installed on the local user desktop; no website deployment needed
