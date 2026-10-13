@@ -1,3 +1,13 @@
+## 2026-10-13 — Restore normal scrollback for Codex in Kitty
+**Area:** desktop support · terminal usability
+**Environments:** local workstation configuration; no website deployment needed
+**Commit(s):** this commit (see Git history)
+
+Confirmed the affected Codex pane was using Kitty's alternate screen while normal wheel and scrollback settings were enabled. Backed up the user's Codex configuration and set `tui.alternate_screen = "never"`, preserving every other configuration value. Recorded the diagnosis and ready-to-paste daily draft under `docs/desktop-support/`.
+
+**Verified by:** parsed before/after comparison, successful installed-Codex configuration load and isolated strict-config TUI startup with no alternate-screen entry or startup error. Earlier socket/validation limitations are recorded in the diagnosis note; physical wheel use after restart is not claimed verified.
+**Follow-ups:** restart/resume the current Codex session, then confirm mouse scrolling; staff enter actual time and submit the daily draft themselves. The active session remains running and still requires the restart.
+
 ## 2026-10-13 — Prepare Q4 ICT and Digital Support OKRs
 **Area:** quarterly planning · reporting · continuous communications support
 **Environments:** local documents only; not deployed because this is a planning handover
