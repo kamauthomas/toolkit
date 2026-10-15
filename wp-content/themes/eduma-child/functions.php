@@ -10,6 +10,7 @@ require_once get_stylesheet_directory() . '/inc/mosiria-story.php';
 require_once get_stylesheet_directory() . '/inc/youtube-feed.php';
 require_once get_stylesheet_directory() . '/inc/supplied-stories.php';
 require_once get_stylesheet_directory() . '/inc/graduation-announcement.php';
+require_once get_stylesheet_directory() . '/inc/graduands.php';
 
 function toolkit_editorial_story_preview() {
 	$story = toolkit_cultural_week_preview();
@@ -25,7 +26,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.10.07.3';
+	return '2026.10.15.1';
 }
 
 function toolkit_is_demo_environment() {

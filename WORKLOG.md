@@ -1,3 +1,15 @@
+## 2026-10-15 — Prepare Wingu backfill and publish graduands QR and Reception improvements
+**Area:** reporting preparation · graduation communications · Reception deployment assurance
+**Environments:** website and Reception demo ✅ · production ✅; Wingu draft only, not submitted
+**Commit(s):** this commit (see Git history)
+
+Parsed all three retained attendance exports and corrected the stale August handoff boundary: Thomas_recent.csv ends on 22 September at 08:19:17, check-in only. Prepared 24 calendar rows from that date through 15 October with no invented attendance, flagged off-day/evidence gaps and updated the Wingu procedure. Live Wingu rows still need reconciliation when new logs arrive.
+
+Published the graduands section at the existing graduation page's permanent #graduands anchor, with a searchable/course-filtered HTML list and complete-list printing. Added administrator-only CSV preview, explicit publication approval, stale-preview protection and confirmed withdrawal. No names are published until an approved source arrives. Generated PNG/SVG QR artwork and an import template privately; ZBar independently decoded the permanent target. Demo-first deployment also verified Reception's compact shared pagination, responsive real-data overview and private returning-contact visit history; the Reception code/worklog live in its own repository.
+
+**Verified by:** 25 roster parser/publication checks; 82 isolated Reception tests / 1,251 assertions; 13 deployed-memory checks per environment; 17 runtime file identities per environment; 56 desktop/390px synthetic-browser checks per environment, public QR destination and seven production public/client-only preview checks. Versioned warming resolved the first old cached production graduation response; subsequent ordinary routes returned website release 2026.10.15.1. No real visitor/applicant registrations, production roster publication or Wingu submission occurred. Private evidence: `reports/reception-graduands-2026-10-15/`, `reports/graduands-2026-10-15/`, `reports/wingu-preparation-2026-10-15/`.
+**Follow-ups:** new attendance logs/live Wingu reconciliation, approved public names/courses and staff acceptance. Location checkout remains disabled pending physical boundary testing; phone matches are not verified identities. Thomas should enter actual task times and file the ready-to-paste daily draft himself.
+
 ## 2026-10-13 — Restore normal scrollback for Codex in Kitty
 **Area:** desktop support · terminal usability
 **Environments:** local workstation configuration; no website deployment needed

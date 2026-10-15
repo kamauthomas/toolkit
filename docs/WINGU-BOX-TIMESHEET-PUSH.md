@@ -96,3 +96,19 @@ After submission, reload the Wingu page and confirm for every changed date:
 Record the verified dates in the task handoff. If Wingu reports a validation
 error, do not repeatedly submit. Inspect the affected rows, correct the payload,
 and repeat the persistence check.
+
+## Latest preparation checkpoint — 15 October 2026
+
+The latest retained attendance export is `reports/logs/Thomas_recent.csv`
+(108 records). Its final actual timestamp is **22 September 2026, 08:19:17,
+check-in**; that date has no recorded checkout. The older August Wingu handoff
+must not be used as the current preparation boundary. At the employee's
+instruction, the new draft starts on **22 September**, includes that incomplete
+day, and runs through 15 October. Later attendance times and all durations stay
+blank pending new logs. See `reports/wingu-preparation-2026-10-15/` for the draft,
+source hashes and dated work evidence.
+
+The log's final date is the requested preparation start point, not proof that
+Wingu saved every earlier date. Existing Wingu rows and current project choices
+still need live reconciliation before any submission or overwrite. Weekends,
+off days and work notes without supporting evidence remain held for review.
