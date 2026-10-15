@@ -59,3 +59,17 @@ $_POST=['graduands_action'=>'publish','revision'=>$revision,'approved'=>'1'];man
 $_POST=['graduands_action'=>'withdraw'];manageRoster();check(count(toolkit_graduands_published()['rows'])===2,'Withdrawal confirmation required');
 $_POST=['graduands_action'=>'withdraw','withdraw_confirmed'=>'1'];manageRoster();check(toolkit_graduands_published()===[] && isset($options['toolkit_graduands_2026_draft']),'Confirmed withdrawal preserves draft');
 echo "PASS: $count total graduands checks, including permissions/CSRF/approval/revision/withdrawal\n";
+function admin_url($s) { return 'https://example.test/wp-admin/'.$s; }
+function get_stylesheet_directory_uri() { return 'https://example.test/wp-content/themes/eduma-child'; }
+function checked($value) { if ($value) echo 'checked'; }
+$options['toolkit_graduands_2026_published']=['rows'=>$rows,'approved'=>true,'published_at'=>gmdate('c')];
+$_POST=[];toolkit_graduands_update_display();
+check(toolkit_graduands_published()===[],'Display switch hides public roster');
+check(count(toolkit_graduands_published(false)['rows'])===2,'Hidden approved names retained for management');
+$_POST=['public_display'=>'1'];toolkit_graduands_update_display();check(count(toolkit_graduands_published()['rows'])===2,'Display switch restores approved roster');
+$nonce_valid=false;$_POST=[];try {toolkit_graduands_update_display();check(false,'Display CSRF rejected');}catch(RuntimeException $e){check($e->getMessage()==='nonce','Display CSRF rejected');}
+check(count(toolkit_graduands_published()['rows'])===2,'Rejected display request does not hide roster');
+$nonce_valid=true;$allowed=false;try {toolkit_graduands_update_display();check(false,'Display admin required');}catch(RuntimeException $e){check($e->getMessage()==='denied','Display admin required');}
+ob_start();toolkit_graduands_qr_panel();$panel=ob_get_clean();check($panel==='','QR controls hidden from nonadmin');
+$allowed=true;ob_start();toolkit_graduands_qr_panel();$panel=ob_get_clean();check(str_contains($panel,'graduands-2026-qr.png')&&str_contains($panel,'graduands-2026-qr.svg'),'Both QR downloads present');check(str_contains($panel,'https://toolkitafrica.ac.ke/graduation/#graduands'),'QR control has stable production URL');check(str_contains($panel,'Manage names and courses')&&str_contains($panel,'public_display'),'Management and display controls present');
+echo "PASS: $count total graduands and dashboard QR checks\n";

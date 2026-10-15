@@ -1,3 +1,15 @@
+## 2026-10-15 — Integrate graduands QR in Toolkit Control and review live website security
+**Area:** custom website administration · graduation QR · controlled security review
+**Environments:** demo ✅ · production ✅; read-only security checks on production
+**Commit(s):** this commit (see Git history)
+
+Added the graduands QR beside existing Toolkit Control QR cards, PNG/SVG downloads, publication status, list management, the Graduands 2026 submenu and a protected public-display switch. Hiding preserves approved names and the permanent QR destination; real names remain unpublished pending an approved source. Demo then production release 2026.10.15.2 was checked against five payload files per environment.
+
+Completed the explicitly requested low-traffic live security review: 18 GETs at least three seconds apart, no retries/logins/form submissions, stop-on-challenge behavior and no retained response bodies/cookie values. Anonymous administration/private REST boundaries denied access, sensitive-file probes disclosed no markers and the harmless search tag was escaped. Final availability remained 200. Confirmed one hardening gap: no CSP response header on the checked public pages; recommend demo report-only testing before enforcement. No critical/high issue was demonstrated within this limited scope.
+
+**Verified by:** 35 isolated graduands/QR permission/publication checks, demo/production source and QR asset hashes, ordinary URLs showing .2, 18 production HTTP observations and five deployed-source reviews. Admissions has only a harmless admin-header UTF-8 meta-tag drift, preserved. Protected signed-in acceptance and intrusive/high-volume/plugin-exploit testing were not performed. Private handovers: `reports/graduands-2026-10-15/admin-control/` and `reports/security-review-2026-10-15/`; daily addendum provided. The temporary browser and localhost fixture server were closed.
+**Follow-ups:** demo CSP plan, signed-in administrator acceptance, approved names/courses, new attendance logs and live Wingu row reconciliation. No daily report was automatically filed.
+
 ## 2026-10-15 — Prepare Wingu backfill and publish graduands QR and Reception improvements
 **Area:** reporting preparation · graduation communications · Reception deployment assurance
 **Environments:** website and Reception demo ✅ · production ✅; Wingu draft only, not submitted
