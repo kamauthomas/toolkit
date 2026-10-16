@@ -1,3 +1,15 @@
+## 2026-10-16 — Investigate image disclosure, contain public deployment backups and update About Us
+**Area:** website security investigation · website content
+**Environments:** demo ✅ · production ✅; initial collection read-only
+**Commit(s):** this commit (see Git history)
+
+Preserved filesystem metadata, hashes, account/plugin inventories and access records without bootstrapping WordPress. The supplied laptop image and all 18 staff portrait files match tracked local copies, with July modification times. Reviewed 43,344 overlapping main-site request observations covering 30 September–16 October; no direct writes to image paths were observed, but POST bodies and hosting-account activity are unavailable. The claimed ability to modify images remains unverified.
+
+Found historical deployment backups inside public uploads. Demo-first containment preserved all 16 files per environment with before/after hashes and moved them outside the webroots, including 15 production PHP files. This is a confirmed exposure addressed separately from the unproven claim. Replaced only the About Us laptop-photo placement with the Toolkit campus exterior, preserving the original course image. Child-theme release 2026.10.16.1 was verified demo then production; the 14 displayed staff portraits remain.
+
+**Verified by:** PHP syntax checks and Python compilation, deployed-file readback, ordinary About Us/home HTTP 200 + release header, campus-image checksum, sampled removed static-backup URL HTTP 404 per environment, unchanged original-image checksum, private move manifests and zero remaining incident cron jobs. Private evidence and Thomas’s management note/daily draft: `reports/asset-incident-2026-10-16/`. No business/test registration records or live write payloads were submitted.
+**Follow-ups:** official licensed Eduma parent-theme update (live parent still 5.3.0 within published advisory ranges), reporter reproduction details, broader review beyond this bounded investigation. The child-theme release does not resolve parent-theme advisories; do not claim the whole site is secure. No staff report was automatically submitted.
+
 ## 2026-10-15 — Integrate graduands QR in Toolkit Control and review live website security
 **Area:** custom website administration · graduation QR · controlled security review
 **Environments:** demo ✅ · production ✅; read-only security checks on production
