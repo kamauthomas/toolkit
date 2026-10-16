@@ -84,11 +84,7 @@ $output = ""; foreach ($values as $key => $value) $output .= $key."=".quoted($va
 file_put_contents($target, $output, LOCK_EX); chmod($target, 0600);
 ' "$campus_repo/.env" "$state_file" "$env_payload"
 
-tar -czf "$archive" -C "$campus_repo" \
-  --exclude='./.env' --exclude='./.git' --exclude='./node_modules' \
-  --exclude='./storage/logs/*' --exclude='./storage/framework/cache/data/*' \
-  --exclude='./storage/framework/sessions/*' --exclude='./storage/framework/views/*' \
-  --exclude='./database/*.sqlite' .
+python3 "$wordpress_repo/scripts/deployment/build-runtime-package.py" campus "$campus_repo" "$archive"
 
 cpanel_session_open "$CPANEL_AUTH"
 cpanel_user=${CPANEL_AUTH%%:*}

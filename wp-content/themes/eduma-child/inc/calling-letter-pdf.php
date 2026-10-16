@@ -477,7 +477,7 @@ function toolkit_calling_letter_pdf_asset( $entry, $ink_only = false ) {
 	}
 	$cache_file = toolkit_calling_letter_private_dir() . '/_pdfimg-' . md5( $memo_key . '|' . strlen( $binary ) . '|' . md5( $binary ) ) . '.cache';
 	if ( is_readable( $cache_file ) ) {
-		$cached = @unserialize( (string) file_get_contents( $cache_file ) );
+		$cached = @unserialize( (string) file_get_contents( $cache_file ), array( 'allowed_classes' => false ) );
 		if ( is_array( $cached ) && isset( $cached['width'], $cached['colour'] ) ) {
 			$memo[ $memo_key ] = $cached;
 			return $cached;

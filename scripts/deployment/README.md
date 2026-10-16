@@ -188,3 +188,24 @@ review an isolated desktop/mobile render when layout changed, then deploy the
 same reviewed payload to production. Never submit a test application on
 production. Keep `functions.php` last because it activates routes and triggers
 the theme release/cache transition.
+
+
+## Runtime payload checkpoint — 16 October 2026
+
+`runtime_payload.py` rejects development documentation, backup variants, source
+maps, archives and public environment files when the shared Python cPanel uploader
+is used. Private configuration and transient audit/rollback storage are handled
+separately. This guard does not retrofit every historical shell deployment.
+
+`build-runtime-package.py PROFILE SOURCE OUTPUT` builds from explicit application
+paths, filters development material, preserves required licenses and adds Laravel's
+empty runtime directories without packaging databases, logs or cached secrets.
+The initial Campus provisioning script now uses it. That provisioning script still
+resets its isolated database and must not be rerun on an existing installation.
+Approved existing public downloads are not removed by this packaging policy.
+
+Server work is paused. Read the local checkpoint at
+`docs/checkpoints/CHECKPOINT-2026-10-16-SECURITY-AND-LOCATION-QR.md` before doing
+anything remotely. Do not replay the archived negative-probe script. The next
+network action must follow the user's decision to resume and should be a normal
+availability check, not another security payload.

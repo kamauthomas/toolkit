@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/private-file-boundary.php";
 /**
  * Automated calling-letter generation for new admissions applications.
  * Generation is native PHP (ZipArchive + DOMDocument, no external library
@@ -861,14 +862,18 @@ add_action( 'admin_post_toolkit_calling_letter_download', function() {
 	$letter_id = absint( $_GET['letter'] ?? 0 );
 	check_admin_referer( 'toolkit_calling_letter_download_' . $letter_id );
 	global $wpdb;
-	$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . toolkit_calling_letter_table_name() . ' WHERE id = %d', $letter_id ) );
+	$row = $wpdb->get_row( $wpdb->prepare( 'SELECT l.*, a.reference FROM ' . toolkit_calling_letter_table_name() . ' l JOIN ' . toolkit_application_table_name() . ' a ON a.id = l.application_id WHERE l.id = %d', $letter_id ) );
 	if ( ! $row ) {
 		wp_die( 'Calling letter file not found.' );
 	}
 	/* PDF is the default: 'docx' has to be asked for explicitly. */
 	$format = 'docx' === ( $_GET['format'] ?? 'pdf' ) ? 'docx' : 'pdf';
 	$path   = 'pdf' === $format ? $row->pdf_path : $row->file_path;
-	if ( empty( $path ) || ! is_readable( $path ) ) {
+	$expected = basename( toolkit_calling_letter_file_path( $row->application_id, $row->reference ) );
+	if ( 'pdf' === $format ) $expected = preg_replace( '/\.docx$/', '.pdf', $expected );
+	// Preserve pre-isolation letters, but never cross into another site's folder.
+	$path = toolkit_confined_private_file( $path, array( toolkit_calling_letter_output_dir(), toolkit_calling_letter_private_dir() ), $expected );
+	if ( false === $path ) {
 		wp_die( 'Calling letter file not found.' );
 	}
 	nocache_headers();

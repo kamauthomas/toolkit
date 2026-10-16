@@ -21,6 +21,9 @@ class Panel:
   if optional and re.search(r'does not exist|doesn.t exist|No such file|not found',str(d.get('errors',[])),re.I):return None
   raise RuntimeError('Cannot establish file state: '+str(p))
  def upload(self,path,data):
+  policy_path=ROOT/'scripts/deployment/runtime_payload.py'
+  import importlib.util
+  spec=importlib.util.spec_from_file_location('toolkit_payload_policy',policy_path);policy=importlib.util.module_from_spec(spec);spec.loader.exec_module(policy);policy.assert_runtime_upload(path)
   p=Path(path);d=self.s.post(self.api+'Fileman/upload_files',data={'dir':str(p.parent),'overwrite':1},files={'file-1':(p.name,data)},timeout=90).json()
   if d.get('status')!=1 or int((d.get('data') or {}).get('succeeded',0))!=1:raise RuntimeError('Upload failed: '+str(p))
  def api2call(self,module,func,**args):

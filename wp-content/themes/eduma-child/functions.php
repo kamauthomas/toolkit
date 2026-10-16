@@ -26,7 +26,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.10.16.1';
+	return '2026.10.16.3';
 }
 
 function toolkit_is_demo_environment() {
