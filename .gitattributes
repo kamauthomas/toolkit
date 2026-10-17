@@ -2,3 +2,4 @@
 wp-content/themes/eduma-child/assets/calendar/*.ics -text whitespace=cr-at-eol
 # Unified patch context includes prefix spaces before original indentation.
 scripts/deployment/releases/graduation-announcement-*.patch -whitespace
+scripts/deployment/releases/patches/mzizi-relay-*.patch -whitespace

@@ -2,7 +2,7 @@
 // Run the actual adapter with synthetic WordPress boundaries; never send network traffic.
 function add_action(...$args) {}
 function add_filter(...$args) {}
-function get_option($key, $default = false) { return $key === 'toolkit_application_storage_version' ? '1.2.0' : $default; }
+function get_option($key, $default = false) { return $key === 'toolkit_application_storage_version' ? '1.3.0' : $default; }
 function wp_salt($key) { return 'synthetic-audit-salt'; }
 function wp_hash($value) { return hash('sha256', $value); }
 function home_url($path = '') { return 'https://audit.example.test'.$path; }
@@ -24,6 +24,7 @@ class AuditDatabase {
  public array $captured = [];
  public function prepare($query, ...$args) { return $query; }
  public function get_row(...$args) { return null; }
+ public function get_var(...$args) { return 1; }
  public function insert($table, $row, $formats) { $this->captured = $row; throw new AuditStorageBoundary('Stopped before any database write'); }
 }
 $wpdb = new AuditDatabase;

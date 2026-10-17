@@ -1,5 +1,27 @@
 # Browser-free theme deployments
 
+## Mandatory review before production commits and releases
+
+Follow [the repository instructions](../../AGENTS.md): review the actual diff
+for flaws and security issues before a production-intended commit, then review
+the exact commit and fetched server baseline again before pushing/deploying.
+Record findings and meaningful checks in the same change's WORKLOG/release note.
+Unresolved security blockers and failed required checks stop production release.
+Review authentication/permissions, nonce checks, input/output handling, data and
+secret exposure, paths/uploads, outbound requests, duplicate actions and failure
+recovery as applicable. Include retry/concurrency checks for integrations.
+
+Build an explicit runtime payload and apply `runtime_payload.py`; documentation,
+reports, development files and recovery archives stay in Git/private storage,
+outside public/application roots. Approved public downloads and necessary
+license notices remain supported. Preserve server drift with anchored patches.
+Verify demo first and use only bounded normal release checks on production.
+Negative security cases belong in isolated tests; a security review is not an
+instruction to run live attack probes, replay uncertain submissions or evade WAF.
+
+The Mzizi relay policy, scheduler requirements and synthetic regression command
+are documented in [MZIZI-RELAY.md](../../docs/MZIZI-RELAY.md).
+
 This directory retains the terminal-driven cPanel Fileman deployment scripts
 used for the Toolkit WordPress child theme. They do not attach to an existing
 browser session and therefore do not interrupt an operator using the browser.
