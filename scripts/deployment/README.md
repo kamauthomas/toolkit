@@ -48,6 +48,16 @@ restricted to the local operator account.
 
 ## Release scripts
 
+`releases/deploy-graduation-details-2026.10.21.1.py` publishes the supplied
+12th graduation programme, arrival guidance and Notice Board event, then imports
+the operator-authorized 294-name roster through the deployed strict parser.
+Run demo first and complete the browser acceptance before production. It checks
+fresh source against the captured baseline, patches PHP with zero fuzz, uploads
+six runtime files, activates the release last, verifies public pages/assets and
+uses a temporary private CLI importer that removes itself. Raw workbooks, review
+PDFs, reports and development files are not deployed. Private rollback/options
+snapshots are retained for recovery. See `docs/GRADUATION-2026-PUBLICATION.md`.
+
 `releases/deploy-graduation-announcement-2026.10.07.3.sh` publishes the supplied
 22 October Class of 2026 announcement. It checks the inspected environment's
 baseline, applies its focused patch without fuzz, preserves recovery files and

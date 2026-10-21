@@ -26,8 +26,15 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.10.17.1';
+	return '2026.10.21.1';
 }
+
+add_action( 'wp_enqueue_scripts', function() {
+	if ( 'graduation' === get_query_var( 'toolkit_showcase' ) || is_page( 'notice-board' ) ) {
+		$file = '/assets/css/graduation-programme.css';
+		wp_enqueue_style( 'toolkit-graduation-programme', get_stylesheet_directory_uri() . $file, array( 'eduma-child-brand-tokens' ), toolkit_asset_version( get_stylesheet_directory() . $file ) );
+	}
+}, 30 );
 
 function toolkit_is_demo_environment() {
 	$host = strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );

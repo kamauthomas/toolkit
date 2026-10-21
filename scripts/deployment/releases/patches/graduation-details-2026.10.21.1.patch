@@ -1,0 +1,101 @@
+diff --git a/wp-content/themes/eduma-child/functions.php b/wp-content/themes/eduma-child/functions.php
+index 716d13e..a8a3ddf 100644
+--- a/wp-content/themes/eduma-child/functions.php
++++ b/wp-content/themes/eduma-child/functions.php
+@@ -26,9 +26,16 @@ function toolkit_editorial_story_preview() {
+  * URLs and triggers one server-side object/page-cache purge per environment.
+  */
+ function toolkit_theme_release() {
+-	return '2026.10.17.1';
++	return '2026.10.21.1';
+ }
+ 
++add_action( 'wp_enqueue_scripts', function() {
++	if ( 'graduation' === get_query_var( 'toolkit_showcase' ) || is_page( 'notice-board' ) ) {
++		$file = '/assets/css/graduation-programme.css';
++		wp_enqueue_style( 'toolkit-graduation-programme', get_stylesheet_directory_uri() . $file, array( 'eduma-child-brand-tokens' ), toolkit_asset_version( get_stylesheet_directory() . $file ) );
++	}
++}, 30 );
++
+ function toolkit_is_demo_environment() {
+ 	$host = strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
+ 	return 'demo.toolkitafrica.ac.ke' === $host;
+diff --git a/wp-content/themes/eduma-child/template-parts/graduation-announcement.php b/wp-content/themes/eduma-child/template-parts/graduation-announcement.php
+index 31ef23c..7dd1ce4 100644
+--- a/wp-content/themes/eduma-child/template-parts/graduation-announcement.php
++++ b/wp-content/themes/eduma-child/template-parts/graduation-announcement.php
+@@ -13,12 +13,12 @@ $announcement_assets = get_stylesheet_directory_uri() . '/assets/';
+ 		<div class="toolkit-graduation__copy">
+ 			<p class="toolkit-graduation__class">Class of <svg viewBox="0 0 100 75" aria-hidden="true"><path d="M2 23 50 2l48 21-48 22zM20 35v20c17 18 43 18 60 0V35L50 49z" fill="currentColor"/><path d="M95 25v38" stroke="#ff6600" stroke-width="4"/><circle cx="95" cy="66" r="5" fill="#ff6600"/></svg></p>
+ 			<h2 id="toolkit-graduation-title"><span class="toolkit-graduation__year">2026</span><span class="toolkit-graduation__heading">Graduation</span><span class="toolkit-graduation__ceremony">Ceremony</span></h2>
+-			<p id="toolkit-graduation-intro">Join us as we celebrate our graduates and the next generation of skilled, confident and productive youth.</p>
++			<p id="toolkit-graduation-intro">Powering Africa’s Future: Skills, Innovation and Opportunity for Women and Youth.</p>
+ 		</div>
+ 		<div class="toolkit-graduation__bottom">
+ 			<dl class="toolkit-graduation__details">
+ 				<div><span class="toolkit-graduation__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6m10-6v6M3 11h18m-14 4h2m3 0h2m3 0h2m-12 3h2m3 0h2"/></svg></span><div><dt>Date</dt><dd>Thursday,<br><time datetime="2026-10-22" class="toolkit-graduation__date">22nd October 2026</time></dd></div></div>
+-				<div><span class="toolkit-graduation__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg></span><div><dt>Time</dt><dd>9:00 AM<br>– 1:00 PM</dd></div></div>
++				<div><span class="toolkit-graduation__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg></span><div><dt>Time</dt><dd>9:00 AM–1:00 PM<span>Arrival from 8:00 AM</span></dd></div></div>
+ 				<div><span class="toolkit-graduation__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 10c0 5-7 12-7 12S5 15 5 10a7 7 0 0 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><div><dt>Venue</dt><dd>The Toolkit Skills &amp; Innovation HUB<span>Karen–Kikuyu Highway<br>(Southern Bypass), Kikuyu</span></dd></div></div>
+ 			</dl>
+ 			<div class="toolkit-graduation__actions"><a class="toolkit-graduation__save" href="<?php echo esc_url( $announcement_assets . 'calendar/toolkit-graduation-2026.ics' ); ?>" download="toolkit-graduation-2026.ics"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6m10-6v6M3 11h18m9 3v5m-2.5-2.5h5"/></svg> Save the date <span aria-hidden="true">›</span></a><button type="button" class="toolkit-graduation__close" data-graduation-close>Close</button><a class="toolkit-graduation__more" href="<?php echo esc_url( home_url( '/graduation/' ) ); ?>">Graduation details <span aria-hidden="true">→</span></a></div>
+diff --git a/wp-content/themes/eduma-child/template-parts/pages/graduation.php b/wp-content/themes/eduma-child/template-parts/pages/graduation.php
+index 742e083..fed5c3b 100644
+--- a/wp-content/themes/eduma-child/template-parts/pages/graduation.php
++++ b/wp-content/themes/eduma-child/template-parts/pages/graduation.php
+@@ -1,10 +1,21 @@
+ <?php
+ /**
+  * Evidence-led graduation and achievement page.
+- * Ceremony date remains deliberately unconfirmed until an approved date is supplied.
++ * Ceremony details follow the supplied October 2026 programme and invitation.
+  */
+ get_header();
+ $base = get_stylesheet_directory_uri() . '/assets/images/graduation/';
++$programme = array(
++	array( '8:00–9:00 AM', 'Arrival, registration and gown fitting', 'Millicent & Nyokabi' ),
++	array( '9:00–9:10 AM', 'Procession', 'Millicent & Nyokabi' ),
++	array( '9:10–9:20 AM', 'National anthem, East African anthem and prayer', 'Clergy representative' ),
++	array( '9:20–9:40 AM', 'Official welcome remarks', 'Jane Muigai Kamphuis — Toolkit Director' ),
++	array( '9:40–10:00 AM', 'Entertainment and addresses by two graduands / alumni', 'Ann Nyokabi' ),
++	array( '10:00–11:00 AM', 'Speeches', '' ),
++	array( '11:00–11:40 AM', 'Guest speaker', '' ),
++	array( '11:40 AM–12:30 PM', 'Graduation awards and presentation of certificates', 'Sylvester T Emirundu — Toolkit Principal' ),
++	array( '12:30–1:00 PM', 'Vote of thanks', 'Sylvester T Emirundu — Toolkit Principal' ),
++);
+ $gallery = array(
+ 	array( 'kmm-2071-jpg.webp', 'Toolkit graduates sharing a joyful moment during a graduation ceremony' ),
+ 	array( 'kmm-2146-jpg.webp', 'Graduates celebrating after completing their training journey' ),
+@@ -24,11 +35,17 @@ $gallery = array(
+ ?>
+ <main id="main-content" class="toolkit-page toolkit-graduation-page">
+ 	<section class="graduation-hero">
+-		<div class="graduation-hero__copy"><p class="toolkit-kicker">Achievement made visible</p><h1>Graduation at Toolkit</h1><p>Graduation celebrates more than a ceremony. It recognises the discipline, practical learning and personal growth behind every completed training journey.</p><div class="graduation-hero__actions"><a class="toolkit-btn toolkit-btn--primary" href="#graduands">View graduands list</a><a class="toolkit-btn toolkit-btn--secondary" href="#graduation-gallery">Explore the gallery</a><a class="toolkit-btn toolkit-btn--secondary" href="<?php echo esc_url( home_url( '/testimonials/' ) ); ?>">Hear graduate voices</a></div></div>
+-		<figure><img src="<?php echo esc_url( $base . 'kmm-2071-jpg.webp' ); ?>" width="1800" height="1153" alt="Toolkit graduates sharing a joyful moment during a graduation ceremony"><figcaption><strong>A shared milestone</strong><span>Skills • Achievement • Progression</span></figcaption></figure>
++		<div class="graduation-hero__copy"><p class="toolkit-kicker">Achievement made visible</p><h1>Class of 2026 Graduation</h1><p>Join the 12th graduation ceremony for Toolkit technicians on Thursday, 22 October 2026. Together we celebrate practical skills, innovation and the opportunities ahead for women and youth.</p><div class="graduation-hero__actions"><a class="toolkit-btn toolkit-btn--primary" href="#graduands">View graduands list</a><a class="toolkit-btn toolkit-btn--secondary" href="#programme">View ceremony programme</a><a class="toolkit-btn toolkit-btn--secondary" href="<?php echo esc_url( home_url( '/testimonials/' ) ); ?>">Hear graduate voices</a></div></div>
++		<figure><img src="<?php echo esc_url( $base . 'kmm-2071-jpg.webp' ); ?>" width="1800" height="1153" alt="Toolkit graduates sharing a joyful moment during a graduation ceremony"><figcaption><strong>From the graduation archive</strong><span>Skills • Achievement • Progression</span></figcaption></figure>
+ 	</section>
+ 
+-	<section class="graduation-date toolkit-section" aria-labelledby="graduation-date-title"><span aria-hidden="true"><i class="fas fa-calendar-check"></i></span><div><p class="toolkit-kicker">Class of 2026</p><h2 id="graduation-date-title">Thursday, 22 October 2026</h2><p>9:00 AM–1:00 PM at The Toolkit Skills &amp; Innovation HUB, Karen–Kikuyu Highway (Southern Bypass), Kikuyu.</p></div><a href="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/calendar/toolkit-graduation-2026.ics' ); ?>" download="toolkit-graduation-2026.ics">Save the date <i class="fas fa-calendar-plus" aria-hidden="true"></i></a></section>
++	<section class="graduation-date toolkit-section" aria-labelledby="graduation-date-title"><span aria-hidden="true"><i class="fas fa-calendar-check"></i></span><div><p class="toolkit-kicker">Class of 2026</p><h2 id="graduation-date-title">Thursday, 22 October 2026</h2><p><strong>Arrival, registration and gown fitting: 8:00–9:00 AM.</strong> Ceremony: 9:00 AM–1:00 PM (East Africa Time).</p><p>The Toolkit for Skills &amp; Innovation Hub, 7219 Karen–Kikuyu Highway (Southern Bypass), Kikuyu, Kenya.</p></div><a href="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/calendar/toolkit-graduation-2026.ics' ); ?>" download="toolkit-graduation-2026.ics">Save the date <i class="fas fa-calendar-plus" aria-hidden="true"></i></a></section>
++
++	<section id="programme" class="graduation-programme toolkit-section" aria-labelledby="graduation-programme-title">
++		<header><p class="toolkit-kicker">12th graduation ceremony · 22 October 2026</p><h2 id="graduation-programme-title">The ceremony programme</h2><p class="graduation-programme__theme">Powering Africa’s Future: Skills, Innovation and Opportunity for Women and Youth</p><p>Master of ceremonies: Hosea Mugera, Toolkit General Manager.</p></header>
++		<div class="graduation-programme__table"><table><caption class="screen-reader-text">Toolkit graduation programme, Thursday 22 October 2026. All times are East Africa Time.</caption><thead><tr><th scope="col">Time (EAT)</th><th scope="col">Activity</th><th scope="col">Facilitator</th></tr></thead><tbody><?php foreach ( $programme as $item ) : ?><tr><th scope="row"><?php echo esc_html( $item[0] ); ?></th><td><?php echo esc_html( $item[1] ); ?></td><td><?php echo esc_html( $item[2] ?: '—' ); ?></td></tr><?php endforeach; ?></tbody></table></div>
++		<p class="graduation-programme__help">Please arrive from 8:00 AM for registration and gown fitting. For ceremony enquiries, <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">contact Toolkit</a>.</p>
++	</section>
+ 
+ 	<?php get_template_part( 'template-parts/graduands' ); ?>
+ 
+diff --git a/wp-content/themes/eduma-child/template-parts/pages/notice-board.php b/wp-content/themes/eduma-child/template-parts/pages/notice-board.php
+index 5eb619d..2587480 100644
+--- a/wp-content/themes/eduma-child/template-parts/pages/notice-board.php
++++ b/wp-content/themes/eduma-child/template-parts/pages/notice-board.php
+@@ -16,6 +16,7 @@ $apply_url = home_url( '/apply/' );
+ 		</div>
+ 		<p class="toolkit-notice-results" aria-live="polite"></p>
+ 		<div class="toolkit-notice-grid">
++			<article data-category="event" data-date="2026-10-21"><div class="toolkit-notice-card__content"><span class="toolkit-tag toolkit-tag--orange">Graduation · Class of 2026</span><h2>12th Toolkit graduation ceremony — 22 October 2026</h2><p>Celebrate our graduands at the Toolkit for Skills &amp; Innovation Hub, 7219 Karen–Kikuyu Highway (Southern Bypass), Kikuyu. Arrival, registration and gown fitting begin at 8:00 AM; the ceremony runs from 9:00 AM to 1:00 PM (EAT).</p><p>Theme: Powering Africa’s Future: Skills, Innovation and Opportunity for Women and Youth.</p><div class="toolkit-notice-card__meta"><span><i class="far fa-calendar" aria-hidden="true"></i> Thursday, 22 October 2026</span><span><i class="far fa-user-circle" aria-hidden="true"></i> Toolkit graduation programme</span></div><a href="<?php echo esc_url( home_url( '/graduation/#programme' ) ); ?>">View programme <i class="fas fa-arrow-right" aria-hidden="true"></i></a><a href="<?php echo esc_url( home_url( '/graduation/#graduands' ) ); ?>">Find a graduand <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/graduation/kmm-2143-jpg.webp' ); ?>" width="600" height="400" alt="Toolkit graduates celebrating their achievement"></article>
+ 			<article data-category="admissions" data-date="2026-07-20"><div class="toolkit-notice-card__content"><span class="toolkit-tag">Admissions</span><h2>Course applications and admissions guidance</h2><p>Review the current Toolkit course pathways and use the guided application route. Admissions will confirm availability, schedules, fees, and entry requirements.</p><div class="toolkit-notice-card__meta"><span><i class="far fa-calendar" aria-hidden="true"></i> Current guidance</span><span><i class="far fa-user-circle" aria-hidden="true"></i> Admissions office</span></div><a href="<?php echo esc_url( $apply_url ); ?>">Start application <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div><img src="<?php echo esc_url( $image ); ?>" width="600" height="400" alt="Toolkit Notice Board admissions update"></article>
+ 			<article data-category="notice" data-date="2026-01-01"><div class="toolkit-notice-card__content"><span class="toolkit-tag toolkit-tag--orange">Important notice</span><h2>Anti-fraud guidance</h2><p>Confirm application and payment instructions with Toolkit before sending money or personal documents. Use only verified Toolkit contacts.</p><div class="toolkit-notice-card__meta"><span><i class="fas fa-shield-alt" aria-hidden="true"></i> Standing guidance</span><span><i class="far fa-user-circle" aria-hidden="true"></i> Admin office</span></div><a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact Toolkit <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div><div class="toolkit-notice-card__symbol"><i class="fas fa-shield-alt" aria-hidden="true"></i></div></article>
+ 			<article data-category="opportunity" data-date="2026-07-20"><div class="toolkit-notice-card__content"><span class="toolkit-tag">Opportunity</span><h2>Current skills pathways</h2><p>Explore the practical training and progression pathways currently presented in Toolkit’s course directory.</p><div class="toolkit-notice-card__meta"><span><i class="far fa-clock" aria-hidden="true"></i> Ongoing</span><span><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Toolkit hubs</span></div><a href="<?php echo esc_url( home_url( '/our-ventures/' ) ); ?>">Explore courses <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div><img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/images/courses/electrical.jpg' ); ?>" width="600" height="400" alt="Electrical installation learner in practical training"></article>

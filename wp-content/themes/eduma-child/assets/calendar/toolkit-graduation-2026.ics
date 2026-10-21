@@ -5,14 +5,16 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:graduation-20261022@toolkitafrica.ac.ke
-DTSTAMP:20261007T060000Z
+DTSTAMP:20261021T060000Z
+SEQUENCE:1
 DTSTART:20261022T060000Z
 DTEND:20261022T100000Z
-SUMMARY:Toolkit Class of 2026 Graduation Ceremony
+SUMMARY:Toolkit 12th Graduation Ceremony - Class of 2026
 LOCATION:The Toolkit Skills & Innovation HUB\, Karen-Kikuyu Highway
  (Southern Bypass)\, Kikuyu\, Kenya
-DESCRIPTION:Celebrate Toolkit graduates and the next generation of skilled
- \, confident and productive youth. 9:00 AM to 1:00 PM East Africa Time.
+DESCRIPTION:Arrival\, registration and gown fitting from 8:00 AM EAT.\nCer
+ emony: 9:00 AM to 1:00 PM EAT.\nTheme: Powering Africa's Future: Skills\,
+  Innovation and Opportunity for Women and Youth.
 URL:https://toolkitafrica.ac.ke/graduation/
 STATUS:CONFIRMED
 END:VEVENT

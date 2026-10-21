@@ -1,3 +1,15 @@
+## 2026-10-21 — Publish supplied graduation programme and approved graduands
+**Area:** graduation · Notice Board · public roster
+**Environments:** demo ✅ · production ✅ — release 2026.10.21.1
+**Commit(s):** this change (see Git history)
+
+Reviewed the supplied programme, final invitation, workbook and draft booklets. Published 294 unique approved name/course rows on demo and production, including Hadiid and Class of 2025 as Welding following the operator's clarification. Only names and courses are public; school/stream/row-number fields and original documents remain local. Added the nine-activity programme and theme to Graduation, an Events notice linking to the timetable/list, and 8 AM arrival guidance on the existing controlled homepage popup. The formal ceremony and calendar remain 9 AM–1 PM EAT on 22 October. Corrected the programme's noon 12:30 AM typo to PM from the surrounding sequence; unnamed speakers remain unnamed.
+
+The stable QR destination and admin publication/visibility controls remain. The importer uses the existing strict parser, saves private rollback options, verifies the saved list and deletes its temporary executable; its cron job is removed. Only six runtime theme assets were deployed. Browser testing identified existing styles overriding hidden Notice Board cards; a scoped rule now restores category/search filtering and empty-state visibility. Security/flaw review covered output escaping, two-field privacy, source integrity, private CLI-only publication, authorized targets, scheduler cleanup, baseline drift and runtime payloads. No new public privileged/upload route, credentials in UI, live test application or attack probe.
+
+**Verified by:** all 294 actual rows pass the production CSV parser; 35 existing graduands permission/approval/visibility tests and 26 popup repeat scenarios pass; PHP syntax and diff checks pass. Demo runtime bytes, public Graduation/Notice Board/homepage HTTP 200 and release/asset markers, 294 rendered names, five course filters, nine programme rows and calendar bytes verified. Production passed the same runtime byte, HTTP/release/assets, roster and programme checks. All 294 public name/course pairs match the approved source exactly on each site. Both environments passed 17 desktop/mobile browser checks, including name search, the 178-name Welding filter, full-list print despite active filters, reset/no-match, Notice Board Events filtering, stable QR links and mobile overflow checks. Screenshots reviewed; calendar CRLF/75-octet folding checked. Temporary importer executables and jobs were removed; private recovery snapshots retained.
+**Follow-ups:** retain administrative name/correction controls; institution can update approved names through the same preview/publish workflow. Source checksums, private rollback and publication evidence are under reports/graduation-2026-10-21/. Earlier unrelated working-tree edits preserved.
+
 ## 2026-10-17 — Investigate Mzizi 409, retain course choices and add safe relay recovery
 **Area:** admissions relay · course availability · production security review
 **Environments:** demo ✅ · production ✅ — release 2026.10.17.1
