@@ -1,3 +1,15 @@
+## 2026-10-21 — Apply named graduands removals and retain Cindy once
+**Area:** public graduands corrections
+**Environments:** demo ✅ · production ✅ — data-only correction; theme release remains 2026.10.21.1
+**Commit(s):** this correction (see Git history)
+
+Matched the operator's nine requested removals to exact existing name/course records, accounting for unique spelling and shortened-name variants. Cindy Malika Galana was already published under Welding and is retained once. The accurate result is 285 (294 minus nine), explained to the operator; no duplicate or invented entry is added to force the earlier suggested total.
+
+Prepared a data-only, demo-first amendment through the existing strict CSV parser. The private CLI importer pins the reviewed baseline revision, saves recovery options, publishes names/courses only, verifies all saved rows, purges page caches and removes itself and its temporary job. Security/flaw review: exact source matching, duplicate rejection, baseline drift protection, fixed CLI targets, private rollback/logging, two-field publication and no public upload/privileged route. No theme change, original-workbook edit, test application or security probe is needed.
+
+**Verified by:** all nine existing targets match once; Cindy exists once in the 294-name source and on the live page; the proposed 285-row list passes the deployed PHP CSV validator. Demo and production each returned HTTP 200 with all 285 public name/course pairs exactly matching the corrected source; all nine removed pairs are absent and Cindy appears once. The normal canonical QR destination was also verified on each host, confirming cache invalidation. Temporary importers and scheduler jobs were removed; private recovery snapshots retained. No theme files changed.
+**Follow-ups:** public totals follow verified people rather than an arithmetic target; intake/cohort details remain excluded from the public two-column list. Existing unrelated work preserved.
+
 ## 2026-10-21 — Publish supplied graduation programme and approved graduands
 **Area:** graduation · Notice Board · public roster
 **Environments:** demo ✅ · production ✅ — release 2026.10.21.1

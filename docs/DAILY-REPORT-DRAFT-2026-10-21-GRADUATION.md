@@ -48,3 +48,18 @@ scenarios. One release, version 2026.10.21.1, verified on demo and live. Each en
 passed 17 desktop/mobile checks. All 294 public name/course pairs match the
 approved source. The existing QR opens the current list. No private spreadsheet
 columns or raw documents were published, and no test applications were sent.
+
+
+## Subsequent graduands correction
+
+At the operator's request, nine named entries were removed from the public
+roster. Cindy Malika Galana was already listed and is retained once under
+Welding. The resulting total is 285 (294 minus nine); no duplicate was added.
+The two-field public list continues to exclude school and intake details.
+
+Task: apply and verify the nine removals and existing Cindy entry. Time spent:
+to enter. Status: completed — demo and live verified. Both normal QR destinations returned
+HTTP 200 with exactly 285 correct name/course pairs, all nine removals absent
+and Cindy present once. Corrected course
+totals are 174 Welding, 74 Welding Upskilling, 24 Solar Electrician, 11 Solar
+Upskilling and 2 Organic Farming. Original source files remain unchanged.

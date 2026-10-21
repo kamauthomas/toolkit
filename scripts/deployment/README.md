@@ -57,6 +57,11 @@ six runtime files, activates the release last, verifies public pages/assets and
 uses a temporary private CLI importer that removes itself. Raw workbooks, review
 PDFs, reports and development files are not deployed. Private rollback/options
 snapshots are retained for recovery. See `docs/GRADUATION-2026-PUBLICATION.md`.
+The subsequent `releases/amend-graduands-2026.10.21.py` applies the operator’s
+nine named removals using the separate pinned correction source: 285 names,
+with the already-listed Cindy retained once. It changes data only, checks the
+prior publication revision and verifies the canonical QR destination. Do not
+reuse the original 294-row import to undo later approved corrections.
 
 `releases/deploy-graduation-announcement-2026.10.07.3.sh` publishes the supplied
 22 October Class of 2026 announcement. It checks the inspected environment's

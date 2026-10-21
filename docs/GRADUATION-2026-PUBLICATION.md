@@ -2,6 +2,9 @@
 
 Prepared by Thomas.
 
+**Latest public total: 285**, following the nine-name correction below. The
+294-row figures describe the original workbook publication.
+
 ## Supplied sources and decisions
 
 Source folder: `/home/t316/Desktop/Projects_father/toolkit/docs/graduation/`.
@@ -95,3 +98,30 @@ verification rechecks the current list and purges cached markup without replacin
 the approved publication again. No live test application or negative probe ran.
 Private source checksums, baseline/rollback files, publication and verification
 records are retained under `reports/graduation-2026-10-21/` (ignored by Git).
+
+
+## Operator correction — nine removals
+
+The operator subsequently requested nine existing entries be removed. The
+shortened/spelling variants matched unique existing records. Cindy Malika
+Galana was already present under Welding and is retained exactly once, so the
+correct revised total is **285**, not 290. No extra person or duplicate is
+introduced to force an arithmetic target. The original 294-row workbook import
+above remains historical source evidence; original documents are not modified.
+
+The correction is data-only and uses a separate private source/rollback record.
+The reviewed original publication hash must match before a replacement; an
+unexpected live edit stops the amendment. The deployed strict CSV parser is
+verified against the repository, and production requires the exact source
+checksum verified on demo. The temporary private importer removes itself and
+its scheduler entry; page caches are purged. All rendered name/course pairs
+and the normal QR destination are checked against the corrected source.
+
+Corrected course totals: Welding 174; Welding Upskilling 74; Solar Electrician
+24; Solar Upskilling 11; Organic Farming 2. Cindy is counted within Welding.
+Demo and production both returned HTTP 200 with all 285 displayed pairs
+matching the corrected source exactly, including the normal QR destination.
+All nine removed pairs were absent and Cindy appeared once. Temporary importers
+and jobs were removed; private recovery copies were retained. No theme files
+changed. The earlier 17-per-site browser checks describe the initial publication;
+this data-only correction was verified by exact rendered-pair comparisons.
