@@ -88,8 +88,8 @@ class PdfDocument:
         self.page += 1
         self.y = 48
 
-    def logo(self):
-        with Image.open(REPO / "docs/assets/toolkit-logo.png") as source:
+    def logo(self, path=None):
+        with Image.open(path or REPO / "docs/assets/toolkit-logo.png") as source:
             buffer = BytesIO()
             source.convert("RGBA").save(buffer, "PNG")
         buffer.seek(0)

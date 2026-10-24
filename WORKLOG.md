@@ -1,3 +1,19 @@
+## 2026-10-24 — Save Wingu drafts and prepare the concise October report
+**Area:** employee-authorised timesheet save · management reporting
+**Environments:** Wingu employee session; local Word/PDF report preparation; no website deployment or Report System filing
+**Commit(s):** this handoff and report-format change (see Git history)
+
+Saved 17 documented dates in Wingu at the employee's instruction: five September dates and twelve October dates. All persisted as Draft after independent server reloads; the separate approval action was not invoked. Kept 24/28 September and 2 October blank as explicitly requested, preserving the 15 existing approved dates, Annual Leave and off/holiday days. Prepared a concise one-page October general report with Thomas Kamau's name and the exact supplied Toolkit logo from imgs; no reporting cutoff is displayed. Includes posters, graduation booklet/event materials, system improvements, reporting, support and remaining decisions.
+
+**Verified by:** exact saved note/time/project checks, plausible hours and no duplicate dates across both reloaded months; 37 unrelated month rows unchanged. Four estimated endpoints in the saved rows are labelled. Initial October save exposed native Unicode/newline handling; corrected the same 12 known Draft records to readable ASCII point-form notes, preserving their existing identifiers/times/project, then reloaded and verified. Intercepted previews caught missing metadata and local comparison issues without sending invalid update requests. Final Wingu receipt is ignored/private under reports/report-preparation-2026-10-23/push-2026-10-24/.
+
+**Report checks:** one A4 PDF page; 284 words in the Word body/tables; exact supplied logo embedded in Word; Thomas Kamau author metadata; full Word-to-PDF text retention; no visible reporting cutoff/date range; all text within page bounds; final PDF visually reviewed. Report renderer retains prior defaults while allowing a supplied local logo and author. Python compilation and staged diff checks pass. Original logo/artwork/logs and earlier preparation snapshots preserved.
+
+**Security/flaw review:** employee identity, displayed project, row status/ownership, dates and exact outgoing payload reviewed before saves; baseline/receipt journals and reload comparisons prevented duplicate or uncertain replay. Owned-Draft note correction carried unchanged displayed project/time values into the native save handler, without changing approval/ownership controls. No credentials read or entered; isolated browser/authentication state removed after verification. Local-only renderer change has no runtime route, SQL, upload, relay or server payload; reports/private evidence remain excluded from deployment. No Git push, live security probe, production test application or external message.
+
+**Follow-ups:** three work descriptions remain pending; normal approver to review saved Drafts. Institutional/hosting/Registry/Admissions decisions remain listed in the October report. See docs/reporting/OCTOBER-REPORT-AND-WINGU-HANDOFF-2026-10-24.md. Unrelated working-tree edits preserved.
+
+
 ## 2026-10-24 — Reconcile Wingu and prepare evidence-backed work reports
 **Area:** reporting · attendance preparation · communications and graduation evidence
 **Environments:** local report generation; Wingu read-only inspection in an employee-authenticated temporary Brave session; no deployment or external filing

@@ -140,3 +140,36 @@ minimised private saved-row evidence are under
 `reports/report-preparation-2026-10-23/`. These are local preparation files, not
 production deployment material. See `docs/reporting/REPORT-PACK-2026-10-24.md`
 for the reproduction requirements and limitations.
+
+## Authorised save — 24 October 2026
+
+Following the employee's explicit “push wingu” instruction, **17 unique dates**
+were saved and independently reloaded as **Draft**:
+
+- September: 22, 23, 25, 29 and 30.
+- October: 1, 5, 6, 7, 13, 14, 15, 16, 19, 21, 22 and 23.
+
+The employee explicitly left 24/28 September and 2 October pending. Their rows
+remain blank. All 15 previously approved September entries, Annual Leave,
+holidays and off days remain unchanged. The current project was selected from
+Wingu's displayed choices. All saved notes, times, hours and project values were
+compared after an independent server reload for each month; 37 unrelated rows
+were unchanged and no duplicate date was created. Four estimated endpoints in
+the saved rows are labelled in their notes. Wingu uses minutes; original seconds
+remain in the local attendance review. The separate **Submit for Approval**
+action was not invoked; saved Draft does not mean manager approval.
+
+Wingu's native handler stores Unicode bullets literally and removes newlines.
+Use readable single-line ASCII point-form notes. The initial October notes were
+corrected on the same 12 confirmed Draft records, then reloaded and checked.
+The draft grid renders project/times as text while its save handler still
+requires their form values. For the owned-Draft note-only correction, the exact
+already-saved project/times were preserved as form metadata; no values,
+approval restrictions or ownership controls were changed. Previewing with the
+outgoing request intercepted exposed the missing-field issue without sending
+an invalid update. Do not infer save success from HTTP 200 alone.
+
+The private receipt, per-month comparisons and saved-date list are in
+`reports/report-preparation-2026-10-23/push-2026-10-24/`. Earlier preparation
+reports remain historical pre-save snapshots. Authentication state is temporary
+and excluded from all handoff/source-control files.

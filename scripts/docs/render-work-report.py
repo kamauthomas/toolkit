@@ -37,11 +37,11 @@ base.proportions = widths
 
 
 class Pdf(base.PdfDocument):
-    def __init__(self, path, title, period):
+    def __init__(self, path, title, period, author='Thomas'):
         super().__init__(path)
         self.period = period
         self.surface.set_metadata(cairo.PDF_METADATA_TITLE, title)
-        self.surface.set_metadata(cairo.PDF_METADATA_AUTHOR, 'Thomas')
+        self.surface.set_metadata(cairo.PDF_METADATA_AUTHOR, author)
 
     def finish_page(self):
         self.color(base.BORDER)
@@ -54,7 +54,8 @@ class Pdf(base.PdfDocument):
         self.context.show_page()
 
 
-def render(source, period):
+def render(source, period, logo=None, author='Thomas'):
+    logo = logo or ROOT / 'docs/assets/toolkit-logo.png'
     soup = BeautifulSoup(markdown.markdown(source.read_text(), extensions=['tables']), 'html.parser')
     nodes = [node for node in soup.children if getattr(node, 'name', None)]
     title = soup.find('h1').get_text() if soup.find('h1') else source.stem
@@ -72,9 +73,9 @@ def render(source, period):
         document.styles[style].font.size = Pt(size)
         document.styles[style].font.color.rgb = RGBColor.from_string(base.TEAL)
         document.styles[style].paragraph_format.keep_with_next = True
-    document.add_picture(str(ROOT / 'docs/assets/toolkit-logo.png'), width=Mm(42))
-    pdf = Pdf(source.with_suffix('.pdf'), title, period)
-    pdf.logo()
+    document.add_picture(str(logo), width=Mm(42))
+    pdf = Pdf(source.with_suffix('.pdf'), title, period, author)
+    pdf.logo(logo)
     for node in nodes:
         if node.name in {'h1', 'h2', 'h3', 'p'}:
             paragraph = document.add_paragraph(style={'h1': 'Heading 1', 'h2': 'Heading 2', 'h3': 'Heading 3'}.get(node.name, 'Normal'))
@@ -116,7 +117,7 @@ def render(source, period):
     for run in footer.runs:
         run.font.size = Pt(7)
     document.core_properties.title = title
-    document.core_properties.author = 'Thomas'
+    document.core_properties.author = author
     document.save(source.with_suffix('.docx'))
     print(source.name, pdf.finish(), 'PDF pages; Word and PDF prepared')
 
@@ -125,5 +126,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path)
     parser.add_argument('--period', default='22 September–23 October 2026')
+    parser.add_argument('--logo', type=Path, help='Existing approved institution logo')
+    parser.add_argument('--author', default='Thomas')
     args = parser.parse_args()
-    render(args.source, args.period)
+    render(args.source, args.period, args.logo, args.author)
