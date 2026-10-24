@@ -1,3 +1,11 @@
+## 2026-10-24 — Shorten October report attention items
+**Area:** management report editorial revision
+**Environments:** local Word/PDF only; no deployment or external filing
+**Commit(s):** this report handoff revision (see Git history)
+
+Removed the original second and last points under Items requiring attention as requested. Retained Admissions/Mzizi and hosting items and regenerated both October report copies. Verified one PDF page, the two remaining points, full Word-to-PDF text retention and the exact supplied logo/name; visually checked the final PDF. Private validation/manifest updated. No application/runtime change or server payload; existing working-tree edits preserved.
+
+
 ## 2026-10-24 — Save Wingu drafts and prepare the concise October report
 **Area:** employee-authorised timesheet save · management reporting
 **Environments:** Wingu employee session; local Word/PDF report preparation; no website deployment or Report System filing

@@ -19,6 +19,9 @@ name and the supplied Toolkit logo. No reporting cutoff appears in that report.
   `reports/report-preparation-2026-10-23/push-2026-10-24/RECEIPT.md`.
 
 All generated reports/evidence remain ignored and outside deployment payloads.
+The later requested editorial revision removes the original second and fourth
+items under “Items requiring attention”; the Admissions/Mzizi and hosting items
+remain. Both Word and PDF were regenerated and remain one page.
 The original supplied logo, artwork, attendance logs and earlier report snapshots
 are unchanged. Local report reproduction:
 
