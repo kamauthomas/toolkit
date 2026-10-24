@@ -112,3 +112,31 @@ The log's final date is the requested preparation start point, not proof that
 Wingu saved every earlier date. Existing Wingu rows and current project choices
 still need live reconciliation before any submission or overwrite. Weekends,
 off days and work notes without supporting evidence remain held for review.
+
+## Read-only reconciliation — 24 October 2026
+
+The employee signed in personally using a separate temporary Brave profile.
+The September and October Edit Time Sheet views confirm approved entries through
+**21 September**; subsequent inspected working rows are blank. September required
+selecting the displayed Toolkit project and using **Refresh Data** before the
+grid appeared. An empty grid without a project is not evidence of an empty month.
+No timesheet was updated or submitted.
+
+The new attendance export, `reports/logs/Thomas 1 Sep - 23 Oct 2026.csv`, contains
+65 observations and ends at **23 October, 08:08:25, check-in**, with no checkout.
+The reconciled preparation period is therefore **22 September–23 October**.
+Wingu marks **8, 9 and 12 October as Annual Leave**; keep these unchanged.
+Weekends and Mashujaa Day remain held without explicit work/time approval.
+
+The employee authorised estimates for missing working-day endpoints only:
+08:00–08:15 and 17:12–17:30. The review pack labels these separately from recorded
+times and preserves original seconds and exceptional late departures. Three
+arrival and three departure fields are estimated; three work descriptions still
+need employee confirmation (24/28 September and 2 October). Saturday 17 October
+has evidenced work, but no attendance entry is authorised by that evidence alone.
+
+Management and daily drafts, the Wingu review workbook/CSV, source registers and
+minimised private saved-row evidence are under
+`reports/report-preparation-2026-10-23/`. These are local preparation files, not
+production deployment material. See `docs/reporting/REPORT-PACK-2026-10-24.md`
+for the reproduction requirements and limitations.

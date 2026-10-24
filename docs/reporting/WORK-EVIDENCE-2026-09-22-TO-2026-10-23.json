@@ -1,0 +1,296 @@
+{
+  "prepared_by": "Thomas",
+  "period_start_provisional": "2026-09-22",
+  "period_end_from_log": "2026-10-23",
+  "entries": {
+    "2026-09-22": {
+      "summary": "Improved visitor administration and the website's institutional information and directions.",
+      "tasks": [
+        "Improved Reception QR-draft management and prepared optional location-based checkout, kept disabled pending physical testing.",
+        "Published the verified Toolkit map and repaired the institutional overview page styling; completed system reference documents."
+      ],
+      "state": "Verified website and Reception releases; location checkout remains disabled.",
+      "sources": [
+        "WORKLOG.md",
+        "../reception-system/WORKLOG.md"
+      ],
+      "basis": "dated worklogs and release evidence",
+      "follow_up": "Complete the on-site checkout-boundary trial and staff acceptance before activation."
+    },
+    "2026-09-23": {
+      "summary": "Prepared promotional layouts for digital-skills and digital-marketing recruitment.",
+      "tasks": [
+        "Prepared and revised course-promotion layouts with different titles, fees and calls to action."
+      ],
+      "state": "Artwork files reviewed; distribution and final approval are not evidenced.",
+      "sources": [
+        "../imgs/posters/samples/digital_marketing.png",
+        "../imgs/posters/samples/digital_marketing2.png",
+        "../imgs/posters/samples/digital_ss.png",
+        "../imgs/posters/samples/digital_ss2.png"
+      ],
+      "basis": "visually reviewed artwork and file modification date; confirm activity date",
+      "follow_up": "Communications to approve the selected artwork and verify current course information."
+    },
+    "2026-09-25": {
+      "summary": "Prepared welding-upskilling and language-programme promotional materials.",
+      "tasks": [
+        "Created or revised campus, industry and upcountry welding promotion layouts.",
+        "Prepared combined French and German programme artwork."
+      ],
+      "state": "Dated artwork available; approval and distribution not independently confirmed.",
+      "sources": [
+        "../imgs/posters/samples/WELDING_UPSKILLING1.png",
+        "../imgs/posters/samples/welding_upskilling_nairobi.png",
+        "../imgs/posters/samples/upskilling_upcountry1.png",
+        "../imgs/posters/samples/French_feat_German.png"
+      ],
+      "basis": "visually reviewed artwork and file modification date; confirm activity date",
+      "follow_up": "Confirm fees and select final layout variants before reuse."
+    },
+    "2026-09-29": {
+      "summary": "Prepared photographic documentation layouts for damaged borehole encasements.",
+      "tasks": [
+        "Arranged supplied photographs into branded PCEA site-documentation sheets and revised the site captions."
+      ],
+      "state": "Photographic documentation only; this is not evidence that repairs were carried out.",
+      "sources": [
+        "../imgs/posters/samples/PCEA.png",
+        "../imgs/posters/samples/PCEA_Rafiki.png",
+        "../imgs/posters/samples/PCEA_rafiki3.png"
+      ],
+      "basis": "visually reviewed artwork and file modification date; confirm activity date",
+      "follow_up": "Confirm the correct site caption and final documentation version."
+    },
+    "2026-09-30": {
+      "summary": "Reviewed management findings, improved access to application links and continued promotional design work.",
+      "tasks": [
+        "Compared management findings with Reception and Reporting behaviour and inspected deployed systems.",
+        "Published the application QR with scan counters and the separate Lnk.Bio QR; prepared the QR handover report.",
+        "Prepared October, alumni, training/employment and welding-promotion artwork variants."
+      ],
+      "state": "QR releases verified on demo and production; management controls and design approvals retain follow-ups.",
+      "sources": [
+        "WORKLOG.md",
+        "../reception-system/docs/MANAGEMENT-REVIEW-COMPARISON-2026-09-30.md",
+        "../imgs/posters/samples/new_month_October.png",
+        "../imgs/posters/samples/alumni_october.png",
+        "../imgs/posters/samples/Senior_employment_model.png"
+      ],
+      "basis": "dated worklogs/releases plus visually reviewed dated artwork",
+      "follow_up": "Staff to phone-test printed QR samples and assign owners to outstanding controls."
+    },
+    "2026-10-01": {
+      "summary": "Updated published course fees and prepared QR artwork for the supplied campaign link.",
+      "tasks": [
+        "Published the supplied revised tuition and exam-fee information after demo checks.",
+        "Created and independently decoded PNG/SVG QR artwork for the supplied Canva link."
+      ],
+      "state": "Fee changes deployed and verified; supplied-link QR files prepared locally.",
+      "sources": [
+        "docs/DAILY-REPORT-DRAFT-2026-10-01-COURSE-PRICING.md",
+        "WORKLOG.md"
+      ],
+      "basis": "dated release records and verified local deliverables",
+      "follow_up": "Communications to use only the current approved fee artwork."
+    },
+    "2026-10-05": {
+      "summary": "Addressed verified system-audit issues and prepared management and communications material.",
+      "tasks": [
+        "Corrected contact validation, Reception staff access and administrator-only record changes/cleanup; improved applicant filtering and Reporting dashboard links.",
+        "Prepared the September management report and retained deployment checks across the systems.",
+        "Prepared customer-service and Teachers' Day promotional artwork."
+      ],
+      "state": "Verified system corrections deployed; email/SMS verification still requires a provider.",
+      "sources": [
+        "reports/system-audit-2026-10-05/TOOLKIT-AFRICA-SYSTEM-AUDIT-REMEDIATION-REPORT-2026-10-05.md",
+        "reports/monthly/2026-09/ICT-MONTHLY-REPORT-2026-09.md",
+        "../imgs/posters/samples/customer_service.png",
+        "../imgs/posters/samples/teachers_day1.png"
+      ],
+      "basis": "deployed audit evidence and dated artwork",
+      "follow_up": "Confirm real-account acceptance and an approved email/SMS provider."
+    },
+    "2026-10-06": {
+      "summary": "Organised a reusable poster collection and prepared environmental-awareness artwork.",
+      "tasks": [
+        "Reviewed 231 sources and packaged 108 distinct poster images, including required editable-source exports, with duplicate mapping and integrity checks.",
+        "Prepared Mazingira Day artwork from the supplied institutional material."
+      ],
+      "state": "Local ZIP and artwork preparation; no claim of external publication.",
+      "sources": [
+        "reports/poster-collection-2026-10-06/DAILY-REPORT-DRAFT.md",
+        "../imgs/posters/samples/mazingira.png"
+      ],
+      "basis": "verified archive report plus visually reviewed artwork",
+      "follow_up": "Communications to select approved artwork from the indexed collection."
+    },
+    "2026-10-07": {
+      "summary": "Prepared the management update, published the controlled graduation announcement and repaired document-opening problems.",
+      "tasks": [
+        "Prepared and revised Thomas's management report and graduation promotional layouts.",
+        "Published the graduation popup and calendar with controlled repeat rules.",
+        "Repaired LibreOffice startup and protected it from stale locks after hostname-changing restarts."
+      ],
+      "state": "Popup/calendar verified on demo and production; desktop repair verified locally.",
+      "sources": [
+        "reports/graduation-popup-2026-10-07/DAILY-REPORT-DRAFT.md",
+        "reports/libreoffice-repair-2026-10-07/recurrence/DAILY-REPORT-DRAFT.md",
+        "/home/t316/Documents/graduation.png"
+      ],
+      "basis": "dated worklogs, release evidence and desktop checks",
+      "follow_up": "Confirm normal document opening after the next reboot."
+    },
+    "2026-10-13": {
+      "summary": "Prepared Q4 ICT objectives, graduation booklet material and workstation support.",
+      "tasks": [
+        "Prepared six Q4 objectives and 25 key results in management documents.",
+        "Diagnosed and corrected terminal scrolling behaviour.",
+        "Prepared an initial 24-page graduation booklet sample and supporting portrait material."
+      ],
+      "state": "Planning and booklet drafts prepared locally; targets and editorial content need institutional review.",
+      "sources": [
+        "docs/q4-2026/DAILY-REPORT-DRAFT.md",
+        "docs/desktop-support/KITTY-SCROLLING-DAILY-REPORT-2026-10-13.md",
+        "../docs/graduation/Toolkit_Graduation_Booklet_Sample_v1.pdf"
+      ],
+      "basis": "dated planning/support reports plus booklet file metadata",
+      "follow_up": "Confirm owners, priority targets and approved booklet content."
+    },
+    "2026-10-14": {
+      "summary": "Developed graduation cover/booklet layouts and partnership promotion artwork.",
+      "tasks": [
+        "Prepared and revised the 29-page booklet draft and graduation cover artwork.",
+        "Prepared KIHBT welding-partnership promotion layouts and revisions."
+      ],
+      "state": "Design drafts available; print/distribution approval not established by filenames.",
+      "sources": [
+        "../docs/graduation/Toolkit_Graduation_Booklet_Polished_v4.pdf",
+        "/home/t316/Documents/HOSEA_KIHBT2.png",
+        "/home/t316/Documents/sample1_Hosea.png",
+        "/home/t316/Documents/cover_page.png"
+      ],
+      "basis": "dated PDF/artwork metadata and visual review; confirm activity date",
+      "follow_up": "Confirm final partner copy, imagery and booklet content."
+    },
+    "2026-10-15": {
+      "summary": "Improved Reception operations and prepared the graduands QR destination and reporting handover.",
+      "tasks": [
+        "Deployed Reception pagination fixes, clearer overview statistics and private returning-visitor history.",
+        "Prepared the graduands webpage, searchable/printable list structure, permanent QR and administrator controls.",
+        "Reconciled the earlier Wingu preparation against the available September logs and continued cover/QR artwork."
+      ],
+      "state": "Reception and website releases verified; live Wingu saved-row reconciliation was not completed in that session.",
+      "sources": [
+        "reports/reception-graduands-2026-10-15/VERIFICATION.md",
+        "reports/wingu-preparation-2026-10-15/PREPARATION.md",
+        "/home/t316/Documents/GRADUANDS.png",
+        "/home/t316/Documents/cover.png"
+      ],
+      "basis": "verified releases, prior preparation record and dated artwork",
+      "follow_up": "Complete staff acceptance and reconcile actual Wingu rows before entry."
+    },
+    "2026-10-16": {
+      "summary": "Investigated reported website exposure and strengthened system protection and deployment hygiene.",
+      "tasks": [
+        "Investigated the image-modification claim; contained exposed source backups/installers and moved development material out of active site trees.",
+        "Applied verified website/report-download protections; prepared chatbot restrictions locally.",
+        "Retained an incident checkpoint after hosting access was blocked; continued partner and graduation layout drafts."
+      ],
+      "state": "Verified containment delivered; image tampering was not proven, broader testing remained incomplete, chatbot changes were local only.",
+      "sources": [
+        "docs/checkpoints/CHECKPOINT-2026-10-16-SECURITY-AND-LOCATION-QR.md",
+        "../report-system/WORKLOG.md",
+        "../Chat-bot/WORKLOG.md",
+        "/home/t316/Documents/HOSEA_RVIST.png"
+      ],
+      "basis": "incident/deployment evidence and local design artefacts",
+      "follow_up": "Arrange remaining hosting/vendor checks and private evidence retention; confirm missing partner artwork fields."
+    },
+    "2026-10-17": {
+      "summary": "Improved application delivery tracking and course availability, and prepared graduation invitation material.",
+      "tasks": [
+        "Corrected relay fields and duplicate-processing risks; added failure history, safe retry scheduling and persistent course choices during Mzizi outages.",
+        "Verified demo and production delivery/cache changes without sending a test application.",
+        "Prepared graduation invitation artwork and print/review PDFs."
+      ],
+      "state": "Website relay/cache improvements verified; unresolved Mzizi outcomes remain for Admissions review. Saturday attendance requires separate confirmation.",
+      "sources": [
+        "docs/MZIZI-RELAY.md",
+        "docs/DAILY-REPORT-DRAFT-2026-10-17-MZIZI.md",
+        "../docs/graduation/Toolkit_Graduation_Invitation_Final_Print.pdf",
+        "/home/t316/Documents/invitation_card.png"
+      ],
+      "basis": "verified release records and local invitation artefacts",
+      "follow_up": "Admissions to reconcile uncertain Mzizi submissions; confirm whether Saturday work belongs in Wingu."
+    },
+    "2026-10-19": {
+      "summary": "Refined graduation invitations/booklet material and prepared holiday promotion artwork.",
+      "tasks": [
+        "Revised the invitation layout and graduation booklet staff/leadership and foundation drafts.",
+        "Prepared Mashujaa Day promotional artwork."
+      ],
+      "state": "Local design/booklet drafts available; approval or public distribution not independently established.",
+      "sources": [
+        "../docs/graduation/Toolkit_Class_of_2026_Staff_Leadership_With_Cultural_Week_v4_Review.pdf",
+        "../docs/graduation/Toolkit_Class_of_2026_Foundation_and_Graduands_v6_Review.pdf",
+        "/home/t316/Documents/invitation_card_sample1.png",
+        "/home/t316/Documents/mashujaa.png"
+      ],
+      "basis": "dated PDF/artwork metadata and visual review; confirm activity date",
+      "follow_up": "Confirm approved ceremony copy and final invitation/leadership content."
+    },
+    "2026-10-21": {
+      "summary": "Published graduation information and the corrected public register, and prepared the booklet and event materials.",
+      "tasks": [
+        "Published the ceremony programme, Notice Board event and 294-name register, then applied nine requested removals to leave 285 names; Cindy was already present and kept once.",
+        "Verified desktop/mobile search, filters, printing and the permanent QR destination.",
+        "Revised booklet v11–v13, portraits, messages and registers; prepared guest/usher artwork and numbered usher cards 01–30 in two PDF formats."
+      ],
+      "state": "Website changes verified live; booklet and print materials prepared locally. No claim that the booklet was published or physically printed.",
+      "sources": [
+        "docs/GRADUATION-2026-PUBLICATION.md",
+        "../docs/graduation/WORKLOG.md",
+        "../docs/graduation/review_v13/Daily_Report_Draft.md",
+        "../docs/graduation/ushers_cards/Daily_Report_Draft.md",
+        "/home/t316/Documents/chief_guest.png",
+        "/home/t316/Documents/ushers.png"
+      ],
+      "basis": "verified website publication, booklet worklog/verification and visual artwork",
+      "follow_up": "Academic Registry to confirm remaining classification issues; Communications to confirm final print approval."
+    },
+    "2026-10-22": {
+      "summary": "Finalised booklet handoff copies and investigated newly reported hosting security concerns.",
+      "tasks": [
+        "Revised the leadership/department messages, added the Poland visit feature and supplied cover; delivered matching 67-page v16 raw, print-quality and light review PDFs.",
+        "Verified cover colours, unchanged following pages, text, fonts and page order across the handoff files.",
+        "Reviewed PHP security disclosures and hosting/file/account evidence; found probing but no confirmed successful intrusion in the inspected evidence."
+      ],
+      "state": "Local booklet deliverables verified; hosting package fixes and memory-error causes require provider confirmation. No security patch deployment or exploit test is claimed.",
+      "sources": [
+        "../docs/graduation/WORKLOG.md",
+        "../docs/graduation/handoff_v16/README.md",
+        "../docs/graduation/handoff_v16/verification.json",
+        "reports/php-cve-review-2026-10-22/DAILY-REPORT-DRAFT.md",
+        "reports/php-hit-review-2026-10-22/DAILY-REPORT-DRAFT.md"
+      ],
+      "basis": "dated booklet verification and retained read-only security assessments",
+      "follow_up": "Hosting to confirm complete security builds/restarts, logging and recurring memory failures; obtain final booklet sign-off."
+    },
+    "2026-10-23": {
+      "summary": "Reconciled new attendance logs and traced recent systems, posters and graduation work for reporting.",
+      "tasks": [
+        "Compared the new September–October attendance export with earlier logs and retained exact recorded times.",
+        "Prepared dated work notes, management reporting, artwork/booklet evidence and a follow-up register.",
+        "Opened a separate Brave session for the employee's Wingu sign-in and saved-row checks."
+      ],
+      "state": "Report preparation in progress at review; Wingu submission is not authorized or claimed.",
+      "sources": [
+        "reports/logs/Thomas 1 Sep - 23 Oct 2026.csv",
+        "reports/report-preparation-2026-10-23/VISUAL-SOURCES.csv"
+      ],
+      "basis": "current report-preparation work and supplied log",
+      "follow_up": "Confirm the live Wingu boundary, missing work descriptions and today's checkout before filing."
+    }
+  }
+}

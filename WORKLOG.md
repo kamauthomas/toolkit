@@ -1,3 +1,17 @@
+## 2026-10-24 — Reconcile Wingu and prepare evidence-backed work reports
+**Area:** reporting · attendance preparation · communications and graduation evidence
+**Environments:** local report generation; Wingu read-only inspection in an employee-authenticated temporary Brave session; no deployment or external filing
+**Commit(s):** this reporting change (see Git history)
+
+Confirmed Wingu approval through 21 September and blank subsequent working rows, establishing 22 September–23 October as the new reporting window. Preserved Wingu Annual Leave on 8, 9 and 12 October. Prepared Thomas's management and daily-report drafts, Wingu review workbook/CSV, source inventories and follow-up actions. Traced documented system releases, poster collection/design work, event cards and the final 67-page graduation booklet while distinguishing local preparation, live verification and pending approval.
+
+**Verified by:** 65 attendance observations preserved without person/device identifiers; 32 calendar rows; 34 recorded and six employee-authorised estimated endpoints; 12 held leave/off/holiday dates; original late checkout and duplicate-punch flags; three unsupported work descriptions explicitly pending. Conflicting-boundary negative check, stable estimate rerun, spreadsheet formula exclusion, source hashes, three booklet-copy hashes/67-page counts, complete Word-to-PDF text retention and visual PDF review. Local Python compilation and diff checks pass.
+
+**Security/flaw review:** local report-only scripts and actual changes reviewed; no production runtime payload, routes, database, upload or relay change. Wingu used displayed project selection/Refresh Data for inspection only; no Update Time Sheet or approval submission. Credentials, cookies, account URLs and original saved notes excluded from report/source-control outputs. Reports and minimised private evidence remain ignored outside deployment payloads; no live attack probes or production test application.
+
+**Follow-ups:** Thomas to confirm 24/28 September and 2 October work descriptions and six estimated endpoints, including the missing 23 October checkout. Saturday 17 October attendance requires explicit approval. Admissions, Registry, Communications and hosting follow-ups are listed separately; prior deployments/security conclusions were traced to retained evidence, not re-tested live. See docs/reporting/REPORT-PACK-2026-10-24.md. Unrelated working-tree edits preserved; no push or deployment.
+
+
 ## 2026-10-21 — Apply named graduands removals and retain Cindy once
 **Area:** public graduands corrections
 **Environments:** demo ✅ · production ✅ — data-only correction; theme release remains 2026.10.21.1
