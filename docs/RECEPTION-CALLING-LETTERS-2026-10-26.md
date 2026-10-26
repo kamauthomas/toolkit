@@ -5,6 +5,14 @@ applicants. Website applications and their letters remain read-only in Reception
 The module is deployed, enabled and verified on demo and production as of
 26 October 2026. New installations still default to disabled.
 
+Open **Calling letters** in the Reception sidebar for the dedicated workspace.
+Administrators can create a standalone letter through Details → Review → Issue,
+or work from an existing applicant. Website PDFs stay read-only. The workspace
+adds private automatic search, completion/download actions and version history.
+Its separate 15-file demo/production release and manual-letter table were verified
+with 31 demo and 16 production checks; no production test letter was issued.
+See the Reception repository’s docs/CALLING-LETTER-WORKSPACE.md for the workflow.
+
 ## Workflow and decisions
 
 | Record | Reception action | Authoritative copy |

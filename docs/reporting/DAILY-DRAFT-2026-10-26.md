@@ -17,7 +17,7 @@ of files kept on the hosting account.
 | Assess the latest PHP security releases and upgrade readiness | Not separately recorded | Completed; current installed releases match the main security fixes |
 | Review and publish completed changes to the remote repositories | Not separately recorded | Completed; existing unrelated drafts preserved locally |
 | Design and implement Reception calling-letter access and administrator issuance | Not separately recorded | Completed on demo and production; administrator issuance verified on demo |
-| Add a dedicated calling-letter workspace and direct manual invitations | Not separately recorded | Local checks passed; demo deployment pending |
+| Add a dedicated calling-letter workspace and direct manual invitations | Not separately recorded | Completed on demo and production; desktop and phone layouts checked |
 
 **Challenges:** Hosting checks timed out and were stopped until access was
 confirmed. Demo exposed a database compatibility issue that was corrected before
@@ -48,9 +48,16 @@ enabled on demo and production. Sample issuance, downloads, access restrictions
 and duplicate prevention were verified on demo, and the sample records were
 removed. Production checks used an existing website letter without creating
 test applicants or issuing test letters.
-The user authorised a one-run exception for the missing hosting module so this
-urgent release could proceed. That exception is closed; future checks remain
-required. Server software and installed libraries were not changed.
+Calling letters now have their own sidebar page, with separate Reception,
+website and manual registers. Administrators can enter a recipient directly,
+review the details and issue a letter without registering an applicant first.
+The workspace includes automatic search, downloads, replacement history and
+controlled test-data cleanup. Ordinary staff retain their permitted viewing
+access. Automatic deletion of manual letters was not introduced.
+The initial calling-letter release used the user-authorised one-run exception
+for the missing hosting module. That exception is closed; future checks remain
+required. The workspace update changed neither server software nor installed
+libraries.
 
 **Next working day:** Thomas and reception/admissions staff to review the updated
 screens and register; ICT to monitor refresh results and review the retention of
