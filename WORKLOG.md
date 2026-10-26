@@ -1,3 +1,16 @@
+## 2026-10-26 — Prepare runtime-only Laravel dependencies with rollback
+**Area:** server runtime policy · safe dependency maintenance
+**Environments:** UI/sync verified demo and production; vendor cleanup prepared locally
+**Commit(s):** this change (see Git history)
+
+Verified the completed UI/read-only sync release on both environments: 19 matching runtime files each, seven demo and 28 production website applications mirrored, setup jobs removed and recurring refresh configured. Reversible cleanup removed 279 reviewed files from active code directories (52 demo; 227 production/Campus), with homepage/inventory receipts. Private recovery holdings and genuine runtime plugin resources are explicitly retained rather than described as absent.
+
+Final normal inventory reads confirmed 33 development dependencies in each Reception/Campus installation. A later ordinary availability check timed out after metadata reads; stopped all requests. The user subsequently confirmed restored access and authorised proceeding; one normal front-controller read succeeded. Prepared isolated Composer --no-dev copies with networking/plugins/scripts disabled: Reception 112→79 and Campus 109→76, no runtime version changes. All five local migration/discovery/routes/environment/login checks pass for each; real working vendors unchanged.
+
+Hardened runtime packaging to reject development/unknown Composer manifests and manifest symlinks; reproducible package boundary tests pass. The demo separated front controller retains a legacy early-maintenance path to the wrong storage directory. Added an exact anchored repair and an existing-tool Composer deployment command with private rollback, pre-rendered maintenance, offline locked removal only, provider-cache rebuild, failure restoration and one-attempt cron cleanup. No uploaded executable helper, archive, project document or credential is needed.
+
+**Security/flaw review:** reviewed actual diff/operation for fixed targets/paths/commands, fresh metadata/root-lock checks, original maintenance-state preservation, no dependency upgrades/network/plugins/scripts, private 0700 rollback and 0600 logging, no business database/files/source changes, immutable native versions, bounded worker/polling, automatic failure restoration/unmaintenance, exact cron removal and normal login verification. Local shell fixtures cover success, Composer failure with rollback, missing Composer and an existing backup; maintenance clears and runtime fixture files survive. Exact index repair rejects missing/ambiguous anchors. Current UI and sync remain live; dependency cleanup requires demo verification before production/Campus. No known release security blocker; private holdings need a separate retention lifecycle. Existing user edits preserved; no Git push.
+
 ## 2026-10-26 — Correct vendor-document metadata search coverage
 **Area:** scoped server cleanup preflight
 **Environments:** no cleanup mutations yet; demo runtime release verified

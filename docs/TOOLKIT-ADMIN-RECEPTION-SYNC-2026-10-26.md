@@ -63,3 +63,17 @@ now use DATETIME, matching existing Reception migrations. A disposable socket-on
 MariaDB reproduced the exact error with legacy/strict defaults and passed the real
 corrected migration with four DATETIME columns and zero application rows. Resume
 is explicitly gated to the saved failure and exact fresh server hashes.
+
+## Verified deployment
+
+Release **2026.10.26.1** is verified on demo and production. All 19 deployed
+runtime-file hashes match across both environments. The additive table and first
+read-only sync succeeded: seven demo and 28 production entries. Both temporary
+setup jobs were removed. Demo's dedicated sync cron runs every five minutes;
+production's existing every-minute scheduler runs the five-minute task without
+an added duplicate cron. Normal homepage requests confirmed the release header
+and asset version, the fetched admin CSS matched exactly, and both Reception
+login pages returned 200 without fatal-error markers. No test applications or
+Mzizi replays were submitted. The final full Reception suite passes 95 tests /
+1,364 assertions after the schema correction. Signed-in staff acceptance is the
+remaining human review; no live signed-in admin visual check is claimed.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build allowlisted runtime archives; never package the whole repository."""
-import argparse,re,tarfile
+import argparse,json,re,tarfile
 from pathlib import Path
 PROFILES={
  'campus':['app','bootstrap','config','database','public','resources','routes','vendor','artisan','composer.json','composer.lock'],
@@ -25,6 +25,11 @@ def allowed(path):
 def build(profile,source,destination):
  source=source.resolve();destination=destination.resolve()
  if destination.is_relative_to(source):raise ValueError('Package output must be outside the source tree')
+ if profile in ('campus','reception') and (source/'vendor').exists():
+  metadata=source/'vendor/composer/installed.json'
+  if any((source/part).is_symlink() for part in ('vendor','vendor/composer','vendor/composer/installed.json')) or not metadata.is_file():raise ValueError('A regular Composer production-install manifest is required')
+  installed=json.loads(metadata.read_text())
+  if not isinstance(installed,dict) or installed.get('dev') is not False or installed.get('dev-package-names') != []:raise ValueError('Development dependencies are not runtime payloads; prepare a separate clean composer install --no-dev staging tree')
  entries=[]
  for relative in PROFILES[profile]:
   path=source/relative

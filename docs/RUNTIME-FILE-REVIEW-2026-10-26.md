@@ -61,3 +61,33 @@ passed local checks. No PHP helper or cron is used for inventory or cleanup. The
 private cleanup receipts record actual removal/verification; this prepared plan
 alone is not a completed server cleanup. API behaviour follows the documented
 [cPanel Fileman file operation API](https://api.docs.cpanel.net/cpanel-api-2/cpanel-api-2-modules-fileman/cpanel-api-2-functions-fileman-fileop).
+
+## Completed cleanup and remaining dependency work
+
+Receipts verify removal of 52 demo and 227 production/Campus files from active
+code directories: 79 Markdown, 28 text, 111 reStructuredText documents, 60 source
+maps and the old harmless demo canary. Every selected path disappeared from the
+post-cleanup inventory and both normal homepage checks returned 200. Recovery
+trash was not emptied. No approved download or license notice was selected.
+
+Private older holdings comprise 815 previous removed-file matches, two database
+snapshots and six incident-log archives (metadata only; about 20.5 MB). These were
+not downloaded or erased. Twelve actual plugin Markdown resources and three
+normal Reporting bytecode files remain separately classified. Reporting's fetched
+configuration contains explicit Python/bytecode/source/secret denial rules; no
+public bytecode request was made, so configuration is not presented as an HTTP
+exposure test.
+
+Fetched Composer metadata confirms 33 development dependencies in each Reception
+and Campus installation. The new package builder rejects a dev-installed vendor
+tree; use a separate clean staging tree, preserving the working copy's test tools.
+Isolated offline Composer removal passed for Reception (79 unchanged runtime
+packages) and Campus (76), with migration, discovery, routes, environment and
+synthetic login checks. Server cleanup uses the existing Composer/app tools with
+private rollback and maintenance, preserving runtime package code and versions.
+Actual vendor-cleanup receipts must establish its final completion.
+
+A later ordinary app-availability check timed out after the metadata/config reads;
+requests stopped immediately. The failing public host was not journalled, so no
+specific outage or IP block is inferred. The user confirmed access restored and a
+single normal cPanel retry succeeded. No IP rotation or attack probes were used.
