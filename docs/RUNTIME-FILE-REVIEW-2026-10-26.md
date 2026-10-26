@@ -134,3 +134,15 @@ writable destination parent, active job, chmod failure, move failure/mismatch an
 changed backup) and two existing-index/drift cases. No files are uploaded by the
 verification/cleanup path. Actual cleanup completion must come from
 `reports/fileinfo-followup-2026-10-26/additional-cleanup.json`, not this prepared plan.
+
+Execution first restricted the recovery root to 0700, then cPanel interpreted the
+relative move destination as a rename within Reception's private storage. The
+post-move check stopped the cleanup before the translation backup was touched.
+Read-only reconciliation located all 1,589 descendant entries there with matching
+relative paths/types/sizes/mtimes/modes, verified root 0700 and both original and
+intended paths absent. No runtime/business files were affected. The corrected
+command uses an absolute full destination and checks the returned destination
+before continuing. A one-use reconciliation accepts only this exact failed receipt,
+requires fresh intermediate metadata/private permissions and absent destinations,
+and records intent before moving. Five additional isolated reconciliation cases
+cover unknown receipts, stale content, duplicate attempts and unexpected destinations.

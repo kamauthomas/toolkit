@@ -37,14 +37,14 @@ class Panel:
         elif kwargs['op'] == 'move':
             assert self.restricted
             assert kwargs['sourcefiles'] == source[len(release.HOME):]
-            assert kwargs['destfiles'] == release.PARENT[len(release.HOME):]
+            assert kwargs['destfiles'] == dest and kwargs['destfiles'].startswith('/')
             if self.mode == 'move_failure': return {'event': {'result': 1}, 'data': [{'result': 0}]}
             self.moved = True
         else:
             assert kwargs['op'] == 'trash' and self.moved
             assert kwargs['sourcefiles'] == release.BACKUP[len(release.HOME):]
             self.trashed = True
-        return {'event': {'result': 1}, 'data': [{'result': 1}]}
+        return {'event': {'result': 1}, 'data': [{'result': 1, 'dest': dest}]}
 
 
 with tempfile.TemporaryDirectory(prefix='toolkit-followup-tests-') as directory:
@@ -111,4 +111,44 @@ with tempfile.TemporaryDirectory(prefix='toolkit-followup-tests-') as directory:
             assert json.loads((release.CASE / 'index-verification.json').read_text())['uploaded_files'] == 0
         assert not panel.uploaded
 
-print('PASS: 10 recovery/cleanup success and negative scenarios; 2 idempotent index/drift scenarios; no live requests.')
+    for mode in ['reconcile_success', 'unknown_receipt', 'stale_intermediate', 'duplicate_reconciliation', 'unexpected_destination']:
+        release.CASE = Path(directory) / mode; release.CASE.mkdir()
+        release.save('followup-plan.json', plan); release.save('recovery-before.private.json', rows)
+        state = {'verified': False, 'recovery_mode_verified': '0700',
+                 'move_receipt': {'event': {'result': 1}, 'data': [{'result': 1, 'src': source, 'dest': release.INTERMEDIATE}]}}
+        if mode == 'unknown_receipt': state['move_receipt']['data'][0]['dest'] = '/unknown'
+        if mode == 'duplicate_reconciliation': state['relocation_reconciliation'] = {'status': 'uncertain'}
+        release.save('additional-cleanup.json', state)
+        release.save('relocation-reconciliation-preflight.private.json', {'metadata_equal': True})
+        calls = []; finished = []
+        class ReconcilePanel:
+            def api2call(self, module, function, **kwargs):
+                if function == 'listcron': return {'event': {'result': 1}, 'data': []}
+                assert function == 'fileop' and kwargs['op'] == 'move'
+                assert kwargs['sourcefiles'] == release.INTERMEDIATE[len(release.HOME):]
+                assert kwargs['destfiles'] == dest and kwargs['destfiles'].startswith('/')
+                calls.append(kwargs)
+                return {'event': {'result': 1}, 'data': [{'result': 1, 'dest': '/unexpected' if mode == 'unexpected_destination' else dest}]}
+        panel = ReconcilePanel(); release.connection = lambda: panel
+        def reconcile_search(unused, path):
+            assert path == release.INTERMEDIATE
+            result = copy.deepcopy(rows)
+            for row in result: row['file'] = release.INTERMEDIATE + row['file'][len(source):]
+            if mode == 'stale_intermediate': result[0]['mtime'] += 1
+            return result
+        release.search = reconcile_search
+        def reconcile_stat(unused, parent, names):
+            if parent == release.HOME.rstrip('/'): return [{'type': 'dir', 'mode': 0o40755}]
+            if names == [Path(release.INTERMEDIATE).name]: return [{'type': 'dir', 'mode': 0o40700, 'exists': 1}]
+            return []
+        release.stat = reconcile_stat
+        release.finish_cleanup = lambda *args: finished.append(args)
+        try: release.reconcile_relocation(True)
+        except AssertionError:
+            assert mode != 'reconcile_success' and not finished
+            if mode != 'unexpected_destination': assert not calls
+        else:
+            assert mode == 'reconcile_success' and len(calls) == 1 and len(finished) == 1
+            assert finished[0][-1] == release.INTERMEDIATE
+
+print('PASS: 10 cleanup, 2 existing-index/drift and 5 narrowly gated reconciliation scenarios; no live requests.')

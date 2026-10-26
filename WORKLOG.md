@@ -1,3 +1,14 @@
+## 2026-10-26 — Reconcile cPanel move semantics before finishing cleanup
+**Area:** private recovery relocation · failure handling
+**Environments:** historical recovery root restricted to 0700; runtime/business files unchanged
+**Commit(s):** this change (see Git history)
+
+The first recovery move returned success but interpreted a relative destination as a rename within Reception private storage. Post-move metadata verification stopped the operation before any obsolete-backup removal. Read-only reconciliation verified all 1,589 descendant entries (882 files / 707 directories) still match original relative paths/types/sizes/mtimes/modes at the exact receipt-reported intermediate location; root is 0700 and original/intended destinations are absent. No files were deleted and no application files or PHP settings changed. Existing demo/production maintenance paths and vendor metadata were independently verified, login pages 200, uploads zero.
+
+Corrected the operation to an absolute full destination and require the API receipt to name it exactly. Added a one-use recovery path gated to this known failed receipt and independently recorded preflight, with fresh full metadata/private-mode/absence/cron checks and journal-before-move. It cannot replay an existing reconciliation or a later backup-removal action. The planned backup removal still requires live loader/metadata checks after successful relocation.
+
+**Verified/security review:** reviewed actual path/lifecycle diff; 17 isolated cleanup/index/reconciliation cases pass, including wrong receipts, stale intermediate data, duplicate reconciliation and unexpected returned destinations. Syntax/diff checks pass. Exact fixed targets, no new execution path/upload/source document, no destructive business operation or admission relay; no same-commit unrelated user edits. Missing fileinfo still blocks vendor cleanup. Finish and page verification require actual final receipt; no completion inferred from accepted move.
+
 ## 2026-10-26 — Investigate missing module and scope remaining runtime cleanup
 **Area:** target PHP requirements · runtime file policy · private recovery
 **Environments:** read-only hosting evidence collected; cleanup prepared; deployed UI/sync unchanged

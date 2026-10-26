@@ -20,9 +20,14 @@ DEST = PARENT + '/platform-security-2026-10-16'
 PLUGIN = HOME + 'public_html/wp-content/plugins/team-press/admin/inc/cmb2/'
 BACKUP = PLUGIN + 'languages/cmb2-pt_PT.mo.orig'
 INDEX = HOME + 'reception-public/index.php'
+INTERMEDIATE = HOME + 'reception-system/storage/app/private/toolkit-private-storage'
 
 
 def sha(data): return hashlib.sha256(data).hexdigest()
+
+
+def signature(rows, prefix):
+    return sorted((r['file'][len(prefix):], r['type'], int(r.get('size', 0)), int(r.get('mtime', 0)), int(r.get('mode', 0))) for r in rows)
 
 
 def load_module(name, filename):
@@ -166,8 +171,6 @@ def cleanup(execute=False):
     panel = connection()
     current = search(panel, SOURCE)
     before = json.loads((CASE / 'recovery-before.private.json').read_text())
-    def signature(rows, prefix):
-        return sorted((r['file'][len(prefix):], r['type'], int(r.get('size', 0)), int(r.get('mtime', 0)), int(r.get('mode', 0))) for r in rows)
     assert signature(current, SOURCE) == signature(before, SOURCE), 'Recovery baseline drift'
     assert not any(int(r.get('exists', 0)) for r in stat(panel, PARENT, [Path(DEST).name]))
     parent = stat(panel, HOME.rstrip('/'), ['toolkit-private-storage'])
@@ -186,12 +189,20 @@ def cleanup(execute=False):
     restricted = stat(panel, str(Path(SOURCE).parent), [Path(SOURCE).name])
     assert len(restricted) == 1 and restricted[0]['type'] == 'dir' and int(restricted[0]['mode']) & 0o777 == 0o700, 'Recovery restriction not verified; do not move'
     state['recovery_mode_verified'] = '0700'; save(journal.name, state)
-    result = panel.api2call('Fileman', 'fileop', op='move', sourcefiles=SOURCE[len(HOME):], destfiles=PARENT[len(HOME):], doubledecode=0)
+    result = panel.api2call('Fileman', 'fileop', op='move', sourcefiles=SOURCE[len(HOME):], destfiles=DEST, doubledecode=0)
     state['move_receipt'] = result; save(journal.name, state)
     assert result.get('event', {}).get('result') == 1 and len(result.get('data', [])) == 1 and str(result['data'][0].get('result')) == '1'
+    assert result['data'][0].get('dest') == DEST, 'Move destination receipt differs; reconcile before further mutation'
+    finish_cleanup(panel, plan, state, before, SOURCE)
+
+
+def finish_cleanup(panel, plan, state, before, moved_from):
+    journal = CASE / 'additional-cleanup.json'
     after = search(panel, DEST)
     assert signature(after, DEST) == signature(before, SOURCE), 'Relocated recovery metadata mismatch'
     assert not any(int(r.get('exists', 0)) for r in stat(panel, str(Path(SOURCE).parent), [Path(SOURCE).name]))
+    if moved_from != SOURCE:
+        assert not any(int(r.get('exists', 0)) for r in stat(panel, str(Path(moved_from).parent), [Path(moved_from).name]))
     moved = stat(panel, PARENT, [Path(DEST).name])
     assert len(moved) == 1 and moved[0]['type'] == 'dir' and int(moved[0]['mode']) & 0o777 == 0o700
     state['recovery_move_verified'] = True; state['preserved_recovery_files'] = plan['recovery_regular_files']; save(journal.name, state)
@@ -209,14 +220,50 @@ def cleanup(execute=False):
     print('VERIFIED:', plan['recovery_regular_files'], 'historical files moved outside Reception; metadata/permissions preserved; one unused .orig removed; normal pages 200.')
 
 
+def reconcile_relocation(execute=False):
+    if not execute:
+        print('Only the known relative-destination failure can be reconciled; use --execute after review.'); return
+    plan = json.loads((CASE / 'followup-plan.json').read_text())
+    state = json.loads((CASE / 'additional-cleanup.json').read_text())
+    receipt = state['move_receipt']
+    assert state['verified'] is False and state['recovery_mode_verified'] == '0700'
+    assert receipt.get('event', {}).get('result') == 1 and len(receipt.get('data', [])) == 1
+    row = receipt['data'][0]
+    assert row['src'] == SOURCE and row['dest'] == INTERMEDIATE and str(row['result']) == '1'
+    assert 'relocation_reconciliation' not in state and 'translation_backup_receipt' not in state, 'Prior reconciliation/cleanup action exists; inspect before retry'
+    assert json.loads((CASE / 'relocation-reconciliation-preflight.private.json').read_text())['metadata_equal'] is True
+    panel = connection()
+    before = json.loads((CASE / 'recovery-before.private.json').read_text())
+    current = search(panel, INTERMEDIATE)
+    assert signature(current, INTERMEDIATE) == signature(before, SOURCE), 'Intermediate baseline changed'
+    for parent, names in [(PARENT, [Path(DEST).name]), (str(Path(SOURCE).parent), [Path(SOURCE).name])]:
+        assert not any(int(r.get('exists', 0)) for r in stat(panel, parent, names))
+    current_stat = stat(panel, str(Path(INTERMEDIATE).parent), [Path(INTERMEDIATE).name])
+    assert len(current_stat) == 1 and current_stat[0]['type'] == 'dir' and int(current_stat[0]['mode']) & 0o777 == 0o700
+    parent = stat(panel, HOME.rstrip('/'), ['toolkit-private-storage'])
+    assert len(parent) == 1 and parent[0]['type'] == 'dir' and int(parent[0]['mode']) & 0o777 in {0o700, 0o755}
+    cron = panel.api2call('Cron', 'listcron')
+    assert cron.get('event', {}).get('result') == 1
+    assert not any(SOURCE in r.get('command', '') or INTERMEDIATE in r.get('command', '') for r in cron.get('data', []))
+    state['relocation_reconciliation'] = {'source': INTERMEDIATE, 'destination': DEST, 'status': 'intent-recorded'}
+    save('additional-cleanup.json', state)
+    result = panel.api2call('Fileman', 'fileop', op='move', sourcefiles=INTERMEDIATE[len(HOME):], destfiles=DEST, doubledecode=0)
+    state['relocation_reconciliation']['receipt'] = result; save('additional-cleanup.json', state)
+    assert result.get('event', {}).get('result') == 1 and len(result.get('data', [])) == 1
+    assert str(result['data'][0].get('result')) == '1' and result['data'][0].get('dest') == DEST
+    state['relocation_reconciliation']['status'] = 'move-accepted'; save('additional-cleanup.json', state)
+    finish_cleanup(panel, plan, state, before, INTERMEDIATE)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['prepare', 'verify-index', 'cleanup'])
+    parser.add_argument('action', choices=['prepare', 'verify-index', 'cleanup', 'reconcile-relocation'])
     parser.add_argument('--execute', action='store_true')
     args = parser.parse_args()
     try:
         if args.action == 'prepare': prepare() if args.execute else print('Use prepare --execute for read-only authenticated baseline collection.')
         elif args.action == 'verify-index': verify_index(args.execute)
+        elif args.action == 'reconcile-relocation': reconcile_relocation(args.execute)
         else: cleanup(args.execute)
     except Exception as exc:
         trace = exc.__traceback__
