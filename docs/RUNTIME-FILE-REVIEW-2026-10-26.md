@@ -99,3 +99,38 @@ vendor state was not changed. PHP Selector controls ALT-PHP: fileinfo is already
 enabled there for 8.4, while the actual applications use native EA-PHP 8.4.
 Native extension controls are disabled; no PHP-version or extension setting was
 changed. Further cleanup must pass the required platform check after provisioning.
+
+## Follow-up review and prepared recovery relocation
+
+A fresh eight-root metadata review found no newly selected README/source-map
+files in active code. Remaining matches include required legal notices, actual
+Elementor runtime Markdown resources, eight bundled plugin template ZIPs and an
+unused CMB2 `.mo.orig` translation backup. The fetched CMB2 loader exactly matches
+the local reviewed file and loads `.mo`, with no `.mo.orig` reference. Preserve
+the actual `.mo` translation and template ZIPs; only the obsolete backup is selected.
+
+Historical security recovery inside Reception contains 882 regular files and
+707 descendant directories. The search also returns the queried root itself;
+it is explicitly excluded from descendant comparisons. No symlink/special-file
+entry was returned. Fresh cron metadata has no job referencing that historical
+folder. The recovery root and shared private-storage parent are both 0755.
+The prepared cleanup restricts only this historical recovery root to 0700 before
+moving it to `toolkit-private-storage/platform-security-2026-10-16`; it does not
+change permissions on the shared parent or delete the last recovery copy.
+Full relative-path/type/size/mtime/mode metadata must agree before/after the move,
+the old path must disappear, and the destination must retain 0700. The single
+obsolete translation backup goes to private recovery trash, which is not emptied.
+
+Fresh front-controller reads establish that the correct early-maintenance path
+is already present on both Reception environments. The production file needs
+verification, not another upload. Its vendor metadata is unchanged. Module
+investigation confirms no matching EA-PHP 8.4 fileinfo module is available, so the
+33-package-per-install dependency cleanup still cannot proceed. No Composer
+attempt or PHP configuration change is part of this follow-up. The existing UI
+and read-only sync release remains the deployed application release.
+
+Local follow-up fixtures pass ten recovery/cleanup cases (including stale state,
+writable destination parent, active job, chmod failure, move failure/mismatch and
+changed backup) and two existing-index/drift cases. No files are uploaded by the
+verification/cleanup path. Actual cleanup completion must come from
+`reports/fileinfo-followup-2026-10-26/additional-cleanup.json`, not this prepared plan.

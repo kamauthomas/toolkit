@@ -1,3 +1,16 @@
+## 2026-10-26 — Investigate missing module and scope remaining runtime cleanup
+**Area:** target PHP requirements · runtime file policy · private recovery
+**Environments:** read-only hosting evidence collected; cleanup prepared; deployed UI/sync unchanged
+**Commit(s):** this change (see Git history)
+
+At the user's request, listed the exact 33 Composer development packages selected per Reception/Campus installation (test/debug/development tools and their supporting libraries). Runtime versions remain unchanged. Read-only inspection of actual EA-PHP 8.4.27 finds a readable configured module directory but no matching fileinfo.so, no fileinfo INI and no built-in fileinfo without INI. No module was available to test-load; package queries are unavailable in the account. No PHP setting/version change, uploaded helper, platform bypass or new Composer attempt. Temporary inspection cron removed. Dependency cleanup remains blocked by hosting provisioning.
+
+Fresh eight-root metadata inventory keeps licenses, real plugin resources and bundled template ZIPs. Reviewed the one unused .mo.orig translation backup against the exact live/local CMB2 loader and the existing .mo translation. The historical Reception security-recovery folder holds 882 files / 707 descendant directories, with no symlink/special entries or referencing cron. Its root and shared storage parent are 0755: prepared an exact reversible 0700 restriction on this recovery root only, then relocation outside the application; the shared parent is untouched. Before/after full metadata and absent source/private destination checks are required. The obsolete translation backup goes to reversible trash, never emptied. No business records/downloads/runtime inputs are selected.
+
+**Verified/security review:** reviewed actual new tool/test/doc diff, fresh live index/loader/vendor baselines and exact mutation targets. Twelve isolated success/negative scenarios pass, as do the prior dependency rollback/index fixtures and Python/PHP/shell syntax checks. Initial read-only preflights stopped on already-correct production index, API root inclusion and the actual 0755 permissions; all were reconciled before any mutation, not blindly retried as deployments. Both Reception maintenance paths are already corrected: the follow-up only verifies hashes/pages, uploads nothing and leaves vendors untouched. Fixed authenticated API targets, fresh drift checks, no traversal/symlink selection, no secrets/document-content output, no new endpoint, no SQL/relay/business-data operation, bounded calls and journal-before-mutation; stop on timeout/WAF/rate-limit. No unresolved blocker for this narrow recovery cleanup; missing fileinfo remains a blocker for the distinct vendor removal. Runtime payload is empty. User's original dirty edits are preserved; no push.
+
+**Follow-ups:** execute reviewed cleanup, record exact receipts/page results and refresh the daily report. Hosting must provision matching fileinfo before demo-first vendor cleanup. PHP web-worker restart/version attestation still needs hosting; no exploit probes used.
+
 ## 2026-10-26 — Complete PHP security assessment and release handoff
 **Area:** PHP2Shell assessment · deployed UI/read-only sync · runtime file policy
 **Environments:** demo/production UI and sync verified; active-code cleanup verified; PHP versions unchanged

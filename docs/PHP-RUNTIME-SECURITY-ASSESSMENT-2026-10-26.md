@@ -85,6 +85,14 @@ Ready-to-send hosting request (not sent by the agent):
 > If PHP 8.5 is provisioned, start with demo and matching modules; leave production
 > interpreter assignments unchanged until the compatibility checks pass.
 
+Follow-up module investigation: the configured EA-PHP 8.4.27 module directory
+is readable, but its matching `fileinfo.so` is absent. No fileinfo INI is scanned,
+and a disposable CLI run without INI confirms fileinfo is not built in. There was
+no matching module to load; no setting was changed. This rules out the simple
+account-visible installed-but-disabled workaround. It is not a root package audit
+or independent web-worker attestation. The inspection job was removed.
+[Exact 33-package removal plan and evidence](RUNTIME-DEVELOPMENT-PACKAGES-2026-10-26.md).
+
 Private evidence: reports/php-upgrade-assessment-2026-10-26 and
 reports/runtime-minimum-audit-2026-10-26. No public diagnostics, exploit payloads,
 production test applications or uncertain admissions replays were used. The
