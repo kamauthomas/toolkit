@@ -17,6 +17,7 @@ of files kept on the hosting account.
 | Assess the latest PHP security releases and upgrade readiness | Not separately recorded | Completed; current installed releases match the main security fixes |
 | Review and publish completed changes to the remote repositories | Not separately recorded | Completed; existing unrelated drafts preserved locally |
 | Design and implement Reception calling-letter access and administrator issuance | Not separately recorded | Completed on demo and production; administrator issuance verified on demo |
+| Add a dedicated calling-letter workspace and direct manual invitations | Not separately recorded | Local checks passed; demo deployment pending |
 
 **Challenges:** Hosting checks timed out and were stopped until access was
 confirmed. Demo exposed a database compatibility issue that was corrected before
