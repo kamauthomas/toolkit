@@ -1,3 +1,14 @@
+## 2026-10-26 — Review completed releases before remote publication
+**Area:** Git publication · security review · preserved drafts
+**Environments:** Git-only publication; existing verified deployment unchanged
+**Commit(s):** this pre-push review and outgoing reviewed history
+
+Fetched origin/wordpress-modernisation; no remote divergence. Reviewed the outgoing runtime/permission/download/sync diff and previous release evidence before pushing. 524 contact checks, 28 signed export/privacy, 8 artifact boundary, 30 upload/traversal, 35 graduands/permission, 202 deployment-path checks plus runtime packaging and 17 cleanup/reconciliation scenarios pass. The outgoing historical-blob scan found no high-confidence token/private-key patterns, known local hosting secret values or tracked secret configuration (WordPress 375 blobs; Reception 143). This focused scan is not a guarantee against every possible secret format. No reports/private evidence, vendor tree, credentials or data snapshot is added to the runtime payload; this push is Git publication only, not a server redeploy.
+
+The user's clean-tree request is handled by preserving unrelated pre-existing report/transfer drafts in named local stash c85f130ba152231bb363fd081f3a90e6c100b1c6 (preserved-preexisting-drafts-before-calling-letters-2026-10-26), including untracked files. It is recoverable locally and is not pushed. No reset/clean or unrelated draft publication. Target missing fileinfo still blocks the separate vendor cleanup; no platform check bypass. Existing UI/read-only sync and runtime cleanup remain verified as previously recorded; PHP/web-worker attestation is still a hosting follow-up. No new production security blocker found in this reviewed publication scope.
+
+**Next:** Calling-letter module design: website letters remain read-only; native Reception issuance is administrators only, as confirmed by the user. Reuse the approved website template and keep delivery/Mzizi outside generation. Implementation will be tested separately before any demo promotion.
+
 ## 2026-10-26 — Verify recovery cleanup and hand off the module prerequisite
 **Area:** runtime file cleanup · deployment verification · daily reporting
 **Environments:** WordPress/Reception normal checks verified; no new runtime uploads; vendors/PHP unchanged
