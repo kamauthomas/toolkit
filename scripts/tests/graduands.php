@@ -7,6 +7,8 @@ function is_wp_error($value) { return $value instanceof WP_Error; }
 $options = [];
 function get_option($key, $default = null) { global $options; return $options[$key] ?? $default; }
 require __DIR__.'/../../wp-content/themes/eduma-child/inc/graduands.php';
+require __DIR__.'/../../wp-content/themes/eduma-child/inc/toolkit-admin.php';
+function toolkit_is_demo_environment() { return true; }
 $count = 0;
 function check($condition, $description) { global $count; if (!$condition) { throw new RuntimeException($description); } $count++; }
 $valid = "display_name,course\nSynthetic Zeta,Electrical Installation\nSynthetic Alpha,Digital Skills\n";

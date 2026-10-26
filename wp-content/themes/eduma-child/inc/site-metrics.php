@@ -1,6 +1,7 @@
 <?php
 /** Privacy-conscious, aggregate first-party site metrics. */
 
+require_once get_stylesheet_directory() . '/inc/toolkit-admin.php';
 require_once get_stylesheet_directory() . '/inc/support-hub.php';
 
 function toolkit_metrics_table_name() {
@@ -140,6 +141,7 @@ add_action( 'admin_post_toolkit_save_controls', function() {
 		'toolkit_2026_catalog_enabled' => $catalog_enabled,
 		// Pricing cannot remain armed behind a disabled catalogue switch.
 		'toolkit_2026_pricing_enabled' => $catalog_enabled && isset( $_POST['pricing'] ),
+		'toolkit_reception_application_sync_enabled' => isset( $_POST['application_sync'] ) && strlen( toolkit_reception_api_secret() ) >= 32,
 	);
 	foreach ( $controls as $option => $enabled ) update_option( $option, $enabled ? 1 : 0, false );
 	wp_safe_redirect( add_query_arg( array( 'page' => 'toolkit-control', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
@@ -196,9 +198,10 @@ function toolkit_render_metrics_page() {
 	$summary = toolkit_metrics_summary( 30 );
 	$views   = array_sum( array_map( function( $row ) { return (int) $row['views']; }, $summary['rows'] ) );
 	$top     = $summary['rows'][0]['path'] ?? 'No activity yet';
-	echo '<div class="wrap toolkit-admin"><header class="toolkit-admin__hero"><div><p>Website operations centre</p><h1>Toolkit Control</h1><span>Admissions, visitor support, risk reports, content performance and rollout controls.</span></div><span class="toolkit-admin__state">' . esc_html( toolkit_is_demo_environment() ? 'Demo review' : 'Production' ) . '</span></header>';
+	echo '<div class="wrap toolkit-admin toolkit-admin--overview">';
+	toolkit_admin_header( 'Your website, at a glance', 'Review applications, follow up enquiries and manage the information people find on Toolkit.' );
 	if ( isset( $_GET['updated'] ) ) echo '<div class="notice notice-success is-dismissible"><p>Toolkit controls updated.</p></div>';
-	echo '<nav class="toolkit-admin__quick" aria-label="Toolkit operations"><a href="' . esc_url( admin_url( 'admin.php?page=toolkit-applications' ) ) . '">Applications</a><a href="' . esc_url( admin_url( 'admin.php?page=toolkit-enquiries' ) ) . '">Enquiries</a><a href="' . esc_url( admin_url( 'admin.php?page=toolkit-speak-up' ) ) . '">Speak-up</a><a href="' . esc_url( admin_url( 'admin.php?page=toolkit-analytics' ) ) . '">Analytics</a><a href="' . esc_url( admin_url( 'admin.php?page=toolkit-chatbot' ) ) . '">Assistant</a></nav>';
+	echo '<div class="toolkit-admin__section-title"><div><p>Overview</p><h2>What needs your attention</h2></div><span>Application totals cover all dates; website activity covers 30 days.</span></div>';
 	echo '<section class="toolkit-admin__stats">';
 	printf( '<a href="%s"><span>Applications</span><strong>%s</strong><small>%s awaiting review</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-applications' ) ), number_format_i18n( $counts['applications'] ), number_format_i18n( $counts['app_new'] ) );
 	printf( '<a href="%s"><span>Admissions follow-up</span><strong>%s</strong><small>Handoff or delivery review</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-applications&status=relay_failed' ) ), number_format_i18n( $counts['app_followup'] ) );
@@ -208,7 +211,7 @@ function toolkit_render_metrics_page() {
 	printf( '<a href="%s"><span>Application QR scans</span><strong>%s</strong><small>QR-link openings in 30 days</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-analytics' ) ), number_format_i18n( toolkit_application_qr_scans( 30 ) ) );
 	printf( '<a href="%s"><span>All-time application QR scans</span><strong>%s</strong><small>Recorded QR-link openings</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-analytics&range=all' ) ), number_format_i18n( toolkit_application_qr_scans( 0 ) ) );
 	printf( '<a href="%s"><span>Top path</span><strong class="toolkit-admin__path">%s</strong><small>Most viewed in 30 days</small></a>', esc_url( admin_url( 'admin.php?page=toolkit-analytics' ) ), esc_html( $top ) );
-	echo '</section><section class="toolkit-admin__grid">';
+	echo '</section><div class="toolkit-admin__section-title"><div><p>Share & manage</p><h2>QR codes and website controls</h2></div></div><section class="toolkit-admin__grid toolkit-admin__dashboard-grid">';
 	if ( function_exists( 'toolkit_graduands_qr_panel' ) ) toolkit_graduands_qr_panel();
 	$qr_image = get_stylesheet_directory_uri() . '/assets/images/application-qr.png';
 	$qr_url   = 'https://toolkitafrica.ac.ke/apply/?utm_source=application_qr&utm_medium=qr&utm_campaign=admissions';
@@ -221,8 +224,9 @@ function toolkit_render_metrics_page() {
 	toolkit_render_control_toggle( 'redesign', 'Modern redesign', eduma_child_redesign_enabled(), 'Activates the reviewed child-theme experience.' );
 	toolkit_render_control_toggle( 'catalog', '2026 course catalogue', eduma_child_2026_catalog_enabled(), 'Activates the separately verified 2026 catalogue.' );
 	toolkit_render_control_toggle( 'pricing', 'Revised September 2026 pricing', eduma_child_2026_pricing_enabled(), 'Publishes tuition and separate exam fees from the revised September 2026 Kikuyu Campus poster.' );
+	toolkit_render_control_toggle( 'application_sync', 'Share website applications with Reception', function_exists( 'toolkit_reception_application_sync_enabled' ) && toolkit_reception_application_sync_enabled(), 'Provides a protected read-only copy. Application changes and Mzizi actions remain on this website.' );
 	echo '<p><button class="button button-primary" type="submit">Save release controls</button></p></form>';
-	echo '<div class="toolkit-admin__panel"><div class="toolkit-admin__panel-heading"><div><small>Live health</small><h2>System status</h2></div><span class="toolkit-health toolkit-health--good">Operational</span></div><dl class="toolkit-admin__status">';
+	echo '<div class="toolkit-admin__panel"><div class="toolkit-admin__panel-heading"><div><small>Configuration</small><h2>Website settings</h2></div></div><dl class="toolkit-admin__status">';
 	printf( '<div><dt>Site</dt><dd>%s</dd></div>', esc_html( home_url() ) );
 	printf( '<div><dt>Theme release</dt><dd>%s</dd></div>', esc_html( toolkit_theme_release() ) );
 	printf( '<div><dt>WordPress</dt><dd>%s</dd></div>', esc_html( get_bloginfo( 'version' ) ) );
@@ -239,7 +243,8 @@ function toolkit_render_analytics_page() {
 	$summary = toolkit_metrics_summary( $days );
 	$views   = array_sum( array_map( function( $row ) { return (int) $row['views']; }, $summary['rows'] ) );
 	$actions = array_sum( array_map( function( $row ) { return (int) $row['interactions']; }, $summary['rows'] ) );
-	echo '<div class="wrap toolkit-admin"><header class="toolkit-admin__hero"><div><p>Privacy-conscious analytics</p><h1>Site performance</h1><span>Daily aggregate behaviour without raw IP addresses, cookies, or visitor profiles.</span></div><a class="toolkit-admin__state" href="' . esc_url( admin_url( 'admin.php?page=toolkit-control' ) ) . '">Dashboard</a></header>';
+	echo '<div class="wrap toolkit-admin">';
+	toolkit_admin_header( 'Site performance', 'Understand page views and interactions through private daily totals.' );
 	echo '<form class="toolkit-admin__range" method="get"><input type="hidden" name="page" value="toolkit-analytics"><span>Reporting window</span>';
 	foreach ( $allowed as $key => $value ) printf( '<button name="range" value="%s" class="%s">%s</button>', esc_attr( $key ), $range === $key ? 'is-active' : '', 'all' === $key ? 'All time' : esc_html( $key . ' days' ) );
 	echo '</form><section class="toolkit-admin__stats">';

@@ -570,3 +570,82 @@ a.toolkit-admin__state:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .toolkit-admin * { transition: none !important; }
 }
+
+/* Toolkit workspace refresh: shared, scoped components across every admin screen. */
+.toolkit-admin { max-width: 1480px; padding: 6px 14px 36px 0; font-size: 14px; line-height: 1.55; }
+.toolkit-admin, .toolkit-admin * { box-sizing: border-box; }
+.toolkit-admin__workspace-header { padding: 25px 28px; color: #1b3230; background: #fff; border: 1px solid #dfe7e5; box-shadow: 0 3px 18px #173f3506; }
+.toolkit-admin__workspace-header::before { height: 3px; background: #006a68; }
+.toolkit-admin__identity { display: flex; align-items: center; gap: 22px; min-width: 0; }
+.toolkit-admin__identity > img { display: block; object-fit: contain; flex: 0 0 76px; padding: 4px; border: 1px solid #e7eeeb; border-radius: 16px; background: #fafcf9; }
+.toolkit-admin__workspace-header .toolkit-admin__identity p { display: block; color: #53716b; font-size: 11px; letter-spacing: .08em; }
+.toolkit-admin__workspace-header .toolkit-admin__identity p::before { display: none; }
+.toolkit-admin__workspace-header .toolkit-admin__identity p span { display: inline; margin: 0 7px; color: #a5b7b0; font-size: inherit; }
+.toolkit-admin__workspace-header h1 { font-size: clamp(24px, 2.3vw, 33px); line-height: 1.2; letter-spacing: -.035em; color: #143d36; }
+.toolkit-admin__workspace-header .toolkit-admin__identity > div > span { color: #5b6d67; font-size: 13px; max-width: 70ch; }
+.toolkit-admin__header-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; }
+.toolkit-admin__environment { display: inline-flex; padding: 5px 11px; border: 1px solid #d9e6df; border-radius: 6px; color: #43644f !important; background: #f2f8f1; font-size: 11px; font-weight: 700; }
+.toolkit-admin__header-actions a { color: #006a68; text-decoration: none; font-size: 12px; font-weight: 650; }
+.toolkit-admin__header-actions a span { display: inline; color: inherit; font-size: inherit; }
+.toolkit-admin__workspace-nav { gap: 3px; padding: 7px; border-radius: 10px; box-shadow: none; }
+.toolkit-admin__workspace-nav a { padding: 9px 12px; background: transparent; border-radius: 6px; font-size: 12px; color: #53645e; white-space: nowrap; transform: none !important; }
+.toolkit-admin__workspace-nav a:hover { background: #f0f6f3; color: #075e55; }
+.toolkit-admin__workspace-nav a[aria-current="page"] { background: #006a68; color: #fff; box-shadow: 0 2px 5px #006a681a; }
+.toolkit-admin__section-title { display: flex; align-items: end; justify-content: space-between; gap: 15px; margin: 27px 0 14px; }
+.toolkit-admin__section-title p { margin: 0 0 3px; color: #73827b; text-transform: uppercase; font-size: 10px; letter-spacing: .12em; font-weight: 700; }
+.toolkit-admin__section-title h2 { margin: 0; font-size: 19px; letter-spacing: -.02em; color: #263b31; }
+.toolkit-admin__section-title > span { color: #718078; font-size: 11px; max-width: 37ch; text-align: right; }
+.toolkit-admin__stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; }
+.toolkit-applications-admin .toolkit-admin__stats { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.toolkit-admin__stats a, .toolkit-admin__stat { min-width: 0; padding: 20px 21px; border-radius: 10px; border-color: #dfe6e2; box-shadow: 0 2px 8px #2b433006; }
+.toolkit-admin__stats a::before { width: 0; }
+.toolkit-admin__stats a > span, .toolkit-admin__stat > span { color: #5b6d63; font-size: 12px; font-weight: 650; }
+.toolkit-admin__stats strong, .toolkit-admin__stat strong { color: #183f34; font-size: 32px; font-weight: 750; letter-spacing: -.035em; }
+.toolkit-admin__stats .toolkit-admin__path { font-size: 16px; overflow-wrap: anywhere; }
+.toolkit-admin__stats small, .toolkit-admin__stat small { color: #748176; font-size: 11px; }
+.toolkit-admin__stats a:hover { border-color: #86b7a9; transform: translateY(-2px); box-shadow: 0 5px 15px #214c3910; }
+.toolkit-admin__panel { border-radius: 11px; border-color: #dfe6e2; padding: 24px; box-shadow: 0 2px 8px #2b433006; min-width: 0; }
+.toolkit-admin__panel > h2 { margin-top: 0; color: #244136; font-size: 17px; }
+.toolkit-admin__panel p { color: #5b6d63; font-size: 12px; line-height: 1.65; }
+.toolkit-admin__dashboard-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 16px; }
+.toolkit-admin__dashboard-grid > form.toolkit-admin__panel { grid-column: span 2; }
+.toolkit-admin__dashboard-grid .toolkit-admin__panel > img { display: block; width: 148px; height: 148px; margin: 18px auto; padding: 8px; background: #fff; border: 1px solid #e4eae6; border-radius: 10px; object-fit: contain; }
+.toolkit-admin .button { display: inline-flex; justify-content: center; align-items: center; gap: 5px; min-height: 37px; padding: 5px 12px; border-radius: 6px; border: 1px solid #cbd9d0; background: #fff; color: #235d50; box-shadow: none; font-size: 12px; font-weight: 600; cursor: pointer; white-space: normal; line-height: 1.5; }
+.toolkit-admin .button:hover { background: #f0f7f3; border-color: #8db4a5; color: #154f42; }
+.toolkit-admin .button-primary { color: #fff; background: #006a68; border-color: #006a68; }
+.toolkit-admin .button-primary:hover { color: #fff; background: #005b59; border-color: #005b59; }
+.toolkit-admin :where(a, button, input, select, textarea):focus-visible { outline: 2px solid #006a68; outline-offset: 3px; }
+.toolkit-admin input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), .toolkit-admin select, .toolkit-admin textarea { max-width: 100%; min-height: 38px; border-color: #cbd8d0; border-radius: 6px; }
+.toolkit-admin .widefat { border-color: #dfe6e2; border-radius: 10px; box-shadow: none; overflow: hidden; }
+.toolkit-admin .widefat th { padding: 14px 16px; color: #536c5e; background: #f5f8f5; font-size: 11px; text-transform: uppercase; letter-spacing: .045em; border-bottom: 1px solid #dfe6e2; }
+.toolkit-admin .widefat td { padding: 14px 16px; font-size: 12px; vertical-align: middle; overflow-wrap: anywhere; }
+.toolkit-admin .widefat.striped > tbody > :nth-child(odd) { background: #fafcf9; }
+.toolkit-admin .widefat tr:hover td { background: #f3f8f5; }
+.toolkit-admin .widefat td small { display: block; color: #758579; margin-top: 3px; }
+.toolkit-admin .toolkit-status, .toolkit-admin .toolkit-pill { font-size: 10px; font-weight: 700; letter-spacing: .025em; padding: 4px 9px; }
+.toolkit-admin .tablenav { display: flex; flex-wrap: wrap; gap: 8px; height: auto; margin: 15px 0; align-items: center; }
+.toolkit-admin .tablenav-pages a, .toolkit-admin .tablenav-pages .page-numbers { display: inline-flex; min-width: 32px; min-height: 32px; align-items: center; justify-content: center; border: 1px solid #dce5de; border-radius: 5px; padding: 3px 8px; text-decoration: none; }
+@media (max-width: 1200px) {
+  .toolkit-admin__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .toolkit-admin__dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .toolkit-admin__dashboard-grid > form.toolkit-admin__panel { grid-column: auto; }
+}
+@media (max-width: 782px) {
+  .toolkit-admin { padding-right: 9px; }
+  .toolkit-admin__workspace-header { flex-direction: column; align-items: stretch; padding: 20px; gap: 16px; }
+  .toolkit-admin__identity { gap: 13px; }
+  .toolkit-admin__identity > img { width: 55px; height: 55px; flex-basis: 55px; border-radius: 10px; }
+  .toolkit-admin__header-actions { flex-direction: row; align-items: center; justify-content: space-between; }
+  .toolkit-admin__section-title { flex-direction: column; align-items: start; gap: 7px; }
+  .toolkit-admin__section-title > span { max-width: none; text-align: left; }
+  .toolkit-admin__workspace-nav { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px; scrollbar-width: thin; }
+  .toolkit-admin__dashboard-grid { grid-template-columns: 1fr; }
+  .toolkit-admin .toolkit-application-tools { flex-direction: column; align-items: stretch; }
+  .toolkit-admin .widefat { min-width: 650px; }
+  .toolkit-admin__table-wrap { overflow-x: auto; max-width: 100%; }
+  .toolkit-support-admin > .widefat, .toolkit-admin > .widefat { display: block; overflow-x: auto; min-width: 0; }
+}
+@media (max-width: 480px) {
+  .toolkit-admin__stats { grid-template-columns: 1fr; }
+  .toolkit-admin__workspace-header h1 { font-size: 24px; }
+}

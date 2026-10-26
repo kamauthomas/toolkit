@@ -121,8 +121,8 @@ function toolkit_graduands_admin() {
 	$draft = get_option( 'toolkit_graduands_2026_draft', array() );
 	$published = toolkit_graduands_published( false );
 	?>
-	<div class="wrap toolkit-admin"><h1>Class of 2026 · Graduands</h1>
-	<p><a href="<?php echo esc_url( admin_url( 'admin.php?page=toolkit-control' ) ); ?>">← Toolkit Control</a></p>
+	<div class="wrap toolkit-admin">
+	<?php toolkit_admin_header( 'Graduands & QR access', 'Review the approved list, manage its visibility and download QR artwork.' ); ?>
 	<?php toolkit_graduands_qr_panel(); ?>
 	<p>Upload the approved list as UTF-8 CSV with exactly two columns: <code>display_name,course</code>. Use public display names and course titles only. Uploading creates a private preview; publishing is a separate confirmation.</p>
 	<p><a href="<?php echo esc_url( home_url( '/graduation/#graduands' ) ); ?>" target="_blank" rel="noopener">Open the public graduands section</a> · The QR address stays the same when the list changes.</p>

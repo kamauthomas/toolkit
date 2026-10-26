@@ -16,9 +16,10 @@ def allowed(path):
  if any(p.lower() in FORBIDDEN_DIRS for p in path.parts):return False
  if len(path.parts)>=2 and path.parts[:2]==('vendor','bin'):return False
  if name in LICENSE_NAMES:return True
+ if path.suffix.lower()=='.txt' and name not in {'requirements.txt','robots.txt','security.txt','llms.txt','license.txt','licence.txt','copyright.txt','notice.txt'}:return False
  if re.match(r'^(readme|changelog|changes|contributing|worklog|agents|claude|todo|deployment|hardening)(?:[._-]|$)',name):return False
  if name in {'review-router.php','router.php'}:return False
- if name.startswith('.env') or name in ['dockerfile','docker-compose.yml','phpunit.xml'] or re.search(r'\.(?:md|docx?|xlsx?|pptx?|sql|sqlite3?|db|bak|old|orig|patch|zip|tgz|tar|gz|log|map|pyc|env|pem|key|p12|pfx)(?:[._-].*)?$',name):return False
+ if name.startswith('.env') or name in ['dockerfile','docker-compose.yml','docker-compose.yaml','phpunit.xml'] or re.search(r'\.(?:md|rst|pdf|docx?|xlsx?|pptx?|sql|sqlite3?|db|bak|old|orig|patch|zip|tgz|tar|gz|7z|log|map|py[co]|env|pem|key|p12|pfx)(?:[._-].*)?$',name):return False
  return True
 
 def build(profile,source,destination):
@@ -28,10 +29,11 @@ def build(profile,source,destination):
  for relative in PROFILES[profile]:
   path=source/relative
   if not path.exists():continue
+  if path.is_symlink():raise ValueError('Symlink runtime root requires explicit review: '+relative)
   for p in sorted(path.rglob('*')) if path.is_dir() else [path]:
    rel=p.relative_to(source)
    if p.is_file() and allowed(rel):
-    if p.is_symlink():raise ValueError('Symlink requires explicit runtime review: '+str(rel))
+    if p.is_symlink() or not p.resolve().is_relative_to(source) or any((source/Path(*rel.parts[:i])).is_symlink() for i in range(1,len(rel.parts))):raise ValueError('Symlink requires explicit runtime review: '+str(rel))
     entries.append((p,rel))
  if not entries:raise ValueError('No runtime files selected')
  with tarfile.open(destination,'w:gz') as archive:

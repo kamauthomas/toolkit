@@ -5,6 +5,7 @@ require_once get_stylesheet_directory() . '/inc/application-adapter.php';
 require_once get_stylesheet_directory() . '/inc/calling-letter-pdf.php';
 require_once get_stylesheet_directory() . '/inc/calling-letters.php';
 require_once get_stylesheet_directory() . '/inc/reception-integration.php';
+require_once get_stylesheet_directory() . '/inc/reception-application-sync.php';
 require_once get_stylesheet_directory() . '/inc/cultural-week-stories.php';
 require_once get_stylesheet_directory() . '/inc/mosiria-story.php';
 require_once get_stylesheet_directory() . '/inc/youtube-feed.php';
@@ -26,7 +27,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.10.21.1';
+	return '2026.10.26.1';
 }
 
 add_action( 'wp_enqueue_scripts', function() {

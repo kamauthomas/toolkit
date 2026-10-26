@@ -318,8 +318,8 @@ function toolkit_support_admin_header( $title, $description ) {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( 'You do not have permission to view this page.' );
 	}
-	printf( '<div class="wrap toolkit-support-admin"><h1>%s</h1><p>%s</p>', esc_html( $title ), esc_html( $description ) );
-	echo '<nav class="nav-tab-wrapper"><a class="nav-tab" href="' . esc_url( admin_url( 'admin.php?page=toolkit-control' ) ) . '">Overview</a><a class="nav-tab" href="' . esc_url( admin_url( 'admin.php?page=toolkit-enquiries' ) ) . '">Enquiries</a><a class="nav-tab" href="' . esc_url( admin_url( 'admin.php?page=toolkit-poll' ) ) . '">Website poll</a><a class="nav-tab" href="' . esc_url( admin_url( 'admin.php?page=toolkit-chatbot' ) ) . '">Chatbot settings</a></nav>';
+	echo '<div class="wrap toolkit-admin toolkit-support-admin">';
+	toolkit_admin_header( $title, $description );
 }
 
 function toolkit_support_render_enquiries() {

@@ -1,3 +1,16 @@
+## 2026-10-26 — Refresh Toolkit Control and add read-only Reception application export
+**Area:** website administration · Reception integration · runtime deployment policy
+**Environments:** locally verified; demo/production deployment pending
+**Commit(s):** this change (see Git history)
+
+Added shared branded navigation, responsive metrics, tables and controls across Toolkit Control. Added a minimal signed GET-only website application export and administrator-controlled sharing switch for Reception's separate read-only register. Hardened deployment path/package boundaries and ignore rules; preserved existing unrelated edits and approved downloads/license notices.
+
+**Verified by:** 202 deployment-boundary checks, 28 synthetic export/auth/privacy cases, 35 graduands/permission checks and 18 desktop/mobile synthetic browser checks. Reception's 95-test suite / 1,364 assertions passed; final focused sync rerun 13 tests / 113 assertions passed. Exact runtime package preparation and PHP syntax checks pass: 19 files per environment, eight website and eleven Reception. Live baselines captured through established cPanel Fileman APIs; no production test applications, Mzizi replays or live attack probes.
+
+**Security/flaw review:** reviewed actual source diff and exact baseline-derived payload for permissions/CSRF, escaping, bounded prepared SQL, strict signing/replay protection, minimal encrypted contact data, fixed outbound hosts/no redirects, duplicate-safe updates, concurrency locks, persisted pagination and bounded failure cooldown. Uploads reject document/archive/map/backup/secret payloads and unsafe/unknown destinations; no source docs/tests/manifests deployed. Automatic review rejected an uploaded inventory helper; it was not used and existing read-only APIs supplied the inventory. A proposed automatic mirror deletion was rejected before implementation; missing entries are retained and labelled instead. Metadata matches include runtime files and are not proven leaks or a bulk cleanup list. No known release security blocker; authenticated staff acceptance and actual demo-first verification remain pending.
+
+**Follow-ups:** see docs/TOOLKIT-ADMIN-RECEPTION-SYNC-2026-10-26.md, docs/RUNTIME-FILE-REVIEW-2026-10-26.md and the ready-to-paste daily draft. Private source/inventory/test receipts remain under reports/ and outside deployment. Stopped on hosting timeout; the user checked access and authorised one retry, which succeeded. No Git push.
+
 ## 2026-10-24 — Shorten October report attention items
 **Area:** management report editorial revision
 **Environments:** local Word/PDF only; no deployment or external filing

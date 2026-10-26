@@ -977,7 +977,8 @@ function toolkit_application_status_label( $status ) {
 }
 
 function toolkit_application_admin_header( $title, $description ) {
-	printf( '<div class="wrap toolkit-admin toolkit-applications-admin"><header class="toolkit-admin__hero"><div><p>Admissions operations</p><h1>%s</h1><span>%s</span></div><a class="toolkit-admin__state" href="%s">Dashboard</a></header>', esc_html( $title ), esc_html( $description ), esc_url( admin_url( 'admin.php?page=toolkit-control' ) ) );
+	echo '<div class="wrap toolkit-admin toolkit-applications-admin">';
+	toolkit_admin_header( $title, $description );
 }
 
 function toolkit_application_render_admin_page() {

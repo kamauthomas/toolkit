@@ -44,3 +44,18 @@
 /wp-content/themes/eduma/
 /wp-content/themes/eduma.zip
 /wp-content/themes/index.php
+
+# Local tooling output and editor/session material, not project source.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+node_modules/
+*.log
+*.bak
+*.bak-*
+*.old
+*.orig
+*.swp
+*.swo
+/codex-session-*.md
