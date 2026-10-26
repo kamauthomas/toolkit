@@ -17,7 +17,7 @@ GROUPS = {'demo': {'demo.toolkitafrica.ac.ke', 'reception-system-demo'},
 LEGAL = {'license', 'license.md', 'license.txt', 'licence', 'licence.txt',
          'copyright', 'copyright.txt', 'notice', 'notice.txt'}
 CANARY = HOME + 'demo.toolkitafrica.ac.ke/wp-content/uploads/toolkit-hardening-canary-20261016.php'
-REGEX = r'(?i)(\.(md|rst|map)$|/(readme|changelog|changes|contributing)\.txt$|toolkit-hardening-canary-20261016\.php$)'
+REGEX = r'(?i)(\.(md|rst|map)$|(?:^|/)(readme|changelog|changes|contributing)\.txt$|toolkit-hardening-canary-20261016\.php$)'
 
 
 def validate(rows, environment):
@@ -72,6 +72,8 @@ def run(environment, execute=False):
 
     roots = sorted({r['root'] for r in rows})
     fresh = {root: inventory(root) for root in roots}
+    snapshot = CASE / ('cleanup-preflight-' + environment + '.private.json')
+    snapshot.write_text(json.dumps(fresh, indent=2) + '\n'); snapshot.chmod(0o600)
     for row in rows:
         current = fresh[row['root']].get(row['file'])
         if current is None or any(current.get(k) != row.get(k) for k in ('type', 'size', 'mtime')):

@@ -1,3 +1,12 @@
+## 2026-10-26 — Correct vendor-document metadata search coverage
+**Area:** scoped server cleanup preflight
+**Environments:** no cleanup mutations yet; demo runtime release verified
+**Commit(s):** this change (see Git history)
+
+Cleanup stopped before any mutation because its filtered inventory omitted five vendor README/changelog TXT basenames. A read-only comparison confirmed the search-pattern coverage issue; no changed-file baseline was accepted or cleanup attempt reset. Corrected the pattern to match both basenames and full paths and retain a private preflight metadata snapshot.
+
+**Verified/security review:** ten positive basename/full-path cases and three unrelated runtime-name negatives pass locally. The exact 279-file cleanup plan and all path/license/download/business-storage protections are unchanged. Reviewed the two-line execution-boundary diff; preflight still checks every file type/size/mtime before reversible private trash, with no blanket deletion or archive/helper upload. Actual cleanup remains pending its receipt; demo release remains verified and production promotion still uses its exact hashes.
+
 ## 2026-10-26 — Verify actual scheduler availability and exact demo promotion
 **Area:** read-only sync rollout orchestration
 **Environments:** demo migration/first sync verified; public release checks pending; production unchanged
