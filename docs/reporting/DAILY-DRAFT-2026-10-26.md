@@ -9,14 +9,15 @@ and tightened the handling of files kept on the hosting account.
 | Improve website administration layout and navigation | Not separately recorded | Completed on demo and production |
 | Show website applications in Reception without edit or delete access | Not separately recorded | Completed; 28 production applications synced |
 | Remove unnecessary vendor documents and source maps from active code folders | Not separately recorded | Completed; 279 reviewed files removed |
-| Prepare removal of development tools from hosted applications | Not separately recorded | Local checks passed; server rollout in progress |
-| Check access restrictions, privacy, page layouts and failure handling | Not separately recorded | Passed with sample data and verified release checks |
+| Prepare removal of development tools from hosted applications | Not separately recorded | In progress; hosting prerequisite pending after verified demo rollback |
+| Check access restrictions, privacy, page layouts and failure handling | Not separately recorded | Completed with sample data and verified release checks |
+| Assess the latest PHP security releases and upgrade readiness | Not separately recorded | Completed; current installed releases match the main security fixes |
 
 **Challenges:** Hosting checks timed out and were stopped until access was
 confirmed. Demo exposed a database compatibility issue that was corrected before
-production. Demo also needed its own scheduled refresh. The host has no Composer
-installation; dependency maintenance uses a verified temporary private tool that
-is removed after use.
+production. Demo also needed its own scheduled refresh. The remaining development-tool cleanup needs hosting to enable its file-inspection
+module. Demo was restored and checked after this prerequisite failed; the temporary
+maintenance tool and scheduled job were removed.
 
 **Decisions/comments:** Staff can view website applications in Reception; changes
 and admissions actions stay on the website. Refresh is scheduled every five
@@ -32,6 +33,6 @@ release evidence. Expected outcome: staff acceptance and a clear recovery policy
 
 **ICT metrics:** Two main systems improved; demo and production release checks
 passed; 28 production website applications synced; 279 unnecessary files removed
-from active code folders. Development-tool cleanup status must be updated from
-its final receipts before submitting this draft through the employee's own Report
-System session.
+from active code folders. Development-tool removal remains pending hosting assistance. PHP 8.5 is not yet
+available for a real compatibility trial, so no live version switch was made.
+Submit this draft through the employee's own Report System session.

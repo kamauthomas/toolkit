@@ -29,3 +29,15 @@ A security review does not require live attack probes. Use isolated tests for
 malicious input. Keep live checks to the minimum normal requests needed for the
 release. Stop on a WAF response, timeout or rate limit; do not rotate IPs to
 continue probing. Coordinate any separately requested live negative testing.
+
+For PHP runtime changes, check current official PHP and hosting-vendor advisories
+and record the exact installed patch/package build, target extensions and web
+handler. Distinguish CLI evidence from the running web workers and record whether
+worker restart was verified. Version selectors and WAF rules are not patch proof;
+vendor backports need build/advisory evidence. Run platform checks on the target
+application's interpreter/configuration, without ignoring missing requirements or
+using another binary merely to make a failed check pass. Validate a new PHP branch
+on demo, including theme/plugins and application flows, before promotion. Do not
+publish phpinfo or diagnostic helpers, or use live exploit requests as a version
+check. Keep any PHP2Shell pre-request mitigation in the appropriate startup/server
+configuration; application ini_set calls are not proof that parsing is protected.
