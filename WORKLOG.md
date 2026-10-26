@@ -1,3 +1,14 @@
+## 2026-10-26 — Make the calling-letter private-file dependency explicit
+**Area:** calling-letter rollout · production acceptance reconciliation
+**Environments:** demo previously verified; production feature automatically disabled after acceptance failure; correction not yet deployed
+**Commit(s):** this correction and release reconciliation tooling
+
+The first production attempt installed and verified all 13 code files, ran the additive migration and refreshed 28 read-only website applications. Existing-PDF acceptance failed before success was declared; its failure trap disabled the new feature on both systems and the temporary cron was removed. A private, read-only native WordPress diagnostic identified the missing toolkit_confined_private_file function. Fresh reads confirm production lacks private-file-boundary.php, while demo has it. No production test application, native letter, email or Mzizi replay was created.
+
+The new exchange module now explicitly loads its private-file guard. Its standalone tests no longer preload that dependency, so they exercise the actual module-loading contract. A narrow reconciliation plan preserves original failed receipts, requires exact installed-source hashes and the identified failure, adds the guard before updating the module, and skips the other unchanged runtime files. The resulting 14-file set must pass actual demo acceptance before identical production promotion. All normal security gates and the user's one-run-only missing-fileinfo exception remain scoped as recorded; PHP and dependencies remain unchanged.
+
+**Verified/security review:** 47 isolated authentication/path/rendering/privacy/cache checks and ten config-preservation/unsafe-state/worker-disable fixtures pass. Reviewed the actual require, private resolver and deployment diff: no broadened file roots, role/CSRF/signature permissions, outbound hosts or data disclosure. New payload is only the previously reviewed 702-byte runtime guard plus the explicit include; no report, README, test, archive or diagnostic helper is uploaded. Fresh baseline matching and guarded dependency-first ordering prevent overwriting unrelated changes or loading a nonexistent include. Actual corrected demo/production acceptance remains pending and will be recorded separately; original failure evidence is retained privately.
+
 ## 2026-10-26 — Verify demo calling letters and reconcile production cache hardening
 **Area:** demo acceptance · production baseline security review
 **Environments:** demo enabled and verified; production preparation only

@@ -68,27 +68,51 @@ def worker_body(environment, app, site, backup, log):
     return '; '.join(tasks)
 
 
-def run(environment, execute=False):
+def run(environment, execute=False, reconcile_guard=False):
     authorization = json.loads((CASE / 'deployment-authorization.json').read_text())
     assert authorization['authorized_by'] == 'user' and authorization['status'] == 'active'
     assert authorization['one_run_only'] and authorization['allow_existing_fileinfo_failure']
-    prep = CASE / (environment + '-preparation')
+    suffix = '-guard-preparation' if reconcile_guard else '-preparation'
+    prep = CASE / (environment + suffix)
     manifest = json.loads((prep / 'manifest.json').read_text())
     assert manifest['environment'] == environment and manifest['prepared'] and not manifest['deployed']
-    rows = manifest['files']; assert len(rows) == 13
+    rows = manifest['files']; assert len(rows) == (14 if reconcile_guard else 13)
     expected = {('wordpress', n) for n in ['functions.php','inc/site-metrics.php','inc/calling-letter-pdf.php','inc/reception-calling-letters.php']}
     expected |= {('reception', n) for n in ['config/services.php','routes/web.php','resources/views/staff/website-applications/show.blade.php','resources/views/staff/applicants/show.blade.php','app/Services/CallingLetterGateway.php','app/Models/CallingLetter.php','app/Http/Controllers/Staff/CallingLetterController.php','database/migrations/2026_10_26_120000_create_calling_letters_table.php','resources/views/staff/calling-letters/index.blade.php']}
+    if reconcile_guard:
+        expected.add(('wordpress', 'inc/private-file-boundary.php'))
+        original = json.loads((CASE / 'deployment' / environment / 'attempt.json').read_text())
+        assert original['cron_removed'] and len(original['uploaded']) == 13
+        prior = {(r['component'], r['file']): r for r in original['files']}
+        changed = {('wordpress','inc/reception-calling-letters.php'), ('wordpress','inc/private-file-boundary.php')}
+        for row in rows:
+            key = row['component'], row['file']
+            if key in prior:
+                assert row['baseline_sha256'] == prior[key]['sha256']
+            if key not in changed:
+                assert row['sha256'] == row['baseline_sha256']
+        if environment == 'production':
+            assert not original['verified']
+            receipt = (CASE / 'deployment/production/runtime.private.log').read_bytes()
+            assert b'CALLING_LETTERS_DISABLED_AFTER_FAILURE' in receipt and b'TOOLKIT_CALLING_EXIT=1' in receipt
+            diagnostic = (CASE / 'deployment/production/metadata-diagnostic.private.log').read_bytes()
+            assert b'Call to undefined function toolkit_confined_private_file()' in diagnostic
+        else:
+            assert original['verified']
     assert {(r['component'],r['file']) for r in rows} == expected
     policy = load('policy', ROOT / 'scripts/deployment/runtime_payload.py')
     for row in rows:
         policy.assert_runtime_upload(row['remote'])
         assert sha((prep / 'payload' / row['component'] / row['file']).read_bytes()) == row['sha256']
     if environment == 'production':
-        demo = json.loads((CASE / 'deployment/demo/verification.json').read_text()); assert demo['verified']
+        receipt_dir = 'deployment/demo/guard-reconciliation' if reconcile_guard else 'deployment/demo'
+        demo = json.loads((CASE / receipt_dir / 'verification.json').read_text()); assert demo['verified']
         assert {(r['component'],r['file'],r['sha256']) for r in demo['files']} == {(r['component'],r['file'],r['sha256']) for r in rows}, 'Production payload differs from verified demo; review required'
     if not execute:
-        print('Reviewed 13-file', environment, 'release; scoped fileinfo exception recorded; no remote action.'); return
+        print('Reviewed', len(rows), 'file', environment, 'release; scoped fileinfo exception recorded; no remote action.'); return
     output = CASE / 'deployment' / environment; output.mkdir(mode=0o700, parents=True, exist_ok=True)
+    if reconcile_guard:
+        output = output / 'guard-reconciliation'; output.mkdir(mode=0o700, exist_ok=True)
     journal = output / 'attempt.json'
     if journal.exists(): raise RuntimeError('Existing deployment attempt; reconcile saved state, never replay')
     panel = load('followup', Path(__file__).with_name('finish-runtime-cleanup-2026.10.26.py')).connection()
@@ -101,9 +125,11 @@ def run(environment, execute=False):
         assert (None if raw is None else sha(raw)) == row['baseline_sha256'], 'Fresh live-source drift'
         if raw is not None:
             path = output / 'before' / row['component'] / row['file']; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(raw); path.chmod(0o600)
-    save(); print(environment, '13 fresh baseline checks passed', flush=True)
-    ordered = sorted(rows, key=lambda r: (r['component'] != 'wordpress', r['file'] in {'functions.php','routes/web.php'}, r['baseline_sha256'] is not None))
+    save(); print(environment, len(rows), 'fresh baseline checks passed', flush=True)
+    ordered = sorted(rows, key=lambda r: (r['file'] != 'inc/private-file-boundary.php', r['component'] != 'wordpress', r['file'] in {'functions.php','routes/web.php'}, r['baseline_sha256'] is not None))
     for row in ordered:
+        if row['baseline_sha256'] == row['sha256']:
+            continue
         raw = panel.fetch(row['remote'], optional=row['baseline_sha256'] is None)
         assert (None if raw is None else sha(raw)) == row['baseline_sha256'], 'Concurrent live edit'
         state['upload_intent'] = row['component'] + '/' + row['file']; save()
@@ -170,12 +196,12 @@ def run(environment, execute=False):
         checks.append({'url':url,'status':200})
     state.update(verified=True, enabled=True, public_checks=checks, production_test_applications=0)
     save(); (output / 'verification.json').write_text(json.dumps(state,indent=2)+'\n')
-    print('VERIFIED',environment,'13 runtime files; enabled module, schema, private runtime checks, normal pages and removed setup job; dependencies/PHP unchanged',flush=True)
+    print('VERIFIED',environment,len(rows),'runtime files; enabled module, schema, private runtime checks, normal pages and removed setup job; dependencies/PHP unchanged',flush=True)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('environment',choices=['demo','production']);parser.add_argument('--execute',action='store_true');args=parser.parse_args()
-    try: run(args.environment,args.execute)
+    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('environment',choices=['demo','production']);parser.add_argument('--execute',action='store_true');parser.add_argument('--reconcile-guard-dependency',action='store_true');args=parser.parse_args()
+    try: run(args.environment,args.execute,args.reconcile_guard_dependency)
     except Exception as error:
         print('STOPPED:',str(error) if isinstance(error,RuntimeError) else type(error).__name__,'— reconcile saved private state before retry',flush=True)
         raise SystemExit(1)

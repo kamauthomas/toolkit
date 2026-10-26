@@ -45,7 +45,6 @@ class FixtureDatabase {
  public function get_row($sql){if(!str_contains($sql,'WHERE a.id=%d'))throw new RuntimeException('Unbounded query');return $this->row;}
 }
 $wpdb=new FixtureDatabase;
-require __DIR__.'/../../wp-content/themes/eduma-child/inc/private-file-boundary.php';
 require __DIR__.'/../../wp-content/themes/eduma-child/inc/calling-letter-pdf.php';
 require __DIR__.'/../../wp-content/themes/eduma-child/inc/reception-calling-letters.php';
 function check($ok,$message){if(!$ok)throw new RuntimeException($message);$GLOBALS['count']++;}

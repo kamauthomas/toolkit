@@ -1,5 +1,7 @@
 <?php
 /** Private PDF exchange; native Reception rendering never creates website applications. */
+require_once __DIR__ . '/private-file-boundary.php';
+
 function toolkit_reception_letters_enabled() {
 	$enabled = defined( 'TOOLKIT_RECEPTION_CALLING_LETTERS_ENABLED' )
 		? true === TOOLKIT_RECEPTION_CALLING_LETTERS_ENABLED
