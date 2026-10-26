@@ -41,3 +41,23 @@ deployed; the existing read-only Fileman search API supplied the inventory inste
 No new remote execution path was introduced for inventory. Server cleanup and
 environment release verification must be recorded from their actual receipts,
 rather than inferred from this inventory or a prepared upload manifest.
+
+## Reviewed cleanup scope
+
+Exact-path review narrows the list to 278 standalone vendor documents/source maps
+and the prior harmless demo canary: 52 files in demo application roots and 227 in
+production/Campus roots. Twelve Elementor Markdown files are actual plugin runtime
+resources and are retained pending an explicit module decision; 49 other broad
+name matches are directories, executable code, schema/template inputs or uncertain
+binary files. Required licenses, approved downloads and private business storage
+are excluded. Generated Reporting bytecode is a separate runtime cache/exposure
+review item, not proof of an accidentally uploaded report.
+
+The cleanup command defaults to a local dry run. Execution requires matching fresh
+file type/size/mtime metadata, uses an exact per-environment allowlist and moves
+files to private cPanel recovery trash without emptying it. Production requires a
+verified demo receipt. Both plans and nine isolated unsafe-path/duplicate cases
+passed local checks. No PHP helper or cron is used for inventory or cleanup. The
+private cleanup receipts record actual removal/verification; this prepared plan
+alone is not a completed server cleanup. API behaviour follows the documented
+[cPanel Fileman file operation API](https://api.docs.cpanel.net/cpanel-api-2/cpanel-api-2-modules-fileman/cpanel-api-2-functions-fileman-fileop).

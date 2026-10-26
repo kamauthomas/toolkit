@@ -1,3 +1,12 @@
+## 2026-10-26 — Scope reversible cleanup of older vendor documentation
+**Area:** runtime-only server file policy
+**Environments:** reviewed local cleanup plan; execution pending demo-first verification
+**Commit(s):** this change (see Git history)
+
+Narrowed broad server-search matches to 278 standalone vendor documents/source maps and one old harmless demo upload canary. Excluded runtime code, schema/template inputs, twelve actual plugin Markdown resources, required licenses, public downloads and private business storage. Added a dry-run-first exact-path cleanup command using existing Fileman APIs and reversible private trash; it never empties recovery storage or uploads an executable helper.
+
+**Verified/security review:** validated both environment plans (52 demo files; 227 production/Campus files) and refused nine isolated unsafe-path/duplicate cases. Reviewed exact diff and mutation boundary: per-environment roots, regular files only, no traversal/commas/encoding ambiguity, no business storage/downloads/licenses, fresh type/size/mtime comparison, recorded per-file API receipts, demo gate and post-cleanup inventory. Requests are paced and stop on timeout/refusal without retry/IP rotation. Existing search inventory is not proof of public exposure. No unresolved security blocker for this scoped reversible cleanup; actual receipts remain pending. Private recovery holdings intentionally remain off application roots for rollback.
+
 ## 2026-10-26 — Refresh Toolkit Control and add read-only Reception application export
 **Area:** website administration · Reception integration · runtime deployment policy
 **Environments:** locally verified; demo/production deployment pending
