@@ -100,6 +100,15 @@ def prepare():
             staging = Path(temporary); build_component(config, baselines, staging)
             for name in config['existing'] + config['new']:
                 raw = (staging / (config['prefix'] + name)).read_bytes()
+                if component == 'wordpress' and name == 'inc/calling-letter-pdf.php':
+                    # Fresh production drift: retain the exact object-cache guard already
+                    # reviewed in Git and exercised by the verified demo renderer.
+                    legacy = b'$cached = @unserialize( (string) file_get_contents( $cache_file ) );'
+                    guarded = b"$cached = @unserialize( (string) file_get_contents( $cache_file ), array( 'allowed_classes' => false ) );"
+                    if legacy in raw:
+                        assert raw.count(legacy) == 1 and guarded not in raw
+                        raw = raw.replace(legacy, guarded, 1)
+                    assert guarded in raw
                 destination = CASE / 'payload' / component / name; destination.parent.mkdir(parents=True, exist_ok=True); destination.write_bytes(raw)
                 policy.assert_runtime_upload(config['remote'] + name)
                 subprocess.run(['php', '-l', str(destination)], check=True, stdout=subprocess.DEVNULL)

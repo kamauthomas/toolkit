@@ -1,3 +1,14 @@
+## 2026-10-26 — Verify demo calling letters and reconcile production cache hardening
+**Area:** demo acceptance · production baseline security review
+**Environments:** demo enabled and verified; production preparation only
+**Commit(s):** this change and 2cdfb05 rollout tooling
+
+Demo verified all 13 runtime hashes, additive schema and enabled switches on actual EA-PHP 8.4.27 with the explicitly excepted missing fileinfo. Fifteen private runtime checks passed: existing website PDF matches its mirror and downloads, administrator native issue/audit, encrypted PDF storage/download, duplicate prevention, history/manager role boundaries and complete rollback of synthetic fixture rows. The native one-page A4 PDF was visually inspected with the approved logo/stamp/signature. Normal demo website/login returned 200, the application sync processed seven entries, and the temporary setup cron was removed. No uploaded helper or test file; PHP and dependencies unchanged.
+
+Fresh production preparation stopped before any mutation because its existing PDF cache unserialize lacked the allowed_classes=false guard already present in Git and verified demo. Added only that exact reconciled hardening line to the focused preparation, retaining the original baseline privately. All 13 production payload hashes now exactly match verified demo. Added an isolated serialized-object cache test: wakeup is not executed and the malformed cache is rebuilt as safe image data. This test is local only; no live poisoned-cache or attack request was used.
+
+**Verified/security review:** 47 renderer/auth/path/privacy/object-cache checks pass, deployment config/failure fixtures pass, focused payload destinations/lint and identical demo hashes pass. Reviewed the actual one-line production reconciliation and tool/test diff again; no unresolved new security blocker for promotion. The missing platform requirement remains documented under the user's one-run exception, without dependency/engine modification or an ignored Composer check. Production verification will read existing PDFs/mirror/configuration and normal pages only; no production test applications. Proceed under the recorded exception, then close it after this run.
+
 ## 2026-10-26 — Authorise a scoped calling-letter rollout and prepare live-baseline payload
 **Area:** urgent calling-letter deployment · one-run fileinfo exception
 **Environments:** fresh demo preparation verified; deployment not yet performed

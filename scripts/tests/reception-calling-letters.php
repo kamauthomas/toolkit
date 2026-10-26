@@ -80,8 +80,12 @@ try {
  file_put_contents($path,str_repeat('a',1048577));check(toolkit_reception_existing_letter(signed()) instanceof WP_Error,'Oversized file rejected');
  unlink($path);symlink($root.'/production/'.basename($path),$path);check(toolkit_reception_existing_letter(signed()) instanceof WP_Error,'Symlink rejected');unlink($path);
  $data=['reference'=>'APP-TEST-LETTER','name'=>'Synthetic Applicant','phone'=>'+254712345678','course'=>'Welding','intake'=>'January 2027'];
+ class SyntheticCacheObject {public function __wakeup(){$GLOBALS['cache_object_instantiated']=true;}}
+ $cache_object_instantiated=false;$entry='word/media/image5.png';$binary=toolkit_calling_letter_zip_read(toolkit_calling_letter_template_path(),$entry);
+ $poisoned=$root.'/_pdfimg-'.md5($entry.'|'.strlen($binary).'|'.md5($binary)).'.cache';file_put_contents($poisoned,serialize(new SyntheticCacheObject));
  foreach([['name'=>['array']],['phone'=>'0712345678'],['course'=>'<script>'],['intake'=>"January\nInjected"],['intake'=>''],['reference'=>'../file'],['name'=>str_repeat('W',120)],['guardian'=>'unneeded'],['intake'=>str_repeat('a',121)]] as $bad)check(toolkit_reception_render_native_letter(signed('POST',null,array_replace($data,$bad))) instanceof WP_Error,'Malformed/unneeded render input rejected');
  $r=toolkit_reception_render_native_letter(signed('POST',null,$data));check($r instanceof WP_REST_Response&&$r->status===200,'Actual native PDF renderer succeeds');
+ check(!$cache_object_instantiated&&str_starts_with(file_get_contents($poisoned),'a:'),'Cached objects are never instantiated; invalid cache rebuilt as safe image data');
  $bytes=base64_decode($r->data['pdf'],true);$text=streams($bytes);check(str_contains($text,'January')&&str_contains($text,'2027')&&!str_contains($text,'August/September'),'Explicit intake without stale default');
  check(str_contains($text,'SYNTHETIC')&&str_contains($text,'APPLICANT')&&str_contains($text,'WELDING'),'Applicant/course printed');
  $revision=hash('sha256',hash_file('sha256',$root.'/template.docx')."\n".hash_file('sha256',__DIR__.'/../../wp-content/themes/eduma-child/inc/calling-letter-pdf.php'));
