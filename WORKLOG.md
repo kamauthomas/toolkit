@@ -1,3 +1,12 @@
+## 2026-10-26 — Verify actual scheduler availability and exact demo promotion
+**Area:** read-only sync rollout orchestration
+**Environments:** demo migration/first sync verified; public release checks pending; production unchanged
+**Commit(s):** this change (see Git history)
+
+The corrected demo migration and first read-only import succeeded (seven demo entries), and the temporary setup cron was removed. A read-only cron inventory confirmed demo has no Reception scheduler; production has an existing every-minute scheduler using a working-directory command. The release now recognises both established command formats and provisions only a dedicated five-minute read-only sync job when no effective scheduler exists. An explicit finish mode rechecks all 19 deployed files and the successful setup receipt without re-running migration or import. Production additionally requires all payload hashes to match the verified demo receipt.
+
+**Verified/security review:** 11 isolated scheduler selection/scope/idempotency/cadence checks pass; the real production command format is recognised from the private snapshot. Reviewed actual orchestration diff, exact cron commands/cadence, no unrelated cron edits or dormant-job activation, duplicate avoidance, no blind setup replay and failure/timeout stop behaviour. Ordinary public checks now require the release header/asset version, exact admin CSS and absence of fatal-error markers. Application payload unchanged from the corrected reviewed 19-file set; no docs/helper/secret uploads or production test applications. No known security blocker; finish demo verification before promotion.
+
 ## 2026-10-26 — Reconcile demo database setup before promotion
 **Area:** demo-first rollout verification
 **Environments:** demo files uploaded; setup stopped; production unchanged

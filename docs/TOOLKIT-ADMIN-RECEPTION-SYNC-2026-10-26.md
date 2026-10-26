@@ -14,8 +14,9 @@ unchanged and do not receive duplicate registrations from this mirror.
 
 ## Operation and privacy
 
-The existing Reception scheduler runs `reception:sync-website-applications` every
-five minutes. A run reads at most five pages of 50 entries, saves its progress
+Reception runs `reception:sync-website-applications` every five minutes.
+Production uses its existing scheduler; demo uses a dedicated read-only sync cron
+because no general Reception scheduler was configured there. A run reads at most five pages of 50 entries, saves its progress
 transactionally, and resumes a larger scan on the next run. Completed scans restart
 from the beginning to refresh existing details/statuses. A shared lock prevents
 overlapping workers; failures preserve existing copies and delay another attempt
