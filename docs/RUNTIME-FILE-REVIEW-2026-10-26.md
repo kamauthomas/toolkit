@@ -146,3 +146,30 @@ before continuing. A one-use reconciliation accepts only this exact failed recei
 requires fresh intermediate metadata/private permissions and absent destinations,
 and records intent before moving. Five additional isolated reconciliation cases
 cover unknown receipts, stale content, duplicate attempts and unexpected destinations.
+
+## Verified follow-up completion
+
+The corrective move and cleanup are complete. The final receipt verifies all
+882 files / 707 descendant directories (128,026,614 file bytes by metadata) at
+the intended recovery destination outside Reception, matching original relative
+paths/types/sizes/mtimes/modes. The destination root is 0700; both the original
+and intermediate locations are absent. This is metadata verification, not a
+download or content-hash audit of the recovery files. Historical scripts referring
+to the original audit path must not be rerun as current deployment instructions;
+use this relocation record when consulting their recovery artifacts.
+
+The exact unused `cmb2-pt_PT.mo.orig` backup was moved to recovery trash and its
+old path is absent. No recovery trash was emptied. Together with the earlier
+279-file cleanup, 280 obsolete files have been removed from active code folders;
+the 882 recovery files are a separate relocation, not additional deletions.
+Approved downloads, licenses, template ZIPs and runtime resources remain.
+
+Final ordinary WordPress homepage and production Reception login requests returned
+200; the homepage still reports release 2026.10.26.1. Existing Reception demo and
+production maintenance paths were separately verified with normal login 200 and
+unchanged vendor metadata; no index upload was needed. This follow-up uploaded
+zero runtime/source/document files and made no PHP or dependency changes.
+Seventeen isolated cleanup/index/reconciliation scenarios pass. Missing fileinfo
+still blocks the distinct 33-package-per-install vendor cleanup. Exact private
+receipts: `reports/fileinfo-followup-2026-10-26/additional-cleanup.json` and
+`index-verification.json`; investigation cron removed.

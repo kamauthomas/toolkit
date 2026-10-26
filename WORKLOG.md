@@ -1,3 +1,14 @@
+## 2026-10-26 — Verify recovery cleanup and hand off the module prerequisite
+**Area:** runtime file cleanup · deployment verification · daily reporting
+**Environments:** WordPress/Reception normal checks verified; no new runtime uploads; vendors/PHP unchanged
+**Commit(s):** this evidence/report update and 48a9fa5/f047eae tooling
+
+Completed the reconciled absolute-path recovery move. All 882 files and 707 descendant directories match the original relative-path/type/size/mtime/mode metadata at toolkit-private-storage/platform-security-2026-10-16; root verified 0700 and both old/intermediate paths absent. This is metadata preservation, not a downloaded content/hash audit. File bytes total 128,026,614 by metadata. Removed the single exact unused CMB2 .mo.orig backup to reversible recovery trash after fresh loader/file checks; its old path is absent. Earlier 279 plus this one gives 280 obsolete active-code files removed. No recovery copy was erased; the 882 relocated files are counted separately. Downloads, licenses, actual plugin resources and bundled template ZIPs are retained.
+
+**Verified/security review:** final additional-cleanup.json verified true; relocation signature/private-mode/absence checks passed; WordPress homepage and production Reception login 200, homepage release 2026.10.26.1. Existing demo/production Reception maintenance paths and production vendor metadata verified, both login 200, index uploads zero. Module-inspection cron removed. Seventeen isolated cleanup/index/reconciliation cases and prior dependency rollback fixtures passed. Actual final diff is evidence/reporting only: no new runtime payload, permissions/SQL/nonce/upload/relay change. No attack requests, application submissions, production dependency removal or PHP changes. Original user edits remain untouched and nothing pushed.
+
+**Remaining:** actual target EA-PHP 8.4 fileinfo module absent; 33 development packages per Laravel installation remain pending hosting provisioning and successful demo platform checks. Laravel Tinker is additionally declared under production requirements and therefore remains outside this no-dev set; no custom app/routes usage was found, but removal needs separate dependency/usage review. Web-worker patch/restart attestation remains hosting work. Ready-to-paste Thomas daily report updated at docs/reporting/DAILY-DRAFT-2026-10-26.md; not submitted externally. Exact package plan: docs/RUNTIME-DEVELOPMENT-PACKAGES-2026-10-26.md.
+
 ## 2026-10-26 — Reconcile cPanel move semantics before finishing cleanup
 **Area:** private recovery relocation · failure handling
 **Environments:** historical recovery root restricted to 0700; runtime/business files unchanged

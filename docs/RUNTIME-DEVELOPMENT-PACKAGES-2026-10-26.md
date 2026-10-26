@@ -6,6 +6,12 @@ Composer `dev-package-names`, checked against the local locked installations.
 These are test, debugging and development tools; their supporting packages are
 included. This is not a runtime library upgrade.
 
+This list follows the current Composer classification. Both applications also
+declare Laravel Tinker as a production requirement, so `--no-dev` retains it.
+Its interactive-shell role is an additional removal candidate for a separate
+dependency/usage review; the 33-package plan does not claim every retained library
+is essential. No Tinker usage was found in the custom application/routes search.
+
 | Installation | Currently installed | Runtime packages to retain | Development packages to remove |
 | --- | ---: | ---: | ---: |
 | Reception demo | 112 | 79 | 33 |
