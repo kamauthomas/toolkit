@@ -55,3 +55,10 @@ maps, archives, manifests or secrets are uploaded. Private release receipts unde
 `reports/toolkit-admin-sync-2026-10-26/` record actual environment verification;
 preparation alone does not mean deployed. Signed-in staff acceptance remains a
 separate human check.
+
+Demo initially rejected legacy MySQL TIMESTAMP defaults during the additive table
+creation. The setup cron was removed and production was held. Source/sync dates
+now use DATETIME, matching existing Reception migrations. A disposable socket-only
+MariaDB reproduced the exact error with legacy/strict defaults and passed the real
+corrected migration with four DATETIME columns and zero application rows. Resume
+is explicitly gated to the saved failure and exact fresh server hashes.

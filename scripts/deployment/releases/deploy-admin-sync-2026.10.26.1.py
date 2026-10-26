@@ -9,14 +9,31 @@ def load(path,name):
 PREP=load(Path(__file__).with_name('prepare-admin-sync-2026.10.26.1.py'),'prepare_release')
 POLICY=load(ROOT/'scripts/deployment/runtime_payload.py','payload_policy')
 def digest(data):return hashlib.sha256(data).hexdigest()
-def run(env):
+def run(env,resume_setup=False):
  manifest=json.loads((CASE/f'release-manifest-{env}.json').read_text());assert manifest['release']==RELEASE and len(manifest['files'])==19
  if env=='production':assert json.loads((CASE/'deployment/demo/verification.json').read_text())['verified']
  out=CASE/'deployment'/env;out.mkdir(parents=True,mode=0o700,exist_ok=True)
- if (out/'attempt.json').exists():raise RuntimeError('Existing attempt: reconcile its saved state before any retry')
+ previous=None
+ if (out/'attempt.json').exists():
+  if not resume_setup:raise RuntimeError('Existing attempt: reconcile its saved state before any retry')
+  previous=json.loads((out/'attempt.json').read_text())
+  receipt=(out/'maintenance.private.log').read_bytes()
+  assert env=='demo' and previous['cron_removed'] is True and previous['verified'] is False
+  assert b"Invalid default value for 'source_updated_at'" in receipt and b'TOOLKIT_ADMIN_SYNC_EXIT=1' in receipt
+ elif resume_setup:raise RuntimeError('No known failed setup to reconcile')
  allowed={'wordpress':set(PREP.WP_EXISTING+PREP.WP_NEW),'reception':set(PREP.RECEPTION_EXISTING+PREP.RECEPTION_NEW)}
  expected={(c,n) for c,names in allowed.items() for n in names};assert {(r['component'],r['file']) for r in manifest['files']}==expected
  rows={(r['component'],r['file']):r for r in manifest['files']}
+ migration='database/migrations/2026_10_26_090000_create_website_applications_table.php'
+ expected_before={key:r['baseline_sha256'] for key,r in rows.items()}
+ if previous:
+  done={c+'/'+n for c,n in rows if n!='routes/console.php'}
+  assert set(previous['uploaded'])==done and len(previous['uploaded'])==18
+  for key,r in rows.items():
+   if key[0]+'/'+key[1] in done:expected_before[key]=r['sha256']
+  # This is the exact failed CREATE TABLE version, not an arbitrary retry baseline.
+  original_migration=subprocess.check_output(['git','-C',str(ROOT.parent/'reception-system'),'show','eb5508a:'+migration])
+  expected_before['reception',migration]=digest(original_migration)
  for r in rows.values():
   POLICY.assert_runtime_upload(r['remote']);p=(CASE/r['payload']).resolve();assert p.is_relative_to((CASE/'release-payload'/env/r['component']).resolve()) and digest(p.read_bytes())==r['sha256']
   actual=('/home/bfyigiln/'+('demo.toolkitafrica.ac.ke' if env=='demo' else 'public_html')+'/wp-content/themes/eduma-child/' if r['component']=='wordpress' else '/home/bfyigiln/reception-system'+('-demo' if env=='demo' else '')+'/')+r['file'];assert r['remote']==actual
@@ -34,23 +51,28 @@ def run(env):
  # No mutation before every existing/new file has a matching fresh baseline.
  for r in rows.values():
   raw=panel.fetch(r['remote'],optional=r['baseline_sha256'] is None)
-  if (None if raw is None else digest(raw))!=r['baseline_sha256']:raise RuntimeError('Fresh server baseline drift: '+r['component']+'/'+r['file'])
+  if (None if raw is None else digest(raw))!=expected_before[r['component'],r['file']]:raise RuntimeError('Fresh server baseline drift: '+r['component']+'/'+r['file'])
   if raw is not None:
-   p=out/'before'/r['component']/r['file'];p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(raw);p.chmod(0o600)
+   p=out/('reconciled-before' if previous else 'before')/r['component']/r['file'];p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(raw);p.chmod(0o600)
  print(env,'all 19 fresh baseline checks passed',flush=True)
- attempt={'environment':env,'release':RELEASE,'uploaded':[],'cron_removed':None,'verified':False};attempt_path=out/'attempt.json'
+ attempt=previous or {'environment':env,'release':RELEASE,'uploaded':[],'cron_removed':None,'verified':False};attempt_path=out/'attempt.json'
+ if previous:
+  (out/'failed-timestamp-setup.private.log').write_bytes(receipt)
+  attempt['reconciled_failure']='Failed CREATE TABLE with MySQL legacy timestamp defaults; all 18 uploaded files rechecked; only DATETIME migration corrected.'
  def journal():attempt_path.write_text(json.dumps(attempt,indent=2)+'\n')
  journal()
  def upload(component,name):
   r=rows[component,name];data=(CASE/r['payload']).read_bytes();before=panel.fetch(r['remote'],optional=r['baseline_sha256'] is None)
-  if (None if before is None else digest(before))!=r['baseline_sha256']:raise RuntimeError('Concurrent server change: '+name)
+  if (None if before is None else digest(before))!=expected_before[component,name]:raise RuntimeError('Concurrent server change: '+name)
   panel.upload(r['remote'],data)
   if panel.fetch(r['remote'])!=data:raise RuntimeError('Uploaded bytes differ: '+name)
-  attempt['uploaded'].append(component+'/'+name);journal();print(env,'verified runtime file',component+'/'+name,flush=True)
+  if component+'/'+name not in attempt['uploaded']:attempt['uploaded'].append(component+'/'+name)
+  journal();print(env,'verified runtime file',component+'/'+name,flush=True)
  wporder=['inc/toolkit-admin.php','inc/reception-application-sync.php','inc/site-metrics.php','inc/support-hub.php','inc/application-adapter.php','inc/graduands.php','assets/css/toolkit-admin.css','functions.php']
- for name in wporder:upload('wordpress',name)
+ if not previous:
+  for name in wporder:upload('wordpress',name)
  # Hold the periodic schedule until the first successful migration and sync.
- for name in PREP.RECEPTION_NEW+[n for n in PREP.RECEPTION_EXISTING if n!='routes/console.php']:upload('reception',name)
+ for name in ([migration] if previous else PREP.RECEPTION_NEW+[n for n in PREP.RECEPTION_EXISTING if n!='routes/console.php']):upload('reception',name)
  private='/home/bfyigiln/reception-system'+('-demo' if env=='demo' else '');site='/home/bfyigiln/'+('demo.toolkitafrica.ac.ke' if env=='demo' else 'public_html')
  nonce=uuid.uuid4().hex;marker='/tmp/toolkit-admin-sync-'+nonce;log=private+'/storage/logs/toolkit-admin-sync-'+nonce+'.log'
  wpcode='define("DISABLE_WP_CRON",true);require '+json.dumps(site+'/wp-load.php')+';update_option("toolkit_reception_application_sync_enabled",1,false);if(!toolkit_reception_application_sync_enabled())exit(3);echo "WEBSITE_SYNC_ENABLED\\n";'
@@ -99,7 +121,7 @@ def run(env):
  (out/'verification.json').write_text(json.dumps(attempt,indent=2)+'\n');print('VERIFIED',env,'19 runtime files, schema, first read-only sync and recurring schedule; no test applications',flush=True)
 
 if __name__=='__main__':
- parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('environment',choices=['demo','production']);parser.add_argument('--execute',action='store_true');args=parser.parse_args()
+ parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('environment',choices=['demo','production']);parser.add_argument('--execute',action='store_true');parser.add_argument('--resume-setup',action='store_true',help='Only reconcile the recorded demo TIMESTAMP migration failure');args=parser.parse_args()
  if not args.execute:raise SystemExit('No remote action. Prepare/review payload and tests, then explicitly use --execute.')
- try:run(args.environment)
+ try:run(args.environment,args.resume_setup)
  except Exception as exc:print('STOPPED:',str(exc) if isinstance(exc,RuntimeError) else type(exc).__name__,'— inspect the private attempt/receipt; do not retry blindly',flush=True);raise SystemExit(1)

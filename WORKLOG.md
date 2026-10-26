@@ -1,3 +1,12 @@
+## 2026-10-26 — Reconcile demo database setup before promotion
+**Area:** demo-first rollout verification
+**Environments:** demo files uploaded; setup stopped; production unchanged
+**Commit(s):** this change (see Git history)
+
+Demo verification caught MySQL error 1067 while creating the new mirror table: the host's legacy implicit TIMESTAMP defaults reject a second required timestamp. The temporary setup cron was removed. Reception now uses DATETIME for its four source/sync dates, matching existing migrations. Added a narrowly gated reconciliation path: require that exact failure receipt, verify every uploaded/pending file against its expected hash, replace only the corrected migration, then perform a fresh one-attempt additive setup. No original attempt is silently reset or blindly replayed.
+
+**Verified/security review:** reproduced error 1067 in disposable socket-only MariaDB with legacy timestamp defaults/strict zero-date rules, then ran the real corrected Laravel migration successfully and verified all four DATETIME columns and zero application rows. The temporary database/process were removed. Final Reception suite: 95 tests / 1,364 assertions; focused schema-fix sync rerun: 13 / 113. Reviewed the exact runner/schema diff, immutable failed-migration baseline, demo-only resume gate, cron cleanup, no destructive schema/data operation and unchanged runtime allowlist. No production test submission or unresolved security blocker. Reconciled demo and production verification still pending their receipts.
+
 ## 2026-10-26 — Scope reversible cleanup of older vendor documentation
 **Area:** runtime-only server file policy
 **Environments:** reviewed local cleanup plan; execution pending demo-first verification
