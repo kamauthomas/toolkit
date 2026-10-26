@@ -12,6 +12,7 @@ original = b"<?php if(file_exists($m=__DIR__.'/../storage/framework/maintenance.
 fixed = deploy.repair_index(original, 'reception-system-demo')
 assert b"__DIR__.'/../reception-system-demo/storage/framework/maintenance.php'" in fixed
 assert fixed.replace(b'/../reception-system-demo/storage/', b'/../storage/') == original
+assert deploy.repair_index(fixed, 'reception-system-demo') == fixed
 for unsafe in [original.replace(b'maintenance.php', b'unknown.php'), original + original]:
     try: deploy.repair_index(unsafe, 'reception-system-demo')
     except AssertionError: pass
@@ -19,7 +20,7 @@ for unsafe in [original.replace(b'maintenance.php', b'unknown.php'), original + 
 
 with tempfile.TemporaryDirectory(prefix='toolkit-dependency-rollback-') as directory:
     root = Path(directory)
-    for mode in ['success', 'composer_failure', 'no_composer', 'existing_backup']:
+    for mode in ['success', 'composer_failure', 'no_composer', 'existing_backup', 'bad_checksum']:
         case = root / mode; app = case / 'application'; cache = app / 'bootstrap/cache'; vendor = app / 'vendor'
         cache.mkdir(parents=True); vendor.mkdir(); (app / 'artisan').touch()
         (vendor / 'runtime.php').write_text('runtime'); (vendor / 'developer.php').write_text('developer')
@@ -42,7 +43,7 @@ esac
 '''); php.chmod(0o700)
         backup = case / 'rollback'
         if mode == 'existing_backup': backup.mkdir(); (backup / 'sentinel').write_text('preserve')
-        body = deploy.maintenance_script(str(app), str(backup), str(php), (str(composer),))
+        body = deploy.maintenance_script(str(app), str(backup), str(php), (str(composer),), tool_hash='0' * 64 if mode == 'bad_checksum' else None)
         assert '\n' not in body and '%' not in body
         subprocess.run(['/bin/sh', '-n'], input=body.encode(), check=True)
         result = subprocess.run(['/bin/sh', '-c', body], capture_output=True)
@@ -57,4 +58,13 @@ esac
             assert (cache / 'config.php').read_text() == 'old cache'
         if mode == 'composer_failure': assert b'PRIVATE_VENDOR_ROLLBACK_ATTEMPTED' in result.stdout
         if mode == 'existing_backup': assert (backup / 'sentinel').read_text() == 'preserve'
+    for status in [0, 7]:
+        tool = root / ('temporary-tool-' + str(status)); tool.write_text('tool fixture')
+        marker = root / ('marker-' + str(status)); log = root / ('worker-' + str(status) + '.log')
+        command = deploy.worker_command('exit ' + str(status), str(marker), str(log), str(tool))
+        subprocess.run(['/bin/sh', '-c', command], check=True)
+        saved = log.read_bytes()
+        assert not tool.exists() and ('TOOLKIT_DEPENDENCY_WORKER_EXIT=' + str(status)).encode() in saved
+        tool.write_text('must not replay'); subprocess.run(['/bin/sh', '-c', command], check=True)
+        assert tool.exists() and log.read_bytes() == saved
 print('PASS: exact maintenance-path repair; success, failed Composer rollback, unavailable Composer and existing-backup guards; maintenance removed and runtime data preserved in isolated fixtures.')

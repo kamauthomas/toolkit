@@ -26,15 +26,24 @@ def sha(data): return hashlib.sha256(data).hexdigest()
 def versions(data): return {(p['name'], p['version']) for p in data['packages']}
 
 
+def worker_command(body, marker, log, tool=None):
+    cleanup = ('; if rm -f ' + shlex.quote(tool) + '; then echo TOOLKIT_COMPOSER_REMOVED; else code=44; fi') if tool else ''
+    command = '/bin/sh -c ' + shlex.quote('umask 077; if mkdir ' + shlex.quote(marker) + ' 2>/dev/null; then { /bin/sh -c ' + shlex.quote(body) + '; code=$?' + cleanup + '; echo TOOLKIT_DEPENDENCY_WORKER_EXIT=$code; } > ' + shlex.quote(log) + ' 2>&1; fi')
+    assert '\n' not in command and '%' not in command
+    return command
+
+
 def repair_index(raw, private_name):
     assert private_name in {'reception-system', 'reception-system-demo'}
     old = b"__DIR__.'/../storage/framework/maintenance.php'"
     new = ("__DIR__.'/../" + private_name + "/storage/framework/maintenance.php'").encode()
-    assert raw.count(old) == 1 and ("/../" + private_name + "/vendor/autoload.php").encode() in raw
+    assert ("/../" + private_name + "/vendor/autoload.php").encode() in raw
+    if raw.count(new) == 1 and old not in raw: return raw
+    assert raw.count(old) == 1
     return raw.replace(old, new, 1)
 
 
-def maintenance_script(private, backup, php='/usr/local/bin/ea-php84', candidates=('/opt/cpanel/composer/bin/composer', '/usr/local/bin/composer')):
+def maintenance_script(private, backup, php='/usr/local/bin/ea-php84', candidates=('/opt/cpanel/composer/bin/composer', '/usr/local/bin/composer'), tool_hash=None):
     # Complete shell statements keep the cPanel cron command on one inspectable line.
     finish = ('finish() { code=$?; trap - EXIT; set +e; '
               'if test "$code" -ne 0 && test "$restore_needed" -eq 1; then '
@@ -47,6 +56,7 @@ def maintenance_script(private, backup, php='/usr/local/bin/ea-php84', candidate
     return '; '.join([
         'set -eu', 'umask 077', 'app=' + shlex.quote(private), 'backup=' + shlex.quote(backup),
         'php=' + shlex.quote(php), 'composer=',
+        *(['test "$(sha256sum ' + shlex.quote(candidates[0]) + ' | cut -c 1-64)" = ' + shlex.quote(tool_hash)] if tool_hash else []),
         'for candidate in ' + ' '.join(shlex.quote(p) for p in candidates) + '; do if test -f "$candidate" && test -r "$candidate"; then composer=$candidate; break; fi; done',
         'if test -z "$composer"; then echo COMPOSER_NOT_AVAILABLE; exit 42; fi',
         'test ! -e "$backup"', 'mkdir -p "$backup"', 'chmod 700 "$backup"',
@@ -54,7 +64,7 @@ def maintenance_script(private, backup, php='/usr/local/bin/ea-php84', candidate
         'maintenance_started=0', 'restore_needed=0', finish, 'trap finish EXIT',
         'maintenance_started=1', '\"$php\" \"$app/artisan\" down --render=errors::503 --retry=60',
         'restore_needed=1', 'cd "$app"',
-        'COMPOSER_DISABLE_NETWORK=1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_AUTH=\'{}\' COMPOSER_CACHE_DIR="$backup/composer-cache" "$php" -d memory_limit=512M "$composer" install --no-dev --no-scripts --no-plugins --no-interaction --no-progress --prefer-dist --optimize-autoloader',
+        'COMPOSER_DISABLE_NETWORK=1 COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_AUTH=\'{}\' COMPOSER_HOME="$backup/composer-home" COMPOSER_CACHE_DIR="$backup/composer-cache" "$php" -d memory_limit=512M "$composer" install --no-dev --no-scripts --no-plugins --no-interaction --no-progress --prefer-dist --optimize-autoloader',
         # Only regenerable framework caches; no business/configuration source is removed.
         'rm -f "$app/bootstrap/cache/packages.php" "$app/bootstrap/cache/services.php" "$app/bootstrap/cache/config.php"',
         '\"$php\" \"$app/artisan\" package:discover --no-ansi',
@@ -64,7 +74,7 @@ def maintenance_script(private, backup, php='/usr/local/bin/ea-php84', candidate
     ])
 
 
-def run(target, execute=False):
+def run(target, execute=False, with_local_composer=False):
     kind, name, public, base = TARGETS[target]
     prep = json.loads((CASE / 'dependency-preparation/verification.json').read_text())[kind]
     before_raw = (CASE / 'final-runtime-checks' / (name + '-installed.private.json')).read_bytes()
@@ -78,7 +88,13 @@ def run(target, execute=False):
         assert json.loads((CASE / 'dependency-deployment/demo/verification.json').read_text())['verified']
     out = CASE / 'dependency-deployment' / target; out.mkdir(parents=True, mode=0o700, exist_ok=True)
     attempt_path = out / 'attempt.json'
-    if attempt_path.exists(): raise RuntimeError('Existing dependency attempt; reconcile it before retry')
+    previous = None
+    if attempt_path.exists():
+        if not with_local_composer: raise RuntimeError('Existing dependency attempt; reconcile it before retry')
+        previous = json.loads(attempt_path.read_text()); failure = (out / 'maintenance.private.log').read_bytes()
+        assert target == 'demo' and previous['cron_removed'] is True and previous['verified'] is False
+        assert not previous.get('local_composer_attempt_started'), 'Reconcile any existing temporary tool attempt first'
+        assert b'COMPOSER_NOT_AVAILABLE' in failure and b'TOOLKIT_DEPENDENCY_WORKER_EXIT=42' in failure
     spec = importlib.util.spec_from_file_location('existing_panel', Path(__file__).with_name('deploy-reception-graduands-2026.10.15.1.py'))
     module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
     panel = module.Panel(); original = panel.s.request; last = [0.0]; blocked = [False]
@@ -101,14 +117,18 @@ def run(target, execute=False):
         assert sha(panel.fetch(private + '/' + file)) == prep['source_' + file.replace('.', '_') + '_sha256']
     for file in ('down', 'maintenance.php'):
         assert panel.fetch(private + '/storage/framework/' + file, optional=True) is None, 'Existing maintenance state; leave it untouched'
-    raw = panel.fetch(index); (out / 'index-before.private.php').write_bytes(raw)
+    raw = panel.fetch(index)
+    if previous:
+        assert raw == (out / 'index-runtime.php').read_bytes()
+        (out / 'failed-composer-availability.private.log').write_bytes(failure)
+    else: (out / 'index-before.private.php').write_bytes(raw)
     if kind == 'reception':
         patched = repair_index(raw, name); (out / 'index-runtime.php').write_bytes(patched)
         subprocess.run(['php', '-l', str(out / 'index-runtime.php')], check=True, stdout=subprocess.DEVNULL)
     else:
         assert b"__DIR__.'/../storage/framework/maintenance.php'" in raw
         patched = raw
-    attempt = {'target': target, 'verified': False, 'cron_removed': None, 'runtime_versions_unchanged': None}
+    attempt = previous or {'target': target, 'verified': False, 'cron_removed': None, 'runtime_versions_unchanged': None}
     def save(): attempt_path.write_text(json.dumps(attempt, indent=2) + '\n')
     save()
     if patched != raw:
@@ -119,14 +139,25 @@ def run(target, execute=False):
     nonce = uuid.uuid4().hex; marker = '/tmp/toolkit-dependencies-' + nonce
     backup = '/home/bfyigiln/toolkit-private-storage/dependency-rollback-2026-10-26/' + name + '-' + nonce
     log = private + '/storage/logs/toolkit-dependencies-' + nonce + '.log'
-    body = maintenance_script(private, backup)
+    tool = None
+    if with_local_composer:
+        tool = private + '/storage/app/private/composer-maintenance-' + nonce + '.phar'
+        manifest = json.loads((CASE / 'dependency-preparation/composer-tool-manifest.json').read_text())
+        binary = Path('/usr/local/bin/composer').read_bytes()
+        assert sha(binary) == manifest['sha256'] and len(binary) == manifest['bytes']
+        attempt['local_composer_attempt_started'] = True
+        attempt['temporary_composer'] = {'path': tool, 'sha256': manifest['sha256'], 'uploaded': False, 'removed': False}; save()
+        panel.upload(tool, binary)
+        attempt['temporary_composer']['uploaded'] = True; save()
+        body = maintenance_script(private, backup, candidates=(tool,), tool_hash=manifest['sha256'])
+    else: body = maintenance_script(private, backup)
     subprocess.run(['/bin/sh', '-n'], input=body.encode(), check=True)
-    command = '/bin/sh -c ' + shlex.quote('umask 077; if mkdir ' + shlex.quote(marker) + ' 2>/dev/null; then { /bin/sh -c ' + shlex.quote(body) + '; code=$?; echo TOOLKIT_DEPENDENCY_WORKER_EXIT=$code; } > ' + shlex.quote(log) + ' 2>&1; fi')
-    assert '\n' not in command and '%' not in command
+    command = worker_command(body, marker, log, tool)
     (out / 'reviewed-maintenance-command.private.sh').write_text(command + '\n')
+    attempt.update(maintenance_command=command, private_rollback=backup, private_log=log, cron_removed=False, cron_submission='pending'); save()
     added = panel.api2call('Cron', 'add_line', command=command, minute='*', hour='*', day='*', month='*', weekday='*')
     assert added.get('event', {}).get('result') == 1
-    attempt.update(maintenance_command=command, private_rollback=backup, private_log=log, cron_removed=False); save()
+    attempt['cron_submission'] = 'accepted'; save()
     receipt = None
     try:
         for _ in range(24):
@@ -142,6 +173,8 @@ def run(target, execute=False):
             attempt['cron_removed'] = not any(r.get('command') == command for r in panel.api2call('Cron', 'listcron').get('data', [])); save()
     if receipt:
         file = out / 'maintenance.private.log'; file.write_bytes(receipt); file.chmod(0o600)
+        if tool:
+            attempt['temporary_composer']['removed'] = b'TOOLKIT_COMPOSER_REMOVED' in receipt; save()
     if not receipt or b'TOOLKIT_DEPENDENCIES_EXIT=0' not in receipt or b'TOOLKIT_DEPENDENCY_WORKER_EXIT=0' not in receipt or b'RUNTIME_DEPENDENCIES_READY' not in receipt:
         raise RuntimeError('Dependency operation did not succeed; inspect private receipt/rollback state')
     after = json.loads(panel.fetch(private + '/vendor/composer/installed.json'))
@@ -161,8 +194,8 @@ def run(target, execute=False):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('target', choices=TARGETS); parser.add_argument('--execute', action='store_true'); args = parser.parse_args()
-    try: run(args.target, args.execute)
+    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('target', choices=TARGETS); parser.add_argument('--execute', action='store_true'); parser.add_argument('--with-local-composer', action='store_true', help='Use the tested SHA-pinned Composer PHAR temporarily outside the webroot; always remove it'); args = parser.parse_args()
+    try: run(args.target, args.execute, args.with_local_composer)
     except Exception as exc:
         print('STOPPED:', str(exc) if isinstance(exc, RuntimeError) else type(exc).__name__, '— reconcile private receipt; never retry blindly')
         raise SystemExit(1)

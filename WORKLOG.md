@@ -1,3 +1,12 @@
+## 2026-10-26 — Handle hosting without a Composer installation
+**Area:** safe runtime-dependency cleanup tooling
+**Environments:** demo maintenance-path repair verified; vendor state unchanged; production untouched by dependency cleanup
+**Commit(s):** this change (see Git history)
+
+Demo's first dependency worker reported COMPOSER_NOT_AVAILABLE and exited 42 before backup, maintenance or dependency changes. Its temporary cron was removed; the exact public early-maintenance path repair remains verified. The locally installed Composer 2.9.7 PHAR used by both successful isolated preparations is now an explicit temporary deployment-tool option: fixed private nonce path, SHA256 pinned to a recorded 3,377,213-byte binary with PHAR SHA512 integrity, hash check before execution, networking/plugins/scripts disabled and unconditional tool removal after worker completion. It is the unmodified dependency manager, not an uploaded inventory helper.
+
+**Verified/security review:** local syntax and shell tests pass, including idempotent exact index repair, missing/ambiguous anchors, unchanged runtime files, Composer failure restoring vendor/cache and clearing maintenance, unavailable Composer, existing-backup refusal and bad tool checksum. Added worker fixtures confirm tool removal on success/failure and single-attempt marker suppression. Upload/cron intents are journalled before uncertain network operations, a pending temporary-tool attempt cannot be blindly replayed, and any hosting timeout stops further requests. Reviewed the actual tool/lifecycle diff and fixed targets; no package upgrades, project-document/archive payload, business-data deletion, source rewrite, secret output, external download or production test application. Only the known no-Composer demo failure is eligible for the explicit reconciliation path; demo must verify before production/Campus.
+
 ## 2026-10-26 — Prepare runtime-only Laravel dependencies with rollback
 **Area:** server runtime policy · safe dependency maintenance
 **Environments:** UI/sync verified demo and production; vendor cleanup prepared locally
