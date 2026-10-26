@@ -2,7 +2,8 @@
 
 **Summary:** Refreshed the website administration workspace, made website
 applications available as a clearly labelled view-only register in Reception,
-and tightened the handling of files kept on the hosting account.
+added controlled calling-letter access and issuance, and tightened the handling
+of files kept on the hosting account.
 
 | Task | Time spent | Status |
 | --- | --- | --- |
@@ -15,7 +16,7 @@ and tightened the handling of files kept on the hosting account.
 | Check access restrictions, privacy, page layouts and failure handling | Not separately recorded | Completed with sample data and verified release checks |
 | Assess the latest PHP security releases and upgrade readiness | Not separately recorded | Completed; current installed releases match the main security fixes |
 | Review and publish completed changes to the remote repositories | Not separately recorded | Completed; existing unrelated drafts preserved locally |
-| Design and implement Reception calling-letter access and administrator issuance | Not separately recorded | Development completed and tested; disabled pending demo/platform verification |
+| Design and implement Reception calling-letter access and administrator issuance | Not separately recorded | Completed on demo and production; administrator issuance verified on demo |
 
 **Challenges:** Hosting checks timed out and were stopped until access was
 confirmed. Demo exposed a database compatibility issue that was corrected before
@@ -25,6 +26,9 @@ maintenance tool and scheduled job were removed.
 The follow-up confirmed the module is missing rather than simply disabled. An
 initial recovery move used an unexpected destination; its checks stopped further
 cleanup, all files were accounted for, and the move was corrected and verified.
+The initial production letter check found a missing supporting file. The new
+features were automatically switched off, the missing file was restored, and
+demo and production verification then succeeded.
 
 **Decisions/comments:** Staff can view website applications in Reception; changes
 and admissions actions stay on the website. Refresh is scheduled every five
@@ -34,13 +38,18 @@ Older private recovery files were preserved, and existing uncommitted work remai
 recoverable in named local Git stashes. Reviewed completed changes have been
 pushed to the WordPress and Reception remotes; reports have not been filed externally.
 The relocated recovery folder now permits access only to its owner. The final
-website and Reception page checks succeeded. No additional application upload or
-PHP change was needed during this follow-up.
+website and Reception page checks succeeded. The recovery cleanup required no application upload or server software change.
 The calling-letter design keeps website letters read-only and lets only
 administrators issue letters for Reception applicants. It uses the approved
 website template, preserves issued versions and records issuance/downloads.
-Generation sends no email/SMS and submits nothing to Mzizi. Development tests pass;
-the new module is disabled and has not been deployed.
+Generation sends no email/SMS and submits nothing to Mzizi. The module is now
+enabled on demo and production. Sample issuance, downloads, access restrictions
+and duplicate prevention were verified on demo, and the sample records were
+removed. Production checks used an existing website letter without creating
+test applicants or issuing test letters.
+The user authorised a one-run exception for the missing hosting module so this
+urgent release could proceed. That exception is closed; future checks remain
+required. Server software and installed libraries were not changed.
 
 **Next working day:** Thomas and reception/admissions staff to review the updated
 screens and register; ICT to monitor refresh results and review the retention of
@@ -49,8 +58,9 @@ release evidence. Expected outcome: staff acceptance and a clear recovery policy
 Hosting support to install the missing module, followed by ICT's demo-first
 development-tool cleanup. Review the additional interactive developer tool that
 is currently declared as a production dependency before removing it.
-Verify the calling-letter module on demo after the hosting prerequisite is met,
-then review it with admissions before production enablement.
+Admissions and Reception staff to review the enabled calling-letter workflow
+in their normal accounts. Expected outcome: approved day-to-day use and feedback
+on any wording or workflow adjustments.
 
 **ICT metrics:** Two main systems improved; demo and production release checks
 passed; 28 production website applications synced; 280 unnecessary files removed

@@ -1,9 +1,9 @@
-# Calling letters in Reception — first implementation
+# Calling letters in Reception — deployed workflow
 
 The user confirmed **administrators only** may issue letters for Reception's own
 applicants. Website applications and their letters remain read-only in Reception.
-This implementation is locally tested and disabled by default; it has not been
-deployed or enabled on hosting.
+The module is deployed, enabled and verified on demo and production as of
+26 October 2026. New installations still default to disabled.
 
 ## Workflow and decisions
 
@@ -71,37 +71,60 @@ lock. Contact details are rechecked under a database row lock after rendering.
 Replacements require confirmation and history is limited to ten versions per
 applicant. No website record receives an issue/edit action.
 
-## Verification and release gate
+## Verification and deployment
 
 Reception: **112 tests / 1,505 assertions**, including 17 new letter tests for
 roles, guest/inactive/password gates, CSRF, encryption, duplicate/replacement
 requests, lock contention, version limits, interrupted storage, changed contacts,
 source boundaries, response limits, safe failure, cross-applicant downloads and
 cascading cleanup. All external responses are mocked and applicants are synthetic.
-WordPress: **46 isolated checks**, plus a private synthetic A4 preview using the
-approved DOCX's actual logo/stamp/signature (47 checks with that preview). The PDF
+WordPress: **47 isolated checks**, plus a private synthetic A4 preview using the
+approved DOCX's actual logo/stamp/signature (48 checks with that preview). The PDF
 was visually inspected and is one-page A4. These checks exercise the real PDF
 renderer, signatures/replay/body tampering, private path confinement, malformed
 and oversized output, explicit intake and temporary-file cleanup. Existing export,
 runtime-path and runtime-packaging regressions also pass. No production applicant
 was submitted and no live negative probe or Mzizi replay was used.
 
-The prepared runtime plan has **13 code/view files**: four WordPress and nine
-Reception, including one additive DATETIME migration. It contains no reports,
+The verified runtime set has **14 code/view files**: five WordPress and nine
+Reception, including the explicit private-file dependency and one additive
+DATETIME migration. It contains no reports,
 README/AGENTS, tests, source maps, vendor rebuild, archive or template upload.
-All 26 corresponding demo/production destinations pass the runtime upload policy.
+All 28 corresponding demo/production destinations pass the runtime upload policy.
 The approved template is an existing server-side runtime input, not a project
 report to upload. No new Composer dependency is introduced.
 
-Before activation, resolve the known target-platform fileinfo prerequisite, fetch
-fresh live baselines/template revision, prepare focused patches preserving drift,
-and verify demo on the application's actual interpreter and web handler. Apply the
-additive migration before enabling native routes. Enable Reception's
-`CALLING_LETTERS_ENABLED=true` and the website Toolkit Control calling-letter
-toggle only for the reviewed environment; the application-sharing switch and
-shared secret remain prerequisites. Test normal staff UI/permissions and a
-synthetic demo-only issuance before production promotion. Keep production off
-until that gate passes. A Git push is not a live feature deployment.
+Fresh live baselines were patched without overwriting unrelated source. All 14
+final runtime hashes match between verified demo and production. Reception's
+`CALLING_LETTERS_ENABLED=true` and Toolkit Control's **Enable calling letters for
+Reception** are enabled; application sharing and the shared secret remain required.
+
+Demo passed 15 checks on native EA-PHP 8.4.27/MySQL, including a real HTTPS website
+PDF and renderer, administrator issue/download, encrypted storage, duplicate
+prevention, issue history, manager denial and complete rollback of synthetic rows.
+Authenticated routes were dispatched privately through the real application
+kernel/session/CSRF stack from CLI, rather than through an interactive browser.
+The generated 90,809-byte PDF is one-page A4 and uses the approved brand assets.
+Production acceptance read an existing website PDF and verified its mirror,
+configuration and schema; it created no test applicant or issued letter. Sync
+processed seven demo and 28 production applications. Both environments' normal
+website homepages and Reception logins returned HTTP 200. Setup crons were removed.
+Staff should still review the workflow in their own normal signed-in sessions.
+
+The first production acceptance failed because its older installation lacked the
+private-file resolver. The failure trap disabled the new controls; the module was
+corrected to load its dependency explicitly, the missing guard was installed first,
+and demo passed again before the identical production reconciliation. Original
+failed and successful receipts are preserved privately, rather than overwritten.
+
+The user explicitly authorised the existing missing-fileinfo prerequisite exception
+**for this release run only**. Native paths above were verified without changing
+PHP configuration, switching interpreters or altering dependencies. The exception
+is now closed; ordinary platform checks remain required for future releases. The
+33 development packages per Laravel installation were not removed: cleanup still
+needs hosting to provision fileinfo and successful target platform checks. CLI
+patch information is not evidence of a web-worker restart or vendor build attestation.
+No production test application, Mzizi replay or email/SMS was sent.
 
 Official implementation references:
 [Laravel HTTP client](https://laravel.com/docs/13.x/http-client),
