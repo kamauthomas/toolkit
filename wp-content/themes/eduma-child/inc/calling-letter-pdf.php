@@ -507,7 +507,7 @@ function toolkit_calling_letter_intake_label() {
  * $tokens: full_name, phone, first_name, course, letter_date.
  * Returns true, or a string error message.
  */
-function toolkit_calling_letter_render_pdf( $destination_path, array $tokens ) {
+function toolkit_calling_letter_render_pdf( $destination_path, array $tokens, array $options = array() ) {
 	$olive  = array( 139, 148, 55 );
 	$blue   = array( 9, 105, 128 );
 	$orange = array( 241, 91, 35 );
@@ -577,7 +577,7 @@ function toolkit_calling_letter_render_pdf( $destination_path, array $tokens ) {
 		array( array( 'Thank you for choosing ', false ), array( 'The Toolkit for Skills & Innovation.', true ) ),
 		array(
 			array( 'We are pleased to invite you to join our ', false ),
-			array( toolkit_calling_letter_intake_label(), true ),
+			array( $options['intake'] ?? toolkit_calling_letter_intake_label(), true ),
 			array( ' and begin your journey towards acquiring practical, industry-relevant skills that lead to employment, entrepreneurship, and career success.', false ),
 		),
 		array(
@@ -700,6 +700,7 @@ function toolkit_calling_letter_render_pdf( $destination_path, array $tokens ) {
 
 	$y = toolkit_pdf_draw_paragraph( $page, array( array( 'THEOPHILE SYLVESTER', false ) ), $left, $y, $width, $size, $leading );
 	$y = toolkit_pdf_draw_paragraph( $page, array( array( 'Principal', true ) ), $left, $y, $width, $size, $leading, array( 'underline' => true ) );
+	if ( ! empty( $options['strict_layout'] ) && $y > 790 ) return 'The calling-letter details exceed the available page space.';
 
 	/* Footer: full-bleed orange rule broken by the centred strapline. */
 	$tagline    = 'A leader in powering Africa with skilled, confident and productive youth';

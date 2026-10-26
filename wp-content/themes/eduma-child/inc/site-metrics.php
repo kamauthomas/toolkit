@@ -142,6 +142,7 @@ add_action( 'admin_post_toolkit_save_controls', function() {
 		// Pricing cannot remain armed behind a disabled catalogue switch.
 		'toolkit_2026_pricing_enabled' => $catalog_enabled && isset( $_POST['pricing'] ),
 		'toolkit_reception_application_sync_enabled' => isset( $_POST['application_sync'] ) && strlen( toolkit_reception_api_secret() ) >= 32,
+		'toolkit_reception_calling_letters_enabled' => isset( $_POST['reception_letters'] ) && strlen( toolkit_reception_api_secret() ) >= 32,
 	);
 	foreach ( $controls as $option => $enabled ) update_option( $option, $enabled ? 1 : 0, false );
 	wp_safe_redirect( add_query_arg( array( 'page' => 'toolkit-control', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
@@ -225,6 +226,7 @@ function toolkit_render_metrics_page() {
 	toolkit_render_control_toggle( 'catalog', '2026 course catalogue', eduma_child_2026_catalog_enabled(), 'Activates the separately verified 2026 catalogue.' );
 	toolkit_render_control_toggle( 'pricing', 'Revised September 2026 pricing', eduma_child_2026_pricing_enabled(), 'Publishes tuition and separate exam fees from the revised September 2026 Kikuyu Campus poster.' );
 	toolkit_render_control_toggle( 'application_sync', 'Share website applications with Reception', function_exists( 'toolkit_reception_application_sync_enabled' ) && toolkit_reception_application_sync_enabled(), 'Provides a protected read-only copy. Application changes and Mzizi actions remain on this website.' );
+	toolkit_render_control_toggle( 'reception_letters', 'Enable calling letters for Reception', function_exists( 'toolkit_reception_letters_enabled' ) && toolkit_reception_letters_enabled(), 'Provides protected website PDFs and the approved renderer for administrator-issued Reception letters. No email or Mzizi submission is triggered.' );
 	echo '<p><button class="button button-primary" type="submit">Save release controls</button></p></form>';
 	echo '<div class="toolkit-admin__panel"><div class="toolkit-admin__panel-heading"><div><small>Configuration</small><h2>Website settings</h2></div></div><dl class="toolkit-admin__status">';
 	printf( '<div><dt>Site</dt><dd>%s</dd></div>', esc_html( home_url() ) );

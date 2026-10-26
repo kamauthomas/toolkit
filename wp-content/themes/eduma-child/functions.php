@@ -6,6 +6,7 @@ require_once get_stylesheet_directory() . '/inc/calling-letter-pdf.php';
 require_once get_stylesheet_directory() . '/inc/calling-letters.php';
 require_once get_stylesheet_directory() . '/inc/reception-integration.php';
 require_once get_stylesheet_directory() . '/inc/reception-application-sync.php';
+require_once get_stylesheet_directory() . '/inc/reception-calling-letters.php';
 require_once get_stylesheet_directory() . '/inc/cultural-week-stories.php';
 require_once get_stylesheet_directory() . '/inc/mosiria-story.php';
 require_once get_stylesheet_directory() . '/inc/youtube-feed.php';
