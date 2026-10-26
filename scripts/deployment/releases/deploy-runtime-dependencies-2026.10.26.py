@@ -59,6 +59,7 @@ def maintenance_script(private, backup, php='/usr/local/bin/ea-php84', candidate
         *(['test "$(sha256sum ' + shlex.quote(candidates[0]) + ' | cut -c 1-64)" = ' + shlex.quote(tool_hash)] if tool_hash else []),
         'for candidate in ' + ' '.join(shlex.quote(p) for p in candidates) + '; do if test -f "$candidate" && test -r "$candidate"; then composer=$candidate; break; fi; done',
         'if test -z "$composer"; then echo COMPOSER_NOT_AVAILABLE; exit 42; fi',
+        '"$php" -r ' + shlex.quote('if(!extension_loaded("fileinfo")){fwrite(STDERR,"FILEINFO_NOT_ENABLED\\n");exit(45);}'),
         'test ! -e "$backup"', 'mkdir -p "$backup"', 'chmod 700 "$backup"',
         'cp -a "$app/vendor" "$backup/vendor"', 'cp -a "$app/bootstrap/cache" "$backup/bootstrap-cache"',
         'maintenance_started=0', 'restore_needed=0', finish, 'trap finish EXIT',
@@ -74,7 +75,7 @@ def maintenance_script(private, backup, php='/usr/local/bin/ea-php84', candidate
     ])
 
 
-def run(target, execute=False, with_local_composer=False):
+def run(target, execute=False, with_local_composer=False, resume_after_fileinfo=False):
     kind, name, public, base = TARGETS[target]
     prep = json.loads((CASE / 'dependency-preparation/verification.json').read_text())[kind]
     before_raw = (CASE / 'final-runtime-checks' / (name + '-installed.private.json')).read_bytes()
@@ -93,8 +94,14 @@ def run(target, execute=False, with_local_composer=False):
         if not with_local_composer: raise RuntimeError('Existing dependency attempt; reconcile it before retry')
         previous = json.loads(attempt_path.read_text()); failure = (out / 'maintenance.private.log').read_bytes()
         assert target == 'demo' and previous['cron_removed'] is True and previous['verified'] is False
-        assert not previous.get('local_composer_attempt_started'), 'Reconcile any existing temporary tool attempt first'
-        assert b'COMPOSER_NOT_AVAILABLE' in failure and b'TOOLKIT_DEPENDENCY_WORKER_EXIT=42' in failure
+        if resume_after_fileinfo:
+            assert with_local_composer and previous['temporary_composer']['removed'] is True
+            assert json.loads((out / 'rollback-verification.json').read_text())['verified']
+            assert b'requires ext-fileinfo' in failure and b'PRIVATE_VENDOR_ROLLBACK_ATTEMPTED' in failure and b'TOOLKIT_DEPENDENCY_WORKER_EXIT=2' in failure
+        else:
+            assert not previous.get('local_composer_attempt_started'), 'Reconcile any existing temporary tool attempt first'
+            assert b'COMPOSER_NOT_AVAILABLE' in failure and b'TOOLKIT_DEPENDENCY_WORKER_EXIT=42' in failure
+    elif resume_after_fileinfo: raise RuntimeError('No recorded fileinfo failure to reconcile')
     spec = importlib.util.spec_from_file_location('existing_panel', Path(__file__).with_name('deploy-reception-graduands-2026.10.15.1.py'))
     module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
     panel = module.Panel(); original = panel.s.request; last = [0.0]; blocked = [False]
@@ -120,7 +127,7 @@ def run(target, execute=False, with_local_composer=False):
     raw = panel.fetch(index)
     if previous:
         assert raw == (out / 'index-runtime.php').read_bytes()
-        (out / 'failed-composer-availability.private.log').write_bytes(failure)
+        (out / ('failed-fileinfo-platform.private.log' if resume_after_fileinfo else 'failed-composer-availability.private.log')).write_bytes(failure)
     else: (out / 'index-before.private.php').write_bytes(raw)
     if kind == 'reception':
         patched = repair_index(raw, name); (out / 'index-runtime.php').write_bytes(patched)
@@ -194,8 +201,8 @@ def run(target, execute=False, with_local_composer=False):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('target', choices=TARGETS); parser.add_argument('--execute', action='store_true'); parser.add_argument('--with-local-composer', action='store_true', help='Use the tested SHA-pinned Composer PHAR temporarily outside the webroot; always remove it'); args = parser.parse_args()
-    try: run(args.target, args.execute, args.with_local_composer)
+    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('target', choices=TARGETS); parser.add_argument('--execute', action='store_true'); parser.add_argument('--with-local-composer', action='store_true', help='Use the tested SHA-pinned Composer PHAR temporarily outside the webroot; always remove it'); parser.add_argument('--resume-after-fileinfo', action='store_true', help='Only after hosting enables fileinfo and the recorded demo rollback is verified'); args = parser.parse_args()
+    try: run(args.target, args.execute, args.with_local_composer, args.resume_after_fileinfo)
     except Exception as exc:
         print('STOPPED:', str(exc) if isinstance(exc, RuntimeError) else type(exc).__name__, '— reconcile private receipt; never retry blindly')
         raise SystemExit(1)

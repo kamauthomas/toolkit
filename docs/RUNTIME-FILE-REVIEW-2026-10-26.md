@@ -91,3 +91,11 @@ A later ordinary app-availability check timed out after the metadata/config read
 requests stopped immediately. The failing public host was not journalled, so no
 specific outage or IP block is inferred. The user confirmed access restored and a
 single normal cPanel retry succeeded. No IP rotation or attack probes were used.
+
+The demo vendor removal was blocked by the host's missing EA-PHP 8.4 fileinfo
+extension. Verified rollback restored the exact original installed metadata,
+removed maintenance/tool/cron state and returned login 200. Production/Campus
+vendor state was not changed. PHP Selector controls ALT-PHP: fileinfo is already
+enabled there for 8.4, while the actual applications use native EA-PHP 8.4.
+Native extension controls are disabled; no PHP-version or extension setting was
+changed. Further cleanup must pass the required platform check after provisioning.

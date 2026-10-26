@@ -20,7 +20,7 @@ for unsafe in [original.replace(b'maintenance.php', b'unknown.php'), original + 
 
 with tempfile.TemporaryDirectory(prefix='toolkit-dependency-rollback-') as directory:
     root = Path(directory)
-    for mode in ['success', 'composer_failure', 'no_composer', 'existing_backup', 'bad_checksum']:
+    for mode in ['success', 'composer_failure', 'no_composer', 'existing_backup', 'bad_checksum', 'fileinfo_failure']:
         case = root / mode; app = case / 'application'; cache = app / 'bootstrap/cache'; vendor = app / 'vendor'
         cache.mkdir(parents=True); vendor.mkdir(); (app / 'artisan').touch()
         (vendor / 'runtime.php').write_text('runtime'); (vendor / 'developer.php').write_text('developer')
@@ -28,6 +28,10 @@ with tempfile.TemporaryDirectory(prefix='toolkit-dependency-rollback-') as direc
         composer = case / 'composer.phar'
         if mode != 'no_composer': composer.touch()
         php = case / 'fake-php'; php.write_text('''#!/bin/sh
+if test "$1" = "-r"; then
+  if test "''' + mode + '''" = fileinfo_failure; then exit 45; fi
+  exit 0
+fi
 if test "$1" = "-d"; then
   test "$COMPOSER_DISABLE_NETWORK" = 1 || exit 89
   rm -f "$PWD/vendor/developer.php"

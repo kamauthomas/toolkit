@@ -1,3 +1,14 @@
+## 2026-10-26 — Verify demo rollback and prepare PHP2Shell version assessment
+**Area:** runtime dependency safety · PHP hosting security
+**Environments:** UI/sync and 279-file cleanup verified; dependency cleanup blocked before promotion
+**Commit(s):** this change (see Git history)
+
+Composer refused demo's PHP 8.4 platform because ext-fileinfo is not enabled. Verified exact original dependency metadata restored, both maintenance files absent, temporary Composer removed, temporary cron absent and normal demo login 200. Production/Campus dependencies were not changed. Added an early fileinfo precondition before backup/maintenance and a narrowly gated resume path requiring the known failure plus verified rollback; no platform-check bypass or blind replay. Local rollback/early-fileinfo fixtures pass.
+
+At the user's request, checked extension controls through existing cPanel APIs and its linked PHP Selector implementation. The applications use EA-PHP 8.4 (production WordPress uses EA-PHP 8.3); the selected selector version is native (8.4), whose extension controls are disabled. ALT-PHP 8.4 already has fileinfo enabled, which does not prove EA-PHP has it. No extension or PHP-version setting was changed.
+
+The user additionally requested latest-PHP safety assessment for PHP2Shell. Official PHP/cPanel/CloudLinux advisories confirm fixes exist within current supported branches and vendor backports require package-build evidence, not version-string assumptions. Added a read-only one-attempt existing-CLI assessment of exact PHP patch/module/configuration facts and specific vendor package/CVE changelog entries, plus installed WordPress version reads. No public phpinfo, uploaded execution helper, exploit requests, app changes, package updates or credentials are involved. Syntax/no-upgrade boundaries pass; actual assessment results and PHP 8.5 compatibility remain pending. Review covers fixed paths/commands, private minimal outputs, bounded polling, journal-before-cron, single-attempt marker and cron removal; stop on timeout/WAF/rate limit. Sources: PHP archive 2026-10-21/23, cPanel Critical PHP Security Release and CloudLinux PHP package-status advisory.
+
 ## 2026-10-26 — Handle hosting without a Composer installation
 **Area:** safe runtime-dependency cleanup tooling
 **Environments:** demo maintenance-path repair verified; vendor state unchanged; production untouched by dependency cleanup
