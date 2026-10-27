@@ -13,12 +13,43 @@ BASE='d51d76c'
 EXISTING=['functions.php','template-parts/pages/course-detail.php','inc/cultural-week-stories.php','inc/course-catalog.php']
 NEW=['inc/seo-discovery.php']
 RELEASE='2026.10.27.1'
+TIMEOUT_ATTEMPTS=1
+TIMEOUT_EVENTS=[]
+RUN_JOURNAL=None
 
 def load(name,path):
     s=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);return m
 def sha(raw):return hashlib.sha256(raw).hexdigest()
 def save(path,data):path.write_text(json.dumps(data,indent=2)+'\n');path.chmod(0o600)
-def connection():return load('connection',Path(__file__).with_name('finish-runtime-cleanup-2026.10.26.py')).connection()
+def timeout_request(send,*args,read_only=False,label='request',**kwargs):
+    """Opt-in timeout retries for exact read operations; never replay a write."""
+    limit=TIMEOUT_ATTEMPTS if read_only else 1
+    for attempt in range(1,limit+1):
+        try:return send(*args,**kwargs)
+        except requests.Timeout as error:
+            TIMEOUT_EVENTS.append({'operation':label,'attempt':attempt,'limit':limit,'error_type':type(error).__name__})
+            print(label,'timeout',attempt,'of',limit,flush=True)
+            if attempt==limit:raise
+            time.sleep(15)
+
+def connection():
+    panel=load('panel',Path(__file__).with_name('deploy-reception-graduands-2026.10.15.1.py')).Panel()
+    original=panel.s.request;last=[0.0];stopped=[False]
+    def paced(method,url,**kwargs):
+        if stopped[0]:raise RuntimeError('Requests stopped')
+        time.sleep(max(0,4-(time.monotonic()-last[0])))
+        kwargs.update(timeout=(10,40),allow_redirects=False)
+        params=kwargs.get('params',{})
+        read_only=method.upper()=='GET' and (url.endswith('/Fileman/get_file_content') or (
+            url==panel.api2 and params.get('cpanel_jsonapi_module')=='Cron' and params.get('cpanel_jsonapi_func')=='listcron'))
+        try:response=timeout_request(original,method,url,read_only=read_only,label='hosting read' if read_only else 'hosting write',**kwargs)
+        except requests.RequestException:
+            stopped[0]=True;raise RuntimeError('Hosting request failed; stopped') from None
+        last[0]=time.monotonic()
+        if response.status_code!=200 or response.headers.get('Retry-After'):
+            stopped[0]=True;raise RuntimeError('Hosting response refused; stopped')
+        return response
+    panel.s.request=paced;return panel
 def site(env):return '/home/bfyigiln/'+('demo.toolkitafrica.ac.ke' if env=='demo' else 'public_html')
 def remote(env,name):return site(env)+'/'+PREFIX+name
 
@@ -45,10 +76,12 @@ def reconcile_observed(previous,rows,observed,activation=False):
     return [r['file'] for r in rows if observed[r['file']]!=r['sha256']]
 
 def prepare(env,source):
+    global RUN_JOURNAL
     assert len(source)==40 and all(c in 'abcdef0123456789' for c in source)
     out=CASE/env;out.mkdir(parents=True,exist_ok=True,mode=0o700);journal=out/'preparation.json'
     if journal.exists():raise RuntimeError('Existing preparation; reconcile instead of replacing it')
     state={'environment':env,'source':source,'prepared':False,'files':[]};save(journal,state)
+    RUN_JOURNAL=journal
     panel=connection();policy=load('policy',ROOT/'scripts/deployment/runtime_payload.py')
     with tempfile.TemporaryDirectory(prefix='toolkit-seo-discovery-') as tmp:
         stage=Path(tmp)
@@ -71,6 +104,7 @@ def prepare(env,source):
     state['prepared']=True;save(journal,state);print('PREPARED',env,'5 allowlisted/linted runtime files; no uploads',flush=True)
 
 def deploy(env,reconcile=False,activation=False):
+    global RUN_JOURNAL
     assert not activation or reconcile
     prepared=CASE/env;out=prepared;plan=json.loads((prepared/'preparation.json').read_text());assert plan['prepared'] and plan['environment']==env
     rows=plan['files'];assert {r['file'] for r in rows}==set(EXISTING+NEW) and len(rows)==5
@@ -93,6 +127,7 @@ def deploy(env,reconcile=False,activation=False):
     journal=out/'attempt.json'
     if journal.exists():raise RuntimeError('Existing attempt; reconcile saved state before any retry')
     state={'environment':env,'source':plan['source'],'files':rows,'verified':False,'uploaded':[],'cron_removed':None};save(journal,state)
+    RUN_JOURNAL=journal
     if previous:state['parent_attempt_sha256']=sha(parent.read_bytes());save(journal,state)
     panel=connection()
     observed={}
@@ -144,6 +179,7 @@ def deploy(env,reconcile=False,activation=False):
     verify_public(env,out,state,prepared)
 
 def resume_verification(env):
+    global RUN_JOURNAL
     """Recheck completed runtime/job state without uploads or publication replay."""
     prepared=CASE/env
     parent=prepared/('reconciliation-2/attempt.json' if env=='demo' else 'attempt.json')
@@ -167,6 +203,7 @@ def resume_verification(env):
     journal=out/'attempt.json'
     if journal.exists():raise RuntimeError('Existing verification continuation; inspect before retry')
     state=dict(previous);state['verification_parent_sha256']=sha(parent.read_bytes());state['verification_only']=True;save(journal,state)
+    RUN_JOURNAL=journal
     panel=connection()
     for row in plan['files']:
         assert sha(panel.fetch(row['remote']))==row['sha256'],'Runtime drift; no verification promotion'
@@ -180,7 +217,7 @@ def verify_public(env,out,state,prepared):
     inspector=load('inspect_seo',ROOT/'scripts/seo-review-2026-10-27.py')
     def get(path):
         time.sleep(5)
-        try:r=requests.get(base+path,timeout=(8,25),allow_redirects=False)
+        try:r=timeout_request(requests.get,base+path,read_only=True,label='public read '+path,timeout=(8,25),allow_redirects=False)
         except requests.RequestException:raise RuntimeError('Normal public verification timed out; stopped') from None
         if r.status_code!=200 or r.headers.get('Retry-After'):raise RuntimeError('Normal public verification refused; stopped')
         (out/('http-'+sha(path.encode())[:12]+'.private.txt')).write_text(r.text)
@@ -207,13 +244,14 @@ def verify_public(env,out,state,prepared):
         if path=='/toolkit-blog/':assert 'Class of 2026: programme and graduands' in r.text
         if path=='/class-of-2026-programme-and-graduands/':
             assert 'kmm-2071-jpg.webp' in r.text and '/graduation/#programme' in r.text and '/graduation/#graduands' in r.text
-    state.update(verified=True,public_checks=checks,page_sitemap_count=len(urls),post_sitemap_count=len(post_urls),production_test_applications=0,php_or_dependencies_changed=False)
+    state.update(verified=True,public_checks=checks,page_sitemap_count=len(urls),post_sitemap_count=len(post_urls),production_test_applications=0,php_or_dependencies_changed=False,timeout_attempt_limit=TIMEOUT_ATTEMPTS,timeout_events=list(TIMEOUT_EVENTS))
     save(journal,state);save(out/'verification.json',state)
     if out!=prepared:save(prepared/'verification.json',state)
     print('VERIFIED',env,'5 runtime hashes, sitemap/canonicals/schema/welding links/blog resource, private job removed; no application submissions',flush=True)
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('environment',choices=['demo','production']);p.add_argument('--prepare',metavar='FULL_SOURCE_COMMIT');p.add_argument('--deploy',action='store_true');p.add_argument('--verify-only',action='store_true');p.add_argument('--reconcile-partial-demo',action='store_true');p.add_argument('--reconcile-activation-demo',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('environment',choices=['demo','production']);p.add_argument('--prepare',metavar='FULL_SOURCE_COMMIT');p.add_argument('--deploy',action='store_true');p.add_argument('--verify-only',action='store_true');p.add_argument('--reconcile-partial-demo',action='store_true');p.add_argument('--reconcile-activation-demo',action='store_true');p.add_argument('--timeout-attempts',type=int,choices=[1,4],default=1);a=p.parse_args()
+    TIMEOUT_ATTEMPTS=a.timeout_attempts
     try:
         assert sum([bool(a.prepare),a.deploy,a.verify_only])==1
         assert not (a.reconcile_partial_demo and a.reconcile_activation_demo)
@@ -223,3 +261,5 @@ if __name__=='__main__':
         else:deploy(a.environment,a.reconcile_partial_demo or a.reconcile_activation_demo,a.reconcile_activation_demo)
     except Exception as e:
         print('STOPPED:',str(e) if isinstance(e,RuntimeError) else type(e).__name__,'— reconcile saved state before retry',flush=True);raise SystemExit(1)
+    finally:
+        if RUN_JOURNAL:save(RUN_JOURNAL.parent/(RUN_JOURNAL.stem+'-transport.json'),{'timeout_attempt_limit':TIMEOUT_ATTEMPTS,'timeout_events':TIMEOUT_EVENTS,'write_retries':0})

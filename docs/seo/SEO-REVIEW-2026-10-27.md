@@ -2,6 +2,13 @@
 
 Prepared by Thomas Kamau · 27 October 2026
 
+**Release follow-up:** The findings below describe the initial assessment.
+The catalogue sitemap, public-page canonical/course-schema integration, welding
+links/prices and graduation resource notice were subsequently repaired and verified
+on demo and production. Each passed 13 public checks; inventories now contain
+40 page and 155 post URLs. See [the verified release](SEO-FIXES-2026-10-27.md).
+These deployment results do not establish search-growth or indexing gains.
+
 The website's technical search foundation has improved since the July work began.
 The remaining weakness is connecting that foundation to the newer programme
 pages and to consistent, authoritative public information. **We cannot quantify

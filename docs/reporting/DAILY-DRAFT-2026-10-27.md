@@ -1,53 +1,53 @@
 # Daily report draft — Thomas Kamau — 27 October 2026
 
-**Summary:** Reviewed the website and the search-visibility work recorded since July.
-Prepared improvements to help people find current programmes, clearer welding links
-and the requested prices. The demo site received the changes and its graduation
-resource notice is ready, but a connection timeout interrupted the final page
-checks. Production has not been changed.
+**Summary:** Reviewed the website's search-readiness work since July and completed
+improvements that help people find current programmes. Published clearer welding
+pathways, confirmed the requested prices and added a graduation resource notice.
+The release passed checks on the demo site before being verified on production.
 
 | Task | Time spent | Status |
 |---|---|---|
 | Check priority pages and trace July–October work against saved records | Not separately recorded | Completed |
-| Identify programme discovery, page-reference and internal-link gaps | Not separately recorded | Completed |
-| Prepare programme discovery, clearer welding links and requested headline prices | Not separately recorded | Completed locally; demo files verified |
-| Prepare and verify the demo graduation-resource publishing job | Not separately recorded | Completed; matching existing notice reused, no duplicate |
-| Check the demo programme and news inventories | Not separately recorded | Completed; 40 programme/page and 155 news links |
-| Complete remaining demo page checks and release to production | Not separately recorded | In progress; stopped on connection timeout |
+| Identify and repair gaps affecting discovery of current programmes | Not separately recorded | Completed |
+| Improve welding programme links and verify requested headline prices | Not separately recorded | Completed on demo and production |
+| Publish a graduation resource notice linking the programme and graduands | Not separately recorded | Completed; one production notice created |
+| Complete demo checks, deploy to production and verify the public pages | Not separately recorded | Completed; 13 checks per environment |
+| Trace changes to the agent instructions for the owner's review | Not separately recorded | Completed; instruction files left unchanged |
 | Compare actual search clicks, impressions and rankings | Not separately recorded | Pending measurement; no verified comparison baseline |
 
-**Challenges:** The demo graduation-page request timed out after the inventories,
-homepage and application page passed. Requests stopped and production was held
-until all required checks can pass. This does not prove the whole website is down.
-Earlier search reviews used different scopes, so their totals cannot be presented
-as a reliable traffic or ranking trend. The separate legacy domain remains outside
-the access available to us.
+**Challenges:** Intermittent connection timeouts interrupted earlier checks.
+With the owner's approval, timed-out reads used a maximum of four total attempts
+with pauses; the affected demo read succeeded on attempt three and one production
+read recovered on attempt two. Changes and publishing jobs were not repeated.
+Earlier search reviews used different scopes, so their totals cannot support a
+reliable traffic or ranking trend. Access to the separate legacy domain remains
+unavailable.
 
-**Decisions/comments:** Main upskilling price is KES 55,017 on campus; skilling is
-KES 127,895. Other previously approved delivery categories remain unchanged.
-Retain the existing search foundation and connect newer programme information to
-it. The graduation notice points to approved public resources without claiming
-unverified event results. Site Kit is collecting data per the owner; its settings
-were left unchanged. The owner authorised publishing the source and checkpoint
-to GitHub; production release remains pending. Reviewed the history of the agent
-instructions and left them unchanged for the owner to evaluate. No production
-test applications or external report submission.
+**Decisions/comments:** The verified live main welding prices are KES 55,017 for
+on-campus upskilling and KES 127,895 for skilling. Other previously approved
+delivery categories remain unchanged. The graduation notice points to approved
+public resources without claiming unverified event results. Site Kit settings
+were left unchanged while it gathers data. Agent instructions were left unchanged
+for the owner's review. Source publication is separate from server deployment;
+only the five required website files reached production. No production test
+applications or external report submission.
 
-**Next working day:** Hosting owner to check the interrupted demo connection;
-Thomas/ICT to finish the remaining checks without repeating publication, then
-release the matching production changes. Domain/profile owners to address old
-links when access is available. Expected outcome: consistent programme discovery
-and a measurable future search baseline.
+**Next working day:** Thomas/ICT to review search-performance data when available;
+Admissions to maintain approved course facts and clarify any delivery-category
+price changes; domain/profile owners to address old links when access is available.
+Expected outcome: consistent programme information and a measurable future search
+baseline.
 
-**ICT metrics:** One website reviewed across production and demo; 13 matched
-priority checks passed in the initial assessment. Five demo release files matched
-approved source. Fifteen programme links confirmed in the demo sitemap; its page
-and news inventories contain 40 and 155 links respectively. One demo publishing
-job completed and its temporary schedule was removed. Local checks: 133 SEO,
-14 publisher, 12 recovery, nine audit, 35 graduands and ten layout checks passed.
-Zero production deployments in this SEO release.
+**ICT metrics:** One website maintained across demo and production. Five matching
+release files per environment; 26 successful public checks in total. Fifteen
+programme links confirmed in each updated page sitemap; inventories contain
+40 page/programme and 155 news links per environment. One new production resource
+notice and one production release completed. Both temporary publishing schedules
+were removed. Local checks: 133 SEO, 14 publisher, 17 recovery, nine audit,
+35 graduands and ten layout checks passed. These checks measure website readiness,
+not Google rankings or traffic growth.
 
 Findings: `docs/seo/SEO-REVIEW-2026-10-27.md`.
-Deployment checkpoint: `docs/seo/SEO-FIXES-2026-10-27.md`.
+Verified release: `docs/seo/SEO-FIXES-2026-10-27.md`.
 Submit through the employee's own Report System session; this draft has not been
 filed externally.

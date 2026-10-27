@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Exercise the actual partial-demo recovery through a fake Fileman, never hosting."""
-import importlib.util,json,tempfile,unittest
+import importlib.util,json,tempfile,types,unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock,patch
 
 ROOT=Path(__file__).resolve().parents[2]
 spec=importlib.util.spec_from_file_location('seo_release',ROOT/'scripts/deployment/releases/deploy-seo-discovery-2026.10.27.py')
@@ -157,5 +157,53 @@ class RecoveryTests(unittest.TestCase):
                 get.assert_called_once()
             self.assertFalse((root/'demo/verification.json').exists())
             self.assertFalse((out/'verification.json').exists())
+
+    def test_authorised_timeout_reads_succeed_within_four_attempts(self):
+        send=Mock(side_effect=[release.requests.Timeout(),release.requests.Timeout(),'done'])
+        with patch.object(release,'TIMEOUT_ATTEMPTS',4),patch.object(release,'TIMEOUT_EVENTS',[]),patch.object(release.time,'sleep') as sleep:
+            self.assertEqual('done',release.timeout_request(send,read_only=True,label='synthetic read'))
+            self.assertEqual(3,send.call_count);self.assertEqual(2,sleep.call_count)
+            self.assertTrue(all(c.args==(15,) for c in sleep.call_args_list))
+
+    def test_timeout_budget_is_four_total_and_never_retries_other_transport_errors(self):
+        for error,count in [(release.requests.Timeout,4),(release.requests.ConnectionError,1)]:
+            with self.subTest(error=error.__name__):
+                send=Mock(side_effect=error)
+                with patch.object(release,'TIMEOUT_ATTEMPTS',4),patch.object(release,'TIMEOUT_EVENTS',[]),patch.object(release.time,'sleep'):
+                    with self.assertRaises(error):release.timeout_request(send,read_only=True)
+                self.assertEqual(count,send.call_count)
+
+    def test_hosting_retry_allowlist_excludes_uploads_and_get_based_mutations(self):
+        cases=[('GET','/Fileman/get_file_content',{},4),('GET','/api2',{'cpanel_jsonapi_module':'Cron','cpanel_jsonapi_func':'listcron'},4),
+               ('GET','/api2',{'cpanel_jsonapi_module':'Cron','cpanel_jsonapi_func':'add_line'},1),
+               ('GET','/api2',{'cpanel_jsonapi_module':'Cron','cpanel_jsonapi_func':'remove_line'},1),
+               ('POST','/Fileman/upload_files',{},1),('GET','/unknown',{},1)]
+        for method,path,params,count in cases:
+            with self.subTest(method=method,path=path,params=params):
+                send=Mock(side_effect=release.requests.Timeout);panel=types.SimpleNamespace(s=types.SimpleNamespace(request=send),api2='https://hosting.example/api2')
+                with patch.object(release,'load',return_value=types.SimpleNamespace(Panel=lambda:panel)),patch.object(release,'TIMEOUT_ATTEMPTS',4),patch.object(release,'TIMEOUT_EVENTS',[]),patch.object(release.time,'sleep'):
+                    client=release.connection()
+                    with self.assertRaises(RuntimeError):client.s.request(method,'https://hosting.example'+path,params=params)
+                    with self.assertRaises(RuntimeError):client.s.request('GET','https://hosting.example/Fileman/get_file_content')
+                self.assertEqual(count,send.call_count)
+
+    def test_hosting_firewall_and_rate_limit_responses_stop_without_retries(self):
+        for status,headers in [(403,{}),(429,{}),(200,{'Retry-After':'30'})]:
+            with self.subTest(status=status,headers=headers):
+                send=Mock(return_value=types.SimpleNamespace(status_code=status,headers=headers))
+                panel=types.SimpleNamespace(s=types.SimpleNamespace(request=send),api2='https://hosting.example/api2')
+                with patch.object(release,'load',return_value=types.SimpleNamespace(Panel=lambda:panel)),patch.object(release,'TIMEOUT_ATTEMPTS',4),patch.object(release.time,'sleep'):
+                    client=release.connection()
+                    with self.assertRaises(RuntimeError):client.s.request('GET','https://hosting.example/Fileman/get_file_content')
+                    with self.assertRaises(RuntimeError):client.s.request('GET','https://hosting.example/Fileman/get_file_content')
+                self.assertEqual(1,send.call_count)
+
+    def test_public_refusal_does_not_use_the_timeout_budget(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);prior,panel=self.completed_fixture(root);out=root/'demo/reconciliation-2'
+            response=types.SimpleNamespace(status_code=429,headers={})
+            with patch.object(release,'TIMEOUT_ATTEMPTS',4),patch.object(release.time,'sleep'),patch.object(release.requests,'get',return_value=response) as get:
+                with self.assertRaisesRegex(RuntimeError,'refused; stopped'):release.verify_public('demo',out,prior,root/'demo')
+                get.assert_called_once()
 
 if __name__=='__main__':unittest.main()
