@@ -22,6 +22,22 @@ def connection():return load('connection',Path(__file__).with_name('finish-runti
 def site(env):return '/home/bfyigiln/'+('demo.toolkitafrica.ac.ke' if env=='demo' else 'public_html')
 def remote(env,name):return site(env)+'/'+PREFIX+name
 
+def validate_partial_previous(previous):
+    assert not previous['verified'] and not previous.get('cron_submission') and not previous.get('publication')
+    assert set(previous['uploaded'])=={'inc/seo-discovery.php','template-parts/pages/course-detail.php','inc/cultural-week-stories.php'}
+    assert previous.get('upload_intent')=='inc/course-catalog.php'
+
+def reconcile_observed(previous,rows,observed):
+    """Only reconcile the saved pre-worker catalogue-upload uncertainty."""
+    validate_partial_previous(previous)
+    assert set(observed)=={r['file'] for r in rows}
+    for row in rows:
+        name=row['file'];actual=observed[name]
+        allowed={row['sha256']} if name in previous['uploaded'] else {row['baseline_sha256']}
+        if name==previous['upload_intent']:allowed.add(row['sha256'])
+        if actual not in allowed:raise RuntimeError('Reconciliation source drift; review the saved fresh file')
+    return [r['file'] for r in rows if observed[r['file']]!=r['sha256']]
+
 def prepare(env,source):
     assert len(source)==40 and all(c in 'abcdef0123456789' for c in source)
     out=CASE/env;out.mkdir(parents=True,exist_ok=True,mode=0o700);journal=out/'preparation.json'
@@ -48,24 +64,41 @@ def prepare(env,source):
             if row['file'] in NEW:assert raw==expected
     state['prepared']=True;save(journal,state);print('PREPARED',env,'5 allowlisted/linted runtime files; no uploads',flush=True)
 
-def deploy(env):
-    out=CASE/env;plan=json.loads((out/'preparation.json').read_text());assert plan['prepared'] and plan['environment']==env
+def deploy(env,reconcile=False):
+    prepared=CASE/env;out=prepared;plan=json.loads((prepared/'preparation.json').read_text());assert plan['prepared'] and plan['environment']==env
     rows=plan['files'];assert {r['file'] for r in rows}==set(EXISTING+NEW) and len(rows)==5
     policy=load('policy',ROOT/'scripts/deployment/runtime_payload.py')
-    for row in rows:policy.assert_runtime_upload(row['remote']);assert row['remote']==remote(env,row['file']) and sha((out/'payload'/row['file']).read_bytes())==row['sha256']
+    for row in rows:policy.assert_runtime_upload(row['remote']);assert row['remote']==remote(env,row['file']) and sha((prepared/'payload'/row['file']).read_bytes())==row['sha256']
     if env=='production':
         demo=json.loads((CASE/'demo/verification.json').read_text());assert demo['verified'] and demo['source']==plan['source']
         assert {(r['file'],r['sha256']) for r in rows}=={(r['file'],r['sha256']) for r in demo['files']}
+    previous=None
+    if reconcile:
+        assert env=='demo','Reconciliation is only for the identified demo failure'
+        previous=json.loads((prepared/'attempt.json').read_text());assert previous['source']==plan['source'] and previous['files']==rows
+        validate_partial_previous(previous)
+        assert not (prepared/'verification.json').exists()
+        out=prepared/'reconciliation-1';out.mkdir(mode=0o700,exist_ok=True)
     journal=out/'attempt.json'
     if journal.exists():raise RuntimeError('Existing attempt; reconcile saved state before any retry')
     state={'environment':env,'source':plan['source'],'files':rows,'verified':False,'uploaded':[],'cron_removed':None};save(journal,state)
+    if previous:state['parent_attempt_sha256']=sha((prepared/'attempt.json').read_bytes());save(journal,state)
     panel=connection()
-    for row in rows:
-        raw=panel.fetch(row['remote'],optional=row['baseline_sha256'] is None);assert (None if raw is None else sha(raw))==row['baseline_sha256'],'Fresh deployment drift'
+    observed={}
+    for row in sorted(rows,key=lambda r:r['file']!='inc/course-catalog.php'):
+        raw=panel.fetch(row['remote'],optional=row['baseline_sha256'] is None)
+        observed[row['file']]=None if raw is None else sha(raw)
+        if previous:
+            path=out/'observed'/row['file'];path.parent.mkdir(parents=True,exist_ok=True)
+            if raw is not None:path.write_bytes(raw);path.chmod(0o600)
+        elif observed[row['file']]!=row['baseline_sha256']:raise RuntimeError('Fresh deployment drift')
+        state['observed']=observed;save(journal,state)
+    if previous:state['remaining_runtime_files']=reconcile_observed(previous,rows,observed);save(journal,state)
     for row in sorted(rows,key=lambda r:(r['file'] not in NEW,r['file']=='functions.php')):
-        raw=panel.fetch(row['remote'],optional=row['baseline_sha256'] is None);assert (None if raw is None else sha(raw))==row['baseline_sha256'],'Concurrent live edit'
+        if previous and observed[row['file']]==row['sha256']:continue
+        raw=panel.fetch(row['remote'],optional=observed[row['file']] is None);assert (None if raw is None else sha(raw))==observed[row['file']],'Concurrent live edit'
         state['upload_intent']=row['file'];save(journal,state)
-        payload=(out/'payload'/row['file']).read_bytes();panel.upload(row['remote'],payload);assert panel.fetch(row['remote'])==payload
+        payload=(prepared/'payload'/row['file']).read_bytes();panel.upload(row['remote'],payload);assert panel.fetch(row['remote'])==payload
         state['uploaded'].append(state.pop('upload_intent'));save(journal,state);print(env,'byte-verified',row['file'],flush=True)
     helper=load('letters',Path(__file__).with_name('deploy-calling-letters-2026.10.26.py'))
     php='/usr/local/bin/ea-php84' if env=='demo' else '/usr/local/bin/ea-php83'
@@ -129,12 +162,15 @@ def deploy(env):
         if path=='/class-of-2026-programme-and-graduands/':
             assert 'kmm-2071-jpg.webp' in r.text and '/graduation/#programme' in r.text and '/graduation/#graduands' in r.text
     state.update(verified=True,public_checks=checks,page_sitemap_count=len(urls),post_sitemap_count=len(post_urls),production_test_applications=0,php_or_dependencies_changed=False)
-    save(journal,state);save(out/'verification.json',state);print('VERIFIED',env,'5 runtime hashes, sitemap/canonicals/schema/welding links/blog resource, private job removed; no application submissions',flush=True)
+    save(journal,state);save(out/'verification.json',state)
+    if previous:save(prepared/'verification.json',state)
+    print('VERIFIED',env,'5 runtime hashes, sitemap/canonicals/schema/welding links/blog resource, private job removed; no application submissions',flush=True)
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('environment',choices=['demo','production']);p.add_argument('--prepare',metavar='FULL_SOURCE_COMMIT');p.add_argument('--deploy',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('environment',choices=['demo','production']);p.add_argument('--prepare',metavar='FULL_SOURCE_COMMIT');p.add_argument('--deploy',action='store_true');p.add_argument('--reconcile-partial-demo',action='store_true');a=p.parse_args()
     try:
         assert bool(a.prepare)!=a.deploy
-        prepare(a.environment,a.prepare) if a.prepare else deploy(a.environment)
+        assert not a.reconcile_partial_demo or (a.deploy and a.environment=='demo')
+        prepare(a.environment,a.prepare) if a.prepare else deploy(a.environment,a.reconcile_partial_demo)
     except Exception as e:
         print('STOPPED:',str(e) if isinstance(e,RuntimeError) else type(e).__name__,'— reconcile saved state before retry',flush=True);raise SystemExit(1)

@@ -1,3 +1,16 @@
+## 2026-10-27 — Checkpoint the partial demo SEO upload after transport failure
+**Area:** deployment incident · safe source reconciliation · reporting
+**Environments:** demo partially transferred and unverified; production unchanged
+**Commit(s):** source c648685 and this checkpoint/recovery tooling
+
+Fresh demo preparation produced five linted runtime files identical to the reviewed source. Three uploads were byte-verified: SEO module, welding template and story-image resolver. Hosting transport failed with upload intent at inc/course-catalog.php; its final state is unknown. functions.php was not attempted, so this release has not activated the new SEO hooks. No publishing/cache cron, draft/article, production mutation or application submission occurred. The old wrapper retained a generic transport failure rather than the underlying exception type: WAF/IP blacklisting is not established. Stopped all hosting requests immediately, requested access confirmation, and did not retry/rotate IPs. Site Kit settings were not touched.
+
+Prepared a narrow recovery path, not a blind replay: catalogue read first; all three previously verified hashes must match; the uncertain catalogue may be old or intended bytes; untouched functions must match its baseline. Any unknown edit stops before mutation. Missing writes only, functions last, separate journal, original failed receipt preserved, and a begun publication job is explicitly ineligible. Five isolated scenarios exercise the actual deploy path through fake Fileman: old/new catalogue completion, unrelated verified-file drift, unknown catalogue bytes, started-worker rejection and original-command replay rejection. No live recovery request has been made while awaiting confirmation.
+
+**Verified/security review:** recovery five scenarios pass, along with 133 SEO checks, 14 publisher checks, nine audit tests, 35 graduands checks and ten local desktop/mobile template checks (visual screenshots reviewed). Actual new recovery diff reviewed for fixed runtime destinations, exact preconditions, fresh CAS reads, preserved evidence, failure handling and no repeat publishing. No new runtime behavior in this checkpoint commit. Required native/demo verification is incomplete, so production and remote publication of the pending release are withheld. No unresolved new security issue in the prepared scope; access/verification remains the blocker. No PHP/dependency change or reuse of the closed fileinfo exception.
+
+**Handoff:** docs/seo/SEO-FIXES-2026-10-27.md and private reports/seo-fixes-2026-10-27/CHECKPOINT.json record the exact state and gated recovery command. Thomas daily draft updated; no report filed externally. Primary upskilling KES 55,017 and skilling KES 127,895 are prepared; separate previously approved delivery rates are retained pending optional clarification. Source remains local until required release checks pass. Existing unrelated stashes preserved.
+
 ## 2026-10-27 — Prepare programme discovery, canonical and welding-price repairs
 **Area:** website SEO · programme links · approved tuition · editorial resources
 **Environments:** local verified; one normal demo source read passed; deployment pending
