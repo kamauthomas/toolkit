@@ -88,6 +88,9 @@ function toolkit_cultural_week_story_for_slug( $slug ) {
  * Resolve the most relevant image for a story wherever it is rendered.
  */
 function toolkit_story_image_url( $post_id, $size = 'large', $fallback_index = 0 ) {
+	if ( 'class-of-2026-programme-and-graduands' === get_post_field( 'post_name', $post_id ) ) {
+		return get_stylesheet_directory_uri() . '/assets/images/graduation/kmm-2071-jpg.webp';
+	}
 	$cultural = toolkit_cultural_week_story_for_slug( get_post_field( 'post_name', $post_id ) );
 	if ( $cultural ) {
 		return $cultural['image'];

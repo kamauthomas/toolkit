@@ -15,6 +15,8 @@ $kicker     = $slug || ! empty( $course['brochure_pricing'] ) ? 'Revised Septemb
 $course_key = $slug ? $slug : eduma_child_get_legacy_course_key_for_page();
 $experience = eduma_child_course_experience( $course_key );
 $is_welding_hub       = 'welding-and-fabrication' === $course_key;
+$full_welding         = $is_welding_hub ? eduma_child_get_course( 'advanced-welding-vr' ) : false;
+$welding_upskilling   = $is_welding_hub ? eduma_child_get_course( 'advanced-welding-upskilling' ) : false;
 $has_published_pricing = eduma_child_2026_pricing_enabled() && ! empty( $course['fees'] ) && ( $slug || ! empty( $course['brochure_pricing'] ) );
 $page_heading          = $is_welding_hub ? 'MIG/MAG Welding Training in Kenya' : $course['title'];
 get_header();
@@ -47,10 +49,15 @@ get_header();
 		</div>
 	</section>
 	<section class="toolkit-section toolkit-welding-pathways" aria-labelledby="welding-pathways-heading">
-		<div><p class="toolkit-kicker">Choose a pathway</p><h2 id="welding-pathways-heading">One welding hub, three distinct learner needs</h2><p>This page introduces Toolkit’s broad MIG/MAG training pathway. Use the specialist pages when your main goal is simulation-supported practice or recognition of skills gained through work.</p></div>
+		<div><p class="toolkit-kicker">Choose a pathway</p><h2 id="welding-pathways-heading">One welding hub, three distinct learner needs</h2><p>Compare full programme training, upskilling and recognition of existing skills. Read <a href="<?php echo esc_url( home_url( '/our-ventures/construction-sector-skills/training-welders-with-virtual-reality/' ) ); ?>">how virtual reality supports workshop practice</a>, then choose the programme that matches your experience.</p></div>
 		<div class="toolkit-welding-pathways__grid">
+			<?php if ( $full_welding && $welding_upskilling ) : ?>
+			<article><span>01</span><h3><?php echo esc_html( $full_welding['title'] ); ?></h3><p><?php echo esc_html( $full_welding['short'] ); ?></p><p><strong>Duration:</strong> <?php echo esc_html( $full_welding['duration'] ); ?></p><p><strong>Entry:</strong> <?php echo esc_html( $full_welding['entry'] ); ?></p><p><strong>Intakes:</strong> <?php echo esc_html( $full_welding['intakes'] ); ?></p><a href="<?php echo esc_url( home_url( '/courses/advanced-welding-vr/' ) ); ?>">View the full welding programme <i class="fas fa-arrow-right" aria-hidden="true"></i></a></article>
+			<article><span>02</span><h3><?php echo esc_html( $welding_upskilling['title'] ); ?></h3><p><?php echo esc_html( $welding_upskilling['short'] ); ?></p><p><strong>Duration:</strong> <?php echo esc_html( $welding_upskilling['duration'] ); ?></p><p><strong>Entry:</strong> <?php echo esc_html( $welding_upskilling['entry'] ); ?></p><p><strong>Intakes:</strong> <?php echo esc_html( $welding_upskilling['intakes'] ); ?></p><a href="<?php echo esc_url( home_url( '/courses/advanced-welding-upskilling/' ) ); ?>">Compare welding upskilling options <i class="fas fa-arrow-right" aria-hidden="true"></i></a></article>
+			<?php else : ?>
 			<article><span>01</span><h3>Practical MIG/MAG training</h3><p>Build workshop safety, process setup, torch control and weld-quality awareness through guided practice.</p><strong aria-current="page">You are viewing this pathway</strong></article>
 			<article><span>02</span><h3>VR-supported welding</h3><p>Understand how Toolkit uses simulation for controlled rehearsal and feedback before skills are reinforced through guided workshop practice.</p><a href="<?php echo esc_url( home_url( '/our-ventures/construction-sector-skills/training-welders-with-virtual-reality/' ) ); ?>">Explore virtual-reality welding training <i class="fas fa-arrow-right" aria-hidden="true"></i></a></article>
+			<?php endif; ?>
 			<article><span>03</span><h3>Recognition of Prior Learning</h3><p>For people with relevant work experience, the RPL route focuses on documenting existing competence, identifying gaps and preparing for assessment.</p><a href="<?php echo esc_url( home_url( '/our-ventures/construction-sector-skills/recognition-of-prior-learning-rpl/' ) ); ?>">Explore the RPL assessment pathway <i class="fas fa-arrow-right" aria-hidden="true"></i></a></article>
 		</div>
 	</section>

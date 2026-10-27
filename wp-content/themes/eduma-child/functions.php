@@ -13,6 +13,7 @@ require_once get_stylesheet_directory() . '/inc/youtube-feed.php';
 require_once get_stylesheet_directory() . '/inc/supplied-stories.php';
 require_once get_stylesheet_directory() . '/inc/graduation-announcement.php';
 require_once get_stylesheet_directory() . '/inc/graduands.php';
+require_once get_stylesheet_directory() . '/inc/seo-discovery.php';
 
 function toolkit_editorial_story_preview() {
 	$story = toolkit_cultural_week_preview();
@@ -28,7 +29,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.10.26.1';
+	return '2026.10.27.1';
 }
 
 add_action( 'wp_enqueue_scripts', function() {
@@ -1147,7 +1148,7 @@ add_filter( 'wpseo_canonical', function( $canonical ) {
 }, 100 );
 
 add_action( 'wp_head', function() {
-	if ( ! toolkit_is_demo_environment() ) {
+	if ( ! toolkit_is_demo_environment() || toolkit_seo_virtual_path() ) {
 		return;
 	}
 	$canonical = toolkit_demo_production_canonical_url();
