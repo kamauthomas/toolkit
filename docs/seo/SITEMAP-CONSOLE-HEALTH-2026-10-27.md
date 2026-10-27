@@ -58,6 +58,38 @@ request paths, query strings or referrers. They are not evidence of sitemap deni
 Current live sitemap fetches succeeded from this machine, not from Google's IPs.
 Search Console's successful fetch/processing result is the next confirmation.
 
+## Search Console follow-up
+
+The owner subsequently shared a General HTTP error for the sitemap index, then
+confirmed that waiting and refreshing cleared it and showed 40 discovered pages.
+One fresh normal index fetch returned 200 in 0.89 seconds, with XML byte-identical
+to the previous successful audit. No sitemap, robots, cache, firewall or application
+configuration was changed to obtain that result. The initial fetch-error cause
+is not established; a transient fetch/status delay is plausible, not proven.
+
+A bounded follow-up native log summary completed and its temporary schedule was
+removed. Both current access-log files were empty at collection, so that follow-up
+cannot identify Google's failed or recovered request. The earlier verified crawler
+sample remains historical evidence, not proof of this particular submission.
+
+Keep the main sitemap_index.xml submission: it references the 40-page child and
+the 155-post child. The reported 40 discovered pages match the page-child count;
+the post child's fetch/processing status should be checked before inferring that
+posts were omitted. Blog posts also count as pages in Search Console. The XML
+inventory contains 195 entries, but neither an immediate Console total of 195 nor
+indexing of every entry is guaranteed. The supplementary schema sitemap need not
+be submitted for the main content inventory.
+
+Google recommends a live URL inspection of the exact sitemap when diagnosing a
+fetch failure: Crawl allowed = Yes and Page fetch = Successful. If it recurs,
+use that result and hosting records rather than treating our local 200 as proof
+of Google's access or rewriting healthy sitemap files. Source:
+[Search Console sitemap report guidance](https://support.google.com/webmasters/answer/7451001?hl=en).
+
+Private follow-up: reports/sitemap-fetch-followup-2026-10-27/. The owner clarified
+that the correct full index URL was used; their earlier shorthand was not a wrong
+submission address.
+
 ## Method and limits
 
 Five normal production GETs, serial five-second spacing, four total timeout

@@ -1,3 +1,14 @@
+## 2026-10-27 — Record Search Console recovery and explain the 40-page discovery count
+**Area:** sitemap fetch follow-up · Console submission handoff
+**Environments:** production read-only follow-up; owner reports Console fetch recovered; no runtime change
+**Commit(s):** this reporting follow-up
+
+The owner showed General HTTP error for the correctly submitted sitemap index, then confirmed it loaded after waiting/refreshing with 40 discovered pages. One normal fresh index GET returned 200 in 0.89 seconds and matched the earlier XML hash exactly. No sitemap/robots, application, cache or firewall setting was changed. A bounded follow-up native log summary found both current main-site access logs empty; its temporary cron completed and removal was verified. Therefore neither the failed request nor recovery cause can be correlated from that sample. Do not substitute earlier genuine Googlebot successes for proof of this exact Console fetch, or claim a code fix resolved it.
+
+Clarified that the existing index references both 40-page and 155-post children; submitting all files separately is unnecessary. The reported count matches the page child, while the post child's processing status remains unconfirmed. Blog posts count as pages in Console and discovery is separate from indexing. Supplementary Yoast schema resources are outside the main content inventory. The correct full URL was used; the owner's shorthand was not evidence of user error.
+
+**Review/verification:** actual retained XML hash/status, public DNS lookup and native receipt/cleanup checked; four-total timeout read budget available, no timeout retry needed. Exact fixed hosts/log basenames, bounded private aggregates, no raw log/query/referrer/UA or public IP publication, no WordPress bootstrap or helper upload, no application/form/Mzizi write. Collector lint/compilation passed; no runtime regression tests warranted for a read-only investigation. Follow-up evidence stays ignored under reports/sitemap-fetch-followup-2026-10-27/. Reviewed reporting diff for accurate limits/privacy before publication. Google official guidance supports live URL inspection if the error recurs; no console action or external staff report filed. Updated Thomas daily draft and sitemap handoff; unrelated stashes preserved.
+
 ## 2026-10-27 — Verify sitemap submission readiness and genuine Googlebot access
 **Area:** SEO monitoring · Search Console handoff · private access-log evidence
 **Environments:** production read-only checks verified; no runtime deployment or configuration edit

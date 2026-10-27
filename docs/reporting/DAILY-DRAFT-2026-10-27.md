@@ -14,6 +14,7 @@ The release passed checks on the demo site before being verified on production.
 | Complete demo checks, deploy to production and verify the public pages | Not separately recorded | Completed; 13 checks per environment |
 | Trace changes to the agent instructions for the owner's review | Not separately recorded | Completed; instruction files left unchanged |
 | Check sitemap readiness and recent genuine Googlebot access | Not separately recorded | Completed; sitemap ready for Search Console submission |
+| Follow up the Search Console fetch error and discovery count | Not separately recorded | Owner confirms recovery after refresh; 40 discovered pages reported |
 | Compare actual search clicks, impressions and rankings | Not separately recorded | Pending measurement; no verified comparison baseline |
 
 **Challenges:** Intermittent connection timeouts interrupted earlier checks.
@@ -58,3 +59,10 @@ Submit through the employee's own Report System session; this draft has not been
 filed externally.
 
 Sitemap submission handoff: `docs/seo/SITEMAP-CONSOLE-HEALTH-2026-10-27.md`.
+
+**Console follow-up:** The owner confirmed the sitemap loaded after waiting and
+refreshing. Its 40 discovered pages match the page sitemap; the separate post
+child contains 155 posts and its processing status still needs checking. The
+index alone is sufficient for submission. One fresh fetch returned the same
+healthy XML; no website configuration was changed. The follow-up current logs
+were empty, so the original error cause remains unconfirmed.
