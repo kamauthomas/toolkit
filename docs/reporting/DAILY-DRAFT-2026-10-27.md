@@ -15,6 +15,7 @@ The release passed checks on the demo site before being verified on production.
 | Trace changes to the agent instructions for the owner's review | Not separately recorded | Completed; instruction files left unchanged |
 | Check sitemap readiness and recent genuine Googlebot access | Not separately recorded | Completed; sitemap ready for Search Console submission |
 | Follow up the Search Console fetch error and discovery count | Not separately recorded | Owner confirms recovery after refresh; 40 discovered pages reported |
+| Compare current course prices with the available fee documents, excluding welding | Not separately recorded | Completed; digital upper-limit conflict and missing individual course details documented |
 | Compare actual search clicks, impressions and rankings | Not separately recorded | Pending measurement; no verified comparison baseline |
 
 **Challenges:** Intermittent connection timeouts interrupted earlier checks.
@@ -66,3 +67,10 @@ child contains 155 posts and its processing status still needs checking. The
 index alone is sufficient for submission. One fresh fetch returned the same
 healthy XML; no website configuration was changed. The follow-up current logs
 were empty, so the original error cause remains unconfirmed.
+
+**Course-pricing follow-up:** The September digital fee sheet lists seven courses
+and a maximum tuition of KES 68,000; the live site still shows KES 18,000–65,000
+without individual course prices. Other non-welding directory prices match the
+approved September poster. Older full-catalogue differences must not reverse
+those approved updates. Comparison completed; no new prices published. Details:
+`docs/pricing/COURSE-PRICE-COMPARISON-2026-10-27.md`.

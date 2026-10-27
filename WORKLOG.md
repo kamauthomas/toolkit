@@ -1,3 +1,16 @@
+## 2026-10-27 — Countercheck course-fee DOCX against the live website, excluding welding
+**Area:** course information · pricing source reconciliation · reporting
+**Environments:** production read-only comparison verified; no runtime deployment or price change
+**Commit(s):** this comparison/reporting handoff
+
+Located the 23 September fees Course.docx in Downloads/Documents and compared its seven digital courses against the current directory and both digital detail pages. Three paced normal GETs returned 200/release 2026.10.27.1. All show the old suite range 18,000–65,000 and no individual digital fee table; the DOCX maximum is Cyber Security 68,000 and contains exact prices/durations/prerequisites for all seven courses. The page's coarse duration bounds agree, but individual details are missing and generic open-entry wording does not convey the five basic-computer-knowledge requirements. Do not invent individual website prices where only the suite range is shown, or add exam fees the newer sheet does not specify.
+
+Checked the remaining non-welding directory cards and exam table against the approved September poster: Electrical/Solar skilling 120,962; Solar Upskilling 30,684/15 days; Smart Agriculture 73,568/from 4,000; Entrepreneurship 8,000–35,000; French/German all levels 35,000/three months and all five exam rates match. The June full DOCX has superseded subsidy/exam/duration values and additional named agriculture/entrepreneurship offerings not itemised on the site. Those older differences are not automatic price errors and must not override the later approved poster. The newer digital sheet conflicts with the poster's digital upper limit, so source reconciliation is documented rather than silently changing fees. Welding was excluded as instructed.
+
+**Verification/privacy review:** DOCX ZIP/XML metadata and table extraction; duplicate catalogue hashes; inspected source/approval history and actual three response bodies. Local current source matches live facts; initially stale/inaccessible external browser material was not used for current claims. Fixed public destinations, serial five-second spacing, user's four-attempt timeout budget available with zero retries; no production application, Mzizi call, personal record, credential or server mutation. No runtime payload/README/report/document uploaded. Retained public HTML and fee-source digest remain in ignored private reports/course-price-comparison-2026-10-27/. No code regression tests warranted for a read-only comparison. Reviewed outgoing documentation for source accuracy and private-data boundaries before publication; no new security blocker identified in this documentation-only scope.
+
+**Handoff:** docs/pricing/COURSE-PRICE-COMPARISON-2026-10-27.md details confirmed mismatch, missing granular fees, superseded source values and a concrete digital-update scope. Thomas daily draft updated; no external report filed. No website fee changed and no existing stash touched.
+
 ## 2026-10-27 — Record Search Console recovery and explain the 40-page discovery count
 **Area:** sitemap fetch follow-up · Console submission handoff
 **Environments:** production read-only follow-up; owner reports Console fetch recovered; no runtime change
