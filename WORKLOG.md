@@ -1,3 +1,16 @@
+## 2026-10-27 — Authorise Git publication and trace the AGENTS policy history
+**Area:** source publication · policy provenance · release reporting
+**Environments:** local/GitHub source only; production deployment remains pending
+**Commit(s):** pending source c648685, c2aef14, f6e1378 and this publication record
+
+The user explicitly instructed pushing the pending work despite incomplete live demo acceptance and requested examination of AGENTS.md. This instruction authorises Git publication for this run; it does not claim demo acceptance passed or authorise bypassing production verification. No hosting requests, deployment, policy rewrite or unrelated stash changes are part of this action. The earlier checkpoint statements about withholding Git publication describe the earlier decision and are superseded by this instruction.
+
+Git shows wordpress/AGENTS.md was introduced in eeae31d on 17 October during the Mzizi relay/course-cache work, including the push/deploy restriction and stop-on-timeout guidance. The conversation had requested ongoing flaw/security checks in README or AGENTS; the detailed wording was added as repository guidance rather than being a verbatim user instruction. Commit 50e7453 on 26 October added the PHP runtime/advisory paragraph. Both commits use the configured kamauthomas author/committer identity, which does not establish that the human personally edited them. The file is byte-identical to the freshly fetched remote and none of today's pending commits changes it. The parent AGENTS file has a 20 August filesystem modification time; that alone does not establish editor identity or version history. Leave both files unchanged for the user's review.
+
+**Pre-push review:** fetched origin and confirmed its branch remains the ancestor of the pending work; reviewed actual runtime diff and source-only publishing/recovery tooling again. Existing fixed routes/paths, escaping, owned publication checks, duplicate/interruption safeguards and runtime allowlist remain intact. The scoped local checks passed previously on these unchanged source bytes (133 SEO, 14 publisher, 12 recovery, nine audit, 35 graduands); ten saved layout checks remain recorded. No new runtime change or unresolved new source security blocker identified. The demo graduation-page transport failure and incomplete public acceptance are explicitly retained as deployment limitations. Recheck outgoing tracked blobs for credential patterns, exact five-file runtime payload identity, whitespace and clean status before the normal fast-forward GitHub push. Documentation is Git content, never a server payload.
+
+**Handoff:** Thomas's daily report and SEO checkpoint now distinguish authorised source publication from the still-pending production release. No report filed externally. Existing unrelated stashes retained.
+
 ## 2026-10-27 — Reconcile demo SEO activation; stop safely on public verification failure
 **Area:** deployment recovery · SEO verification · reporting
 **Environments:** demo runtime and native publisher verified; public acceptance incomplete; production unchanged

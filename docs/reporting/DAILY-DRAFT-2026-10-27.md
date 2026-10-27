@@ -28,7 +28,10 @@ KES 127,895. Other previously approved delivery categories remain unchanged.
 Retain the existing search foundation and connect newer programme information to
 it. The graduation notice points to approved public resources without claiming
 unverified event results. Site Kit is collecting data per the owner; its settings
-were left unchanged. No production test applications or external report submission.
+were left unchanged. The owner authorised publishing the source and checkpoint
+to GitHub; production release remains pending. Reviewed the history of the agent
+instructions and left them unchanged for the owner to evaluate. No production
+test applications or external report submission.
 
 **Next working day:** Hosting owner to check the interrupted demo connection;
 Thomas/ICT to finish the remaining checks without repeating publication, then
