@@ -13,6 +13,7 @@ The release passed checks on the demo site before being verified on production.
 | Publish a graduation resource notice linking the programme and graduands | Not separately recorded | Completed; one production notice created |
 | Complete demo checks, deploy to production and verify the public pages | Not separately recorded | Completed; 13 checks per environment |
 | Trace changes to the agent instructions for the owner's review | Not separately recorded | Completed; instruction files left unchanged |
+| Check sitemap readiness and recent genuine Googlebot access | Not separately recorded | Completed; sitemap ready for Search Console submission |
 | Compare actual search clicks, impressions and rankings | Not separately recorded | Pending measurement; no verified comparison baseline |
 
 **Challenges:** Intermittent connection timeouts interrupted earlier checks.
@@ -32,7 +33,8 @@ for the owner's review. Source publication is separate from server deployment;
 only the five required website files reached production. No production test
 applications or external report submission.
 
-**Next working day:** Thomas/ICT to review search-performance data when available;
+**Next working day:** Thomas/ICT to submit sitemap_index.xml in Search Console,
+confirm its processing result and review search-performance data when available;
 Admissions to maintain approved course facts and clarify any delivery-category
 price changes; domain/profile owners to address old links when access is available.
 Expected outcome: consistent programme information and a measurable future search
@@ -45,9 +47,14 @@ programme links confirmed in each updated page sitemap; inventories contain
 notice and one production release completed. Both temporary publishing schedules
 were removed. Local checks: 133 SEO, 14 publisher, 17 recovery, nine audit,
 35 graduands and ten layout checks passed. These checks measure website readiness,
-not Google rankings or traffic growth.
+not Google rankings or traffic growth. A further five sitemap/robots reads passed;
+recent verified Googlebot requests show successful access and no access-denial,
+rate-limit or server-error responses in the inspected sample. Google's fetch of
+the updated sitemap remains to be confirmed in Search Console.
 
 Findings: `docs/seo/SEO-REVIEW-2026-10-27.md`.
 Verified release: `docs/seo/SEO-FIXES-2026-10-27.md`.
 Submit through the employee's own Report System session; this draft has not been
 filed externally.
+
+Sitemap submission handoff: `docs/seo/SITEMAP-CONSOLE-HEALTH-2026-10-27.md`.
