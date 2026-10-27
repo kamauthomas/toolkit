@@ -1,42 +1,50 @@
 # Daily report draft — Thomas Kamau — 27 October 2026
 
-**Summary:** Reviewed Toolkit's live website and the SEO work recorded since July. Prepared the identified website repairs and welding headline prices; demo delivery stopped on a hosting connection failure, with production unchanged.
-The main technical improvements remain in place. Identified gaps affecting the
-discovery of newer programme pages and the connection between established course
-information and detailed programmes. Organic growth cannot be quantified because
-Search Console is not available.
+**Summary:** Reviewed the website and the search-visibility work recorded since July.
+Prepared improvements to help people find current programmes, clearer welding links
+and the requested prices. The demo site received the changes and its graduation
+resource notice is ready, but a connection timeout interrupted the final page
+checks. Production has not been changed.
 
 | Task | Time spent | Status |
 |---|---|---|
-| Check priority public pages, course details, sitemaps and staging policy | Not separately recorded | Completed; 13/13 matched priority checks pass |
-| Trace July–October changes against saved audit evidence | Not separately recorded | Completed |
-| Identify programme discovery, canonical and internal-link gaps | Not separately recorded | Completed; 15 catalogue URLs absent from sitemap |
-| Check the legacy domain's migration path | Not separately recorded | In progress; stopped on its first timeout |
-| Compare actual search clicks, impressions and rankings | Not separately recorded | Not available; owner confirms no Search Console |
-| Prepare the findings and a prioritised next phase | Not separately recorded | Completed |
-| Prepare programme sitemap/canonical/link and approved welding-price updates | Not separately recorded | Local checks passed; demo partly transferred, production pending |
-| Prepare an approved graduation-resource blog update | Not separately recorded | Prepared; not published |
-| Reconcile interrupted demo transfer safely | Not separately recorded | Recovery tested locally; awaiting hosting access confirmation |
+| Check priority pages and trace July–October work against saved records | Not separately recorded | Completed |
+| Identify programme discovery, page-reference and internal-link gaps | Not separately recorded | Completed |
+| Prepare programme discovery, clearer welding links and requested headline prices | Not separately recorded | Completed locally; demo files verified |
+| Prepare and verify the demo graduation-resource publishing job | Not separately recorded | Completed; matching existing notice reused, no duplicate |
+| Check the demo programme and news inventories | Not separately recorded | Completed; 40 programme/page and 155 news links |
+| Complete remaining demo page checks and release to production | Not separately recorded | In progress; stopped on connection timeout |
+| Compare actual search clicks, impressions and rankings | Not separately recorded | Pending measurement; no verified comparison baseline |
 
-**Challenges:** No verified search-performance baseline exists for this comparison.
-The legacy domain timed out; live requests were stopped without retry. The main
-domain's checked pages had responded normally. Earlier audits used different
-scopes, including images and concurrent crawls, so their totals cannot honestly
-be presented as a month-by-month ranking or traffic trend.
+**Challenges:** The demo graduation-page request timed out after the inventories,
+homepage and application page passed. Requests stopped and production was held
+until all required checks can pass. This does not prove the whole website is down.
+Earlier search reviews used different scopes, so their totals cannot be presented
+as a reliable traffic or ranking trend. The separate legacy domain remains outside
+the access available to us.
 
-**Decisions/comments:** Preserve the existing working SEO foundation. The owner confirmed no access to the separate legacy host. Hosting requests stopped after the demo transfer failed; the catalogue upload is uncertain, activation/publishing has not begun, and production is unchanged. Site Kit is collecting data per the owner; its settings remain untouched. Prioritise
-programme sitemap coverage, public-page canonicals and clearer course links.
-Keep technical readiness separate from actual search growth. No production
-changes, plugin/account connection, form submissions or live attack tests.
+**Decisions/comments:** Main upskilling price is KES 55,017 on campus; skilling is
+KES 127,895. Other previously approved delivery categories remain unchanged.
+Retain the existing search foundation and connect newer programme information to
+it. The graduation notice points to approved public resources without claiming
+unverified event results. Site Kit is collecting data per the owner; its settings
+were left unchanged. No production test applications or external report submission.
 
-**Next working day:** Hosting owner to confirm cPanel access; Thomas/ICT to reconcile the exact demo state, finish live verification and promote the matched release; Admissions to confirm course-page roles and facts; domain owner to check
-legacy redirects and profile URLs; management to arrange an owned Search Console
-property. Expected outcome: consistent discovery and a measurable future baseline.
+**Next working day:** Hosting owner to check the interrupted demo connection;
+Thomas/ICT to finish the remaining checks without repeating publication, then
+release the matching production changes. Domain/profile owners to address old
+links when access is available. Expected outcome: consistent programme discovery
+and a measurable future search baseline.
 
-**ICT metrics:** One website reviewed across production and demo; 18 main-domain
-HTML pages returned 200; 13 matched priority pages passed; 179 sitemap entries
-inspected as an inventory, not an index count; 15 missing programme URLs identified;
-nine offline audit checks, 133 SEO checks, 14 publisher checks, five recovery scenarios and ten layout checks passed; zero production deployments.
+**ICT metrics:** One website reviewed across production and demo; 13 matched
+priority checks passed in the initial assessment. Five demo release files matched
+approved source. Fifteen programme links confirmed in the demo sitemap; its page
+and news inventories contain 40 and 155 links respectively. One demo publishing
+job completed and its temporary schedule was removed. Local checks: 133 SEO,
+14 publisher, 12 recovery, nine audit, 35 graduands and ten layout checks passed.
+Zero production deployments in this SEO release.
 
-Full findings: `docs/seo/SEO-REVIEW-2026-10-27.md`; release checkpoint: `docs/seo/SEO-FIXES-2026-10-27.md`. Submit this draft through the
-employee's own Report System session; it has not been filed externally.
+Findings: `docs/seo/SEO-REVIEW-2026-10-27.md`.
+Deployment checkpoint: `docs/seo/SEO-FIXES-2026-10-27.md`.
+Submit through the employee's own Report System session; this draft has not been
+filed externally.

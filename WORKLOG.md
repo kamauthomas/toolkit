@@ -1,3 +1,18 @@
+## 2026-10-27 — Reconcile demo SEO activation; stop safely on public verification failure
+**Area:** deployment recovery · SEO verification · reporting
+**Environments:** demo runtime and native publisher verified; public acceptance incomplete; production unchanged
+**Commit(s):** runtime source c648685; guarded continuation and checkpoint in this change
+
+On the user's resumed deployment instruction, one normal fresh read confirmed the interrupted functions.php upload had arrived. Added and exercised a narrow second recovery: verifies the original journal chain and precise pre-worker state, checks all five runtime hashes and skips completed writes. All five matched; zero repeat uploads. The demo publishing/cache worker completed for matching owned resource post 14480 (`created: false`, no new duplicate). Its temporary cron was removed and absence verified. Demo XML checks passed: 40 page URLs including all 15 catalogue programmes once, and 155 post URLs including the resource article. Homepage and application-page rendered release/canonical/heading/schema/noindex checks passed.
+
+The next normal demo /graduation/ request failed with a transport exception reported as a timeout; no response was saved. Stopped all live requests immediately without retry/IP rotation. This is not proof of WAF blocking, a PHP error or general outage. Remaining page/price/link/blog acceptance is incomplete. No production preparation or mutation, production test application, Mzizi replay or email/SMS occurred. Remote publication remains withheld because a required demo check did not complete.
+
+Prepared a verification-only continuation for checked/restored access. It requires the saved successful native receipt and removed-job state, freshly rechecks the five runtime hashes and exact cron absence, then performs normal public checks. It cannot upload, add jobs or republish. Existing-attempt, drift, incomplete-worker and receipt guards fail closed. Original failed journals remain unchanged; private CHECKPOINT.json and tracked release notes record exact progress and next command.
+
+**Verified/security review:** 12 isolated release/recovery tests pass, including old/new catalogue and activation, unrelated drift, unknown bytes, started-worker refusal, tampered parent, no-write/no-publication verification, unsafe native receipt, replay refusal and first-transport-failure stop. Also passed 133 SEO checks, 14 publisher checks, nine audit tests, 35 graduands checks; ten prior local desktop/mobile layout checks remain recorded. Python compilation and diff checks pass. Re-reviewed actual runtime/publisher/recovery diff for fixed routes/destinations, output escaping, ownership/content/metadata and collision handling, no client-write/upload/SQL endpoint, no applicant/secret output, exact fresh hashes and interruption handling. Five runtime PHP files only: no README, document, report, test, archive or helper upload. PHP/dependencies/Site Kit unchanged; no closed fileinfo exemption reused. No new unresolved source security blocker identified; live demo acceptance remains the deployment blocker.
+
+**Handoff:** updated docs/seo/SEO-FIXES-2026-10-27.md and Thomas's ready-to-paste daily draft; no external report filed. Primary upskilling KES 55,017 on campus/skilling KES 127,895 are in demo source, rendered price checks and production remain pending. Other approved delivery rates retained pending optional clarification. Source/checkpoint committed locally only; prior unrelated stashes preserved.
+
 ## 2026-10-27 — Checkpoint the partial demo SEO upload after transport failure
 **Area:** deployment incident · safe source reconciliation · reporting
 **Environments:** demo partially transferred and unverified; production unchanged

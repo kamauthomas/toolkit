@@ -22,18 +22,24 @@ def connection():return load('connection',Path(__file__).with_name('finish-runti
 def site(env):return '/home/bfyigiln/'+('demo.toolkitafrica.ac.ke' if env=='demo' else 'public_html')
 def remote(env,name):return site(env)+'/'+PREFIX+name
 
-def validate_partial_previous(previous):
+def validate_partial_previous(previous,activation=False):
     assert not previous['verified'] and not previous.get('cron_submission') and not previous.get('publication')
+    if activation:
+        assert previous['uploaded']==[] and previous.get('remaining_runtime_files')==['functions.php']
+        assert previous.get('upload_intent')=='functions.php' and previous.get('parent_attempt_sha256')
+        assert previous['observed']=={r['file']:(r['baseline_sha256'] if r['file']=='functions.php' else r['sha256']) for r in previous['files']}
+        return
     assert set(previous['uploaded'])=={'inc/seo-discovery.php','template-parts/pages/course-detail.php','inc/cultural-week-stories.php'}
     assert previous.get('upload_intent')=='inc/course-catalog.php'
 
-def reconcile_observed(previous,rows,observed):
+def reconcile_observed(previous,rows,observed,activation=False):
     """Only reconcile the saved pre-worker catalogue-upload uncertainty."""
-    validate_partial_previous(previous)
+    validate_partial_previous(previous,activation)
     assert set(observed)=={r['file'] for r in rows}
     for row in rows:
         name=row['file'];actual=observed[name]
-        allowed={row['sha256']} if name in previous['uploaded'] else {row['baseline_sha256']}
+        allowed={row['sha256']} if activation or name in previous['uploaded'] else {row['baseline_sha256']}
+        if activation and name=='functions.php':allowed.add(row['baseline_sha256'])
         if name==previous['upload_intent']:allowed.add(row['sha256'])
         if actual not in allowed:raise RuntimeError('Reconciliation source drift; review the saved fresh file')
     return [r['file'] for r in rows if observed[r['file']]!=r['sha256']]
@@ -64,7 +70,8 @@ def prepare(env,source):
             if row['file'] in NEW:assert raw==expected
     state['prepared']=True;save(journal,state);print('PREPARED',env,'5 allowlisted/linted runtime files; no uploads',flush=True)
 
-def deploy(env,reconcile=False):
+def deploy(env,reconcile=False,activation=False):
+    assert not activation or reconcile
     prepared=CASE/env;out=prepared;plan=json.loads((prepared/'preparation.json').read_text());assert plan['prepared'] and plan['environment']==env
     rows=plan['files'];assert {r['file'] for r in rows}==set(EXISTING+NEW) and len(rows)==5
     policy=load('policy',ROOT/'scripts/deployment/runtime_payload.py')
@@ -75,17 +82,21 @@ def deploy(env,reconcile=False):
     previous=None
     if reconcile:
         assert env=='demo','Reconciliation is only for the identified demo failure'
-        previous=json.loads((prepared/'attempt.json').read_text());assert previous['source']==plan['source'] and previous['files']==rows
-        validate_partial_previous(previous)
+        parent=prepared/('reconciliation-1/attempt.json' if activation else 'attempt.json')
+        previous=json.loads(parent.read_text());assert previous['source']==plan['source'] and previous['files']==rows
+        validate_partial_previous(previous,activation)
+        if activation:
+            original=json.loads((prepared/'attempt.json').read_text());validate_partial_previous(original)
+            assert previous['parent_attempt_sha256']==sha((prepared/'attempt.json').read_bytes())
         assert not (prepared/'verification.json').exists()
-        out=prepared/'reconciliation-1';out.mkdir(mode=0o700,exist_ok=True)
+        out=prepared/('reconciliation-2' if activation else 'reconciliation-1');out.mkdir(mode=0o700,exist_ok=True)
     journal=out/'attempt.json'
     if journal.exists():raise RuntimeError('Existing attempt; reconcile saved state before any retry')
     state={'environment':env,'source':plan['source'],'files':rows,'verified':False,'uploaded':[],'cron_removed':None};save(journal,state)
-    if previous:state['parent_attempt_sha256']=sha((prepared/'attempt.json').read_bytes());save(journal,state)
+    if previous:state['parent_attempt_sha256']=sha(parent.read_bytes());save(journal,state)
     panel=connection()
     observed={}
-    for row in sorted(rows,key=lambda r:r['file']!='inc/course-catalog.php'):
+    for row in sorted(rows,key=lambda r:r['file']!=('functions.php' if activation else 'inc/course-catalog.php')):
         raw=panel.fetch(row['remote'],optional=row['baseline_sha256'] is None)
         observed[row['file']]=None if raw is None else sha(raw)
         if previous:
@@ -93,7 +104,7 @@ def deploy(env,reconcile=False):
             if raw is not None:path.write_bytes(raw);path.chmod(0o600)
         elif observed[row['file']]!=row['baseline_sha256']:raise RuntimeError('Fresh deployment drift')
         state['observed']=observed;save(journal,state)
-    if previous:state['remaining_runtime_files']=reconcile_observed(previous,rows,observed);save(journal,state)
+    if previous:state['remaining_runtime_files']=reconcile_observed(previous,rows,observed,activation);save(journal,state)
     for row in sorted(rows,key=lambda r:(r['file'] not in NEW,r['file']=='functions.php')):
         if previous and observed[row['file']]==row['sha256']:continue
         raw=panel.fetch(row['remote'],optional=observed[row['file']] is None);assert (None if raw is None else sha(raw))==observed[row['file']],'Concurrent live edit'
@@ -130,6 +141,41 @@ def deploy(env,reconcile=False):
     if not receipt or b'TOOLKIT_SEO_EXIT=0' not in receipt:raise RuntimeError('Publication/cache worker failed; reconcile private state, do not replay')
     publication=next(json.loads(line) for line in receipt.decode().splitlines() if line.startswith('{') and json.loads(line).get('seo_release')=='passed')
     state['publication']=publication;save(journal,state)
+    verify_public(env,out,state,prepared)
+
+def resume_verification(env):
+    """Recheck completed runtime/job state without uploads or publication replay."""
+    prepared=CASE/env
+    parent=prepared/('reconciliation-2/attempt.json' if env=='demo' else 'attempt.json')
+    previous=json.loads(parent.read_text());plan=json.loads((prepared/'preparation.json').read_text())
+    assert not previous['verified'] and previous['cron_removed'] is True
+    assert previous['cron_submission']=='accepted' and previous['publication']['seo_release']=='passed'
+    assert previous['files']==plan['files'] and previous['source']==plan['source']
+    assert len(plan['files'])==5 and {r['file'] for r in plan['files']}==set(EXISTING+NEW)
+    receipt=(parent.parent/'runtime.private.log').read_bytes()
+    assert b'TOOLKIT_SEO_EXIT=0' in receipt
+    assert previous['publication'] in [json.loads(line) for line in receipt.decode().splitlines() if line.startswith('{')]
+    assert not (prepared/'verification.json').exists()
+    if env=='production':
+        demo=json.loads((CASE/'demo/verification.json').read_text());assert demo['verified'] and demo['source']==plan['source']
+        assert {(r['file'],r['sha256']) for r in plan['files']}=={(r['file'],r['sha256']) for r in demo['files']}
+    policy=load('policy',ROOT/'scripts/deployment/runtime_payload.py')
+    for row in plan['files']:
+        assert row['remote']==remote(env,row['file']);policy.assert_runtime_upload(row['remote'])
+        assert sha((prepared/'payload'/row['file']).read_bytes())==row['sha256']
+    out=prepared/'verification-resume-1';out.mkdir(mode=0o700,exist_ok=True)
+    journal=out/'attempt.json'
+    if journal.exists():raise RuntimeError('Existing verification continuation; inspect before retry')
+    state=dict(previous);state['verification_parent_sha256']=sha(parent.read_bytes());state['verification_only']=True;save(journal,state)
+    panel=connection()
+    for row in plan['files']:
+        assert sha(panel.fetch(row['remote']))==row['sha256'],'Runtime drift; no verification promotion'
+    cron=panel.api2call('Cron','listcron');assert cron.get('event',{}).get('result')==1
+    assert not any(r.get('command')==previous['command'] for r in cron.get('data',[])),'Publication cron is still present'
+    verify_public(env,out,state,prepared)
+
+def verify_public(env,out,state,prepared):
+    journal=out/'attempt.json';publication=state['publication']
     base='https://'+('demo.' if env=='demo' else '')+'toolkitafrica.ac.ke';checks=[]
     inspector=load('inspect_seo',ROOT/'scripts/seo-review-2026-10-27.py')
     def get(path):
@@ -163,14 +209,17 @@ def deploy(env,reconcile=False):
             assert 'kmm-2071-jpg.webp' in r.text and '/graduation/#programme' in r.text and '/graduation/#graduands' in r.text
     state.update(verified=True,public_checks=checks,page_sitemap_count=len(urls),post_sitemap_count=len(post_urls),production_test_applications=0,php_or_dependencies_changed=False)
     save(journal,state);save(out/'verification.json',state)
-    if previous:save(prepared/'verification.json',state)
+    if out!=prepared:save(prepared/'verification.json',state)
     print('VERIFIED',env,'5 runtime hashes, sitemap/canonicals/schema/welding links/blog resource, private job removed; no application submissions',flush=True)
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('environment',choices=['demo','production']);p.add_argument('--prepare',metavar='FULL_SOURCE_COMMIT');p.add_argument('--deploy',action='store_true');p.add_argument('--reconcile-partial-demo',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('environment',choices=['demo','production']);p.add_argument('--prepare',metavar='FULL_SOURCE_COMMIT');p.add_argument('--deploy',action='store_true');p.add_argument('--verify-only',action='store_true');p.add_argument('--reconcile-partial-demo',action='store_true');p.add_argument('--reconcile-activation-demo',action='store_true');a=p.parse_args()
     try:
-        assert bool(a.prepare)!=a.deploy
-        assert not a.reconcile_partial_demo or (a.deploy and a.environment=='demo')
-        prepare(a.environment,a.prepare) if a.prepare else deploy(a.environment,a.reconcile_partial_demo)
+        assert sum([bool(a.prepare),a.deploy,a.verify_only])==1
+        assert not (a.reconcile_partial_demo and a.reconcile_activation_demo)
+        assert not (a.reconcile_partial_demo or a.reconcile_activation_demo) or (a.deploy and a.environment=='demo')
+        if a.prepare:prepare(a.environment,a.prepare)
+        elif a.verify_only:resume_verification(a.environment)
+        else:deploy(a.environment,a.reconcile_partial_demo or a.reconcile_activation_demo,a.reconcile_activation_demo)
     except Exception as e:
         print('STOPPED:',str(e) if isinstance(e,RuntimeError) else type(e).__name__,'— reconcile saved state before retry',flush=True);raise SystemExit(1)
