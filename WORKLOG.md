@@ -1,3 +1,16 @@
+## 2026-10-28 — Prepare a bounded weekly work plan aligned to the current OKRs
+**Area:** weekly planning · cross-system priorities · management reporting
+**Environments:** local planning/report artifacts only; no runtime or external system changes
+**Commit(s):** this source plan and alignment handoff
+
+Prepared Thomas Kamau's 26–31 October plan in the recent October report format, using the exact official imgs logo and matching A4 Word/PDF. Both render as two pages. Monday/Tuesday record verified calling-letter and SEO work; the remaining days target two staff acceptance reviews, a fee-source decision, known-risk ownership, five shared AI/source questions, five communications assets and a weekly handover. Cap new delivery at one small approved correction, with 13 focused planning hours and a separate four-hour support/rework allowance; Saturday is limited and conditional on availability. These are estimates, not attendance or new submissions.
+
+Crosschecked all 25 Q4 result texts across Markdown, Word and the newer workbook. The six-objective Q4 document remains proposed; the eight-objective finalized portfolio remains the baseline. Mapped all portfolio objectives and Q4 areas without silently activating targets. Prioritised the 31 October staff-review/risk-owner milestones; November/December pilot, module rollout, provider, restore and infrastructure outcomes are not promised this week. Reconciled stale owner notes against newer deployment and Wingu records; no duplicate completed deployment or host-provisioning task was invented.
+
+**Verified/security review:** dates are Monday 26 through Saturday 31; both Word/PDF retain all 59 source content blocks, six daily rows and six coverage rows. Exact embedded logo digest and Thomas author verified; all source/OKR hashes unchanged. Both PDF pages and the independent two-page LibreOffice Word render were visually reviewed. Initial sandboxed LibreOffice launch could not start; an isolated temporary profile outside that restriction rendered successfully, without touching the personal profile. Source documents, attendance and existing stashes are unchanged. Reviewed report/notes for factual limits, private data and runtime exclusion; no network, production check, account action, code change or deployment. No regression suite needed for a planning document.
+
+**Handoff:** docs/reporting/WEEKLY-PLAN-2026-10-26-TO-31.md plus the detailed ALIGNMENT.md; local Word/PDF/Markdown, source register and validation under reports/weekly-plans/2026-10-26-to-31/. Daily draft for 28 October prepared. No report filed externally and no staff/hosting message sent. The user's next request is a comprehensive technical analysis of the entire application-form journey; that analysis is separate from this completed weekly plan.
+
 ## 2026-10-27 — Countercheck course-fee DOCX against the live website, excluding welding
 **Area:** course information · pricing source reconciliation · reporting
 **Environments:** production read-only comparison verified; no runtime deployment or price change
