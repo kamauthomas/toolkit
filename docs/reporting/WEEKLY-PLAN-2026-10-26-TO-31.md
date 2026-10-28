@@ -39,9 +39,3 @@ Consolidate this week’s releases, obtain staff feedback and settle the next ap
 - **Management/hosting:** confirm owners for known serious findings by Friday; keep unconfirmed assignments open. Required hosting support, security confirmation and the licensed website update cannot be guaranteed this week.
 - **Academic lead:** confirm lecturer, learner group, policies, captions and support arrangements. Campus production launch, full AI rollout and automated notifications remain outside this week’s commitment.
 - **Scope control:** one correction only if approval, testing, backup and post-release checks fit. Expanded Reporting modules, full restore exercises and new integrations move to a separately agreed schedule.
-
-## Completion evidence
-
-Retain the two review records or explicit blockers, fee decision/proposal, owner-action list, five-question review, five-asset sample and weekly handover. Report completed work separately from requests awaiting others; no quarterly performance percentage is claimed from this short plan.
-
-**OKR basis:** finalized portfolio, revised 2 September; newer Q4 targets, prepared 13 October, remain proposed. Q4’s 31 October review/owner milestones guide priority; its November/December outcomes are not pulled into this week. Neither OKR source is amended by this plan.
