@@ -13,6 +13,7 @@ FORBIDDEN_DIRS={'.git','.github','.codex','.agents','docs','reports','tests','te
 LICENSE_NAMES={'license.md','licence.md','copyright.md','notice.md'}
 def allowed(path):
  name=path.name.lower()
+ if path.parts[:2] in {('resources','js'),('resources','css'),('database','factories')}:return False
  if any(p.lower() in FORBIDDEN_DIRS for p in path.parts):return False
  if len(path.parts)>=2 and path.parts[:2]==('vendor','bin'):return False
  if name in LICENSE_NAMES:return True

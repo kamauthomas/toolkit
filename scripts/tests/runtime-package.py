@@ -10,6 +10,11 @@ script = Path(__file__).resolve().parents[1] / 'deployment/build-runtime-package
 spec = importlib.util.spec_from_file_location('builder', script)
 builder = importlib.util.module_from_spec(spec); spec.loader.exec_module(builder)
 
+for name in ['resources/js/app.js', 'resources/css/app.css', 'database/factories/UserFactory.php']:
+    assert not builder.allowed(Path(name)), name
+for name in ['resources/views/layouts/app.blade.php', 'public/build/assets/app-reviewed.js', 'public/build/assets/app-reviewed.css']:
+    assert builder.allowed(Path(name)), name
+
 
 def refused(profile, source, destination):
     try: builder.build(profile, source, destination)
