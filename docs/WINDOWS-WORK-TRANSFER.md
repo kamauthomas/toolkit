@@ -37,10 +37,13 @@ and generator were retained.
 
 ## Source snapshot rules
 
-Tracked applications were exported from their recorded Git commits instead of
+Tracked applications are exported from their recorded Git commits instead of
 being copied wholesale. This avoids local secrets, caches, and unrelated
-machine state. The untracked Virtual Campus application was copied separately
-with its credentials, database, dependencies, and runtime storage excluded.
+machine state. Virtual Campus is now tracked: its separate project folder uses
+the same recorded commit as Smart Lecturer, never the live working tree.
+Exclusions apply to all copied sources, including Git snapshots. Final management
+documents are retained from report-preparation work; private attendance/Wingu
+receipts are omitted. Campus progress reports also have a separate reports folder.
 
 `SOURCE_COMMITS.tsv` records the exact branch and commit used for each tracked
 project. `SYNC_HISTORY.tsv` records when the mirror was refreshed.
@@ -64,6 +67,23 @@ managed Linux source are removed from its Windows mirror, but the script never
 deletes unrelated folders elsewhere on the Desktop. Git projects are rebuilt
 from their current commits before synchronization, so stale tracked files do
 not accumulate.
+
+The entire handoff is first built and checked in private local staging. The
+script verifies the destination is on a mounted read/write Windows filesystem
+and stops on prohibited paths, key/token signatures or a symlinked managed
+destination. Only after those checks does it update the seven managed folders
+and verify every copied checksum. It does not mount or force-repair a disk.
+
+When the Windows disk is unavailable, prepare an explicitly labelled local
+handoff from the WordPress repository:
+
+```bash
+./scripts/data-transfer/sync-toolkit-to-windows.sh --prepare-only ../toolkit-private-storage/windows-sync-preview/Toolkit_Workspace
+```
+
+This mode does not record a Windows sync. `PREPARATION.tsv` and the inventory
+identify it as local preparation. Once the real volume is mounted normally,
+run the default synchronization to refresh the Windows workspace and its history.
 
 Do not treat this workspace as a live deployment or a backup of production
 data. It is an organised, secret-free working mirror for the Windows desktop.

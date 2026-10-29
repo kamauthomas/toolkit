@@ -1,3 +1,16 @@
+## 2026-10-29 — Separate curated Windows handoff from Campus runtime deployment
+**Area:** workstation continuity · Virtual Campus release tooling · file privacy
+**Environments:** local tooling verified; Windows volume unavailable; no application-host upload
+**Commit(s):** this commit
+
+Updated the Windows exporter to use committed Campus source and shared exclusions across every copied source. It now builds and scans the whole handoff in private local staging before updating managed Windows folders, verifies checksums after copying, rejects unmounted/non-Windows destinations and symlinked managed folders, and supports an explicitly labelled local preparation mode. Final management reports and Campus progress reports remain available; private runtime/deployment and Wingu/attendance preparation records do not travel.
+
+Reviewed the provisioned deployment process: Campus uses guarded Fileman/Cron deltas; the initial-provisioning script resets its isolated test database and must not be reused for this update. Added an exact Campus runtime-delta checker. Only the 11 reviewed PHP/Blade/CSS files, Vite manifest and validated hashed assets can enter this candidate; documentation, reports, tests, source CSS/JS and standalone helpers are rejected. The checker itself runs locally and is not uploaded.
+
+**Verified/security review:** four disposable-repository sync tests pass, including secret exclusion, committed-vs-working Campus source, preservation of composer.lock, pre-copy signature failure, stale managed deletion, unmanaged-file preservation, local-only preparation labels, absent mount and symlink rejection. Three runtime-delta tests pass; existing runtime package tests pass and 202 runtime destination checks pass. Shell syntax and diff checks pass. Git remotes were refreshed without incoming divergence. No live application, payment, applicant or Mzizi request was submitted.
+
+**Follow-ups:** prepare the full local handoff after committing source snapshots; mount the actual Windows volume normally and rerun sync when its device is available. UDisks and the kernel currently expose only the 256 GB Linux SSD; recorded Windows UUID/device are absent. Campus hosted updates require the provisioned deployment session and fresh drift/readiness checks; no production deployment is claimed here. Preserve the user's unrelated editor swap file.
+
 ## 2026-10-28 — Document the complete application architecture and trim the weekly plan
 **Area:** admissions architecture · Mzizi · Reception · calling letters · management reporting
 **Environments:** local source analysis and report artifacts only; no runtime deployment or live mutation
