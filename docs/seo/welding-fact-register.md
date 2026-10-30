@@ -2,6 +2,15 @@
 
 **Created:** 15 September 2026
 
+**30 October 2026 supersession note:** The July/September fee entries below are
+historical evidence, not the current publishing authority. The owner's later
+approved change was verified in the 27 October demo/production release:
+**on-campus welding upskilling KES 55,017; skilling KES 127,895**. Other delivery
+categories remain separately priced. Use the current catalogue and
+[verified release record](SEO-FIXES-2026-10-27.md) for new public price copy;
+do not revert to the old brochure figures. The remaining academic/process and
+assessment sign-offs are not supplied by a price approval or search ranking.
+
 **Canonical hub:** `https://toolkitafrica.ac.ke/our-ventures/construction-sector-skills/`
 
 Only `verified` fields may be published as factual course claims. `Pending` means the website must either use careful non-specific wording or omit the claim until the named owner signs it off.
@@ -17,10 +26,10 @@ Only `verified` fields may be published as factual course claims. `Pending` mean
 | Contact hours | not supplied | pending | Head of Welding | Provide theory, simulation and workshop hours |
 | Industry attachment | three months | pending | Admissions + Welding | Confirm availability and whether it applies to every learner/pathway |
 | Intake dates | January, April, July and October | pending | Admissions | Confirm next open intake and application deadline |
-| Standard fee | KES 176,276 | verified | Management | Approved 7 July 2026 admissions brochure; confirmed as the correct website fee on 16 September 2026 |
-| Subsidised fee | KES 120,962 | verified | Management | Approved 7 July 2026 admissions brochure; eligibility and availability still require Admissions confirmation |
-| Upskilling standard fee | KES 66,300 | verified | Management | Approved 7 July 2026 admissions brochure; applies to Advanced Welding Upskilling, not the full programme |
-| Upskilling subsidised fee | KES 30,684 | verified | Management | Approved 7 July 2026 admissions brochure; eligibility and availability still require Admissions confirmation |
+| Standard fee | KES 176,276 | Superseded fee evidence | Management | Approved 7 July 2026 admissions brochure; confirmed as the correct website fee on 16 September 2026 |
+| Subsidised fee | KES 120,962 | Superseded fee evidence | Management | Approved 7 July 2026 admissions brochure; eligibility and availability still require Admissions confirmation |
+| Upskilling standard fee | KES 66,300 | Superseded fee evidence | Management | Approved 7 July 2026 admissions brochure; applies to Advanced Welding Upskilling, not the full programme |
+| Upskilling subsidised fee | KES 30,684 | Superseded fee evidence | Management | Approved 7 July 2026 admissions brochure; eligibility and availability still require Admissions confirmation |
 | Included costs | not supplied | pending | Admissions + Finance | List tuition, materials, PPE, assessment and attachment costs |
 | Entry requirement | KCPE or KCSE certificate | pending | Admissions | Confirm minimum level and required documents |
 | Qualification awarded | Advanced Welding Skills Certificate with VR | pending | Compliance + Welding | Confirm exact award wording and issuing body |
@@ -38,6 +47,6 @@ Only `verified` fields may be published as factual course claims. `Pending` mean
 
 - Do not infer accreditation from membership or partnership.
 - Do not use `KEBS`, `NITA`, `IIW` or another body as interchangeable trainer, assessor, examiner, accreditor or certificate issuer.
-- Attribute published prices to the approved 7 July 2026 brochure and direct applicants to Admissions for installments, subsidy eligibility, assessment costs, and current intake availability.
+- Use the latest approved price source identified above; retain the July brochure as historical evidence only. Direct applicants to Admissions for installments, assessment costs and current intake availability. Do not infer current subsidy eligibility from the older brochure.
 - Do not promise placement, certification or employment.
 - Keep visible text, metadata, schema, brochures, chatbot answers and application choices aligned.

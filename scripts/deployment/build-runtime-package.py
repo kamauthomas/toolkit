@@ -7,7 +7,7 @@ PROFILES={
  'reception':['app','bootstrap','config','database','public','resources','routes','vendor','artisan','composer.json','composer.lock'],
  'reporting':['app.py','safe_files.py','passenger_wsgi.py','wsgi.py','requirements.txt','templates','static','data'],
  'chatbot':['chatbot.py','database.py','faq_matcher.py','logger.py','session_manager.py','state_machine.py','web_app.py','webhook.py','templates','requirements.txt'],
- 'wordpress':['wp-content/themes/eduma-child','wp-content/mu-plugins/toolkit-runtime-hardening.php'],
+ 'wordpress':['favicon.ico','wp-content/themes/eduma-child','wp-content/mu-plugins/toolkit-runtime-hardening.php'],
 }
 FORBIDDEN_DIRS={'.git','.github','.codex','.agents','docs','reports','tests','test','__pycache__','node_modules','logs','sessions','cache'}
 LICENSE_NAMES={'license.md','licence.md','copyright.md','notice.md'}

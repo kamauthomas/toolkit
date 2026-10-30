@@ -48,4 +48,18 @@ with tempfile.TemporaryDirectory(prefix='toolkit-package-policy-') as directory:
     builder.build('reception', source, root / 'reception.tgz')
     metadata.unlink(); metadata.symlink_to(root / 'external.json'); (root / 'external.json').write_text('{"dev":false,"dev-package-names":[]}')
     refused('reception', source, root / 'metadata-symlink.tgz')
+
+    source = root / 'wordpress'; theme = source / 'wp-content/themes/eduma-child'
+    theme.mkdir(parents=True); (theme / 'functions.php').write_text('<?php // runtime fixture')
+    (theme / 'LICENSE.md').write_text('Required license fixture')
+    for name in ['README.md', 'report.docx', 'backup.zip']:
+        (theme / name).write_text('Excluded fixture')
+    (source / 'favicon.ico').write_bytes(b'\x00\x00\x01\x00favicon-fixture')
+    (source / '.env').write_text('Excluded secret fixture')
+    archive = root / 'wordpress.tgz'; builder.build('wordpress', source, archive)
+    with tarfile.open(archive) as packaged:
+        assert set(packaged.getnames()) == {'favicon.ico', 'wp-content/themes/eduma-child/functions.php', 'wp-content/themes/eduma-child/LICENSE.md'}
+    (source / 'favicon.ico').unlink(); (root / 'outside.ico').write_bytes(b'private fixture')
+    (source / 'favicon.ico').symlink_to(root / 'outside.ico')
+    refused('wordpress', source, root / 'favicon-symlink.tgz')
 print('PASS: document/secret/archive/map exclusion, required license retention, path/symlink boundaries and production-only Composer dependencies; no existing dependencies changed.')

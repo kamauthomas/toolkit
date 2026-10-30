@@ -2,6 +2,13 @@
 
 Prepared by Thomas Kamau · 27 October 2026
 
+**30 October follow-up:** Search Console access is now available. The owner's
+three-month export contains only 26–27 October: 30 clicks and 485 impressions.
+Current screenshots and that export establish MIG/MAG and broader welding
+visibility, but not a historical growth percentage. See the
+[measured visibility/favicon review](SEO-VISIBILITY-2026-10-30.md).
+The lack-of-access statements below describe the 27 October assessment.
+
 **Release follow-up:** The findings below describe the initial assessment.
 The catalogue sitemap, public-page canonical/course-schema integration, welding
 links/prices and graduation resource notice were subsequently repaired and verified
