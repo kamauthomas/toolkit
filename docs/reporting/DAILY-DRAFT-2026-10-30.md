@@ -1,4 +1,4 @@
-# Daily report draft — Thomas Kamau — 30 October 2026
+# Report draft — Thomas Kamau — Week of 26–31 October 2026
 
 **Summary:** Verified current search visibility and investigated the different
 favicon shown by Brave and Google. Analysed the owner's Search Console export
@@ -11,6 +11,7 @@ without further browser interaction after the request to keep the window inactiv
 |Add the missing root favicon fallback using official icon bytes|Not separately recorded|Completed; demo then production verified 200, correct MIME and identical bytes|
 |Analyse the Search Console CSV export and verify totals/date coverage|Not separately recorded|Completed;30 clicks/485 impressions across 26–27 October only|
 |Compare generic welding queries and 15 programme URLs|Not separately recorded|Completed; broader welding appearances;12 programme pages have impressions|
+|Refresh project and October reports from the latest Jobs source; record operational closure and this week’s Smart Lecturer/Campus changes|Not separately recorded|Completed; reporting weeks used; matching Word/PDF checked|
 |Keep the favicon in future runtime packages and verify exclusion boundaries|Not separately recorded|Completed; package fixtures and 202 deployment-boundary checks pass|
 |Prepare measured follow-ups and reconcile stale editorial guidance|Not separately recorded|Completed; no speculative runtime SEO change or growth claim|
 
@@ -44,3 +45,5 @@ One static fallback release verified on demo and production; zero external
 report submissions this session.
 
 Detailed handoff: `docs/seo/SEO-VISIBILITY-2026-10-30.md`.
+
+**Report refresh:** Jobs frontend/backend main updated to e09d1ab/e0809b1; old frontend feature branch and local files preserved. The project report now includes Campus branding/navigation, a protected resource library, lesson-access fixes and the recorded local checks. Owner-confirmed Jobs operational issues are closed; no blanket security certification or new hosted acceptance is inferred. Project report is two pages; October summary remains one page. No application deployment or external filing occurred for this report refresh.

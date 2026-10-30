@@ -1,5 +1,21 @@
 # October report and Wingu handoff
 
+## Report refresh — week of 26–31 October 2026
+
+The concise October report now records the owner's confirmation that the Jobs
+Linkage operational issues are resolved, using the latest frontend/backend main
+source (`e09d1ab` / `e0809b1`). It also includes this week's Smart Lecturer/Campus
+branding, navigation, protected learning library and lesson-access improvements.
+Local verification and pending hosted acceptance are distinguished; a new
+lecturer-face or connected teaching-service release is not claimed.
+
+The versioned monthly source is
+`docs/reporting/OCTOBER-MANAGEMENT-REPORT-2026.md`; matching Word/PDF remain at
+the delivery paths below. Both render as one A4 page with Thomas Kamau and the
+exact official logo. The two retained attention items are unchanged. The related
+project progress report is two pages and describes work by reporting week.
+This editorial refresh does not change the saved Wingu outcome or attendance.
+
 The employee requested the Wingu push, explicitly kept the three undocumented
 work days pending, then requested a concise October general report with Thomas's
 name and the supplied Toolkit logo. No reporting cutoff appears in that report.
