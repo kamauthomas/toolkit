@@ -67,8 +67,8 @@ foreach(['advanced-welding-vr','advanced-welding-upskilling'] as $slug)check(str
 check(str_contains($page,'6 months: 3 months')&&str_contains($page,'KCPE or KCSE')&&str_contains($page,'January, April, July and October'),'Approved programme facts reused without reinterpretation');
 check(str_contains($page,'/recognition-of-prior-learning-rpl/')&&str_contains($page,'/training-welders-with-virtual-reality/'),'Existing RPL and VR guidance retained');
 $catalog=false;ob_start();include $root.'/template-parts/pages/course-detail.php';$legacy=ob_get_clean();check(!str_contains($legacy,'/courses/advanced-welding-vr/'),'Hub contains no inactive catalogue link');$catalog=true;
-check(eduma_child_get_course('advanced-welding-vr')['fees']==='KES 127,895','Skilling tuition matches owner instruction');
-check(eduma_child_get_course('advanced-welding-upskilling')['fees']==='KES 55,017','Upskilling primary tuition matches owner instruction');
+check(eduma_child_get_course('advanced-welding-vr')['fees']==='KES 176,276','Skilling cost matches approved Principal notice');
+check(eduma_child_get_course('advanced-welding-upskilling')['fees']==='KES 66,300','Upskilling cost matches approved Principal notice');
 $story=toolkit_seo_graduation_update();check(str_contains($story['content'],'/graduation/#programme')&&str_contains($story['content'],'/graduation/#graduands'),'New resource article links actual approved anchors');
 check(!str_contains($story['content'],'<script')&&!str_contains($story['content'],'exam results'),'Article contains no scripts or invented results');
 echo $checks." SEO sitemap, canonical, schema, toggle, negative-route and real-template checks passed\n";

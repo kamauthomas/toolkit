@@ -1,5 +1,11 @@
 # Welding Fact Register
 
+**Current welding-price authority:** the Principal’s 10 November notice now
+approves Skilling **KES 176,276** and Upskilling **KES 66,300**, effective
+immediately. Older welding figures/category tables below are historical. See
+[approved November costs](../pricing/APPROVED-WELDING-COSTS-2026-11.md).
+
+
 **Created:** 15 September 2026
 
 **30 October 2026 supersession note:** The July/September fee entries below are

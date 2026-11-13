@@ -29,7 +29,7 @@ function toolkit_editorial_story_preview() {
  * URLs and triggers one server-side object/page-cache purge per environment.
  */
 function toolkit_theme_release() {
-	return '2026.10.27.1';
+	return '2026.11.13.1';
 }
 
 add_action( 'wp_enqueue_scripts', function() {
@@ -1762,7 +1762,7 @@ add_action( 'template_redirect', function() {
 		'',
 		'## Information-use rules',
 		'- Treat the current course pages and admissions guidance as authoritative for public website answers.',
-		'- Use the revised September 2026 tuition fees where a course page shows them, then confirm installments, subsidy eligibility, assessment costs, and intake availability with Toolkit Admissions before advising payment or enrolment.',
+		'- Advanced MIG/MAG Welding with VR costs KES 176,276 for Skilling (6 months: 3 months at the Hub and 3 months in industry) and KES 66,300 for Upskilling (1 month), effective immediately. These replace previous welding rates. Refer fee and financing questions to the Youth Skills Manager’s Office; financing depends on partner eligibility and approval. Other courses retain their published revised September 2026 tuition and separate exam fees; confirm assessment and intake details with Admissions.',
 		'- Do not infer or publish future pricing before its approved effective date.',
 		'- Refer uncertain application questions to office@toolkitafrica.ac.ke, call +254 709 549 200, or WhatsApp +254 711 802 855.',
 	);

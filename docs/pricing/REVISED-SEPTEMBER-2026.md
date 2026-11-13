@@ -1,5 +1,11 @@
 # Revised September 2026 Kikuyu Campus fees
 
+**Current welding-price authority:** the Principal’s 10 November notice now
+approves Skilling **KES 176,276** and Upskilling **KES 66,300**, effective
+immediately. Older welding figures/category tables below are historical. See
+[approved November costs](../pricing/APPROVED-WELDING-COSTS-2026-11.md).
+
+
 Source: the poster supplied by the user on 1 October 2026, headed **Revised
 September 2026**, retained as `revised-september-2026-poster.png`. The user
 instructed publication after checking the extraction. This revision supersedes
