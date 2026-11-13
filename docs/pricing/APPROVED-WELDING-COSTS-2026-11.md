@@ -44,3 +44,17 @@ application, Mzizi replay, account change or document upload is required.
 
 Deployment results are recorded in WORKLOG and the private release receipts;
 a target release number alone does not claim live completion.
+
+## Verified publication
+
+Release **2026.11.13.1** is verified on demo and production. The five-file runtime
+payload matched on both environments and each uploaded file was fetched back
+byte-identically. Both course pages, directory, welding hub, text guidance and
+unpriced RPL passed normal public checks. No notice PDF, announcement or dated
+attribution was published. The source PDF remains unchanged locally, pending
+publication. No application was submitted or Mzizi request made.
+
+The initial demo verifier assumed the text route emitted an HTML release header.
+Its source-defined behaviour was checked, the verifier corrected to MIME/content
+checks, and read-only verification completed without repeating uploads. Production
+passed with the corrected verifier. Private receipts remain outside deployment.

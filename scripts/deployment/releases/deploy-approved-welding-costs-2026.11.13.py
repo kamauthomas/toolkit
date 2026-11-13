@@ -110,8 +110,17 @@ def public_check(env, out):
     for index, (path, expected) in enumerate([(routes[0][0] + '?training_costs=' + RELEASE, routes[0][1])] + routes):
         time.sleep(5)
         response = requests.get(base + path, timeout=(10, 40), allow_redirects=False)
+        save(out / ('public-' + str(index) + '-response.json'), dict(
+            path=path, status=response.status_code,
+            release=response.headers.get('X-Toolkit-Release'),
+            content_type=response.headers.get('Content-Type'),
+            retry_after_present=bool(response.headers.get('Retry-After'))))
         assert response.status_code == 200 and not response.headers.get('Retry-After'), 'Public read refused; stop'
-        assert response.headers.get('X-Toolkit-Release') == RELEASE, 'Cached/incorrect release; inspect before retry'
+        if path == '/llms.txt':
+            # Text routes are not custom HTML surfaces and do not emit this header.
+            assert response.headers.get('Content-Type', '').startswith('text/plain'), 'Unexpected text route'
+        else:
+            assert response.headers.get('X-Toolkit-Release') == RELEASE, 'Cached/incorrect release; inspect before retry'
         html = response.text
         soup = BeautifulSoup(html, 'html.parser')
         main = soup.find('main')
@@ -195,5 +204,5 @@ if __name__ == '__main__':
         else:
             deploy(args.environment, args.verify_only)
     except Exception as error:
-        print('STOPPED:', type(error).__name__, '(inspect private state; no automatic retry)', flush=True)
+        print('STOPPED:', type(error).__name__, str(error) if isinstance(error, AssertionError) else '(inspect private state; no automatic retry)', flush=True)
         raise SystemExit(1)
